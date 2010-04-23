@@ -7,7 +7,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -17,6 +21,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
@@ -25,6 +30,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 
 public class XMLUtility {
 	private static Logger logger = Logger.getLogger(XMLUtility.class);
@@ -44,7 +52,7 @@ public class XMLUtility {
 		StringWriter writer = new StringWriter();
 		*/
 		
-		//test3
+		//test34
 		
 	}
 	
@@ -93,16 +101,42 @@ public class XMLUtility {
 
 	public static Document loadXMLFile(String fileAbsolutePath) throws ParserConfigurationException, SAXException, IOException
 	{
+		try {
+			long startParsingXMLFile = System.currentTimeMillis();
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = factory.newDocumentBuilder();
+			Document xmlDocument = docBuilder.parse(fileAbsolutePath);
+			//Document xmlDocument = docBuilder.parse(new InputSource(new InputStreamReader(new FileInputStream(fileAbsolutePath), "UTF8")));
+			long endParsingXMLFile = System.currentTimeMillis();
+			long durationParsingXMLFile = (endParsingXMLFile-startParsingXMLFile) / 1000;
+			//logger.info("Parsing XML file time was "+(durationParsingXMLFile)+" s.");
+
+			return xmlDocument;			
+		} catch(FileNotFoundException fnfe) {
+			logger.error("File " + fileAbsolutePath + " can not be found!");
+			throw fnfe;
+		} catch(SAXParseException saxpe) {
+			logger.error("Error while parsing the xml file " + fileAbsolutePath);
+			throw saxpe;			
+		}
 		
-		DocumentBuilderFactory documentBuilderFactory = 
-			DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = 
-			documentBuilderFactory.newDocumentBuilder();
-		//Document xmlDocument = docBuilder.parse(fileAbsolutePath);
-		Document xmlDocument = docBuilder.parse(new InputSource(new InputStreamReader(new FileInputStream(fileAbsolutePath), "UTF8")));
-		return xmlDocument;
+
 	}
 
+	public static Document convertToXMLDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException
+	{
+		long startParsingXMLFile = System.currentTimeMillis();
+		
+		DOMParser parser = new DOMParser();
+		parser.parse(new InputSource(new java.io.StringReader(xmlString)));
+		Document xmlDocument = parser.getDocument();
+		long endParsingXMLFile = System.currentTimeMillis();
+		long durationParsingXMLFile = (endParsingXMLFile-startParsingXMLFile) / 1000;
+		//logger.info("Converting String to XML Document time was "+(durationParsingXMLFile)+" s.");
+
+		return xmlDocument;
+	}
+	
 	public static Element getRootElement(String fileLocation) throws ParserConfigurationException, SAXException, IOException {
 		return XMLUtility.loadXMLFile(fileLocation).getDocumentElement();
 	}
@@ -132,21 +166,64 @@ public class XMLUtility {
 		return result;
 	}
 
-	public static Element getFirstElementByTagName(Element element, String name) {
-		NodeList nl = element.getElementsByTagName(name);
-		return (Element) nl.item(0);
+	public static Element getFirstChildElementByTagName(Element element, String name) {
+		boolean found = false;
+		Element result = null;
+		NodeList nl = element.getChildNodes();
+		for(int i=0; i<nl.getLength() && !found; i++) {
+			if(nl.item(i) instanceof Element) {
+				if(name.equals(nl.item(i).getNodeName())) {
+					result = (Element) nl.item(i);
+					found = true;
+				}				
+			}
+
+		}
+		return result;
 	}
 	
-	public static void printXMLDocument(
-			Document document, Writer writer, 
-			boolean indenting, boolean omitXMLDeclaration) throws TransformerException, IOException
+	public static List<Element> getChildElements(Element element) {
+		List<Element> result = new ArrayList<Element>();
+		NodeList childNodes = element.getChildNodes();
+		for(int i=0; i<childNodes.getLength(); i++) {
+			if(childNodes.item(i) instanceof Element) {
+				result.add((Element) childNodes.item(i));
+			}
+		}
+		return result;
+	}
+
+	public static List<Element> getChildElementsByTagName(Element element, String name) {
+		List<Element> result = new ArrayList<Element>();
+		NodeList childNodes = element.getChildNodes();
+		for(int i=0; i<childNodes.getLength(); i++) {
+			Node node = childNodes.item(i); 
+			if(node instanceof Element) {
+				String nodeName = node.getNodeName();
+				if(nodeName != null) {
+					if(nodeName.equals(name)) {
+						result.add((Element) childNodes.item(i));
+					}
+				}
+				
+			}
+		}
+		return result;
+	}
+
+	public static String printXMLDocument(
+			Document document, boolean indenting, boolean omitXMLDeclaration) 
+	throws TransformerException, IOException
 	{
+		StringWriter writer = new StringWriter();
 		OutputFormat format = new OutputFormat(document);
 		format.setIndenting(indenting);
 		format.setOmitXMLDeclaration(omitXMLDeclaration);
 
 		XMLSerializer serializer = new XMLSerializer(writer, format);
 		serializer.serialize(document);
+		String inputString = writer.toString();
+		return inputString;
 	}
 	/**
 	 * This method uses Xerces specific classes
@@ -194,6 +271,14 @@ public class XMLUtility {
 				.getDocumentElement();
 		fragmentNode = doc.importNode(fragmentNode, true);
 		parent.appendChild(fragmentNode);
+	}
+	
+	public static String toOpenTag(String tagName) {
+		return "<" + tagName + ">";
+	}
+	
+	public static String toCloseTag(String tagName) {
+		return "</" + tagName + ">";
 	}
 }
 
