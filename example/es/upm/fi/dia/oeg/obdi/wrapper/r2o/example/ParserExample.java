@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.example;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -10,9 +11,12 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import es.upm.fi.dia.oeg.obdi.IMapping;
-import es.upm.fi.dia.oeg.obdi.Parser;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.IAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
+import es.upm.fi.dia.oeg.obdi.wrapper.AbstractParser;
+import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
 
 public class ParserExample {
@@ -21,17 +25,31 @@ public class ParserExample {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		PropertyConfigurator.configure("log4j.properties");
+		
 		try {
-			PropertyConfigurator.configure("log4j.properties");
+			String r2oMappingDirectory = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase34/";
+			String r2oMappingFile = r2oMappingDirectory + "NOMGEO_boris_r2o.xml";
 			
-			String absoluteFilePath = "/home/fpriyatna/Dropbox/workspace/es.upm.fi.dia.oeg.obdi/mappings/Luis/luis16/EGM_Estero2.r2o.xml";
+			AbstractParser parser = new R2OParser(); 
+			IMappingDocument mappingDocument = parser.parse(r2oMappingFile);
+			Collection<AbstractConceptMapping> mappedConcepts = mappingDocument.getConceptMappings();
+			for(AbstractConceptMapping conceptMapping : mappedConcepts) {
+				System.out.println("Mapped concept = " + conceptMapping.getName());
+				
+				Collection<IAttributeMapping> attributeMappings = 
+					mappingDocument.getAttributeMappings(conceptMapping.getName(), null);
+				for(IAttributeMapping attributeMapping : attributeMappings) {
+					System.out.println("Mapped attribute = " + attributeMapping.getAttributeName());
+				}
 
-
-			//parse r2o mapping
-			Parser parser = new R2OParser(); 
-			IMapping r2oMapping = parser.parse(absoluteFilePath);
-			List<String> listOfMappedConcepts = r2oMapping.getMappedConcepts();
-			System.out.println("listOfMappedConcepts = " + listOfMappedConcepts);
+				Collection<IRelationMapping> relationMappings = 
+					mappingDocument.getRelationMappings(conceptMapping.getName(), null);
+				for(IRelationMapping relationMapping : relationMappings) {
+					System.out.println("Mapped relation = " + relationMapping.getRelationName());
+				}
+			}
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
