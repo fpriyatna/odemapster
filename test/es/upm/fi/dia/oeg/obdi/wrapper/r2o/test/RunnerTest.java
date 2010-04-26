@@ -88,8 +88,8 @@ public class RunnerTest extends XMLTestCase {
 	}
 	
 	public static void testTestcase41() {
-		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase34/";
-		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase41/";
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase41/";
+		//String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase41/";
 		String r2oConfigurationFile = dir + "r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
