@@ -25,12 +25,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.DatabaseMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
 
 public class R2OMappingDocument implements IMappingDocument {
 	Collection<DatabaseMapping> dbschemaDescs;
 	Collection<R2OConceptMapping> conceptmapDefs;
+	Collection<R2OPropertyMapping> propertymapDefs;
 	
 	
 	@Override
@@ -168,9 +170,18 @@ public class R2OMappingDocument implements IMappingDocument {
 		result.conceptmapDefs = new ArrayList<R2OConceptMapping>();
 		for(int i=0; i<nlConceptMapDefs.getLength(); i++) {
 			Element conceptMappingElement = (Element) nlConceptMapDefs.item(i); 
-			R2OConceptMapping conceptMapping = (R2OConceptMapping) new R2OConceptMapping().parse(conceptMappingElement);
+			R2OConceptMapping conceptMapping = new R2OConceptMapping().parse(conceptMappingElement);
 			result.conceptmapDefs.add(conceptMapping);
 		}
+
+		result.propertymapDefs = new ArrayList<R2OPropertyMapping>();
+		
+		Collection<Element> attributeMappingsElements = XMLUtility.getChildElementsByTagName(r2oElement, R2OConstants.ATTRIBUTEMAP_DEF_TAG);
+		for(Element attributeMappingElement : attributeMappingsElements) {
+			R2OAttributeMapping attributeMapping = new R2OAttributeMapping().parse(attributeMappingElement);
+			result.propertymapDefs.add(attributeMapping);
+		}
+
 
 		return result;
 	}
@@ -185,9 +196,12 @@ public class R2OMappingDocument implements IMappingDocument {
 			result.append(dbm.toString() + "\n");
 		}
 
-		
-		for(AbstractConceptMapping conceptMapping : this.conceptmapDefs) {
+		for(R2OConceptMapping conceptMapping : this.conceptmapDefs) {
 			result.append(conceptMapping.toString() + "\n");
+		}
+
+		for(R2OPropertyMapping propertyMapping : this.propertymapDefs) {
+			result.append(propertyMapping.toString() + "\n");
 		}
 
 		result.append("</" + R2OConstants.R2O_TAG + ">\n");

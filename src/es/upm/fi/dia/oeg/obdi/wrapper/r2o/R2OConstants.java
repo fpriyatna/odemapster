@@ -9,6 +9,8 @@ public class R2OConstants {
 	public static final String ARG_RESTRICTION_TAG="arg-restriction";
 	public static final String HAS_VALUE_TAG="has-value";
 	public static final String HAS_COLUMN_TAG="has-column";
+	public static final String HAS_DOMAIN_TAG="has-domain";
+	public static final String HAS_RANGE_TAG="has-range";
 	public static final String HAS_TRANSFORMATION_TAG="has-transformation";
 	public static final String APPLIES_IF_TAG="applies-if";
 	public static final String APPLIES_IF_TOP_TAG="applies-if-top";

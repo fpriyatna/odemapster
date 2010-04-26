@@ -35,11 +35,10 @@ public class R2OParser extends AbstractParser {
 		return result;
 	}
 	
-	public boolean testParseResult(String r2oFilePath, R2OMappingDocument r2oMapping) throws Exception {
+	public void testParseResult(String r2oFilePath, R2OMappingDocument r2oMapping) throws Exception {
 		logger.debug("Validating parsed file....");
 		XMLUnit.setIgnoreComments(Boolean.TRUE);
 		XMLUnit.setIgnoreWhitespace(Boolean.TRUE);
-
 		Document xmlDocument = XMLUtility.loadXMLFile(r2oFilePath);
 		Document r2oDocument = r2oMapping.toXMLDocument();
 		Diff diff = new Diff(xmlDocument, r2oDocument);
@@ -47,22 +46,22 @@ public class R2OParser extends AbstractParser {
 		
 		
 		if(!diff.similar()) {
-			logger.error("Parsed R2O mapping is not similar to the original file!");
+			String errorMessage = "Parsed R2O mapping is not similar to the original file! " + diff.toString();
+			logger.error(errorMessage);
 			logger.debug("\n" + XMLUtility.printXMLDocument(xmlDocument, true, true));
 			logger.debug("\n" + XMLUtility.printXMLDocument(r2oDocument, true, true));
-			return false;
+			throw new Exception(errorMessage);
 			//assertXMLEqual("not similar", diff, true);
 
 		}
 
 		if(!diff.identical()) {
-			logger.error("Parsed R2O mapping is not identical to the original file!");
+			String errorMessage = "Parsed R2O mapping is not identical to the original file!" + diff.toString();
+			logger.error(errorMessage);
+			logger.debug("\n" + XMLUtility.printXMLDocument(xmlDocument, true, true));
 			logger.debug("\n" + XMLUtility.printXMLDocument(r2oDocument, true, true));
-			return false;
-			//assertXMLIdentical("not identical", diff, true);
+			throw new Exception(errorMessage);			//assertXMLIdentical("not identical", diff, true);
 		}
-
-		return true;
 	}
 
 }
