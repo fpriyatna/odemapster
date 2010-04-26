@@ -24,6 +24,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Condition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction;
@@ -83,9 +84,35 @@ public class R2OModelGenerator {
 		List<R2OAttributeMapping> attributeMappings = r2oConceptMapping.getAttributeMappings();
 		for(R2OAttributeMapping attributeMapping : attributeMappings) {
 			//logger.info("Processing attribute mappings : " + attributeMapping.getName());
-			this.processAttributeMapping(attributeMapping, rs, model, subject);
+			
+			try {
+				this.processAttributeMapping(attributeMapping, rs, model, subject);	
+			} catch(Exception e) {
+				//e.printStackTrace();
+				String newErrorMessage = e.getMessage() + " while processing attribute mapping " + attributeMapping.getId();
+				logger.error(newErrorMessage);
+				throw e;
+			}
+			
 		}
 			
+	}
+	
+	private void addProperty(String propName, String propValString, Model model, Resource subject) {
+		if(propName.equalsIgnoreCase(RDFS.label.toString())) { //special case of rdfs:label
+			int lastAtIndex = propValString.lastIndexOf("@");
+			Literal literal = null;
+			if(lastAtIndex > 0) {
+				String propertyValue = propValString.substring(0, lastAtIndex);
+				String language = propValString.substring(lastAtIndex+1, propValString.length());
+				literal = model.createLiteral(propertyValue, language);
+			} else {
+				literal = model.createLiteral(propValString);
+			}
+			subject.addProperty(RDFS.label, literal);
+		} else {
+			subject.addProperty(model.createProperty(propName), model.createLiteral(propValString));
+		}
 	}
 	
 	private void processAttributeMapping(R2OAttributeMapping attributeMapping, ResultSet rs, Model model, Resource subject) throws Exception {
@@ -93,7 +120,8 @@ public class R2OModelGenerator {
 		
 		String dbColUsed = attributeMapping.getUseDBCol();
 		if(dbColUsed != null) {
-			
+			String propValString = this.processUseDbCol(attributeMapping.getUseDBCol(), rs);
+			this.addProperty(propName, propValString, model, subject);
 		} else {
 			Collection<Selector> attributeMappingSelectors = attributeMapping.getSelectors();
 			if(attributeMappingSelectors != null) {
@@ -113,20 +141,7 @@ public class R2OModelGenerator {
 						String propValString = rs.getString(alias);
 						
 						if(propValString!= null && propValString != "" && !propValString.equals("")) {
-							if(propName.equalsIgnoreCase(RDFS.label.toString())) { //special case of rdfs:label
-								int lastAtIndex = propValString.lastIndexOf("@");
-								Literal literal = null;
-								if(lastAtIndex > 0) {
-									String propertyValue = propValString.substring(0, lastAtIndex);
-									String language = propValString.substring(lastAtIndex+1, propValString.length());
-									literal = model.createLiteral(propertyValue, language);
-								} else {
-									literal = model.createLiteral(propValString);
-								}
-								subject.addProperty(RDFS.label, literal);
-							} else {
-								subject.addProperty(model.createProperty(propName), model.createLiteral(propValString));
-							}							
+							this.addProperty(propName, propValString, model, subject);
 						}
 					}
 				}
@@ -228,9 +243,13 @@ public class R2OModelGenerator {
 			operationId = condition.getPrimitiveCondition();
 		}
 		
-		//delegeable : already done in database / query-unfolder level
-		if(Utility.inArray(R2OConstants.DELEGABLE_OPERATIONS, operationId)) {
-			result = true;
+		if(R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processEqualsConditionalExpression(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_NOT_EQUALS_NAME.equalsIgnoreCase(operationId)) {
+			boolean conditionEquals = this.processEqualsConditionalExpression(condition, rs);
+			result = !conditionEquals;
 		}
 
 		if(R2OConstants.CONDITIONAL_OPERATOR_MATCH_REGEXP_NAME.equalsIgnoreCase(operationId)) {
@@ -260,7 +279,6 @@ public class R2OModelGenerator {
 		}
 	}
 	
-	/*
 	private boolean processEqualsConditionalExpression(Condition condition, ResultSet rs) throws Exception {
 		List<ArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
 
@@ -275,20 +293,35 @@ public class R2OModelGenerator {
 			return false;
 		}
 	}
-	*/
 	
-	private String processRestriction(Restriction restriction, ResultSet rs) throws Exception {
-		String result = null;
-		if(restriction.getRestrictionType() == RestrictionType.HAS_COLUMN) {
-			result = rs.getString(restriction.getHasColumn().replaceAll("\\.", "_"));
-		} else if(restriction.getRestrictionType() == RestrictionType.HAS_VALUE) {
-			result = restriction.getHasValue();
-		} else if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION) {
-			
+	private String processUseDbCol(String columnName, ResultSet rs) throws Exception {
+		try {
+			String result = rs.getString(columnName.replaceAll("\\.", "_"));
+			return result;			
+		} catch(SQLException e) {
+			throw e;
 		}
 		
-		 
-		return result;
+	}
+	
+	private String processRestriction(Restriction restriction, ResultSet rs) throws Exception {
+		try {
+			String result = null;
+			if(restriction.getRestrictionType() == RestrictionType.HAS_COLUMN) {
+				//result = rs.getString(restriction.getHasColumn().replaceAll("\\.", "_"));
+				result = this.processUseDbCol(restriction.getHasColumn(), rs);
+			} else if(restriction.getRestrictionType() == RestrictionType.HAS_VALUE) {
+				result = restriction.getHasValue();
+			} else if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION) {
+				
+			}
+			
+			return result;			
+		} catch(SQLException e) {
+			//e.printStackTrace();
+			throw e;
+		}
+
 	}
 
 	public Model createMemoryModel() {

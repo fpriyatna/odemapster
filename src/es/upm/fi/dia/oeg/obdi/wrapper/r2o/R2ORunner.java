@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.Collection;
@@ -23,7 +24,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.test.RunnerTest;
 public class R2ORunner extends AbstractRunner {
 	private static Logger logger = Logger.getLogger(RunnerTest.class);
 	
-	public void run(String r2oConfigurationFile) {
+	public void run(String r2oConfigurationFile) throws Exception {
 		long start = System.currentTimeMillis();
 		
 		try {
@@ -141,13 +142,18 @@ public class R2ORunner extends AbstractRunner {
 			//cleaning up
 			Utility.closeConnection(conn, "r2o wrapper");
 			logger.info("done.");
+			long end = System.currentTimeMillis();
+			long duration = (end-start) / 1000;
+			logger.info("Execution time was "+(duration)+" s.");
+		} catch(FileNotFoundException e) {
+			logger.error("Can't find file " + r2oConfigurationFile);
+			throw e;
 		} catch(Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			throw e;
 		}
 		
-		long end = System.currentTimeMillis();
-		long duration = (end-start) / 1000;
-		logger.info("Execution time was "+(duration)+" s.");
+
 	}
 	
 	public static void main(String args[]) {

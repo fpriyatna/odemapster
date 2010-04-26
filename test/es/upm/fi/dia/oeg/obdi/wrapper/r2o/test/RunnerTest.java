@@ -44,13 +44,13 @@ public class RunnerTest extends XMLTestCase {
 	}
 
 	public static void testTestcase34() {
-		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase34/";
-		//String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase34/";
+		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase34/";
+		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase34/";
 		String r2oConfigurationFile = dir + "r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 
-	private void testTestcase35() {
+	public void testTestcase35() {
 		//String dir = "D:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster_shared/testcases/testcase35/";
 		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase35/";
 		String r2oConfigurationFile = dir + "r2o.properties";
@@ -66,50 +66,57 @@ public class RunnerTest extends XMLTestCase {
 	}
 	*/
 
-	private  void testTestcase38() {
+	public static void testTestcase38() {
 		//String dir = "D:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster_shared/testcases/testcase35/";
 		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase38/";
 		String r2oFile = dir + "r2o.properties";
-		this.testProcess(r2oFile, dir);
+		RunnerTest.testProcess(r2oFile, dir);
 	}
 
-	private void testTestcase39() {
+	public static void testTestcase39() {
 		//String dir = "D:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster_shared/testcases/testcase35/";
 		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase39/";
 		String r2oFile = dir + "r2o.properties";
-		this.testProcess(r2oFile, dir);
+		RunnerTest.testProcess(r2oFile, dir);
 	}
 
+	public static void testTestcase40() {
+		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase34/";
+		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase40/";
+		String r2oConfigurationFile = dir + "r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+	public static void testTestcase41() {
+		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase34/";
+		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase41/";
+		String r2oConfigurationFile = dir + "r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
 	public static void main(String args[]) {
-		
-		
 		try {
-			RunnerTest.testTestcase34();
-			
+			RunnerTest.testTestcase41();
 		} catch(Exception e) {
-			logger.error("Exception occured!");
+			//e.printStackTrace();
+			logger.error("Error occured!");
 			logger.error("Error message = " + e.getMessage());
 		}
-
-
+		
 	}
 
 	@Test
 	private static void testProcess(String r2oConfigurationFile, String mappingDirectory) {
 		PropertyConfigurator.configure("log4j.properties");
-		long start = System.currentTimeMillis();
 		
 		try {
 			AbstractRunner runner = new R2ORunner();
 			runner.run(r2oConfigurationFile);
 		} catch(Exception e) {
 			e.printStackTrace();
-			assertTrue(false);
+			assertTrue(e.getMessage(), false);
 		}
 		
-		long end = System.currentTimeMillis();
-		long duration = (end-start) / 1000;
-		logger.info("Execution time was "+(duration)+" s.");
 		assertTrue(true);
 	}
 }

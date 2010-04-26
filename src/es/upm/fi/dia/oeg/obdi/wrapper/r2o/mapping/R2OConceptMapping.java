@@ -214,12 +214,15 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		List<R2OAttributeMapping> result = new ArrayList<R2OAttributeMapping>();
 		
 		List<R2OPropertyMapping> propertyMappings = this.getDescribedBy();
-		for(R2OPropertyMapping propertyMapping : propertyMappings) {
-			if(propertyMapping instanceof R2OAttributeMapping) {
-				result.add((R2OAttributeMapping) propertyMapping);
-			}
-			
+		if(propertyMappings != null) {
+			for(R2OPropertyMapping propertyMapping : propertyMappings) {
+				if(propertyMapping instanceof R2OAttributeMapping) {
+					result.add((R2OAttributeMapping) propertyMapping);
+				}
+				
+			}			
 		}
+
 		return result;
 	}
 

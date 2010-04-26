@@ -39,6 +39,9 @@ public class R2OConstants {
 
 	public static final String CONDITIONAL_OPERATOR_EQUALS_NAME = "equals";
 	public static final String CONDITIONAL_OPERATOR_EQUALS_NO_ARGUMENTS = "2";
+	public static final String CONDITIONAL_OPERATOR_NOT_EQUALS_NAME = "not-equals";
+	public static final String CONDITIONAL_OPERATOR_NOT_EQUALS_NO_ARGUMENTS = "2";
+
 	public static final String CONDITIONAL_OPERATOR_MATCH_REGEXP_NAME = "match-regexp";
 	
 	public static final String TRANSFORMATION_OPERATOR_CONSTANT_NAME = "constant";
@@ -46,7 +49,7 @@ public class R2OConstants {
 	public static final String ONPARAM_STRING = "string";
 	public static final String ONPARAM_REGEXP = "regexp";
 	
-	public static final String[] DELEGABLE_OPERATIONS = {"equals"};
+	public static final String[] DELEGABLE_OPERATIONS = {CONDITIONAL_OPERATOR_EQUALS_NAME, CONDITIONAL_OPERATOR_NOT_EQUALS_NAME};
 	
 	
 	public static final String R2OFILE_PROP_NAME = "r2o.file.path";
