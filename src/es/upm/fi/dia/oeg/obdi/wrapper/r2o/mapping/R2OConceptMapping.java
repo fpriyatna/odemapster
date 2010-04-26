@@ -55,7 +55,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		return transformationExpressionURIAs;
 	}
 
-	public R2OElement parse(Element conceptMappingElement) throws ParseException{
+	public R2OConceptMapping parse(Element conceptMappingElement) throws ParseException{
 		R2OConceptMapping result = new R2OConceptMapping();
 
 		//parse name attribute
@@ -110,6 +110,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		//parse described-by element
 		Element describedByElement = XMLUtility.getFirstChildElementByTagName(conceptMappingElement, R2OConstants.DESCRIBED_BY_TAG);
 		if(describedByElement != null) {
+			logger.warn("Deprecated use mode. Property mappings should be defined under r2o element, not under concept mapping element!");
 			result.describedBy = this.parseDescribedByElement(describedByElement);
 		}
 
@@ -157,6 +158,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 				result.append(XMLUtility.toCloseTag(R2OConstants.HAS_TABLE_TAG) + "\n");
 			}
 		}
+
 		
 		result.append("<" + R2OConstants.URI_AS_TAG + ">\n");
 		if(this.selectorURIAs != null) {

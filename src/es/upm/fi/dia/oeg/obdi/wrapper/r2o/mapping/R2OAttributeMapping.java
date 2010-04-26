@@ -23,7 +23,9 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 //    documentation?
 	private String useDBCol;
 	private Collection<Selector> selectors;
-
+	private Collection<String> hasDomains;
+	private Collection<String> hasRanges;
+	
 	@Override
 	public R2OAttributeMapping parse(Element attributeMappingElement) throws ParseException {
 		R2OAttributeMapping result = new R2OAttributeMapping();
@@ -32,19 +34,48 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 		//parse identifiedBy attribute
 		result.id = attributeMappingElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
 		
-		Element firstElement = XMLUtility.getFirstElement(attributeMappingElement);
-		String firstElementName = firstElement.getNodeName();
-		if(R2OConstants.SELECTOR_TAG.equalsIgnoreCase(firstElementName)) {
+		List<Element> hasDomainElements = XMLUtility.getChildElementsByTagName(
+				attributeMappingElement, R2OConstants.HAS_DOMAIN_TAG);
+		if(hasDomainElements.size() > 1) {
+			String errorMessage = "Unsupported multiple domains!";
+			throw new ParseException(errorMessage);			
+		}
+		result.hasDomains = new ArrayList<String>();
+		for(Element hasDomainElement : hasDomainElements) {
+			result.hasDomains.add(hasDomainElement.getTextContent());
+		}
+
+		List<Element> hasRangeElements = XMLUtility.getChildElementsByTagName(
+				attributeMappingElement, R2OConstants.HAS_RANGE_TAG);
+		if(hasRangeElements.size() > 1) {
+			String errorMessage = "Unsupported multiple ranges!";
+			throw new ParseException(errorMessage);			
+		}
+		result.hasRanges= new ArrayList<String>();
+		for(Element hasRangeElement : hasRangeElements) {
+			result.hasRanges.add(hasRangeElement.getTextContent());
+		}
+		
+		
+		List<Element> useDBColElements = XMLUtility.getChildElementsByTagName(attributeMappingElement, R2OConstants.USE_DBCOL_TAG);
+		if(useDBColElements.size() == 1) { //using db col
+			result.useDBCol = useDBColElements.get(0).getTextContent();
+		} else { //using selector
+			List<Element> selectorElements = XMLUtility.getChildElementsByTagName(attributeMappingElement, R2OConstants.SELECTOR_TAG);
+			
+			if(selectorElements.size() > 1) {
+				String errorMessage = "Unsupported multiple selectors!";
+				throw new ParseException(errorMessage);
+			}
 			result.selectors = new ArrayList<Selector>();
-			List<Element> childElements = XMLUtility.getChildElements(attributeMappingElement);
-			for(Element childElement : childElements) {
+			for(Element childElement : selectorElements) {
 				Selector selector = new Selector().parse(childElement);
 				result.selectors.add(selector);
-				
-			}
-		} else if(R2OConstants.USE_DBCOL_TAG.equalsIgnoreCase(firstElementName)) {
-			result.useDBCol = firstElement.getTextContent();
+			}			
+			
 		}
+		
+
 		return result;
 	}
 
@@ -60,11 +91,26 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 		}
 		result.append(">\n");
 
-		
+		if(this.hasDomains != null) {
+			for(String hasDomain : this.hasDomains) {
+				result.append(XMLUtility.toOpenTag(R2OConstants.HAS_DOMAIN_TAG)+ "\n");
+				result.append(hasDomain);
+				result.append(XMLUtility.toCloseTag(R2OConstants.HAS_DOMAIN_TAG)+ "\n");				
+			}
+		}
+
+		if(this.hasRanges != null) {
+			for(String hasRange : this.hasRanges) {
+				result.append(XMLUtility.toOpenTag(R2OConstants.HAS_RANGE_TAG)+ "\n");
+				result.append(hasRange);
+				result.append(XMLUtility.toCloseTag(R2OConstants.HAS_RANGE_TAG)+ "\n");				
+			}
+		}
+
 		if(this.useDBCol != null) {
-			result.append("<" + R2OConstants.USE_DBCOL_TAG + ">\n");
+			result.append(XMLUtility.toOpenTag(R2OConstants.USE_DBCOL_TAG)+ "\n");
 			result.append(this.useDBCol);
-			result.append("</" + R2OConstants.USE_DBCOL_TAG + ">\n");	
+			result.append(XMLUtility.toCloseTag(R2OConstants.USE_DBCOL_TAG)+ "\n");
 		}
 		
 		if(this.selectors != null) {
@@ -74,7 +120,7 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 			
 		}
 		
-		result.append("</" + R2OConstants.ATTRIBUTEMAP_DEF_TAG + ">"); 
+		result.append(XMLUtility.toCloseTag(R2OConstants.ATTRIBUTEMAP_DEF_TAG)+ "\n");
 		return result.toString();
 	}
 
