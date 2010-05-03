@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
@@ -16,6 +17,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.DatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Selector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.TransformationExpression;
@@ -39,7 +41,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	//    (joins-via concept-join-expr)?
 	//    documentation?
 	//    (described-by propertymap-def)*
-	private Collection<String> hasTables;
+	private Vector<DatabaseTable> hasTables;
 	private Selector selectorURIAs;//original version
 	private TransformationExpression transformationExpressionURIAs;//odemapster 1 version
 	private List<R2OPropertyMapping> describedBy;
@@ -71,10 +73,16 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		//parse has-table
 		List<Element> hasTableElements = XMLUtility.getChildElementsByTagName(conceptMappingElement, R2OConstants.HAS_TABLE_TAG);
 		if(hasTableElements != null && hasTableElements.size() > 0) {
-			result.hasTables = new ArrayList<String>();
-			for(Element hasTableElement : hasTableElements) {
-				result.hasTables.add(hasTableElement.getTextContent());
+			if(hasTableElements.size() > 1) {
+				throw new ParseException("Multiple hasTables is not implemented yet!");
 			}
+			result.hasTables = new Vector<DatabaseTable>();
+			for(Element hasTableElement : hasTableElements) {
+				result.hasTables.add(new DatabaseTable().parse(hasTableElement));
+			}
+		} else {
+			logger.warn("Deprecated use mode. hasTable elements should be defined.");
+			throw new ParseException("hasTables element should be defined on a concept mapping!");
 		}
 
 		//parse uri-as element
@@ -96,6 +104,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			result.appliesIf = new ConditionalExpression().parse(conditionElement);
 		} else {
 			if(appliesIfTopElement != null) {
+				logger.warn("applies-if-top is deprecated, use applies-if instead!");
 				Element conditionElement = XMLUtility.getFirstElement(appliesIfTopElement);
 				result.appliesIfTop = new ConditionalExpression().parse(conditionElement);				
 			}
@@ -126,7 +135,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			for(Element propertyMappingElement : propertyMappingElements) {
 				if(propertyMappingElement.getNodeName().equalsIgnoreCase(R2OConstants.ATTRIBUTEMAP_DEF_TAG)) {
 					result.add(new R2OAttributeMapping().parse(propertyMappingElement));
-				} else if(propertyMappingElement.getNodeName().equalsIgnoreCase(R2OConstants.ATTRIBUTEMAP_DEF_TAG)) {
+				} else if(propertyMappingElement.getNodeName().equalsIgnoreCase(R2OConstants.DBRELATION_DEF_TAG)) {
 					result.add(new R2ORelationMapping().parse(propertyMappingElement));
 				} else {
 					throw new ParseException("undefined mapping type.");
@@ -152,10 +161,8 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		result.append(">\n");
 
 		if(this.hasTables != null && this.hasTables.size() > 0) {
-			for(String hasTable : this.hasTables) {
-				result.append(XMLUtility.toOpenTag(R2OConstants.HAS_TABLE_TAG));
-				result.append(hasTable);
-				result.append(XMLUtility.toCloseTag(R2OConstants.HAS_TABLE_TAG) + "\n");
+			for(DatabaseTable hasTable : this.hasTables) {
+				result.append(hasTable.toString() + "\n");
 			}
 		}
 
@@ -184,7 +191,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 		if(describedBy != null) {
 			result.append("<" + R2OConstants.DESCRIBED_BY_TAG + ">\n");
-			for(AbstractPropertyMapping propertyMapping : describedBy) {
+			for(R2OPropertyMapping propertyMapping : describedBy) {
 				result.append(propertyMapping.toString() + "\n");
 			}
 			result.append("</" + R2OConstants.DESCRIBED_BY_TAG + ">\n");
@@ -244,6 +251,10 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	@Override
 	public String getConceptName() {
 		return this.name;
+	}
+
+	public Vector<DatabaseTable> getHasTables() {
+		return hasTables;
 	}
 	
 

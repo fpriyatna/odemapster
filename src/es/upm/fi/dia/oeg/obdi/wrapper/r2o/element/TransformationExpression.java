@@ -73,7 +73,7 @@ public class TransformationExpression extends Expression {
 		return result;
 	}
 
-	public Collection<String> getInvolvedTables() {
+	public Vector<String> getInvolvedTables() {
 		Vector<String> result = new Vector<String>();
 		
 		for(ArgumentRestriction argRestriction : argRestrictions) {

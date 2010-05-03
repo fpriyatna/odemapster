@@ -88,35 +88,60 @@ public class RunnerTest extends XMLTestCase {
 	}
 	
 	public static void testTestcase41() {
-		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase41/";
-		//String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase41/";
+		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase41/";
+		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase41/";
 		String r2oConfigurationFile = dir + "r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 	
-	public static void main(String args[]) {
-		try {
-			RunnerTest.testTestcase41();
-		} catch(Exception e) {
-			//e.printStackTrace();
-			logger.error("Error occured!");
-			logger.error("Error message = " + e.getMessage());
-		}
-		
+	public static void test42NomgeoIndividuals() {
+		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase41/";
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "NomgeoIndividuals.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+		//this.runMapsterTest("test42", "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase39/mapster.cfg", "base-result.rdf");
+	}
+	
+	public static void test42NomgeoIndividualsAttributes() {
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "NomgeoIndividualsAttributes.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 
+	public static void test42CanalIndividualsAttributes() {
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "CanalIndividualsAttributes.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+	public static void test42Nomgeo3Individuals() {
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "Nomgeo3Individuals.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+
+	
+	public static void main(String args[]) {
+		RunnerTest.test42NomgeoIndividuals();
+	}
+
+
+	
 	@Test
 	private static void testProcess(String r2oConfigurationFile, String mappingDirectory) {
 		PropertyConfigurator.configure("log4j.properties");
-		
 		try {
+			long startMemory = Runtime.getRuntime().freeMemory();
 			AbstractRunner runner = new R2ORunner();
 			runner.run(r2oConfigurationFile);
+			long endMemory = Runtime.getRuntime().freeMemory();
+			long memoryUsage = (startMemory - endMemory) / 1024;
+			logger.info("Memory usage was "+(memoryUsage)+" KB.");
 		} catch(Exception e) {
 			e.printStackTrace();
-			assertTrue(e.getMessage(), false);
+			logger.error("Error occured : " + e.getMessage());
+			//assertTrue(e.getMessage(), false);
 		}
-		
 		assertTrue(true);
 	}
 }

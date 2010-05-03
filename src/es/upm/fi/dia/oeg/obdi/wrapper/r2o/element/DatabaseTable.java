@@ -12,6 +12,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 
 public class DatabaseTable implements R2OElement {
 	private String name;
+	private String alias;
 	private List<DatabaseColumn> hasColumns;
 	
 	@Override
@@ -50,13 +51,27 @@ public class DatabaseTable implements R2OElement {
 		
 		result.append("<" + R2OConstants.HAS_TABLE_TAG+ " ");
 		result.append(R2OConstants.NAME_ATTRIBUTE + "=\"" + this.name + "\">");
+		if(this.alias != null) {
+			result.append(R2OConstants.ALIAS_ATTRIBUTE + "=\"" + this.alias + "\">");
+		}
 		
-		for(DatabaseColumn hasColumn : hasColumns) {
-			result.append(hasColumn.toString() + "\n");
+		if(this.hasColumns != null && this.hasColumns.size() > 0) {
+			for(DatabaseColumn hasColumn : hasColumns) {
+				result.append(hasColumn.toString() + "\n");
+			}
+			
 		}
 		
 		result.append("</" + R2OConstants.HAS_TABLE_TAG + ">");
 		return result.toString();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getAlias() {
+		return alias;
 	}
 
 	

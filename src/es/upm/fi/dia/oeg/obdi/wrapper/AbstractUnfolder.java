@@ -6,7 +6,9 @@ import java.util.Set;
 import es.upm.fi.dia.oeg.obdi.ILogicalQuery;
 
 public abstract class AbstractUnfolder {
-	public abstract Set<String> toSQL(Set<ILogicalQuery> logicalQueries, IMappingDocument mapping) throws Exception;
+	protected abstract Set<String> unfold(Set<ILogicalQuery> logicalQueries, IMappingDocument mapping) throws Exception;
 
-	public abstract String toSQL(AbstractConceptMapping mapping) throws Exception;
+	public abstract String unfold(AbstractConceptMapping mapping) throws Exception;
+	
+	protected abstract String unfold(IMappingDocument mapping) throws Exception;
 }

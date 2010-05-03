@@ -16,6 +16,7 @@ import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.tdb.TDBFactory;
@@ -32,73 +33,91 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Selector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction.RestrictionType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ORelationMapping;
 
 public class R2OModelGenerator {
 	private static Logger logger = Logger.getLogger(R2OModelGenerator.class);
-	
+
 	public void generateModel(ResultSet rs, Model model, AbstractConceptMapping conceptMapping) throws Exception {
-		logger.info("generating model.......");
+		String conceptName = conceptMapping.getConceptName();
+		logger.info("generating model  for " + conceptName);
 		long startGeneratingModel = System.currentTimeMillis();
+
 		
 		R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping;
+		Resource object = model.getResource(conceptName);
+		
 		long counter = 0;
 		while(rs.next()) {
-			String uri = rs.getString("uri");
+			boolean conditionAppliesIf = 
+				this.processConceptMappingAppliesIfElement(r2oConceptMapping, rs);
 
-			
-			boolean conditionAppliesIf = this.processConceptMappingAppliesIfElement(r2oConceptMapping, rs);
-			//boolean conditionAppliesIf = true;
-			
 			if(conditionAppliesIf) {
+				String uri = rs.getString(r2oConceptMapping.getId() + "_uri");
 				uri = Utility.encodeURI(uri);
 
-				if(counter % 10000 == 0) {
+				if(counter % 100000 == 0) {
 					logger.info("Current record (" + counter + ") = " + uri);
 				}
 				counter++;
 
 				Resource subject = model.createResource(uri);
-				Resource object = model.getResource(conceptMapping.getName());
 				Statement statement = model.createStatement(subject, RDF.type, object);
 				model.add(statement);
-				
+
 				//logger.info("Processing property mappings.");
 				this.processPropertyMappings(r2oConceptMapping, rs, model, subject);
 			}
-			
+
 
 
 		}
 		logger.info(counter + " retrieved.");
 
-		
-		
+
+
 		long endGeneratingModel = System.currentTimeMillis();
 		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
 		logger.info("Generating model time was "+(durationGeneratingModel)+" s.");
-		
+
 
 	}
+
 	
 	private void processPropertyMappings(R2OConceptMapping r2oConceptMapping, ResultSet rs, Model model, Resource subject) throws Exception {
-		List<R2OAttributeMapping> attributeMappings = r2oConceptMapping.getAttributeMappings();
-		for(R2OAttributeMapping attributeMapping : attributeMappings) {
-			//logger.info("Processing attribute mappings : " + attributeMapping.getName());
-			
-			try {
-				this.processAttributeMapping(attributeMapping, rs, model, subject);	
-			} catch(Exception e) {
-				//e.printStackTrace();
-				String newErrorMessage = e.getMessage() + " while processing attribute mapping " + attributeMapping.getId();
-				logger.error(newErrorMessage);
-				throw e;
-			}
-			
+		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
+		if(propertyMappings != null) {
+			for(R2OPropertyMapping propertyMapping : propertyMappings) {
+				if(propertyMapping instanceof R2OAttributeMapping) {
+					try {
+						this.processAttributeMapping((R2OAttributeMapping) propertyMapping, rs, model, subject);
+					} catch(Exception e) {
+						String newErrorMessage = e.getMessage() + " while processing attribute mapping " + propertyMapping.getId();
+						logger.error(newErrorMessage);
+						throw e;
+					}
+
+				} else if(propertyMapping instanceof R2ORelationMapping) {
+					try {
+						this.processRelationMapping((R2ORelationMapping) propertyMapping, rs, model, subject);
+					} catch(Exception e) {
+						String newErrorMessage = e.getMessage() + " while processing relation mapping " + propertyMapping.getId();
+						logger.error(newErrorMessage);
+						throw e;
+					}
+
+				}
+			}			
 		}
-			
+		
+
+
+
+
 	}
-	
-	private void addProperty(String propName, String propValString, Model model, Resource subject) {
+
+	private void addDataTypeProperty(String propName, String propValString, Model model, Resource subject) {
 		if(propName.equalsIgnoreCase(RDFS.label.toString())) { //special case of rdfs:label
 			int lastAtIndex = propValString.lastIndexOf("@");
 			Literal literal = null;
@@ -114,14 +133,27 @@ public class R2OModelGenerator {
 			subject.addProperty(model.createProperty(propName), model.createLiteral(propValString));
 		}
 	}
+
+	private void processRelationMapping(R2ORelationMapping r2oRelationMapping, ResultSet rs, Model model, Resource subject) throws Exception {
+		String relationName = r2oRelationMapping.getRelationName();
+		Property property = model.createProperty(relationName);
+		String rangeURI = rs.getString(r2oRelationMapping.getId());
+		if(rangeURI != null) {
+			Resource object = model.createResource(rangeURI);
+			Statement rdfstmtInstance = model.createStatement(subject,property, object);
+			model.add(rdfstmtInstance);
+		}
+
+	}
+
 	
 	private void processAttributeMapping(R2OAttributeMapping attributeMapping, ResultSet rs, Model model, Resource subject) throws Exception {
 		String propName = attributeMapping.getName();
-		
+
 		String dbColUsed = attributeMapping.getUseDBCol();
 		if(dbColUsed != null) {
 			String propValString = this.processUseDbCol(attributeMapping.getUseDBCol(), rs);
-			this.addProperty(propName, propValString, model, subject);
+			this.addDataTypeProperty(propName, propValString, model, subject);
 		} else {
 			Collection<Selector> attributeMappingSelectors = attributeMapping.getSelectors();
 			if(attributeMappingSelectors != null) {
@@ -135,31 +167,29 @@ public class R2OModelGenerator {
 						//else, evaluate the applies-if condition
 						attributeMappingSelectorAppliesIfValue = this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs);
 					}
-					
+
 					if(attributeMappingSelectorAppliesIfValue) {
 						String alias = attributeMapping.getId() + attributeMappingSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
 						String propValString = rs.getString(alias);
-						
+
 						if(propValString!= null && propValString != "" && !propValString.equals("")) {
-							this.addProperty(propName, propValString, model, subject);
+							this.addDataTypeProperty(propName, propValString, model, subject);
 						}
 					}
 				}
-				
+
 			}
 		}
-		
+
 	}
 
-	private void processRelationMapping() {
-		
-	}
+
 
 	private boolean processConceptMappingAppliesIfElement(R2OConceptMapping r2oConceptMapping, ResultSet rs) throws Exception {
 		boolean result = false;
 		ConditionalExpression appliesIf = r2oConceptMapping.getAppliesIf();
 		ConditionalExpression appliesIfTop = r2oConceptMapping.getAppliesIfTop();
-		
+
 		if(appliesIf == null && appliesIfTop == null) {
 			result = true;
 		} else {
@@ -171,43 +201,43 @@ public class R2OModelGenerator {
 				}
 			}			
 		}
-		
+
 		return result;
 
 	}
-	
+
 	/*
 	private boolean processOrConditionalExpression(OrConditionalExpression orConditionalExpression, ResultSet rs) throws Exception {
 		boolean result = false;
-		
+
 		if(orConditionalExpression.isUsingOr()) { //the case of : OR orcond-expr condition
 			Condition condition = orConditionalExpression.getCondition();
 			boolean result1 = this.processCondition(condition, rs);
 			if(result1) {
 				return true;
 			}
-			
+
 			OrConditionalExpression orCondExpression = orConditionalExpression.getOrCondExpr();
 			boolean result2 = this.processOrConditionalExpression(orCondExpression, rs);
 			if(result2) {
 				return true;
 			}
-			
+
 			//false at this point
 			return false;
 		} else { //the case of : condition
 			Condition condition = orConditionalExpression.getCondition();
 			result = this.processCondition(condition, rs);
 		}
-		
+
 		return result;
 	}
-	*/
-	
+	 */
+
 	private boolean processConditionalExpression(ConditionalExpression conditionalExpression, ResultSet rs) throws Exception {
 		boolean result = false;
 		String conditionalExpressionOperator = conditionalExpression.getOperator();
-		
+
 		if(conditionalExpressionOperator == null) {
 			result = this.processCondition(conditionalExpression.getCondition(), rs);
 		} else if(conditionalExpressionOperator.equalsIgnoreCase(R2OConstants.AND_TAG)) {
@@ -217,7 +247,7 @@ public class R2OModelGenerator {
 					return false;
 				}
 			}
-			
+
 			return true;
 		} else if(conditionalExpressionOperator.equalsIgnoreCase(R2OConstants.OR_TAG)) {
 			for(ConditionalExpression condExpr : conditionalExpression.getCondExprs()) {
@@ -226,23 +256,23 @@ public class R2OModelGenerator {
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 		return result;
 	}
-	
+
 	private boolean processCondition(Condition condition, ResultSet rs) throws Exception {
 		boolean result = false;
-		
+
 		String operationId = null;
 		if(R2OConstants.CONDITION_TAG.equalsIgnoreCase(condition.getPrimitiveCondition())) {
 			operationId = condition.getOperId();
 		} else {
 			operationId = condition.getPrimitiveCondition();
 		}
-		
+
 		if(R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME.equalsIgnoreCase(operationId)) {
 			result = this.processEqualsConditionalExpression(condition, rs);
 		}
@@ -255,30 +285,30 @@ public class R2OModelGenerator {
 		if(R2OConstants.CONDITIONAL_OPERATOR_MATCH_REGEXP_NAME.equalsIgnoreCase(operationId)) {
 			result = this.processMatchRegExpConditionalExpression(condition, rs);
 		}
-		
+
 		return result;
 	}
-	
+
 
 	private boolean processMatchRegExpConditionalExpression(Condition condition, ResultSet rs) throws Exception {
 		Restriction inputStringRestriction = condition.getArgRestricts(R2OConstants.ONPARAM_STRING);
 		String inputString = this.processRestriction(inputStringRestriction, rs);
 		Restriction regexRestriction = condition.getArgRestricts(R2OConstants.ONPARAM_REGEXP);
 		String regex = this.processRestriction(regexRestriction, rs);
-		
+
 		if(inputString != null && regex != null) {
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(inputString);
 			if(matcher.find()) {
-                return true;
-            } else {
-            	return false;
-            }
+				return true;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
 	}
-	
+
 	private boolean processEqualsConditionalExpression(Condition condition, ResultSet rs) throws Exception {
 		List<ArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
 
@@ -293,7 +323,7 @@ public class R2OModelGenerator {
 			return false;
 		}
 	}
-	
+
 	private String processUseDbCol(String columnName, ResultSet rs) throws Exception {
 		try {
 			String result = rs.getString(columnName.replaceAll("\\.", "_"));
@@ -301,9 +331,9 @@ public class R2OModelGenerator {
 		} catch(SQLException e) {
 			throw e;
 		}
-		
+
 	}
-	
+
 	private String processRestriction(Restriction restriction, ResultSet rs) throws Exception {
 		try {
 			String result = null;
@@ -313,9 +343,9 @@ public class R2OModelGenerator {
 			} else if(restriction.getRestrictionType() == RestrictionType.HAS_VALUE) {
 				result = restriction.getHasValue();
 			} else if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION) {
-				
+
 			}
-			
+
 			return result;			
 		} catch(SQLException e) {
 			//e.printStackTrace();
@@ -358,16 +388,14 @@ public class R2OModelGenerator {
 
 	public Model createTDBModel(String databaseName) {
 		String tdbDatabaseFolder = "tdb-database";
-		
 		File folder = new File(tdbDatabaseFolder);
 		if(!folder.exists()) {
 			folder.mkdir();
 		}
-		
-		return TDBFactory.createModel(tdbDatabaseFolder + "/" + databaseName) ;	
+		return TDBFactory.createModel(tdbDatabaseFolder + "/" + databaseName) ;
 
 	}
-	
+
 	public Model createModel(String jenaMode, String jenaDatabaseName) {
 		Model model = null;
 
@@ -380,7 +408,7 @@ public class R2OModelGenerator {
 				model = this.createHSQLDBModel();
 			} else if(jenaMode.equalsIgnoreCase(R2OConstants.JENA_MODE_TYPE_TDB)) {
 				//logger.debug("jena mode = tdb");
-				this.createTDBModel(jenaDatabaseName);
+				model = this.createTDBModel(jenaDatabaseName);
 			} else if (jenaMode.equalsIgnoreCase(R2OConstants.JENA_MODE_TYPE_MEMORY)){
 				//logger.debug("jena mode = memory");
 				model = this.createMemoryModel();
@@ -389,7 +417,7 @@ public class R2OModelGenerator {
 				model = this.createMemoryModel();
 			}				
 		}		
-		
+
 		return model;
 	}
 }

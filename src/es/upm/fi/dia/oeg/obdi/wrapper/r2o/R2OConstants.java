@@ -1,9 +1,11 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
 public class R2OConstants {
+	//R2O xml tags
 	public static final String R2O_TAG="r2o";
 	public static final String CONCEPTMAP_DEF_TAG="conceptmap-def";
 	public static final String ATTRIBUTEMAP_DEF_TAG="attributemap-def";
+	public static final String DBRELATION_DEF_TAG="dbrelationmap-def";
 	public static final String URI_AS_TAG="uri-as";
 	public static final String SELECTOR_TAG="selector";
 	public static final String ARG_RESTRICTION_TAG="arg-restriction";
@@ -21,7 +23,18 @@ public class R2OConstants {
 	public static final String OR_TAG = "or";
 	public static final String USE_DBCOL_TAG = "use-dbcol";
 	public static final String OPERATION_TAG = "operation";
+	public static final String JOINS_VIA_TAG = "joins-via";
 
+	//R2O xml attributes
+	public static final String ON_PARAM_ATTRIBUTE="on-param";
+	public static final String NAME_ATTRIBUTE="name";
+	public static final String ALIAS_ATTRIBUTE="alias";
+	public static final String DOCUMENTATION_ATTRIBUTE="documentation";
+	public static final String IDENTIFIED_BY_ATTRIBUTE="identified-by";
+	public static final String OPER_ID_ATTRIBUTE="oper-id";
+	public static final String TO_CONCEPT_ATTRIBUTE="toConcept";
+
+	
 	//constants related to database mapping elements
 	public static final String DBSCHEMA_DESC_TAG = "dbschema-desc";
 	public static final String HAS_TABLE_TAG = "has-table";
@@ -30,14 +43,11 @@ public class R2OConstants {
 	public static final String NONKEYCOL_DESC_TAG = "nonkeycol-desc";
 	
 	
+	//constant related to sql commands
+	public static final String SQL_AND = "AND";
+	public static final String SQL_OR = "OR";
 	
 	
-	
-	public static final String ON_PARAM_ATTRIBUTE="on-param";
-	public static final String NAME_ATTRIBUTE="name";
-	public static final String DOCUMENTATION_ATTRIBUTE="documentation";
-	public static final String IDENTIFIED_BY_ATTRIBUTE="identified-by";
-	public static final String OPER_ID_ATTRIBUTE="oper-id";
 
 	public static final String CONDITIONAL_OPERATOR_EQUALS_NAME = "equals";
 	public static final String CONDITIONAL_OPERATOR_EQUALS_NO_ARGUMENTS = "2";
@@ -72,6 +82,9 @@ public class R2OConstants {
 	//jena specific properties
 	public static final String JENA_MODE_TYPE = "jena.mode.type";
 	public static final String JENA_MODE_TYPE_MEMORY = "memory";
-	public static final String JENA_MODE_TYPE_TDB = "tdb";
 	public static final String JENA_MODE_TYPE_HSQL = "hsql";
+	public static final String JENA_MODE_TYPE_TDB = "tdb";
+	public static final String JENA_TDB_DIRECTORY = "jena.tdb.dir";
+	public static final String JENA_TDB_FILEBASE = "jena.tdb.filebase";
+	
 }
