@@ -35,6 +35,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OUnfolder;
 
 public class RunnerTest extends XMLTestCase {
 	private static Logger logger = Logger.getLogger(RunnerTest.class);
+	private static String R2O_DIR_UBUNTU = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
 	
 	private static void testTestcase08() {
 		//String dir = "D:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster_shared/testcases/testcase34/";
@@ -95,28 +96,46 @@ public class RunnerTest extends XMLTestCase {
 	}
 	
 	public static void test42NomgeoIndividuals() {
-		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase41/";
-		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
+		//String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
 		String r2oConfigurationFile = dir + "NomgeoIndividuals.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 		//this.runMapsterTest("test42", "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase39/mapster.cfg", "base-result.rdf");
 	}
 	
 	public static void test42NomgeoIndividualsAttributes() {
-		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
 		String r2oConfigurationFile = dir + "NomgeoIndividualsAttributes.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 
 	public static void test42CanalIndividualsAttributes() {
-		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
 		String r2oConfigurationFile = dir + "CanalIndividualsAttributes.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
-	
+
+	public static void test42CorrienteFluvialIndividualsAttributes() {
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "CorrienteFluvialAttributes.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+
 	public static void test42Nomgeo3Individuals() {
-		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/odemapster_public_server/mappings/Freddy/testcase42/odemapster2/";
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
 		String r2oConfigurationFile = dir + "Nomgeo3Individuals.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+
+	public static void test42Nomgeo5Individuals() {
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "Nomgeo5Individuals.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+
+	public static void test42Nomgeo10Individuals() {
+		String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
+		String r2oConfigurationFile = dir + "Nomgeo10Individuals.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 
@@ -130,13 +149,14 @@ public class RunnerTest extends XMLTestCase {
 	@Test
 	private static void testProcess(String r2oConfigurationFile, String mappingDirectory) {
 		PropertyConfigurator.configure("log4j.properties");
+		logger.info("==========================Starting==========================");
 		try {
 			long startMemory = Runtime.getRuntime().freeMemory();
 			AbstractRunner runner = new R2ORunner();
 			runner.run(r2oConfigurationFile);
 			long endMemory = Runtime.getRuntime().freeMemory();
 			long memoryUsage = (startMemory - endMemory) / 1024;
-			logger.info("Memory usage was "+(memoryUsage)+" KB.");
+			logger.info("Memory usage was "+(memoryUsage)+" KB.\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
 			logger.error("Error occured : " + e.getMessage());

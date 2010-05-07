@@ -157,7 +157,7 @@ public class R2ORunner extends AbstractRunner {
 		long end = System.currentTimeMillis();
 		long duration = (end-start) / 1000;
 		logger.info("Execution time was "+(duration)+" s.");
-		logger.info("done.\n\n");
+		logger.info("done.");
 
 
 	}

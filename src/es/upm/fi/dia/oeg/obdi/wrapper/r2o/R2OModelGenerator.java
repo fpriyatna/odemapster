@@ -392,7 +392,9 @@ public class R2OModelGenerator {
 		if(!folder.exists()) {
 			folder.mkdir();
 		}
-		return TDBFactory.createModel(tdbDatabaseFolder + "/" + databaseName) ;
+		String tdbFileBase = tdbDatabaseFolder + "/" + databaseName;
+		logger.info("TDB filebase = " + tdbFileBase);
+		return TDBFactory.createModel(tdbFileBase) ;
 
 	}
 
