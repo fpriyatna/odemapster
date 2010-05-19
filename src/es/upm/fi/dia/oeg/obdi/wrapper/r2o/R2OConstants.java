@@ -33,6 +33,7 @@ public class R2OConstants {
 	public static final String IDENTIFIED_BY_ATTRIBUTE="identified-by";
 	public static final String OPER_ID_ATTRIBUTE="oper-id";
 	public static final String TO_CONCEPT_ATTRIBUTE="toConcept";
+	public static final String DATATYPE_ATTRIBUTE="datatype";
 
 	
 	//constants related to database mapping elements
@@ -43,25 +44,44 @@ public class R2OConstants {
 	public static final String NONKEYCOL_DESC_TAG = "nonkeycol-desc";
 	
 	
-	//constant related to sql commands
+	//constant related to sql
 	public static final String SQL_AND = "AND";
 	public static final String SQL_OR = "OR";
-	
-	
 
+	public static final String DATATYPE_STRING="string";
+	public static final String DATATYPE_DOUBLE="double";
+	public static final String DATATYPE_DATE="date";
+	
+	//conditional operations
 	public static final String CONDITIONAL_OPERATOR_EQUALS_NAME = "equals";
-	public static final String CONDITIONAL_OPERATOR_EQUALS_NO_ARGUMENTS = "2";
 	public static final String CONDITIONAL_OPERATOR_NOT_EQUALS_NAME = "not-equals";
-	public static final String CONDITIONAL_OPERATOR_NOT_EQUALS_NO_ARGUMENTS = "2";
-
+	public static final String CONDITIONAL_OPERATOR_LO_THAN_NAME = "lo-than";
+	public static final String CONDITIONAL_OPERATOR_LOEQ_THAN_NAME = "loeq-than";
+	public static final String CONDITIONAL_OPERATOR_HI_THAN_NAME = "hi-than";
+	public static final String CONDITIONAL_OPERATOR_HIEQ_THAN_NAME = "hieq-than";
+	public static final String CONDITIONAL_OPERATOR_IN_KEYWORD_NAME = "in-keyword";
+	public static final String CONDITIONAL_OPERATOR_BETWEEN_NAME = "between";
 	public static final String CONDITIONAL_OPERATOR_MATCH_REGEXP_NAME = "match-regexp";
+	/*
+	public static final String[] DELEGABLE_CONDITIONAL_OPERATIONS = {
+		CONDITIONAL_OPERATOR_EQUALS_NAME, CONDITIONAL_OPERATOR_NOT_EQUALS_NAME
+		, CONDITIONAL_OPERATOR_LO_THAN_NAME, CONDITIONAL_OPERATOR_LOEQ_THAN_NAME
+		, CONDITIONAL_OPERATOR_HI_THAN_NAME, CONDITIONAL_OPERATOR_HIEQ_THAN_NAME
+		, CONDITIONAL_OPERATOR_IN_KEYWORD_NAME
+		, CONDITIONAL_OPERATOR_BETWEEN_NAME
+		};
+	*/
 	
-	public static final String TRANSFORMATION_OPERATOR_CONSTANT_NAME = "constant";
+	//transformation operations
+	public static final String TRANSFORMATION_OPERATOR_CONSTANT = "constant";
+	public static final String TRANSFORMATION_OPERATOR_CONCAT = "concat";
+	public static final String[] DELEGABLE_TRANSFORMATION_OPERATIONS = {
+		TRANSFORMATION_OPERATOR_CONCAT, TRANSFORMATION_OPERATOR_CONSTANT
+	};
 	
 	public static final String ONPARAM_STRING = "string";
 	public static final String ONPARAM_REGEXP = "regexp";
-	
-	public static final String[] DELEGABLE_OPERATIONS = {CONDITIONAL_OPERATOR_EQUALS_NAME, CONDITIONAL_OPERATOR_NOT_EQUALS_NAME};
+
 	
 	
 	public static final String R2OFILE_PROP_NAME = "r2o.file.path";

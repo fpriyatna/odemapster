@@ -8,14 +8,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Selector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 
 
 public class R2ORelationMapping extends R2OPropertyMapping implements R2OElement, IRelationMapping {
 	private String toConcept;
-	private ConditionalExpression joinsVia;
+	private R2OConditionalExpression joinsVia;
 	
 	@Override
 	public R2ORelationMapping parse(Element xmlElement) throws ParseException {
@@ -29,7 +29,7 @@ public class R2ORelationMapping extends R2OPropertyMapping implements R2OElement
 		
 		Element joinsViaElement = XMLUtility.getFirstChildElementByTagName(xmlElement, R2OConstants.JOINS_VIA_TAG);
 		Element joinsViaConditionElement = XMLUtility.getFirstChildElementByTagName(joinsViaElement, R2OConstants.CONDITION_TAG);
-		result.joinsVia = new ConditionalExpression().parse(joinsViaConditionElement);
+		result.joinsVia = new R2OConditionalExpression().parse(joinsViaConditionElement);
 		
 		return result;
 	}
@@ -63,7 +63,7 @@ public class R2ORelationMapping extends R2OPropertyMapping implements R2OElement
 		return result.toString();
 	}
 
-	public ConditionalExpression getJoinsVia() {
+	public R2OConditionalExpression getJoinsVia() {
 		return joinsVia;
 	}
 

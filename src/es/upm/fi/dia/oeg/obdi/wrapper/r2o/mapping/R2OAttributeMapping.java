@@ -15,14 +15,15 @@ import es.upm.fi.dia.oeg.obdi.wrapper.IParseable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Selector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 
 public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElement, IAttributeMapping {
 //	(33) attributemap-def::= attributemap-def name
 //    (selector* | use-dbcol)
 //    documentation?
 	private String useDBCol;
-	private Collection<Selector> selectors;
+	private String useDBColDatatype;
+	private Collection<R2OSelector> selectors;
 	private Collection<String> hasDomains;
 	private Collection<String> hasRanges;
 	
@@ -60,6 +61,7 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 		List<Element> useDBColElements = XMLUtility.getChildElementsByTagName(attributeMappingElement, R2OConstants.USE_DBCOL_TAG);
 		if(useDBColElements.size() == 1) { //using db col
 			result.useDBCol = useDBColElements.get(0).getTextContent();
+			result.useDBColDatatype = useDBColElements.get(0).getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
 		} else { //using selector
 			List<Element> selectorElements = XMLUtility.getChildElementsByTagName(attributeMappingElement, R2OConstants.SELECTOR_TAG);
 			
@@ -67,9 +69,9 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 				String errorMessage = "Unsupported multiple selectors!";
 				throw new ParseException(errorMessage);
 			}
-			result.selectors = new ArrayList<Selector>();
+			result.selectors = new ArrayList<R2OSelector>();
 			for(Element childElement : selectorElements) {
-				Selector selector = new Selector().parse(childElement);
+				R2OSelector selector = new R2OSelector().parse(childElement);
 				result.selectors.add(selector);
 			}			
 			
@@ -114,7 +116,7 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 		}
 		
 		if(this.selectors != null) {
-			for(Selector selector : this.selectors) {
+			for(R2OSelector selector : this.selectors) {
 				result.append(selector.toString() + "\n");
 			}
 			
@@ -125,7 +127,7 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 	}
 
 
-	public Collection<Selector> getSelectors() {
+	public Collection<R2OSelector> getSelectors() {
 		return selectors;
 	}
 
@@ -138,6 +140,11 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 	@Override
 	public String getAttributeName() {
 		return this.name;
+	}
+
+
+	public String getUseDBColDatatype() {
+		return useDBColDatatype;
 	}
 
 	

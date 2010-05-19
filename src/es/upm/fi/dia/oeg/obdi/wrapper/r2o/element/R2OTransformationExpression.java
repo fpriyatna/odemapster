@@ -12,17 +12,17 @@ import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction.RestrictionType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 
-public class TransformationExpression extends Expression {
+public class R2OTransformationExpression extends R2OExpression {
 	//	(30) transformation::= primitive-transf (arg-restriction arg-restriction)*
 	private String primitiveTransf;
 	private String operId;
-	private List<ArgumentRestriction> argRestrictions;
+	private List<R2OArgumentRestriction> argRestrictions;
 
 	@Override
-	public TransformationExpression parse(Element element) throws ParseException {
-		TransformationExpression result = new TransformationExpression();
+	public R2OTransformationExpression parse(Element element) throws ParseException {
+		R2OTransformationExpression result = new R2OTransformationExpression();
 		Element operationElement = XMLUtility.getFirstElement(element);
 		String operationElementNodeName = operationElement.getNodeName();
 		result.primitiveTransf = operationElementNodeName;
@@ -32,11 +32,11 @@ public class TransformationExpression extends Expression {
 		}
 
 
-		result.argRestrictions = new ArrayList<ArgumentRestriction>();
+		result.argRestrictions = new ArrayList<R2OArgumentRestriction>();
 		NodeList argumentRestrictionsNodeList = operationElement.getElementsByTagName(R2OConstants.ARG_RESTRICTION_TAG);
 		for(int i=0; i<argumentRestrictionsNodeList.getLength(); i++) {
 			Element argumentRestrictionElement = (Element) argumentRestrictionsNodeList.item(i);
-			ArgumentRestriction argumentRestictionObject = new ArgumentRestriction().parse(argumentRestrictionElement);
+			R2OArgumentRestriction argumentRestictionObject = new R2OArgumentRestriction().parse(argumentRestrictionElement);
 			result.argRestrictions.add(argumentRestictionObject);
 		}
 		return result;
@@ -53,7 +53,7 @@ public class TransformationExpression extends Expression {
 			result.append("<" + this.primitiveTransf + ">\n");
 		}
 
-		for(ArgumentRestriction argRestriction : argRestrictions) {
+		for(R2OArgumentRestriction argRestriction : argRestrictions) {
 			result.append(argRestriction.toString() + "\n");
 		}
 		result.append("</" + this.primitiveTransf + ">");
@@ -63,8 +63,8 @@ public class TransformationExpression extends Expression {
 	public Collection<String> getInvolvedColumns() {
 		Vector<String> result = new Vector<String>();
 		
-		for(ArgumentRestriction argRestriction : argRestrictions) {
-			Restriction restriction = argRestriction.getRestriction();
+		for(R2OArgumentRestriction argRestriction : argRestrictions) {
+			R2ORestriction restriction = argRestriction.getRestriction();
 			RestrictionType restrictionType = restriction.getRestrictionType();
 			if(restrictionType == RestrictionType.HAS_COLUMN) {
 				result.add(restriction.getHasColumn());
@@ -76,8 +76,8 @@ public class TransformationExpression extends Expression {
 	public Vector<String> getInvolvedTables() {
 		Vector<String> result = new Vector<String>();
 		
-		for(ArgumentRestriction argRestriction : argRestrictions) {
-			Restriction restriction = argRestriction.getRestriction();
+		for(R2OArgumentRestriction argRestriction : argRestrictions) {
+			R2ORestriction restriction = argRestriction.getRestriction();
 			RestrictionType restrictionType = restriction.getRestrictionType();
 			if(restrictionType == RestrictionType.HAS_COLUMN) {
 				String columnName = restriction.getHasColumn(); 
@@ -92,7 +92,7 @@ public class TransformationExpression extends Expression {
 		return primitiveTransf;
 	}
 
-	public List<ArgumentRestriction> getArgRestrictions() {
+	public List<R2OArgumentRestriction> getArgRestrictions() {
 		return argRestrictions;
 	}
 

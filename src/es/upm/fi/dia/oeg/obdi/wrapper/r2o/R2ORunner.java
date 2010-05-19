@@ -102,8 +102,8 @@ public class R2ORunner extends AbstractRunner {
 		long startGeneratingModel = System.currentTimeMillis();
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			//unfold mapped concepts
-			AbstractUnfolder unfolder = new R2OUnfolder(r2oMappingDocument);
-			String sqlQuery = unfolder.unfold(conceptMapping);
+			AbstractUnfolder unfolder = new R2OUnfolder(r2oMappingDocument, "primitiveOperations.cfg");
+			String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
 			logger.debug("sqlQueries for " + conceptMapping.getName() + " = " + sqlQuery);
 
 			//evaluate query
@@ -111,8 +111,8 @@ public class R2ORunner extends AbstractRunner {
 
 
 			//generating model
-			R2OModelGenerator modelGenerator = new R2OModelGenerator();
-			if(splitOutput) { //if split output is true, then always create a new model and write it to the output
+			R2OPostProcessor modelGenerator = new R2OPostProcessor();
+			if(splitOutput) { //if split output is true, then always creates a new model and write it to the output
 				model = modelGenerator.createModel(jenaMode, conceptMapping.hashCode() + "");
 
 				modelGenerator.generateModel(rs, model, conceptMapping);
@@ -133,7 +133,7 @@ public class R2ORunner extends AbstractRunner {
 				if(model == null) {
 					model = modelGenerator.createModel(jenaMode, r2oMappingDocument.hashCode() + "");
 				}
-				new R2OModelGenerator().generateModel(rs, model, conceptMapping);
+				new R2OPostProcessor().generateModel(rs, model, conceptMapping);
 			}
 
 

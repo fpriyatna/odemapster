@@ -11,27 +11,27 @@ import org.w3c.dom.NodeList;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction.RestrictionType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 
-public class Condition implements R2OElement {
+public class R2OCondition implements R2OElement {
 	//(24) condition::= primitive-condition (arg-restriction arg-restrict)*
 	private String primitiveCondition;
-	private List<ArgumentRestriction> argRestricts;
+	private List<R2OArgumentRestriction> argRestricts;
 	private String operId;
 	
 	@Override
-	public Condition parse(Element element) throws ParseException {
-		Condition result = new Condition();
+	public R2OCondition parse(Element element) throws ParseException {
+		R2OCondition result = new R2OCondition();
 		
 		result.primitiveCondition = element.getNodeName();
 		if(R2OConstants.CONDITION_TAG.equalsIgnoreCase(result.primitiveCondition)) {
 			result.operId = element.getAttribute(R2OConstants.OPER_ID_ATTRIBUTE);
 		}
 		NodeList argRestrictionElements = element.getElementsByTagName(R2OConstants.ARG_RESTRICTION_TAG);
-		result.argRestricts = new ArrayList<ArgumentRestriction>();
+		result.argRestricts = new ArrayList<R2OArgumentRestriction>();
 		for(int i=0; i<argRestrictionElements.getLength();i++) {
 			Element argRestrictionElement = (Element) argRestrictionElements.item(i);
-			ArgumentRestriction argRestrictionObject = new ArgumentRestriction().parse(argRestrictionElement);
+			R2OArgumentRestriction argRestrictionObject = new R2OArgumentRestriction().parse(argRestrictionElement);
 			result.argRestricts.add(argRestrictionObject);
 		}
 		return result;
@@ -48,7 +48,7 @@ public class Condition implements R2OElement {
 			result.append("<" + this.primitiveCondition + ">\n");
 		}
 		
-		for(ArgumentRestriction argRestrict : this.argRestricts) {
+		for(R2OArgumentRestriction argRestrict : this.argRestricts) {
 			result.append(argRestrict.toString() + "\n");
 		}
 		result.append("</" + this.primitiveCondition + ">");
@@ -71,8 +71,8 @@ public class Condition implements R2OElement {
 	public Collection<String> getInvolvedColumns() {
 		Vector<String> result = new Vector<String>();
 		
-		for(ArgumentRestriction argRestriction : this.argRestricts) {
-			Restriction restriction = argRestriction.getRestriction();
+		for(R2OArgumentRestriction argRestriction : this.argRestricts) {
+			R2ORestriction restriction = argRestriction.getRestriction();
 			RestrictionType restrictionType = restriction.getRestrictionType();
 			if(restrictionType == RestrictionType.HAS_COLUMN) {
 				String columnName = restriction.getHasColumn(); 
@@ -90,15 +90,15 @@ public class Condition implements R2OElement {
 		return operId;
 	}
 
-	public List<ArgumentRestriction> getArgRestricts() {
+	public List<R2OArgumentRestriction> getArgRestricts() {
 		return argRestricts;
 	}	
 	
-	public Restriction getArgRestricts(String onParam) {
-		Restriction result = null;
+	public R2ORestriction getArgRestricts(String onParam) {
+		R2ORestriction result = null;
 		
 		if(onParam != null) {
-			for(ArgumentRestriction argRestrict : argRestricts) {
+			for(R2OArgumentRestriction argRestrict : argRestricts) {
 				if(onParam.equals(argRestrict.getOnParam())) {
 					result = argRestrict.getRestriction();
 				}

@@ -24,13 +24,13 @@ import es.upm.fi.dia.oeg.obdi.wrapper.IPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.DatabaseMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ODatabaseMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
 
 public class R2OMappingDocument implements IMappingDocument {
-	Collection<DatabaseMapping> dbschemaDescs;
+	Collection<R2ODatabaseMapping> dbschemaDescs;
 	Collection<R2OConceptMapping> conceptmapDefs;
 	Collection<R2OPropertyMapping> propertymapDefs;
 	
@@ -159,10 +159,10 @@ public class R2OMappingDocument implements IMappingDocument {
 		R2OMappingDocument result = new R2OMappingDocument();
 
 		NodeList nlDBSchemas = r2oElement.getElementsByTagName(R2OConstants.DBSCHEMA_DESC_TAG);
-		result.dbschemaDescs = new ArrayList<DatabaseMapping>();
+		result.dbschemaDescs = new ArrayList<R2ODatabaseMapping>();
 		for(int i=0; i<nlDBSchemas.getLength(); i++) {
 			Element dbschemaDescElement = (Element) nlDBSchemas.item(i); 
-			DatabaseMapping dbm = (DatabaseMapping) new DatabaseMapping().parse(dbschemaDescElement);
+			R2ODatabaseMapping dbm = (R2ODatabaseMapping) new R2ODatabaseMapping().parse(dbschemaDescElement);
 			result.dbschemaDescs.add(dbm);
 		}
 
@@ -192,7 +192,7 @@ public class R2OMappingDocument implements IMappingDocument {
 		
 		result.append("<" + R2OConstants.R2O_TAG + ">\n");
 
-		for(DatabaseMapping dbm : this.dbschemaDescs) {
+		for(R2ODatabaseMapping dbm : this.dbschemaDescs) {
 			result.append(dbm.toString() + "\n");
 		}
 

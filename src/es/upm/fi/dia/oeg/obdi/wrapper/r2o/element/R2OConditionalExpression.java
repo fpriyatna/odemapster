@@ -11,14 +11,14 @@ import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction.RestrictionType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 
-public class ConditionalExpression extends Expression {
+public class R2OConditionalExpression extends R2OExpression {
 	// (22) cond-expr ::= orcond-expr | AND orcond-expr	--> original R2O
 	// (22) cond-expr ::= condition | AND cond-expr cond-expr | OR cond-expr cond-expr --> modified R2O
 	private String operator;
-	private Condition condition;
-	private Collection<ConditionalExpression> condExprs;
+	private R2OCondition condition;
+	private Collection<R2OConditionalExpression> condExprs;
 
 
 	/*
@@ -26,11 +26,11 @@ public class ConditionalExpression extends Expression {
 	private OrConditionalExpression orCondExpr1;
 	 */
 
-	public Collection<ConditionalExpression> getCondExprs() {
+	public Collection<R2OConditionalExpression> getCondExprs() {
 		return condExprs;
 	}
 
-	public Condition getCondition() {
+	public R2OCondition getCondition() {
 		return condition;
 	} 
 
@@ -43,7 +43,7 @@ public class ConditionalExpression extends Expression {
 		if(this.operator == null) {
 			result.addAll(this.condition.getInvolvedColumns());
 		} else {
-			for(ConditionalExpression condExpr : condExprs) {
+			for(R2OConditionalExpression condExpr : condExprs) {
 				result.addAll(condExpr.getInvolvedColumns());
 			}			
 		}
@@ -57,7 +57,7 @@ public class ConditionalExpression extends Expression {
 		if(this.operator == null) {
 			result.addAll(this.condition.getInvolvedTables());
 		} else {
-			for(ConditionalExpression condExpr : condExprs) {
+			for(R2OConditionalExpression condExpr : condExprs) {
 				result.addAll(condExpr.getInvolvedTables());
 			}
 		}
@@ -70,28 +70,28 @@ public class ConditionalExpression extends Expression {
 	}
 
 	@Override
-	public ConditionalExpression parse(Element element) throws ParseException {
-		ConditionalExpression result = new ConditionalExpression();
-		result.condExprs = new ArrayList<ConditionalExpression>();
+	public R2OConditionalExpression parse(Element element) throws ParseException {
+		R2OConditionalExpression result = new R2OConditionalExpression();
+		result.condExprs = new ArrayList<R2OConditionalExpression>();
 
 		if(element.getNodeName().equalsIgnoreCase(R2OConstants.AND_TAG)) {
 			result.operator = R2OConstants.AND_TAG;
 			List<Element> condExprsElements = XMLUtility.getChildElements(element);
-			ConditionalExpression condExpr1 = new ConditionalExpression().parse(condExprsElements.get(0));
-			ConditionalExpression condExpr2 = new ConditionalExpression().parse(condExprsElements.get(1));
+			R2OConditionalExpression condExpr1 = new R2OConditionalExpression().parse(condExprsElements.get(0));
+			R2OConditionalExpression condExpr2 = new R2OConditionalExpression().parse(condExprsElements.get(1));
 			result.condExprs.add(condExpr1);
 			result.condExprs.add(condExpr2);
 		} if(element.getNodeName().equalsIgnoreCase(R2OConstants.OR_TAG)) {
 			result.operator = R2OConstants.OR_TAG;
 			List<Element> condExprsElements = XMLUtility.getChildElements(element);
-			ConditionalExpression condExpr1 = new ConditionalExpression().parse(condExprsElements.get(0));
-			ConditionalExpression condExpr2 = new ConditionalExpression().parse(condExprsElements.get(1));
+			R2OConditionalExpression condExpr1 = new R2OConditionalExpression().parse(condExprsElements.get(0));
+			R2OConditionalExpression condExpr2 = new R2OConditionalExpression().parse(condExprsElements.get(1));
 			result.condExprs.add(condExpr1);
 			result.condExprs.add(condExpr2);
 
 			//result.orCondExpr1 = (OrConditionalExpression) new OrConditionalExpression().parse(element);
 		} else {
-			result.condition = new Condition().parse(element);
+			result.condition = new R2OCondition().parse(element);
 
 			/*
 			result.usingAnd = false;
@@ -109,7 +109,7 @@ public class ConditionalExpression extends Expression {
 			result.append(this.condition.toString());
 		} else {
 			result.append(XMLUtility.toOpenTag(this.operator) + "\n");
-			for(ConditionalExpression condExpr : condExprs) {
+			for(R2OConditionalExpression condExpr : condExprs) {
 				result.append(condExpr.toString() + "\n");
 			}
 			result.append(XMLUtility.toCloseTag(this.operator) + "\n");

@@ -25,19 +25,21 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ArgumentRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Condition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Selector;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction.RestrictionType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ORelationMapping;
 
-public class R2OModelGenerator {
-	private static Logger logger = Logger.getLogger(R2OModelGenerator.class);
+public class R2OPostProcessor {
+	private static Logger logger = Logger.getLogger(R2OPostProcessor.class);
+	private static final String ATTRIBUTE_MAPPING_SELECTOR = "attributemappingselector";
+	private static final String CONCEPT_MAPPING_APPLIES_IF = "conceptmappingappliesif";
 
 	public void generateModel(ResultSet rs, Model model, AbstractConceptMapping conceptMapping) throws Exception {
 		String conceptName = conceptMapping.getConceptName();
@@ -57,8 +59,8 @@ public class R2OModelGenerator {
 				String uri = rs.getString(r2oConceptMapping.getId() + "_uri");
 				uri = Utility.encodeURI(uri);
 
-				if(counter % 100000 == 0) {
-					logger.info("Current record (" + counter + ") = " + uri);
+				if(counter % 10000 == 1000) {
+					logger.info("Processing record no " + counter + " : " + uri);
 				}
 				counter++;
 
@@ -146,30 +148,33 @@ public class R2OModelGenerator {
 
 	}
 
+
 	
 	private void processAttributeMapping(R2OAttributeMapping attributeMapping, ResultSet rs, Model model, Resource subject) throws Exception {
 		String propName = attributeMapping.getName();
 
 		String dbColUsed = attributeMapping.getUseDBCol();
 		if(dbColUsed != null) {
-			String propValString = this.processUseDbCol(attributeMapping.getUseDBCol(), rs);
+			String propValString = (String) this.processDBColumn(attributeMapping.getUseDBCol(), attributeMapping.getUseDBColDatatype(), rs);
 			this.addDataTypeProperty(propName, propValString, model, subject);
 		} else {
-			Collection<Selector> attributeMappingSelectors = attributeMapping.getSelectors();
+			Collection<R2OSelector> attributeMappingSelectors = attributeMapping.getSelectors();
 			if(attributeMappingSelectors != null) {
-				for(Selector attributeMappingSelector : attributeMappingSelectors) {
-					ConditionalExpression attributeMappingSelectorAppliesIf = attributeMappingSelector.getAppliesIf();
+				for(R2OSelector attributeMappingSelector : attributeMappingSelectors) {
+					R2OConditionalExpression attributeMappingSelectorAppliesIf = attributeMappingSelector.getAppliesIf();
 					boolean attributeMappingSelectorAppliesIfValue = false;
 					if(attributeMappingSelectorAppliesIf == null) {
 						//if there is no applies-if specified in the selector, then the condition is true
 						attributeMappingSelectorAppliesIfValue = true;
 					} else {
 						//else, evaluate the applies-if condition
-						attributeMappingSelectorAppliesIfValue = this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs);
+						attributeMappingSelectorAppliesIfValue = 
+							this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs, ATTRIBUTE_MAPPING_SELECTOR);
 					}
 
 					if(attributeMappingSelectorAppliesIfValue) {
-						String alias = attributeMapping.getId() + attributeMappingSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
+						//String alias = attributeMapping.getId() + attributeMappingSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
+						String alias = attributeMappingSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
 						String propValString = rs.getString(alias);
 
 						if(propValString!= null && propValString != "" && !propValString.equals("")) {
@@ -187,17 +192,17 @@ public class R2OModelGenerator {
 
 	private boolean processConceptMappingAppliesIfElement(R2OConceptMapping r2oConceptMapping, ResultSet rs) throws Exception {
 		boolean result = false;
-		ConditionalExpression appliesIf = r2oConceptMapping.getAppliesIf();
-		ConditionalExpression appliesIfTop = r2oConceptMapping.getAppliesIfTop();
+		R2OConditionalExpression appliesIf = r2oConceptMapping.getAppliesIf();
+		R2OConditionalExpression appliesIfTop = r2oConceptMapping.getAppliesIfTop();
 
 		if(appliesIf == null && appliesIfTop == null) {
 			result = true;
 		} else {
 			if(appliesIf != null) {
-				return this.processConditionalExpression(appliesIf, rs);
+				return this.processConditionalExpression(appliesIf, rs, CONCEPT_MAPPING_APPLIES_IF);
 			} else {
 				if(appliesIfTop != null) {
-					return this.processConditionalExpression(appliesIfTop, rs);
+					return this.processConditionalExpression(appliesIfTop, rs, CONCEPT_MAPPING_APPLIES_IF);
 				}
 			}			
 		}
@@ -234,15 +239,19 @@ public class R2OModelGenerator {
 	}
 	 */
 
-	private boolean processConditionalExpression(ConditionalExpression conditionalExpression, ResultSet rs) throws Exception {
+	private boolean processConditionalExpression(R2OConditionalExpression conditionalExpression, ResultSet rs, String source) throws Exception {
 		boolean result = false;
 		String conditionalExpressionOperator = conditionalExpression.getOperator();
 
+		if(source.equalsIgnoreCase(CONCEPT_MAPPING_APPLIES_IF)) {
+			return true;
+		}
+		
 		if(conditionalExpressionOperator == null) {
 			result = this.processCondition(conditionalExpression.getCondition(), rs);
 		} else if(conditionalExpressionOperator.equalsIgnoreCase(R2OConstants.AND_TAG)) {
-			for(ConditionalExpression condExpr : conditionalExpression.getCondExprs()) {
-				boolean condition = this.processConditionalExpression(condExpr, rs);
+			for(R2OConditionalExpression condExpr : conditionalExpression.getCondExprs()) {
+				boolean condition = this.processConditionalExpression(condExpr, rs, source);
 				if(condition == false) {
 					return false;
 				}
@@ -250,8 +259,8 @@ public class R2OModelGenerator {
 
 			return true;
 		} else if(conditionalExpressionOperator.equalsIgnoreCase(R2OConstants.OR_TAG)) {
-			for(ConditionalExpression condExpr : conditionalExpression.getCondExprs()) {
-				boolean condition = this.processConditionalExpression(condExpr, rs);
+			for(R2OConditionalExpression condExpr : conditionalExpression.getCondExprs()) {
+				boolean condition = this.processConditionalExpression(condExpr, rs, source);
 				if(condition == true) {
 					return true;
 				}
@@ -263,7 +272,7 @@ public class R2OModelGenerator {
 		return result;
 	}
 
-	private boolean processCondition(Condition condition, ResultSet rs) throws Exception {
+	private boolean processCondition(R2OCondition condition, ResultSet rs) throws Exception {
 		boolean result = false;
 
 		String operationId = null;
@@ -274,27 +283,51 @@ public class R2OModelGenerator {
 		}
 
 		if(R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME.equalsIgnoreCase(operationId)) {
-			result = this.processEqualsConditionalExpression(condition, rs);
+			result = this.processEqualsConditional(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_LO_THAN_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processLoThanConditional(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_LOEQ_THAN_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processLoEqThanConditional(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_HI_THAN_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processHiThanConditional(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_HIEQ_THAN_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processHiEqThanConditional(condition, rs);
 		}
 
 		if(R2OConstants.CONDITIONAL_OPERATOR_NOT_EQUALS_NAME.equalsIgnoreCase(operationId)) {
-			boolean conditionEquals = this.processEqualsConditionalExpression(condition, rs);
+			boolean conditionEquals = this.processEqualsConditional(condition, rs);
 			result = !conditionEquals;
 		}
 
 		if(R2OConstants.CONDITIONAL_OPERATOR_MATCH_REGEXP_NAME.equalsIgnoreCase(operationId)) {
-			result = this.processMatchRegExpConditionalExpression(condition, rs);
+			result = this.processMatchRegExpConditional(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_IN_KEYWORD_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processInKeywordConditional(condition, rs);
+		}
+
+		if(R2OConstants.CONDITIONAL_OPERATOR_BETWEEN_NAME.equalsIgnoreCase(operationId)) {
+			result = this.processBetweenConditional(condition, rs);
 		}
 
 		return result;
 	}
 
 
-	private boolean processMatchRegExpConditionalExpression(Condition condition, ResultSet rs) throws Exception {
-		Restriction inputStringRestriction = condition.getArgRestricts(R2OConstants.ONPARAM_STRING);
-		String inputString = this.processRestriction(inputStringRestriction, rs);
-		Restriction regexRestriction = condition.getArgRestricts(R2OConstants.ONPARAM_REGEXP);
-		String regex = this.processRestriction(regexRestriction, rs);
+	private boolean processMatchRegExpConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		R2ORestriction inputStringRestriction = condition.getArgRestricts(R2OConstants.ONPARAM_STRING);
+		String inputString = (String) this.processRestriction(inputStringRestriction, rs);
+		R2ORestriction regexRestriction = condition.getArgRestricts(R2OConstants.ONPARAM_REGEXP);
+		String regex = (String) this.processRestriction(regexRestriction, rs);
 
 		if(inputString != null && regex != null) {
 			Pattern pattern = Pattern.compile(regex);
@@ -309,13 +342,13 @@ public class R2OModelGenerator {
 		}
 	}
 
-	private boolean processEqualsConditionalExpression(Condition condition, ResultSet rs) throws Exception {
-		List<ArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+	private boolean processEqualsConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
 
-		Restriction restriction0 = argumentRestrictions.get(0).getRestriction();
-		String operand0 = this.processRestriction(restriction0, rs);
-		Restriction restriction1 = argumentRestrictions.get(1).getRestriction();
-		String operand1 = this.processRestriction(restriction1, rs);
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		String operand0 = (String) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		String operand1 = (String) this.processRestriction(restriction1, rs);
 
 		if(operand0 != null && operand1 != null) {
 			return operand0.equals(operand1);
@@ -324,9 +357,117 @@ public class R2OModelGenerator {
 		}
 	}
 
-	private String processUseDbCol(String columnName, ResultSet rs) throws Exception {
+	private boolean processBetweenConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		Double operand0 = (Double) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		Double operand1 = Double.parseDouble(this.processRestriction(restriction1, rs).toString());
+		R2ORestriction restriction2 = argumentRestrictions.get(2).getRestriction();
+		Double operand2 = Double.parseDouble(this.processRestriction(restriction2, rs).toString());
+
+		if(operand0 != null && operand1 != null && operand2 != null) {
+			return operand0.doubleValue() >= operand1.doubleValue() && operand0.doubleValue() <= operand2.doubleValue();
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean processInKeywordConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		String operand0 = (String) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		String operand1 = (String) this.processRestriction(restriction1, rs);
+
+		if(operand0 != null && operand1 != null) {
+			return operand0.indexOf(operand1) != -1;
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean processLoThanConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		Double operand0 = (Double) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		Double operand1 = Double.parseDouble(this.processRestriction(restriction1, rs).toString());
+
+		if(operand0 != null && operand1 != null) {
+			return(operand0.doubleValue() < operand1.doubleValue());
+		} else {
+			return false;
+		}
+	}
+
+	private boolean processLoEqThanConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		Double operand0 = (Double) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		Double operand1 = Double.parseDouble(this.processRestriction(restriction1, rs).toString());
+
+		if(operand0 != null && operand1 != null) {
+			return(operand0.doubleValue() <= operand1.doubleValue());
+		} else {
+			return false;
+		}
+	}
+
+	private boolean processHiThanConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		Double operand0 = (Double) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		Double operand1 = Double.parseDouble(this.processRestriction(restriction1, rs).toString());
+
+		if(operand0 != null && operand1 != null) {
+			return(operand0.doubleValue() > operand1.doubleValue());
+		} else {
+			return false;
+		}
+	}
+
+	private boolean processHiEqThanConditional(R2OCondition condition, ResultSet rs) throws Exception {
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		Double operand0 = (Double) this.processRestriction(restriction0, rs);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		Double operand1 = Double.parseDouble(this.processRestriction(restriction1, rs).toString());
+
+		if(operand0 != null && operand1 != null) {
+			return(operand0.doubleValue() >= operand1.doubleValue());
+		} else {
+			return false;
+		}
+	}
+	private Object processDBColumn(String columnName, String dataType, ResultSet rs) throws Exception {
 		try {
-			String result = rs.getString(columnName.replaceAll("\\.", "_"));
+			Object result = null;
+			if(dataType == null) {
+				dataType = R2OConstants.DATATYPE_STRING;
+				
+			} 
+			
+			String alias = columnName.replaceAll("\\.", "_");
+			if(dataType.equalsIgnoreCase(R2OConstants.DATATYPE_STRING)) {
+				result = rs.getString(alias);
+			} else if (dataType.equalsIgnoreCase(R2OConstants.DATATYPE_DOUBLE)) {
+				result = rs.getDouble(alias);
+			} else if (dataType.equalsIgnoreCase(R2OConstants.DATATYPE_DATE)) {
+				result = rs.getDate(alias);
+			} else {
+				result = rs.getString(alias);
+			}
+			
+			//rs.getDouble(columnLabel)
 			return result;			
 		} catch(SQLException e) {
 			throw e;
@@ -334,12 +475,12 @@ public class R2OModelGenerator {
 
 	}
 
-	private String processRestriction(Restriction restriction, ResultSet rs) throws Exception {
+	private Object processRestriction(R2ORestriction restriction, ResultSet rs) throws Exception {
 		try {
-			String result = null;
+			Object result = null;
 			if(restriction.getRestrictionType() == RestrictionType.HAS_COLUMN) {
 				//result = rs.getString(restriction.getHasColumn().replaceAll("\\.", "_"));
-				result = this.processUseDbCol(restriction.getHasColumn(), rs);
+				result = this.processDBColumn(restriction.getHasColumn(), restriction.getRestrictionDataType(), rs);
 			} else if(restriction.getRestrictionType() == RestrictionType.HAS_VALUE) {
 				result = restriction.getHasValue();
 			} else if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION) {

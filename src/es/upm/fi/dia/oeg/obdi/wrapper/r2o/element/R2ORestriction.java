@@ -7,7 +7,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 
-public class Restriction implements R2OElement {
+public class R2ORestriction implements R2OElement {
 	private RestrictionType restrictionType;
 	public enum RestrictionType {
 		HAS_VALUE, HAS_COLUMN, HAS_TRANSFORMATION
@@ -18,30 +18,35 @@ public class Restriction implements R2OElement {
 	//    has-transform transformation
 	private String hasValue;
 	private String hasColumn;
-	private TransformationExpression hasTransformation;
+	private String restrictionDataType;
+	private R2OTransformationExpression hasTransformation;
 	
 	@Override
-	public Restriction parse(Element element) throws ParseException {
-		Restriction result = new Restriction();
+	public R2ORestriction parse(Element element) throws ParseException {
+		R2ORestriction result = new R2ORestriction();
 		
 		String nodeName = element.getNodeName();
 		if(nodeName.equalsIgnoreCase(R2OConstants.HAS_VALUE_TAG)) {
 			result.restrictionType = RestrictionType.HAS_VALUE;
 			String content = element.getTextContent();
 			if(content != null) {
-				result.hasValue = content.trim();
+				result.hasValue = content;
 			}
 		} else if(nodeName.equalsIgnoreCase(R2OConstants.HAS_COLUMN_TAG)) {
 			result.restrictionType = RestrictionType.HAS_COLUMN;
 			String content = element.getTextContent();
 			if(content != null) {
-				result.hasColumn = content.trim();
+				result.hasColumn = content;
 			}
 		} else if(nodeName.equalsIgnoreCase(R2OConstants.HAS_TRANSFORMATION_TAG)) {
 			result.restrictionType = RestrictionType.HAS_TRANSFORMATION;
-			result.hasTransformation = new TransformationExpression().parse(element);
+			result.hasTransformation = new R2OTransformationExpression().parse(element);
 		}
-		
+
+		String dataType = element.getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
+		if(dataType != null && dataType != "") {
+			result.restrictionDataType = dataType;
+		}
 		return result;
 	}
 
@@ -49,15 +54,29 @@ public class Restriction implements R2OElement {
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		if(this.restrictionType == RestrictionType.HAS_VALUE) {
-			result.append("<" + R2OConstants.HAS_VALUE_TAG + ">");
+			if(this.restrictionDataType == null) {
+				result.append("<" + R2OConstants.HAS_VALUE_TAG + ">");
+			} else {
+				result.append("<" + R2OConstants.HAS_VALUE_TAG + " " + R2OConstants.DATATYPE_ATTRIBUTE + "=\"" + this.restrictionDataType + "\">");
+			}
 			result.append(this.hasValue);
 			result.append("</" + R2OConstants.HAS_VALUE_TAG + ">");
 		} else if(this.restrictionType == RestrictionType.HAS_COLUMN) {
-			result.append("<" + R2OConstants.HAS_COLUMN_TAG + ">");
+			if(this.restrictionDataType == null) {
+				result.append("<" + R2OConstants.HAS_COLUMN_TAG + ">");
+			} else {
+				result.append("<" + R2OConstants.HAS_COLUMN_TAG + " " + R2OConstants.DATATYPE_ATTRIBUTE + "=\"" + this.restrictionDataType + "\">");
+			}
+			
 			result.append(this.hasColumn);
 			result.append("</" + R2OConstants.HAS_COLUMN_TAG + ">");
 		} else if(this.restrictionType == RestrictionType.HAS_TRANSFORMATION) {
-			result.append(XMLUtility.toOpenTag(R2OConstants.HAS_TRANSFORMATION_TAG) + "\n");
+			if(this.restrictionDataType == null) {
+				result.append("<" + R2OConstants.HAS_TRANSFORMATION_TAG + ">");
+			} else {
+				result.append("<" + R2OConstants.HAS_TRANSFORMATION_TAG + " " + R2OConstants.DATATYPE_ATTRIBUTE + "=\"" + this.restrictionDataType + "\">");
+			}
+			
 			result.append(this.hasTransformation.toString() + "\n");
 			result.append(XMLUtility.toOpenTag(R2OConstants.HAS_TRANSFORMATION_TAG) + "\n");
 		}
@@ -75,6 +94,10 @@ public class Restriction implements R2OElement {
 
 	public String getHasValue() {
 		return hasValue;
+	}
+
+	public String getRestrictionDataType() {
+		return restrictionDataType;
 	};
 	
 	

@@ -8,8 +8,8 @@ public class RegexTest {
 
     public static void main(String[] args){
         
-        String regex = "(.*), ((Barranco)|(Barranquera)|(Barranquillo)) (.*)";
-        String inputString = "Sisca, Barranco de";
+        String regex = "Man";
+        String inputString = "Asistant Manager";
         
             Pattern pattern = Pattern.compile(regex);
 

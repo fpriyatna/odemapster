@@ -1,9 +1,12 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
@@ -23,14 +26,14 @@ import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ArgumentRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Condition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.ConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.DatabaseTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Selector;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.TransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.Restriction.RestrictionType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
@@ -44,20 +47,38 @@ public class R2OUnfolder extends AbstractUnfolder {
 	private ZQuery zQuery;
 	private Collection<String> leftJoinTables;
 	private String leftJoinCondition;
+	private Properties primitiveOperations;
+	private String[] delegableConditionalOperations;
 	
 	public R2OUnfolder(R2OMappingDocument r2oMappingDocument) {
 		this.r2oMappingDocument = r2oMappingDocument;
 	}
-	
-	private void processPropertyMapping(R2OPropertyMapping r2oPropertyMapping) throws Exception {
+
+	public R2OUnfolder(R2OMappingDocument r2oMappingDocument, String primitiveOperationsFile) throws Exception {
+		this.r2oMappingDocument = r2oMappingDocument;
+		this.primitiveOperations = new Properties();
+		try {
+			this.primitiveOperations.load(new FileInputStream(primitiveOperationsFile));
+		} catch(Exception e) {
+			logger.error("Error loading primitive operations file : " + primitiveOperationsFile);
+			throw e;
+		}
+		
+		String delegableConditionaloperations = this.primitiveOperations.getProperty("delegable.conditionaloperations");
+		logger.debug("delegableConditionaloperations = " + delegableConditionaloperations);
+		this.delegableConditionalOperations = delegableConditionaloperations.split(",");
+
+	}
+
+	private void unfoldPropertyMapping(R2OPropertyMapping r2oPropertyMapping) throws Exception {
 		if(r2oPropertyMapping instanceof R2OAttributeMapping) {
-			this.processAttributeMapping((R2OAttributeMapping) r2oPropertyMapping);
+			this.unfoldAttributeMapping((R2OAttributeMapping) r2oPropertyMapping);
 		} else if(r2oPropertyMapping instanceof R2ORelationMapping) {
-			this.processRelationMapping((R2ORelationMapping) r2oPropertyMapping);
+			this.unfoldRelationMapping((R2ORelationMapping) r2oPropertyMapping);
 		}
 	}
 	
-	private void processRelationMapping(R2ORelationMapping r2oRelationMapping) throws Exception {
+	private void unfoldRelationMapping(R2ORelationMapping r2oRelationMapping) throws Exception {
 		String toConcept = r2oRelationMapping.getToConcept();
 		Collection<AbstractConceptMapping> conceptMappings = this.r2oMappingDocument.getConceptMappings(toConcept);
 		R2OConceptMapping rangeConceptMapping = null;
@@ -68,24 +89,31 @@ public class R2OUnfolder extends AbstractUnfolder {
 			logger.warn(errorMessage);
 			rangeConceptMapping = (R2OConceptMapping) conceptMappings.iterator().next();
 		} else {
-			String errorMessage = "Mapping for the range concept is not defined!";
+			String errorMessage = "Mapping for the range concept " + toConcept + " is not defined!";
 			throw new Exception(errorMessage);
 		}
 		
-		this.processURIAs(rangeConceptMapping, r2oRelationMapping.getId());
+		//this.processURIAs(rangeConceptMapping, r2oRelationMapping.getId());
+		R2OTransformationExpression transformationExpressionURIAs = rangeConceptMapping.getTransformationExpressionURIAs();
+		ZExp selectExpression = this.unfoldTransformationExpression(transformationExpressionURIAs);
+		ZSelectItem zSelectItem = new ZSelectItem();
+		zSelectItem.setExpression(selectExpression);
+		zSelectItem.setAlias(r2oRelationMapping.getId());
+		zQuery.getSelect().add(zSelectItem);		
+		
 		
 		//process left join tables
 		this.leftJoinTables = new ArrayList<String>();
-		Vector<DatabaseTable> rangeTables = rangeConceptMapping.getHasTables();
-		for(DatabaseTable rangeTable : rangeTables) {
+		Vector<R2ODatabaseTable> rangeTables = rangeConceptMapping.getHasTables();
+		for(R2ODatabaseTable rangeTable : rangeTables) {
 			this.leftJoinTables.add(rangeTable.getName());
 		}
 		 
 		//process left join conditions
-		ConditionalExpression joinsVia = r2oRelationMapping.getJoinsVia();
-		ZExp joinsViaExp1 = this.processConditionalExpression(joinsVia);
+		R2OConditionalExpression joinsVia = r2oRelationMapping.getJoinsVia();
+		ZExp joinsViaExp1 = this.unfoldConditionalExpression(joinsVia);
 		
-		ConditionalExpression rangeConditionalExpression = null;
+		R2OConditionalExpression rangeConditionalExpression = null;
 		if(rangeConceptMapping.getAppliesIf() != null) {
 			rangeConditionalExpression = rangeConceptMapping.getAppliesIf();
 		} else {
@@ -94,7 +122,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 			}
 		}
 		if(rangeConditionalExpression != null) {
-			ZExp joinsViaExp2 = this.processConditionalExpression(rangeConditionalExpression);
+			ZExp joinsViaExp2 = this.unfoldConditionalExpression(rangeConditionalExpression);
 			if(joinsViaExp2 != null) {
 				joinsViaExp1 = new ZExpression("AND", joinsViaExp1, joinsViaExp2);
 			}
@@ -105,8 +133,49 @@ public class R2OUnfolder extends AbstractUnfolder {
 		}
 
 	}
+
+	/*
+	private void unfoldSelector(Selector selector) throws Exception {
+		ConditionalExpression selectorAppliesIf = selector.getAppliesIf();
+		if(selectorAppliesIf != null) {
+			this.unfoldConditionalExpression(selectorAppliesIf);
+		}
+		
+		TransformationExpression selectorAfterTransform = selector.getAfterTransform();
+		ZExp selectExpression = this.unfoldTransformationExpression(selectorAfterTransform);
+		ZSelectItem zSelectItem = new ZSelectItem();
+		zSelectItem.setExpression(selectExpression);
+		String alias = selector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
+		zSelectItem.setAlias(alias);
+		zQuery.getSelect().add(zSelectItem);		
+	}
 	
-	private void processAttributeMapping(R2OAttributeMapping r2oAttributeMapping) throws Exception {
+
+	private void unfoldSelector2(Selector selector) throws Exception {
+		ConditionalExpression selectorAppliesIf = selector.getAppliesIf();
+		if(selectorAppliesIf != null) {
+			Collection<String> involvedColumns = selectorAppliesIf.getInvolvedColumns();
+			for(String columnName : involvedColumns) {
+				ZSelectItem zSelectItemAppliesIf = new ZSelectItem();
+				String columnNameAlias = columnName.replaceAll("\\.", "_");
+				zSelectItemAppliesIf.setExpression(new ZConstant(columnName, ZConstant.COLUMNNAME));
+				zSelectItemAppliesIf.setAlias(columnNameAlias);
+				zQuery.getSelect().add(zSelectItemAppliesIf);
+			}				
+		}
+
+
+		TransformationExpression selectorAfterTransform = selector.getAfterTransform();
+		ZExp selectExpression = this.unfoldTransformationExpression(selectorAfterTransform);
+		ZSelectItem zSelectItem = new ZSelectItem();
+		zSelectItem.setExpression(selectExpression);
+		String alias = selector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
+		zSelectItem.setAlias(alias);
+		zQuery.getSelect().add(zSelectItem);		
+	}
+	*/
+	
+	private void unfoldAttributeMapping(R2OAttributeMapping r2oAttributeMapping) throws Exception {
 
 		if(r2oAttributeMapping.getUseDBCol() != null) {
 			ZSelectItem zSelectItemAppliesIf = new ZSelectItem();
@@ -115,27 +184,26 @@ public class R2OUnfolder extends AbstractUnfolder {
 			zSelectItemAppliesIf.setAlias(columnNameAlias);
 			zQuery.getSelect().add(zSelectItemAppliesIf);
 		} else {
-			Collection<Selector> attributeSelectors = r2oAttributeMapping.getSelectors();
+			Collection<R2OSelector> attributeSelectors = r2oAttributeMapping.getSelectors();
 			if(attributeSelectors != null) {
-				for(Selector attributeSelector : attributeSelectors) {
-					ConditionalExpression attributeSelectorAppliesIf = attributeSelector.getAppliesIf();
-					if(attributeSelectorAppliesIf != null) {
-						Collection<String> involvedColumns = attributeSelectorAppliesIf.getInvolvedColumns();
+				for(R2OSelector attributeSelector : attributeSelectors) {
+					R2OConditionalExpression selectorAppliesIf = attributeSelector.getAppliesIf();
+					if(selectorAppliesIf != null) {
+						Collection<String> involvedColumns = selectorAppliesIf.getInvolvedColumns();
 						for(String columnName : involvedColumns) {
 							ZSelectItem zSelectItemAppliesIf = new ZSelectItem();
 							String columnNameAlias = columnName.replaceAll("\\.", "_");
 							zSelectItemAppliesIf.setExpression(new ZConstant(columnName, ZConstant.COLUMNNAME));
 							zSelectItemAppliesIf.setAlias(columnNameAlias);
 							zQuery.getSelect().add(zSelectItemAppliesIf);
-						}				
+						}	
 					}
-
-
-					TransformationExpression attributeSelectorAfterTransform = attributeSelector.getAfterTransform();
-					ZExp selectExpression = this.processTransformationExpression(attributeSelectorAfterTransform);
+					
+					R2OTransformationExpression selectorAfterTransform = attributeSelector.getAfterTransform();
+					ZExp selectExpression = this.unfoldTransformationExpression(selectorAfterTransform);
 					ZSelectItem zSelectItem = new ZSelectItem();
 					zSelectItem.setExpression(selectExpression);
-					String alias = r2oAttributeMapping.getId() + attributeSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
+					String alias = attributeSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
 					zSelectItem.setAlias(alias);
 					zQuery.getSelect().add(zSelectItem);
 				}			
@@ -145,25 +213,12 @@ public class R2OUnfolder extends AbstractUnfolder {
 
 	}
 
-	private void processConceptMapping(R2OConceptMapping r2oConceptMapping) throws Exception {
-		this.processURIAs(r2oConceptMapping, r2oConceptMapping.getId() + "_uri");
-		this.processConceptMappingAppliesIf(r2oConceptMapping);
-
-		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
-		if(propertyMappings != null) {
-			for(R2OPropertyMapping propertyMappping : propertyMappings) {
-				this.processPropertyMapping(propertyMappping);
-			}			
-		}
-
-	}
-
-	private void processConceptMappingAppliesIf(R2OConceptMapping r2oConceptMapping) throws Exception {
+	private void unfoldConceptMappingAppliesIf(R2OConceptMapping r2oConceptMapping) throws Exception {
 
 
 		//sql select generation for applies if
 		Collection<String> conceptMappingAppliesIfSelect = null; 
-		ConditionalExpression appliesIf = null;
+		R2OConditionalExpression appliesIf = null;
 
 		if(r2oConceptMapping.getAppliesIf() != null) {
 			appliesIf = r2oConceptMapping.getAppliesIf();
@@ -175,7 +230,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 
 		if(appliesIf != null) {
 			//WHERE part
-			ZExp conceptMappingAppliesIfWhere = this.processConditionalExpression(appliesIf);
+			ZExp conceptMappingAppliesIfWhere = this.unfoldConditionalExpression(appliesIf);
 			if(conceptMappingAppliesIfWhere != null) {
 				ZExp whereExpression = null;
 				if(zQuery.getWhere() == null) {
@@ -199,7 +254,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 		}
 	}
 
-	private ZExp processCondition(Condition condition) throws Exception {
+	private ZExp unfoldCondition(R2OCondition condition) throws Exception {
 		ZExp result = null;
 
 		String operationId = null;
@@ -209,30 +264,33 @@ public class R2OUnfolder extends AbstractUnfolder {
 			operationId = condition.getPrimitiveCondition();
 		}
 
-		//delegeable operation that needs to be done on the database
-		if(Utility.inArray(R2OConstants.DELEGABLE_OPERATIONS, operationId)) {
-			if(operationId.equals(R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME)) {
-				result = this.processEqualsConditionalExpression(condition);
-			} else if(operationId.equals(R2OConstants.CONDITIONAL_OPERATOR_NOT_EQUALS_NAME)) {
-				result = this.processNotEqualsConditionalExpression(condition);
+		//delegable operation that needs to be done on the database
+		if(Utility.inArray(this.delegableConditionalOperations, operationId)) {
+			if(operationId.equalsIgnoreCase(R2OConstants.CONDITIONAL_OPERATOR_NOT_EQUALS_NAME)) {
+				result = this.unfoldNotEqualsConditional(condition);
+			} else if(operationId.equalsIgnoreCase(R2OConstants.CONDITIONAL_OPERATOR_IN_KEYWORD_NAME)) {
+				result = this.unfoldInKeywordConditional(condition);
+			} else {
+				result = unfoldDelegableConditional(operationId, condition);
 			}
-
+		} else {
+			logger.info("Delegating conditional operation " + operationId);
 		}
 
 		return result;
 	}
 
-	private ZExp processConditionalExpression(ConditionalExpression conditionalExpression) throws Exception {
+	private ZExp unfoldConditionalExpression(R2OConditionalExpression conditionalExpression) throws Exception {
 		ZExp result = null;
 		String conditionalExpressionOperator = conditionalExpression.getOperator();
 
 		if(conditionalExpressionOperator == null) {
-			result = this.processCondition(conditionalExpression.getCondition());
+			result = this.unfoldCondition(conditionalExpression.getCondition());
 		} else if(conditionalExpressionOperator.equalsIgnoreCase(R2OConstants.AND_TAG)) {
-			Collection<ConditionalExpression> condExprs = conditionalExpression.getCondExprs();
+			Collection<R2OConditionalExpression> condExprs = conditionalExpression.getCondExprs();
 			List<ZExp> operands = new ArrayList<ZExp>();
-			for(ConditionalExpression condExpr : condExprs) {
-				ZExp operand = this.processConditionalExpression(condExpr);
+			for(R2OConditionalExpression condExpr : condExprs) {
+				ZExp operand = this.unfoldConditionalExpression(condExpr);
 				if(operand != null) {
 					operands.add(operand);
 				}
@@ -247,10 +305,14 @@ public class R2OUnfolder extends AbstractUnfolder {
 				}
 			}
 		} else if(conditionalExpressionOperator.equalsIgnoreCase(R2OConstants.OR_TAG)) {
+			String errorMessage = "OR operator in conditional expression is not supported!";
+			throw new Exception(errorMessage);
+			
+			/*
 			Collection<ConditionalExpression> condExprs = conditionalExpression.getCondExprs();
 			List<ZExp> operands = new ArrayList<ZExp>();
 			for(ConditionalExpression condExpr : condExprs) {
-				ZExp operand = this.processConditionalExpression(condExpr);
+				ZExp operand = this.unfoldConditionalExpression(condExpr);
 				if(operand != null) {
 					operands.add(operand);
 				}
@@ -264,24 +326,167 @@ public class R2OUnfolder extends AbstractUnfolder {
 					zExpression.addOperand(operand);
 				}
 			}
+			*/
 		}
 
 
 		return result;
 	}
 
-	private ZExpression processEqualsConditionalExpression(Condition condition) throws Exception{
+	private ZExpression unfoldDelegableConditional(String operationId, R2OCondition condition) throws Exception{
 		ZExpression result = null;
 
-		List<ArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+		int noOfArgs = Integer.parseInt(
+				this.primitiveOperations.getProperty("operation." + operationId + ".nargs"));
+		String dbOperation = this.primitiveOperations.getProperty("operation." + operationId + ".delegated.db");
+		ZExpression zExpression = new ZExpression(dbOperation);
+		for(int i=0; i<noOfArgs;i++) {
+			R2ORestriction restriction = argumentRestrictions.get(i).getRestriction();
+			ZExp operand = this.unfoldRestriction(restriction);
+			zExpression.addOperand(operand);
+		}
 
-		Restriction restriction0 = argumentRestrictions.get(0).getRestriction();
-		ZExp operand0 = this.processRestriction(restriction0);
-		Restriction restriction1 = argumentRestrictions.get(1).getRestriction();
-		ZExp operand1 = this.processRestriction(restriction1);
+		result = zExpression;
+		return result;		
+	}
+	
+	private ZExpression unfoldEqualsConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
 
 		if(operand0 != null && operand1 != null) {
 			ZExpression zExpression = new ZExpression("=");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			result = zExpression;
+		} 
+
+		return result;
+	}
+
+	private ZExpression unfoldBetweenConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
+		R2ORestriction restriction2 = argumentRestrictions.get(2).getRestriction();
+		ZExp operand2 = this.unfoldRestriction(restriction2);
+
+		if(operand0 != null && operand1 != null && operand2 != null) {
+			ZExpression zExpression = new ZExpression("BETWEEN");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			zExpression.addOperand(operand2);
+			result = zExpression;
+		} 
+
+		return result;
+	}
+	
+	private ZExpression unfoldInKeywordConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
+		operand1 = new ZConstant("%" + operand1.toString().replaceAll("'", "") + "%", ZConstant.STRING);
+		
+		if(operand0 != null && operand1 != null) {
+			ZExpression zExpression = new ZExpression("LIKE");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			result = zExpression;
+		} 
+
+		return result;
+	}
+	
+	private ZExpression unfoldLoThanConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
+
+		if(operand0 != null && operand1 != null) {
+			ZExpression zExpression = new ZExpression("<");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			result = zExpression;
+		} 
+
+		return result;
+	}
+
+	private ZExpression unfoldLoEqThanConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
+
+		if(operand0 != null && operand1 != null) {
+			ZExpression zExpression = new ZExpression("<=");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			result = zExpression;
+		} 
+
+		return result;
+	}
+
+	private ZExpression unfoldHiThanConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
+
+		if(operand0 != null && operand1 != null) {
+			ZExpression zExpression = new ZExpression(">");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			result = zExpression;
+		} 
+
+		return result;
+	}
+
+	private ZExpression unfoldHiEqThanConditional(R2OCondition condition) throws Exception{
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		ZExp operand0 = this.unfoldRestriction(restriction0);
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		ZExp operand1 = this.unfoldRestriction(restriction1);
+
+		if(operand0 != null && operand1 != null) {
+			ZExpression zExpression = new ZExpression(">=");
 			zExpression.addOperand(operand0);
 			zExpression.addOperand(operand1);
 			result = zExpression;
@@ -319,16 +524,28 @@ public class R2OUnfolder extends AbstractUnfolder {
 	}
 	 */
 
-	private ZExpression processNotEqualsConditionalExpression(Condition condition) throws Exception{
-		return new ZExpression("NOT", this.processEqualsConditionalExpression(condition));
+	private ZExpression unfoldNotEqualsConditional(R2OCondition condition) throws Exception{
+		return new ZExpression("NOT", this.unfoldEqualsConditional(condition));
 	}
 
-	private ZExp processRestriction(Restriction restriction) throws Exception {
+	private ZExp unfoldRestriction(R2ORestriction restriction) throws Exception {
 		ZExp result = null;
 		if(restriction.getRestrictionType() == RestrictionType.HAS_COLUMN) {
 			result = new ZConstant(restriction.getHasColumn(), ZConstant.COLUMNNAME);
 		} else if(restriction.getRestrictionType() == RestrictionType.HAS_VALUE) {
-			result = new ZConstant(restriction.getHasValue(), ZConstant.STRING);
+			String restrictionDataType = restriction.getRestrictionDataType();
+			String restrictionValue = restriction.getHasValue().toString();
+			if(restrictionDataType == null) {
+				restrictionDataType = R2OConstants.DATATYPE_STRING;
+			}
+			
+			if(restrictionDataType.equalsIgnoreCase(R2OConstants.DATATYPE_STRING)) {
+				result = new ZConstant(restrictionValue, ZConstant.STRING);
+			} else if(restrictionDataType.equalsIgnoreCase(R2OConstants.DATATYPE_DOUBLE)) {
+				result = new ZConstant(restrictionValue, ZConstant.NUMBER);
+			} else {
+				result = new ZConstant(restrictionValue, ZConstant.STRING);
+			}
 		} else if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION) {
 			throw new Exception("Not implemented yet!");
 		}
@@ -338,29 +555,39 @@ public class R2OUnfolder extends AbstractUnfolder {
 	}
 
 
-	private ZExp processTransformationExpression(TransformationExpression transformationExpressionURIAs) throws Exception {
+	private ZExp unfoldTransformationExpression(R2OTransformationExpression transformationExpressionURIAs) throws Exception {
 
 		String operator = transformationExpressionURIAs.getOperId();
 		if(operator == null) {
 			return null;
 		}
 
-		if(operator.equals(R2OConstants.TRANSFORMATION_OPERATOR_CONSTANT_NAME)) {
-			Restriction restriction = transformationExpressionURIAs.getArgRestrictions().get(0).getRestriction();
-			return this.processRestriction(restriction);
-		} else {
-			ZExpression selectExpression = new ZExpression(operator);
-			List<ArgumentRestriction> argumentRestrictions = transformationExpressionURIAs.getArgRestrictions();
-			for(ArgumentRestriction argumentRestriction : argumentRestrictions) {
-				Restriction restriction = argumentRestriction.getRestriction();
-				ZExp restrictionExpression = this.processRestriction(restriction);
-				selectExpression.addOperand(restrictionExpression);
-			}
+		if(Utility.inArray(R2OConstants.DELEGABLE_TRANSFORMATION_OPERATIONS, operator)) {
+			List<R2OArgumentRestriction> argumentRestrictions = transformationExpressionURIAs.getArgRestrictions();
+			if(operator.equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CONSTANT)) {
+				R2ORestriction restriction = transformationExpressionURIAs.getArgRestrictions().get(0).getRestriction();
+				return this.unfoldRestriction(restriction);				
+			} else {
+				ZExpression selectExpression = new ZExpression(operator);
+				for(R2OArgumentRestriction argumentRestriction : argumentRestrictions) {
+					R2ORestriction restriction = argumentRestriction.getRestriction();
+					ZExp restrictionExpression = this.unfoldRestriction(restriction);
+					selectExpression.addOperand(restrictionExpression);
+				}
 
-			return selectExpression;
+				return selectExpression;
+			}
+			
+
+		} else {
+			String errorMessage = "Operator " + operator + " is not supported yet!";
+			throw new Exception(errorMessage);
 		}
+		
+
 	}
 
+	/*
 	private void processURIAs(R2OConceptMapping r2oConceptMapping, String uriAlias) throws Exception {
 
 		Selector selectorURIAs = r2oConceptMapping.getSelectorURIAs();
@@ -388,19 +615,29 @@ public class R2OUnfolder extends AbstractUnfolder {
 		}
 
 	}
+	*/
 
 	@Override
-	public String unfold(AbstractConceptMapping conceptMapping) throws Exception {
+	public String unfoldConceptMapping(AbstractConceptMapping conceptMapping) throws Exception {
 		logger.debug("Unfolding = " + conceptMapping.getConceptName());
-		
+		R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping;
 		ZUtils.addCustomFunction("concat", 2);
 		this.zQuery = new ZQuery();
 		zQuery.addFrom(new Vector<String>());
+		zQuery.addSelect(new Vector<ZSelectItem>());
+
 		
-		R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping;
-		Vector<DatabaseTable> relatedTables = r2oConceptMapping.getHasTables();
+		R2OTransformationExpression transformationExpressionURIAs = r2oConceptMapping.getTransformationExpressionURIAs();
+		ZExp selectExpression = this.unfoldTransformationExpression(transformationExpressionURIAs);
+		ZSelectItem zSelectItemConceptURI = new ZSelectItem();
+		zSelectItemConceptURI.setExpression(selectExpression);
+		zSelectItemConceptURI.setAlias(r2oConceptMapping.getId() + "_uri");
+		zQuery.getSelect().add(zSelectItemConceptURI);
+		//this.processURIAs(r2oConceptMapping, r2oConceptMapping.getId() + "_uri");
+
+		Vector<R2ODatabaseTable> relatedTables = r2oConceptMapping.getHasTables();
 		if(relatedTables != null && relatedTables.size() > 0) {
-			for(DatabaseTable hasTable : relatedTables) {
+			for(R2ODatabaseTable hasTable : relatedTables) {
 				ZFromItem fromItem = new ZFromItem(hasTable.getName());
 				if(hasTable.getAlias() != null) {
 					fromItem.setAlias(hasTable.getAlias());
@@ -409,9 +646,14 @@ public class R2OUnfolder extends AbstractUnfolder {
 			}
 		}
 		
-		zQuery.addSelect(new Vector<ZSelectItem>());
+		this.unfoldConceptMappingAppliesIf(r2oConceptMapping);
 
-		this.processConceptMapping(r2oConceptMapping);
+		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
+		if(propertyMappings != null) {
+			for(R2OPropertyMapping propertyMappping : propertyMappings) {
+				this.unfoldPropertyMapping(propertyMappping);
+			}			
+		}
 
 		if(this.leftJoinTables == null && this.leftJoinCondition == null) {
 			return zQuery.toString();	

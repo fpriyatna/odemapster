@@ -10,21 +10,21 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 
-public class Selector implements R2OElement {
+public class R2OSelector implements R2OElement {
 	
 	
 //	(38) selector::= selector (applies-if cond-expr)?
 //            (aftertransform transformation)?
-	private ConditionalExpression appliesIf;
-	private TransformationExpression afterTransform;
+	private R2OConditionalExpression appliesIf;
+	private R2OTransformationExpression afterTransform;
 	
 	@Override
-	public Selector parse(Element element) throws ParseException {
-		Selector result = new Selector();
+	public R2OSelector parse(Element element) throws ParseException {
+		R2OSelector result = new R2OSelector();
 		NodeList afterTransformElements = element.getElementsByTagName(R2OConstants.AFTERTRANSFORM_TAG);
 		if(afterTransformElements != null && afterTransformElements.getLength() > 0) {
 			Element afterTransformElement = (Element) afterTransformElements.item(0);
-			result.afterTransform = new TransformationExpression().parse(afterTransformElement);
+			result.afterTransform = new R2OTransformationExpression().parse(afterTransformElement);
 		}
 		
 		
@@ -32,7 +32,7 @@ public class Selector implements R2OElement {
 		if(appliesIfElements != null && appliesIfElements.getLength() > 0) {
 			Element appliesIfElement = (Element) appliesIfElements.item(0);
 			Element conditionalExpressionElement = XMLUtility.getChildElements(appliesIfElement).get(0);
-			result.appliesIf = new ConditionalExpression().parse(conditionalExpressionElement);
+			result.appliesIf = new R2OConditionalExpression().parse(conditionalExpressionElement);
 		}
 		
 		return result;
@@ -58,11 +58,11 @@ public class Selector implements R2OElement {
 		return result.toString();
 	}
 
-	public ConditionalExpression getAppliesIf() {
+	public R2OConditionalExpression getAppliesIf() {
 		return appliesIf;
 	}
 
-	public TransformationExpression getAfterTransform() {
+	public R2OTransformationExpression getAfterTransform() {
 		return afterTransform;
 	}
 	

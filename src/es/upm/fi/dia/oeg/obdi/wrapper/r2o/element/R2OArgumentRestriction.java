@@ -7,21 +7,21 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 
-public class ArgumentRestriction implements R2OElement {
+public class R2OArgumentRestriction implements R2OElement {
 	// (26) arg-restrict::= parameter-selector restriction
 	// (27) parameter-selector::= on-param literal
 	private String onParam;
-	private Restriction restriction;
+	private R2ORestriction restriction;
 	
 	
 	@Override
-	public ArgumentRestriction parse(Element element) throws ParseException {
-		ArgumentRestriction result = new ArgumentRestriction();
+	public R2OArgumentRestriction parse(Element element) throws ParseException {
+		R2OArgumentRestriction result = new R2OArgumentRestriction();
 		result.onParam = element.getAttribute(R2OConstants.ON_PARAM_ATTRIBUTE);
 		
 		Element elementFirstChild = XMLUtility.getFirstElement(element);
 		if(elementFirstChild != null) {
-			result.restriction = new Restriction().parse((Element) elementFirstChild);
+			result.restriction = new R2ORestriction().parse((Element) elementFirstChild);
 		}
 		return result;
 	}
@@ -41,7 +41,7 @@ public class ArgumentRestriction implements R2OElement {
 	}
 
 
-	public Restriction getRestriction() {
+	public R2ORestriction getRestriction() {
 		return restriction;
 	}
 

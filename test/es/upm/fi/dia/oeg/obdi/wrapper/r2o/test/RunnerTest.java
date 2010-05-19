@@ -27,7 +27,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OModelGenerator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPostProcessor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OUnfolder;
@@ -139,9 +139,22 @@ public class RunnerTest extends XMLTestCase {
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 
+	public static void test43Playa() {
+		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase43/";
+		String r2oConfigurationFile = dir + "r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+		//this.runMapsterTest("test42", "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase39/mapster.cfg", "base-result.rdf");
+	}
+
+	public static void test44Playa() {
+		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase44/";
+		String r2oConfigurationFile = dir + "r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+		//this.runMapsterTest("test42", "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase39/mapster.cfg", "base-result.rdf");
+	}
 	
 	public static void main(String args[]) {
-		RunnerTest.test42NomgeoIndividuals();
+		RunnerTest.test43Playa();
 	}
 
 

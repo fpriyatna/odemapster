@@ -7,7 +7,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 
 
-public class DatabaseColumn implements R2OElement {
+public class R2ODatabaseColumn implements R2OElement {
 	private String name;
 	private ColumnType columnType;
 	
@@ -16,8 +16,8 @@ public class DatabaseColumn implements R2OElement {
 	}
 	
 	@Override
-	public DatabaseColumn parse(Element element) throws ParseException {
-		DatabaseColumn result = new DatabaseColumn();
+	public R2ODatabaseColumn parse(Element element) throws ParseException {
+		R2ODatabaseColumn result = new R2ODatabaseColumn();
 		
 		result.name = element.getAttribute(R2OConstants.NAME_ATTRIBUTE);
 
