@@ -13,7 +13,8 @@ public interface IMappingDocument extends IParseable {
 
 	public List<String> getMappedConcepts();
 	public Collection<AbstractConceptMapping> getConceptMappings();
-	public Collection<AbstractConceptMapping> getConceptMappings(String conceptURI);
+	public Collection<AbstractConceptMapping> getConceptMappingsByConceptURI(String conceptURI);
+	public AbstractConceptMapping getConceptMappingsByMappingId(String mappingId);
 	
 	public List<String> getMappedProperties();
 	public Collection<IPropertyMapping> getPropertyMappings();

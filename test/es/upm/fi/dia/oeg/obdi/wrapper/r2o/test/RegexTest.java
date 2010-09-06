@@ -8,8 +8,8 @@ public class RegexTest {
 
     public static void main(String[] args){
         
-        String regex = "Man";
-        String inputString = "Asistant Manager";
+        String regex = "(.*) Cruz de (.*)";
+        String inputString = "Santa Cruz de Tenerife, Puerto de";
         
             Pattern pattern = Pattern.compile(regex);
 

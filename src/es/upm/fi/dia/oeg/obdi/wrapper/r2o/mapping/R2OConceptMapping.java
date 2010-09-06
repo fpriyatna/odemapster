@@ -17,6 +17,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
@@ -42,8 +43,10 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	//    documentation?
 	//    (described-by propertymap-def)*
 	private Vector<R2ODatabaseTable> hasTables;
+	private Collection<String> orderBy;
 	private R2OSelector selectorURIAs;//original version
 	private R2OTransformationExpression transformationExpressionURIAs;//odemapster 1 version
+	private String encodeURI;
 	private List<R2OPropertyMapping> describedBy;
 	private R2OConditionalExpression appliesIf;//original version
 	private R2OConditionalExpression appliesIfTop;//odemapster 1 version
@@ -84,9 +87,20 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			logger.warn("Deprecated use mode. hasTable elements should be defined.");
 			throw new ParseException("hasTables element should be defined on a concept mapping!");
 		}
-
+		
+		//parse order-by
+		List<Element> orderByElements = XMLUtility.getChildElementsByTagName(conceptMappingElement, R2OConstants.ORDER_BY_TAG);
+		if(orderByElements != null && orderByElements.size() != 0) {
+			result.orderBy = new ArrayList<String>();
+			for(Element orderByElement : orderByElements) {
+				result.orderBy.add(orderByElement.getTextContent());
+			}
+		}
+		
 		//parse uri-as element
 		Element uriAsElement = XMLUtility.getFirstChildElementByTagName(conceptMappingElement, R2OConstants.URI_AS_TAG);
+		result.encodeURI = uriAsElement.getAttribute(R2OConstants.ENCODE_URI_ATTRIBUTE);
+		
 		Element selectorURIAsElement = XMLUtility.getFirstChildElementByTagName(uriAsElement, R2OConstants.SELECTOR_TAG);
 		//Element transformationExpressionURIAs = XMLUtility.getFirstElement(uriAsElement);
 		if(selectorURIAsElement != null) {
@@ -117,7 +131,9 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		result.documentation = conceptMappingElement.getAttribute(R2OConstants.DOCUMENTATION_ATTRIBUTE);
 
 		//parse described-by element
-		Element describedByElement = XMLUtility.getFirstChildElementByTagName(conceptMappingElement, R2OConstants.DESCRIBED_BY_TAG);
+		Element describedByElement = 
+			XMLUtility.getFirstChildElementByTagName(
+					conceptMappingElement, R2OConstants.DESCRIBED_BY_TAG);
 		if(describedByElement != null) {
 			//logger.warn("Deprecated use mode. Property mappings should be defined under r2o element, not under concept mapping element!");
 			result.describedBy = this.parseDescribedByElement(describedByElement);
@@ -166,8 +182,25 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			}
 		}
 
+		if(this.orderBy != null && this.orderBy.size() != 0) {
+			for(String orderByString : this.orderBy) {
+				result.append(XMLUtility.toOpenTag(R2OConstants.ORDER_BY_TAG));
+				result.append(orderByString);
+				result.append(XMLUtility.toCloseTag(R2OConstants.ORDER_BY_TAG));				
+			}
+		}
 		
-		result.append("<" + R2OConstants.URI_AS_TAG + ">\n");
+		result.append("<" + R2OConstants.URI_AS_TAG + " ");
+		if(this.encodeURI != null) {
+			if(this.encodeURI.equalsIgnoreCase(R2OConstants.STRING_TRUE)) {
+				result.append(R2OConstants.ENCODE_URI_ATTRIBUTE +"=\"" + R2OConstants.STRING_TRUE + "\" ");
+			} else if(this.encodeURI.equalsIgnoreCase(R2OConstants.STRING_FALSE)) {
+				result.append(R2OConstants.ENCODE_URI_ATTRIBUTE +"=\"" + R2OConstants.STRING_FALSE + "\" ");
+			}			
+		}
+
+		result.append(">\n");
+		
 		if(this.selectorURIAs != null) {
 			result.append(this.selectorURIAs.toString() + "\n");
 		} else {
@@ -203,11 +236,11 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	}
 
 	public R2OConditionalExpression getAppliesIf() {
-		return appliesIf;
-	}
-
-	public R2OConditionalExpression getAppliesIfTop() {
-		return appliesIfTop;
+		if(appliesIf != null) {
+			return this.appliesIf;
+		} else {
+			return this.appliesIfTop;
+		}
 	}
 
 	public List<R2OPropertyMapping> getDescribedBy() {
@@ -239,12 +272,14 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		List<R2ORelationMapping> result = new ArrayList<R2ORelationMapping>();
 		
 		List<R2OPropertyMapping> propertyMappings = this.getDescribedBy();
-		for(R2OPropertyMapping propertyMapping : propertyMappings) {
-			if(propertyMapping instanceof R2ORelationMapping) {
-				result.add((R2ORelationMapping) propertyMapping);
-			}
-			
+		if(propertyMappings != null) {
+			for(R2OPropertyMapping propertyMapping : propertyMappings) {
+				if(propertyMapping instanceof R2ORelationMapping) {
+					result.add((R2ORelationMapping) propertyMapping);
+				}
+			}			
 		}
+
 		return result;
 	}
 
@@ -255,6 +290,14 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 	public Vector<R2ODatabaseTable> getHasTables() {
 		return hasTables;
+	}
+
+	public Collection<String> getOrderBy() {
+		return orderBy;
+	}
+
+	public String getEncodeURI() {
+		return encodeURI;
 	}
 	
 

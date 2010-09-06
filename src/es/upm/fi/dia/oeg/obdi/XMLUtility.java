@@ -195,6 +195,7 @@ public class XMLUtility {
 
 	public static List<Element> getChildElementsByTagName(Element element, String name) {
 		List<Element> result = new ArrayList<Element>();
+		
 		NodeList childNodes = element.getChildNodes();
 		for(int i=0; i<childNodes.getLength(); i++) {
 			Node node = childNodes.item(i); 
@@ -207,6 +208,10 @@ public class XMLUtility {
 				}
 				
 			}
+		}
+		
+		if(result.size() == 0) {
+			result = null;
 		}
 		return result;
 	}

@@ -57,10 +57,10 @@ public class R2OParser extends AbstractParser {
 
 		if(!diff.identical()) {
 			String errorMessage = "Parsed R2O mapping is not identical to the original file!" + diff.toString();
-			logger.error(errorMessage);
+			logger.warn(errorMessage);
 			logger.debug("\n" + XMLUtility.printXMLDocument(xmlDocument, true, true));
 			logger.debug("\n" + XMLUtility.printXMLDocument(r2oDocument, true, true));
-			throw new Exception(errorMessage);			//assertXMLIdentical("not identical", diff, true);
+			//throw new Exception(errorMessage);			//assertXMLIdentical("not identical", diff, true);
 		}
 	}
 

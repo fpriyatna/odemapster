@@ -13,7 +13,9 @@ public class R2OConstants {
 	public static final String HAS_COLUMN_TAG="has-column";
 	public static final String HAS_DOMAIN_TAG="has-domain";
 	public static final String HAS_RANGE_TAG="has-range";
-	public static final String HAS_TRANSFORMATION_TAG="has-transformation";
+	public static final String HAS_TRANSFORMATION_TAG="has-transform";
+	public static final String HAS_SQL_TAG="has-sql";
+	public static final String HAS_LANGUAGE_TAG="has-language";
 	public static final String APPLIES_IF_TAG="applies-if";
 	public static final String APPLIES_IF_TOP_TAG="applies-if-top";
 	public static final String CONDITION_TAG="condition";
@@ -22,9 +24,20 @@ public class R2OConstants {
 	public static final String AND_TAG = "and";
 	public static final String OR_TAG = "or";
 	public static final String USE_DBCOL_TAG = "use-dbcol";
+	public static final String USE_SQL_TAG = "use-sql";
 	public static final String OPERATION_TAG = "operation";
 	public static final String JOINS_VIA_TAG = "joins-via";
+	public static final String ORDER_BY_TAG = "order-by";
+	
 
+	//aliases
+	public static final String URI_AS_ALIAS="URI_";
+	public static final String APPLIES_IF_ALIAS="AI_";
+	public static final String AFTERTRANSFORM_ALIAS="AT_";
+	public static final String RELATIONMAPPING_ALIAS="RM_";
+	public static final String RESTRICTION_ALIAS="R_";
+	
+	
 	//R2O xml attributes
 	public static final String ON_PARAM_ATTRIBUTE="on-param";
 	public static final String NAME_ATTRIBUTE="name";
@@ -32,8 +45,13 @@ public class R2OConstants {
 	public static final String DOCUMENTATION_ATTRIBUTE="documentation";
 	public static final String IDENTIFIED_BY_ATTRIBUTE="identified-by";
 	public static final String OPER_ID_ATTRIBUTE="oper-id";
-	public static final String TO_CONCEPT_ATTRIBUTE="toConcept";
+	public static final String TO_CONCEPT_ATTRIBUTE="to-concept";
 	public static final String DATATYPE_ATTRIBUTE="datatype";
+	public static final String JOINS_TYPE_ATTRIBUTE = "joins-type";
+	public static final String DATE_FORMAT_ATTRIBUTE="date-format";
+	public static final String RETURN_TYPE_ATTRIBUTE="return-type";
+	public static final String ENCODE_URI_ATTRIBUTE="encodeURI";
+	public static final String IS_COLLECTION_ATTRIBUTE="is-collection";
 
 	
 	//constants related to database mapping elements
@@ -50,7 +68,11 @@ public class R2OConstants {
 
 	public static final String DATATYPE_STRING="string";
 	public static final String DATATYPE_DOUBLE="double";
+	public static final String DATATYPE_NUMBER="number";
 	public static final String DATATYPE_DATE="date";
+	public static final String DATATYPE_INTEGER="integer";
+	public static final String DATATYPE_BLOB="blob";
+	public static final String DATATYPE_COLLECTION="collection";
 	
 	//conditional operations
 	public static final String CONDITIONAL_OPERATOR_EQUALS_NAME = "equals";
@@ -62,6 +84,8 @@ public class R2OConstants {
 	public static final String CONDITIONAL_OPERATOR_IN_KEYWORD_NAME = "in-keyword";
 	public static final String CONDITIONAL_OPERATOR_BETWEEN_NAME = "between";
 	public static final String CONDITIONAL_OPERATOR_MATCH_REGEXP_NAME = "match-regexp";
+	public static final String CONDITIONAL_OPERATOR_NOT_MATCH_REGEXP_NAME = "not-match-regexp";
+	
 	/*
 	public static final String[] DELEGABLE_CONDITIONAL_OPERATIONS = {
 		CONDITIONAL_OPERATOR_EQUALS_NAME, CONDITIONAL_OPERATOR_NOT_EQUALS_NAME
@@ -75,6 +99,8 @@ public class R2OConstants {
 	//transformation operations
 	public static final String TRANSFORMATION_OPERATOR_CONSTANT = "constant";
 	public static final String TRANSFORMATION_OPERATOR_CONCAT = "concat";
+	public static final String TRANSFORMATION_OPERATOR_SUBSTRING = "substring";
+	public static final String TRANSFORMATION_OPERATOR_CUSTOM_TRANSFORMATION = "custom-transformation";
 	public static final String[] DELEGABLE_TRANSFORMATION_OPERATIONS = {
 		TRANSFORMATION_OPERATOR_CONCAT, TRANSFORMATION_OPERATOR_CONSTANT
 	};
@@ -89,6 +115,7 @@ public class R2OConstants {
 	public static final String ONTOFILE_PROP_NAME = "onto.file.path";
 	public static final String ONTOURL_PROP_NAME = "onto.url.path";
 	public static final String OUTPUTFILE_PROP_NAME = "output.file.path";
+	public static final String OUTPUTFILE_RDF_LANGUAGE = "output.rdflanguage";
 	
 	public static final String DATABASE_NAME_PROP_NAME = "database.name";
 	public static final String DATABASE_DRIVER_PROP_NAME = "database.driver";
@@ -107,4 +134,22 @@ public class R2OConstants {
 	public static final String JENA_TDB_DIRECTORY = "jena.tdb.dir";
 	public static final String JENA_TDB_FILEBASE = "jena.tdb.filebase";
 	
+	//r2o properties
+	public static final String R2O_PROPERTY_CONDITIONAL_OPERATIONS_DELEGABLE="conditional-operations.delegable";
+	public static final String R2O_PROPERTY_CONDITIONAL_OPERATIONS_NON_DELEGABLE="conditional-operations.nondelegable";
+	public static final String R2O_PROPERTY_TRANSFORMATION_OPERATIONS_DELEGABLE="transformation-operations.delegable";
+	public static final String R2O_PROPERTY_TRANSFORMATION_OPERATIONS_NON_DELEGABLE="transformation-operations.nondelegable";
+	
+	public static final String STRING_YES="yes";
+	public static final String STRING_TRUE="true";
+	public static final String STRING_NO="no";
+	public static final String STRING_FALSE="false";
+	
+	public static final String XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
+	
+	public static final String OUTPUT_FORMAT_RDFXML = "RDF/XML";
+	public static final String OUTPUT_FORMAT_RDFXML_ABBREV = "RDF/XML-ABBREV";
+	public static final String OUTPUT_FORMAT_NTRIPLE = "N-TRIPLE";
+	public static final String OUTPUT_FORMAT_TURTLE = "TURTLE";
+	public static final String OUTPUT_FORMAT_N3 = "N3";
 }

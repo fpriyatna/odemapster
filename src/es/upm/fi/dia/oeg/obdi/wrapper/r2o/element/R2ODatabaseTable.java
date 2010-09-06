@@ -20,6 +20,10 @@ public class R2ODatabaseTable implements R2OElement {
 		R2ODatabaseTable result = new R2ODatabaseTable();
 		
 		result.name = element.getAttribute(R2OConstants.NAME_ATTRIBUTE);
+		String alias = element.getAttribute(R2OConstants.ALIAS_ATTRIBUTE);
+		if(alias!= null ){
+			result.alias = alias;
+		}
 		
 		result.hasColumns = new ArrayList<R2ODatabaseColumn>();
 		
@@ -50,10 +54,11 @@ public class R2ODatabaseTable implements R2OElement {
 		StringBuffer result = new StringBuffer();
 		
 		result.append("<" + R2OConstants.HAS_TABLE_TAG+ " ");
-		result.append(R2OConstants.NAME_ATTRIBUTE + "=\"" + this.name + "\">");
-		if(this.alias != null) {
-			result.append(R2OConstants.ALIAS_ATTRIBUTE + "=\"" + this.alias + "\">");
+		result.append(R2OConstants.NAME_ATTRIBUTE + "=\"" + this.name + "\" ");
+		if(this.alias != null && this.alias != "") {
+			result.append(R2OConstants.ALIAS_ATTRIBUTE + "=\"" + this.alias + "\" ");
 		}
+		result.append(">");
 		
 		if(this.hasColumns != null && this.hasColumns.size() > 0) {
 			for(R2ODatabaseColumn hasColumn : hasColumns) {

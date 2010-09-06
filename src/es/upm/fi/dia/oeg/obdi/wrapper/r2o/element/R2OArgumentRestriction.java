@@ -32,8 +32,11 @@ public class R2OArgumentRestriction implements R2OElement {
 		StringBuffer result = new StringBuffer();
 		result.append("<");
 		result.append(R2OConstants.ARG_RESTRICTION_TAG + " ");
-		result.append(R2OConstants.ON_PARAM_ATTRIBUTE + "=\"");
-		result.append(onParam + "\">\n");
+		if(this.onParam != null && this.onParam != "") {
+			result.append(R2OConstants.ON_PARAM_ATTRIBUTE + "=\"" + onParam + "\"");
+		}
+		result.append(">\n");
+		
 		result.append(this.restriction.toString() + "\n");
 		result.append("</" + R2OConstants.ARG_RESTRICTION_TAG + ">");
 		

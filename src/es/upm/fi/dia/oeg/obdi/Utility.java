@@ -1,5 +1,7 @@
 package es.upm.fi.dia.oeg.obdi;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -101,43 +103,44 @@ public class Utility {
 		}
 	}
 	
-	public static String encodeURI(String uri) {
-		String newURI = uri;
+	public static String encodeURI(String uri)  {
+		String result = uri;
 		try {
-			String splitChar = "#";
-			int splitPosition = uri.lastIndexOf(splitChar);
-			if(splitPosition == -1) {
-				splitChar = "/";
-				splitPosition = uri.lastIndexOf(splitChar);
-			}
 
-			String leftPart = uri.substring(0, splitPosition);
-			String rightPart = uri.substring(splitPosition+1, uri.length());
-
-			String encodedURI = "";
-			encodedURI = rightPart.replaceAll(" ", "_");
-			encodedURI = URLEncoder.encode(encodedURI, "UTF-8");
-
-
-			newURI = leftPart + splitChar + encodedURI;
+			
+			result = new URI(null, uri, null).toASCIIString();
+			result = result.replaceAll(",", "%2C");
+			result = result.replaceAll("'", "%27");
+			//System.out.println("result = " + result);
+			
+			/*
+			result = new URI(null, uri, null).toURL().toString();
+			System.out.println("result = " + result);
+			*/
 		} catch(Exception e) {
-			logger.error("Error encoding uri for uri = " + uri);
-			//e.printStackTrace();
+			logger.error("Error encoding uri for uri = " + uri + " because of " + e.getMessage());
 		}
 		
-		return newURI;
+		return result;
 	}
 	
 	public static boolean inArray(String[] delegableOperations, String operationId) {
 		boolean isDelegableOperation = false;
 		
 		for(int i=0 ; i<delegableOperations.length && !isDelegableOperation; i++) {
-			if(delegableOperations[i].equalsIgnoreCase(operationId)) {
+			if(delegableOperations[i].trim().equalsIgnoreCase(operationId.trim())) {
 				isDelegableOperation = true;
 			}
 		}
 		
 		return isDelegableOperation;
 
+	}
+	
+	public static void main(String args[]) {
+		String uri = "http://www.google.com/esp'aña spain#lang=en,es";
+		String uri2 = "http://geo.linkeddata.es/resource/¿Quiénes disfrutamos del parque?, Senda de educación ambiental 1.2 o variante |";
+		String newURI = Utility.encodeURI(uri2);
+		System.out.println("newURI = " + newURI);
 	}
 }

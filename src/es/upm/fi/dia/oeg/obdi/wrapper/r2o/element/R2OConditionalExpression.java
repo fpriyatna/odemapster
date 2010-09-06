@@ -11,6 +11,7 @@ import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 
 public class R2OConditionalExpression extends R2OExpression {
@@ -69,6 +70,43 @@ public class R2OConditionalExpression extends R2OExpression {
 		return operator;
 	}
 
+	public boolean isConjuctiveConditionalExpression() {
+		if(this.condition != null) {
+			return true;
+		} else {
+			if(this.operator == R2OConstants.AND_TAG) {
+				for(R2OConditionalExpression child : this.condExprs) {
+					if(!child.isConjuctiveConditionalExpression()) {
+						return false;
+					}
+				}				
+			} else {
+				return false;
+			}
+		}
+
+		return true;
+
+	}
+
+	public Collection<R2OCondition> flatConjuctiveConditionalExpression() {
+		Collection<R2OCondition> result = new ArrayList<R2OCondition>();
+
+		if(this.isConjuctiveConditionalExpression()) {
+			if(this.condition != null) {
+				result.add(this.condition);
+			} else {
+				for(R2OConditionalExpression child : this.condExprs) {
+					Collection<R2OCondition> tempresult = child.flatConjuctiveConditionalExpression();
+					result.addAll(tempresult);
+				}
+			}			
+		} 
+
+
+		return result;
+	}
+
 	@Override
 	public R2OConditionalExpression parse(Element element) throws ParseException {
 		R2OConditionalExpression result = new R2OConditionalExpression();
@@ -81,7 +119,7 @@ public class R2OConditionalExpression extends R2OExpression {
 			R2OConditionalExpression condExpr2 = new R2OConditionalExpression().parse(condExprsElements.get(1));
 			result.condExprs.add(condExpr1);
 			result.condExprs.add(condExpr2);
-		} if(element.getNodeName().equalsIgnoreCase(R2OConstants.OR_TAG)) {
+		} else if(element.getNodeName().equalsIgnoreCase(R2OConstants.OR_TAG)) {
 			result.operator = R2OConstants.OR_TAG;
 			List<Element> condExprsElements = XMLUtility.getChildElements(element);
 			R2OConditionalExpression condExpr1 = new R2OConditionalExpression().parse(condExprsElements.get(0));
@@ -118,4 +156,16 @@ public class R2OConditionalExpression extends R2OExpression {
 		return result.toString();
 	}
 
+	public boolean isDelegableConditionalExpression(R2OProperties r2oProperties) {
+		if(this.getOperator() == null) {
+			return this.condition.isDelegableCondition(r2oProperties);
+		} else {
+			for(R2OConditionalExpression condExpr : this.getCondExprs()) {
+				if(condExpr.isDelegableConditionalExpression(r2oProperties) == false) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
 }

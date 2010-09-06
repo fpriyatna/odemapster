@@ -49,7 +49,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			String domain, String range) {
 		Collection<IAttributeMapping> result = new ArrayList<IAttributeMapping>();
 		
-		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappings(domain);
+		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptURI(domain);
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping; 
 			result.addAll(r2oConceptMapping.getAttributeMappings());
@@ -70,7 +70,7 @@ public class R2OMappingDocument implements IMappingDocument {
 
 
 	@Override
-	public Collection<AbstractConceptMapping> getConceptMappings(String conceptName) {
+	public Collection<AbstractConceptMapping> getConceptMappingsByConceptURI(String conceptName) {
 		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
 		
 		for(AbstractConceptMapping conceptMapping : this.conceptmapDefs) {
@@ -124,7 +124,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			String domain, String range) {
 		Collection<IPropertyMapping> result = new ArrayList<IPropertyMapping>();
 		
-		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappings(domain);
+		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptURI(domain);
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping; 
 			result.addAll(r2oConceptMapping.getPropertyMappings());
@@ -146,7 +146,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			String domain, String range) {
 		Collection<IRelationMapping> result = new ArrayList<IRelationMapping>();
 		
-		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappings(domain);
+		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptURI(domain);
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping; 
 			result.addAll(r2oConceptMapping.getRelationMappings());
@@ -177,10 +177,13 @@ public class R2OMappingDocument implements IMappingDocument {
 		result.propertymapDefs = new ArrayList<R2OPropertyMapping>();
 		
 		Collection<Element> attributeMappingsElements = XMLUtility.getChildElementsByTagName(r2oElement, R2OConstants.ATTRIBUTEMAP_DEF_TAG);
-		for(Element attributeMappingElement : attributeMappingsElements) {
-			R2OAttributeMapping attributeMapping = new R2OAttributeMapping().parse(attributeMappingElement);
-			result.propertymapDefs.add(attributeMapping);
+		if(attributeMappingsElements != null) {
+			for(Element attributeMappingElement : attributeMappingsElements) {
+				R2OAttributeMapping attributeMapping = new R2OAttributeMapping().parse(attributeMappingElement);
+				result.propertymapDefs.add(attributeMapping);
+			}			
 		}
+
 
 
 		return result;
@@ -212,6 +215,17 @@ public class R2OMappingDocument implements IMappingDocument {
 	public Document toXMLDocument() throws Exception {
 		Document result = XMLUtility.convertToXMLDocument(this.toString());
 		return result;
+	}
+
+	@Override
+	public AbstractConceptMapping getConceptMappingsByMappingId(String mappingId) {
+		for(AbstractConceptMapping conceptMapping : this.conceptmapDefs) {
+			if(conceptMapping.getId().equals(mappingId)) {
+				return conceptMapping;
+			}
+		}
+		
+		return null;
 	}
 
 

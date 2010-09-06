@@ -8,9 +8,13 @@ import java.util.Vector;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import Zql.ZExp;
+
+import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
 
 public class R2OCondition implements R2OElement {
@@ -107,4 +111,22 @@ public class R2OCondition implements R2OElement {
 
 		return result;
 	}
+	
+	public boolean isDelegableCondition(R2OProperties r2oProperties) {
+		String operationId = null;
+		if(R2OConstants.CONDITION_TAG.equalsIgnoreCase(this.getPrimitiveCondition())) {
+			operationId = this.getOperId();
+		} else {
+			operationId = this.getPrimitiveCondition();
+		}
+
+		//R2OProperties r2oProperties = (R2OProperties) super.unfolderProperties;
+		if(Utility.inArray(r2oProperties.getDelegableConditionalOperations(), operationId)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+
 }
