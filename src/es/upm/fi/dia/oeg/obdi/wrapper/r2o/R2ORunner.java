@@ -6,16 +6,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
@@ -25,11 +29,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.ModelWriter;
 import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 public class R2ORunner extends AbstractRunner {
 	private static Logger logger = Logger.getLogger(R2ORunner.class);
-	private R2OProperties runnerProperties;
 	private static final String PRIMITIVE_OPERATIONS_FILE = "primitiveOperations.cfg";
+	public static R2OConfigurationProperties configurationProperties;
+	public static R2OPrimitiveOperationsProperties primitiveOperationsProperties;
 	private R2OPostProcessor postProcessor; 	
 
 	public R2ORunner() {
@@ -40,150 +47,102 @@ public class R2ORunner extends AbstractRunner {
 		this.postProcessor = postProcessor;
 	}
 
-	public void run(String r2oConfigurationFile) throws Exception {
-		long start = System.currentTimeMillis();
-
-		Properties r2oProperties = new Properties();
+	private R2OConfigurationProperties loadConfigurationFile(
+			String mappingDirectory, String r2oConfigurationFile) 
+	throws IOException, SQLException, InvalidConfigurationPropertiesException {
+		logger.info("Active Directory = " + mappingDirectory);
+		logger.info("Loading R2O configuration file : " + r2oConfigurationFile);
+		
 		try {
-			r2oProperties.load(new FileInputStream(r2oConfigurationFile));
+			R2OConfigurationProperties r2oProperties = 
+				new R2OConfigurationProperties(mappingDirectory, r2oConfigurationFile);
+			return r2oProperties;
 		} catch(FileNotFoundException e) {
 			logger.error("Can't find R2O properties file : " + r2oConfigurationFile);
 			throw e;
 		}
-
-
-		this.runnerProperties = new R2OProperties();
+	}
+	
+	private R2OPrimitiveOperationsProperties loadPrimitiveOperationsFile(String primitiveOperationsFile) throws Exception{
+		logger.debug("Loading R2O operations file : " + primitiveOperationsFile);
 		try {
-			this.runnerProperties.load(new FileInputStream(PRIMITIVE_OPERATIONS_FILE));
-			this.runnerProperties.initOperations();
+			R2OPrimitiveOperationsProperties primitiveOperationsProperties = 
+				new R2OPrimitiveOperationsProperties(primitiveOperationsFile);
+			return primitiveOperationsProperties;
 		} catch(Exception e) {
 			logger.error("Error loading primitive operations file : " + PRIMITIVE_OPERATIONS_FILE);
 			throw e;
 		}
-
-
-		logger.info("Loading R2O configuration file " + r2oConfigurationFile);
-
-
-		int noOfDatabase = Integer.parseInt(r2oProperties.getProperty("no_of_database"));
-		if(noOfDatabase != 1) {
-			throw new Exception("Only one database is supported.");
-		}
-
-
-		Connection conn = null;
-		for(int i=0; i<noOfDatabase;i++) {
-			String propertyDatabaseDriver = R2OConstants.DATABASE_DRIVER_PROP_NAME + "[" + i + "]";
-			String databaseDriver = r2oProperties.getProperty(propertyDatabaseDriver);
-
-			String propertyDatabaseURL = R2OConstants.DATABASE_URL_PROP_NAME + "[" + i + "]";
-			String databaseURL = r2oProperties.getProperty(propertyDatabaseURL);
-
-			String propertyDatabaseName= R2OConstants.DATABASE_NAME_PROP_NAME + "[" + i + "]";
-			String databaseName = r2oProperties.getProperty(propertyDatabaseName);
-
-			String propertyDatabaseUser = R2OConstants.DATABASE_USER_PROP_NAME + "[" + i + "]";
-			String databaseUser = r2oProperties.getProperty(propertyDatabaseUser);
-
-			String propertyDatabasePassword = R2OConstants.DATABASE_PWD_PROP_NAME  + "[" + i + "]";
-			String databasePassword = r2oProperties.getProperty(propertyDatabasePassword);
-
-			conn = Utility.getLocalConnection(
-					databaseUser, databasePassword, 
-					databaseDriver, 
-					databaseURL, "Test R2O Wrapper");
-		}
-
-		//initialization
-		String r2oAbsolutePath = r2oProperties.getProperty(R2OConstants.R2OFILE_PROP_NAME);
-		String outputFilename = r2oProperties.getProperty(R2OConstants.OUTPUTFILE_PROP_NAME);
-		String rdfLanguage = r2oProperties.getProperty(R2OConstants.OUTPUTFILE_RDF_LANGUAGE);
-		if(rdfLanguage == null) {
-			rdfLanguage = "RDF/XML";
-		}
-
-
-		//parsing r2o mapping
-		R2OParser parser = new R2OParser(); 
-		R2OMappingDocument r2oMappingDocument = (R2OMappingDocument) parser.parse(r2oAbsolutePath);
-
-
-		//test the parsing result
-		parser.testParseResult(r2oAbsolutePath, r2oMappingDocument);
-
-
-		String jenaMode = r2oProperties.getProperty(R2OConstants.JENA_MODE_TYPE);
-		logger.debug("Jena mode = " + jenaMode);
-		//			String jenaTDBDir= r2oProperties.getProperty(R2OConstants.JENA_TDB_DIRECTORY);
-		//			logger.debug("Jena TDB Directory = " + jenaTDBDir);
-
-		//boolean splitOutput = false;
-		String splitOutputPerConcept = r2oProperties.getProperty(R2OConstants.SPLIT_OUTPUT_PER_CONCEPT);
-		if(splitOutputPerConcept != null) {
-			if(splitOutputPerConcept.equalsIgnoreCase("yes") || splitOutputPerConcept.equalsIgnoreCase("true")) {
-				logger.warn("Split output is not supported anymore");
-			}
-		}
-
-		//this.postProcessor = new R2OPostProcessor();
-		postProcessor.setProperties(runnerProperties);
+	}
+	
 		
-		FileWriter fileWriter = new FileWriter(outputFilename);
+	public void run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
+		long start = System.currentTimeMillis();
+
+		//loading operations file
+		R2ORunner.primitiveOperationsProperties = 
+			this.loadPrimitiveOperationsFile(PRIMITIVE_OPERATIONS_FILE);
+
+		//Loading R2O configuration file
+		R2ORunner.configurationProperties = 
+			this.loadConfigurationFile(mappingDirectory, r2oConfigurationFile);
+
+
+		
+		//parsing r2o mapping document
+		R2OParser parser = new R2OParser(); 
+		R2OMappingDocument r2oMappingDocument = 
+			(R2OMappingDocument) parser.parse(configurationProperties.getR2oFilePath());
+		
+		//test the parsing result
+		parser.testParseResult(configurationProperties.getR2oFilePath(), r2oMappingDocument);
+
+
+		
+		//parsing sparql file
+		String queryFilePath = configurationProperties.getQueryFilePath();
+		if(queryFilePath != null) {
+			Query query = QueryFactory.read(queryFilePath);
+		}
+		
+
+
+		//preparing output file
+		FileWriter fileWriter = 
+			new FileWriter(configurationProperties.getOutputFilePath());
 
 		Model model = null;
-		Collection<AbstractConceptMapping> conceptMappings = r2oMappingDocument.getConceptMappings();
+		Collection<AbstractConceptMapping> conceptMappings = 
+			r2oMappingDocument.getConceptMappings();
 		long startGeneratingModel = System.currentTimeMillis();
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			try {
 				//unfold mapped concepts
 				logger.info("Unfolding concept " + conceptMapping.getConceptName());
-				AbstractUnfolder unfolder = new R2OUnfolder(r2oMappingDocument);
-				unfolder.setUnfolderProperties(runnerProperties);
+				R2OUnfolder unfolder = 
+					new R2OUnfolder(r2oMappingDocument, primitiveOperationsProperties, configurationProperties);
 				String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
-				logger.info(sqlQuery);
 
 				//evaluate query
-				ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, conn);
-
-
-				//				//generating model
-				//				if(splitOutput) { //if split output is true, then always creates a new model and write it to the output
-				//					model = postProcessor.createModel(jenaMode, conceptMapping.hashCode() + "");
-				//
-				//					postProcessor.processConceptMapping(rs, model, conceptMapping);
-				//					String conceptOutputFilename = outputFilename + "." + conceptMapping.getId();
-				//					int dotLastIndex = outputFilename.lastIndexOf(".");
-				//					if(dotLastIndex == -1) {
-				//						conceptOutputFilename = outputFilename + "-" + conceptMapping.getId() + ".rdf"; 
-				//					} else {
-				//						conceptOutputFilename = outputFilename.substring(0, dotLastIndex) 
-				//						+ "-" + conceptMapping.getId() 
-				//						+ outputFilename.substring(dotLastIndex, outputFilename.length());
-				//					}
-				//
-				//					//logger.debug("output file = " + conceptOutputFilename);
-				//					if(model != null) {
-				//						ModelWriter.writeModelStream(model, conceptOutputFilename, rdfLanguage);
-				//						model.close();						
-				//					} else {
-				//						logger.warn("Model for " + conceptMapping.getConceptName() + " was not generated!");
-				//					}
-				//
-				//				} else { //if split output is false, then only create the model when it's not null, and write after the looping 
-				//					if(model == null) {
-				//						model = postProcessor.createModel(jenaMode, r2oMappingDocument.hashCode() + "");
-				//					}
-				//					postProcessor.processConceptMapping(rs, model, conceptMapping);
-				//				}
+				ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, configurationProperties.getConn());
 
 				if(model == null) {
-					model = postProcessor.createModel(jenaMode, r2oMappingDocument.hashCode() + "");
+					model = postProcessor.createModel(
+							configurationProperties.getJenaMode(), r2oMappingDocument.hashCode() + "");
 				}
-				postProcessor.processConceptMapping(rs, model, conceptMapping, rdfLanguage, fileWriter, rdfLanguage);
+				postProcessor.processConceptMapping(rs, model, conceptMapping, fileWriter);
 
 				//cleaning up
 				Utility.closeStatement(rs.getStatement());
-				Utility.closeRecordSet(rs);				
+				Utility.closeRecordSet(rs);
+			} catch(SQLException e) {
+				String errorMessage = "Error processing " + conceptMapping.getName();
+				logger.error(errorMessage);				
+				throw e;
+			} catch(RelationMappingUnfolderException e) {
+				String errorMessage = "Error processing " + conceptMapping.getName();
+				logger.error(errorMessage);				
+				throw e;				
 			} catch(Exception e) {
 				e.printStackTrace();
 				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
@@ -195,21 +154,13 @@ public class R2ORunner extends AbstractRunner {
 		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
 		logger.info("Post Processing all concepts time was "+(durationGeneratingModel)+" s.");
 
-		//		if(!splitOutput) {
-		//			if(model == null) {
-		//				logger.warn("Model was empty!");
-		//			} else {
-		//				ModelWriter.writeModelStream(model, outputFilename, rdfLanguage);
-		//				model.close();				
-		//			}
-		//		}
 		if(model == null) {
 			logger.warn("Model was empty!");
 		} else {
-			if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
+			if(configurationProperties.getRdfLanguage().equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
 				//done
 			} else {
-				ModelWriter.writeModelStream(model, outputFilename, rdfLanguage);
+				ModelWriter.writeModelStream(model, configurationProperties.getOutputFilePath(), configurationProperties.getRdfLanguage());
 				model.close();				
 			}
 				
@@ -227,7 +178,7 @@ public class R2ORunner extends AbstractRunner {
 			
 		}
 
-		Utility.closeConnection(conn, "r2o wrapper");
+		Utility.closeConnection(configurationProperties.getConn(), "r2o wrapper");
 		long end = System.currentTimeMillis();
 		long duration = (end-start) / 1000;
 		logger.info("Execution time was "+(duration)+" s.");
@@ -245,7 +196,7 @@ public class R2ORunner extends AbstractRunner {
 			} else {
 				r2oFile = args[0];
 			}
-			runner.run(r2oFile);
+			runner.run(null, r2oFile);
 		} catch(Exception e) {
 			logger.error("Exception occured!");
 			logger.error("Error message = " + e.getMessage());

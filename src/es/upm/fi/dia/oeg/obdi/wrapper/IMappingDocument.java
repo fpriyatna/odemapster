@@ -9,7 +9,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
 
 
 public interface IMappingDocument extends IParseable {
-	public IMappingDocument parse(Element xmlElement) throws ParseException;
+	public void parse(Element xmlElement) throws ParseException;
 
 	public List<String> getMappedConcepts();
 	public Collection<AbstractConceptMapping> getConceptMappings();
@@ -18,6 +18,7 @@ public interface IMappingDocument extends IParseable {
 	
 	public List<String> getMappedProperties();
 	public Collection<IPropertyMapping> getPropertyMappings();
+	public Collection<AbstractPropertyMapping> getPropertyMappingsByPropertyURI(String propertyURI);
 	public Collection<IPropertyMapping> getPropertyMappings(String domain, String range);
 	
 	public List<String> getMappedAttributes();

@@ -14,23 +14,25 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractParser;
 public class R2OParser extends AbstractParser {
 	private Logger logger = Logger.getLogger(R2OParser.class);
 	
+	
 	@Override
 	public IMappingDocument parse(Object mappingResource) throws Exception {
 		long startParsingR2OFile = System.currentTimeMillis();
 		
 		String fileAbsolutePath = (String) mappingResource;
-		logger.info("Parsing r2o mapping file " + fileAbsolutePath);
+		logger.info("Parsing r2o mapping document file " + fileAbsolutePath);
 		//parse the xml file
 		Document document = XMLUtility.loadXMLFile(fileAbsolutePath);
 		
 		//get the root element
 		Element r2oElement = document.getDocumentElement();
 		
-		R2OMappingDocument result = (R2OMappingDocument) new R2OMappingDocument().parse(r2oElement);
+		R2OMappingDocument result = new R2OMappingDocument();
+		result.parse(r2oElement);
 		
 		long endParsingR2OFile = System.currentTimeMillis();
 		long durationParsingR2OFile = (endParsingR2OFile-startParsingR2OFile) / 1000;
-		logger.info("Parsing R2O file time was "+(durationParsingR2OFile)+" s.");
+		logger.debug("Parsing R2O file time was "+(durationParsingR2OFile)+" s.");
 
 		return result;
 	}
@@ -48,8 +50,8 @@ public class R2OParser extends AbstractParser {
 		if(!diff.similar()) {
 			String errorMessage = "Parsed R2O mapping is not similar to the original file! " + diff.toString();
 			logger.error(errorMessage);
-			logger.debug("\n" + XMLUtility.printXMLDocument(xmlDocument, true, true));
-			logger.debug("\n" + XMLUtility.printXMLDocument(r2oDocument, true, true));
+			//logger.debug("\nOriginal Mapping : " + XMLUtility.printXMLDocument(xmlDocument, true, true));
+			logger.debug("\nParsed Mapping : " + XMLUtility.printXMLDocument(r2oDocument, true, true));
 			throw new Exception(errorMessage);
 			//assertXMLEqual("not similar", diff, true);
 

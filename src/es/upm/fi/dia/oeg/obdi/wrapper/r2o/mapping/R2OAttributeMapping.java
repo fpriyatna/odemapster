@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
@@ -14,10 +15,13 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.IParseable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 
-public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElement, IAttributeMapping {
+public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElement, IAttributeMapping, Cloneable {
+	private Logger logger = Logger.getLogger(R2OAttributeMapping.class);
+	
 	//	(33) attributemap-def::= attributemap-def name
 	//    (selector* | use-dbcol)
 	//    documentation?
@@ -38,22 +42,33 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 	private String langDBColDataType;
 	private String langHasValue;
 
+	
 
+	public R2OAttributeMapping(Element attributeMappingElement) throws ParseException {
+		this.parse(attributeMappingElement);
+	}
+
+
+	public R2OAttributeMapping(R2OConceptMapping parent, Element attributeMappingElement) throws ParseException {
+		super(parent);
+		this.parse(attributeMappingElement);
+	}
+	
 	@Override
-	public R2OAttributeMapping parse(Element attributeMappingElement) throws ParseException {
-		R2OAttributeMapping result = new R2OAttributeMapping();
-		result.name = attributeMappingElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
+	public void parse(Element attributeMappingElement) throws ParseException {
+		//R2OAttributeMapping result = new R2OAttributeMapping();
+		this.name = attributeMappingElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
 
 		//parse identifiedBy attribute
-		result.id = attributeMappingElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
-		if(result.id == "") {
-			result.id = null;
+		this.id = attributeMappingElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
+		if(this.id == "") {
+			this.id = null;
 		}
 
 		//parse datatype attribute
-		result.datatype = attributeMappingElement.getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
-		if(result.datatype == "") {
-			result.datatype = null;
+		this.datatype = attributeMappingElement.getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
+		if(this.datatype == "") {
+			this.datatype = null;
 		}
 
 		List<Element> hasDomainElements = XMLUtility.getChildElementsByTagName(
@@ -63,9 +78,9 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 				String errorMessage = "Unsupported multiple domains!";
 				throw new ParseException(errorMessage);			
 			}
-			result.hasDomains = new ArrayList<String>();
+			this.hasDomains = new ArrayList<String>();
 			for(Element hasDomainElement : hasDomainElements) {
-				result.hasDomains.add(hasDomainElement.getTextContent());
+				this.hasDomains.add(hasDomainElement.getTextContent());
 			}			
 		}
 
@@ -77,9 +92,9 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 				String errorMessage = "Unsupported multiple ranges!";
 				throw new ParseException(errorMessage);			
 			}
-			result.hasRanges= new ArrayList<String>();
+			this.hasRanges= new ArrayList<String>();
 			for(Element hasRangeElement : hasRangeElements) {
-				result.hasRanges.add(hasRangeElement.getTextContent());
+				this.hasRanges.add(hasRangeElement.getTextContent());
 			}			
 		}
 
@@ -99,12 +114,12 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 					Element hasLanguageChildElement = hasLanguageChildrenElements.get(0);
 					if(hasLanguageChildElement.getTagName().equalsIgnoreCase(R2OConstants.USE_DBCOL_TAG)) {
 						Element langDBColElement = hasLanguageChildElement; 
-						result.langDBCol = langDBColElement.getTextContent();
+						this.langDBCol = langDBColElement.getTextContent();
 						if(langDBColElement.getAttribute(R2OConstants.DATATYPE_ATTRIBUTE) != null) {
-							result.langDBColDataType = langDBColElement.getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
+							this.langDBColDataType = langDBColElement.getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
 						}
 					} else if(hasLanguageChildElement.getTagName().equalsIgnoreCase(R2OConstants.HAS_VALUE_TAG)) {
-						result.langHasValue = hasLanguageChildElement.getTextContent();
+						this.langHasValue = hasLanguageChildElement.getTextContent();
 					} else {
 						String errorMessage = "Unsupported sources of languages!";
 						throw new ParseException(errorMessage);					
@@ -135,8 +150,8 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 
 		if(useDBColElements != null) { //using db col
 			if(useDBColElements.size() == 1) { //using db col
-				result.useDBCol = useDBColElements.get(0).getTextContent();
-				result.useDBColDatatype = useDBColElements.get(0).getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
+				this.useDBCol = useDBColElements.get(0).getTextContent();
+				this.useDBColDatatype = useDBColElements.get(0).getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
 			} else { 
 				String errorMessage = "Unsupported multiple db columns!";
 				throw new ParseException(errorMessage);
@@ -145,9 +160,9 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 
 		if(useSQLElements != null) { //using sql
 			if(useSQLElements.size() == 1) { //using sql
-				result.useSQL = useSQLElements.get(0).getTextContent();
-				result.useSQLAlias = useSQLElements.get(0).getAttribute(R2OConstants.ALIAS_ATTRIBUTE);
-				result.useSQLDataType = useSQLElements.get(0).getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
+				this.useSQL = useSQLElements.get(0).getTextContent();
+				this.useSQLAlias = useSQLElements.get(0).getAttribute(R2OConstants.ALIAS_ATTRIBUTE);
+				this.useSQLDataType = useSQLElements.get(0).getAttribute(R2OConstants.DATATYPE_ATTRIBUTE);
 			} else {
 				String errorMessage = "Unsupported multiple useSQL elements!";
 				throw new ParseException(errorMessage);				
@@ -155,15 +170,14 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 		}
 
 		if(selectorElements != null) {
-			result.selectors = new ArrayList<R2OSelector>();
+			this.selectors = new ArrayList<R2OSelector>();
 			for(Element childElement : selectorElements) {
-				R2OSelector selector = new R2OSelector().parse(childElement);
-				result.selectors.add(selector);
+				R2OSelector selector = new R2OSelector(childElement);
+				this.selectors.add(selector);
 			}			
 		}
 		
 
-		return result;
 	}
 
 
@@ -313,5 +327,22 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 	}
 
 
+	@Override
+	public R2OAttributeMapping clone() {
+		try {
+			R2OAttributeMapping am2 = (R2OAttributeMapping) super.clone();
+			am2.selectors = new ArrayList<R2OSelector>();
+			for(R2OSelector selector : this.selectors) {
+				am2.selectors.add(selector.clone());
+			}
+			return am2;
+				
+		} catch(Exception e) {
+			logger.error("Error occured while cloning R2OAttributeMapping object.");
+			logger.error("Error message = " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 }

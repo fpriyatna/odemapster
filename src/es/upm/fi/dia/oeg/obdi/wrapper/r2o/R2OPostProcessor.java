@@ -36,7 +36,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction.RestrictionType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OColumnRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConstantRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSQLRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.RestrictionValue;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
@@ -44,11 +48,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ORelationMapping;
 
 public abstract class R2OPostProcessor {
 	private static Logger logger = Logger.getLogger(R2OPostProcessor.class);
-	private static final String ATTRIBUTE_MAPPING_SELECTOR = "attributemappingselector";
-	private static final String CONCEPT_MAPPING_APPLIES_IF = "conceptmappingappliesif";
-	private R2OProperties properties;
 
-	public void processConceptMapping(ResultSet rs, Model model, AbstractConceptMapping conceptMapping, String outputFormat, Writer outputFileWriter, String rdfLanguage) throws Exception {
+
+	public void processConceptMapping(ResultSet rs, Model model, AbstractConceptMapping conceptMapping
+			, Writer outputFileWriter) throws Exception {
 		String conceptName = conceptMapping.getConceptName();
 		logger.info("Post processing for " + conceptName);
 		long startGeneratingModel = System.currentTimeMillis();
@@ -65,7 +68,7 @@ public abstract class R2OPostProcessor {
 			processRecord = true;
 			appliesIfIsConjuctiveConditionalExpr = false;			
 		} else { 
-			appliesIfIsDelegableConditionalExpr = appliesIf.isDelegableConditionalExpression(this.properties);
+			appliesIfIsDelegableConditionalExpr = appliesIf.isDelegableConditionalExpression();
 			appliesIfIsConjuctiveConditionalExpr = appliesIf.isConjuctiveConditionalExpression();
 
 			if(appliesIfIsDelegableConditionalExpr) { //always process if applies-if is delegable conditional expr
@@ -74,20 +77,22 @@ public abstract class R2OPostProcessor {
 		}
 
 		R2OTransformationExpression conceptMappingURIAsTransformationExpression = 
-			r2oConceptMapping.getTransformationExpressionURIAs();
+			r2oConceptMapping.getURIAs();
 
 		boolean uriAsIsDelegableTransformationExpr = 
 			isDelegableTransformationExpression(conceptMappingURIAsTransformationExpression);
 
-		boolean encodeURI = false;
-		if(r2oConceptMapping.getEncodeURI() == null) {
-			encodeURI = true;
-		} else {
-			if(r2oConceptMapping.getEncodeURI().equalsIgnoreCase(R2OConstants.STRING_TRUE)) {
-				encodeURI = true;
-			}
-
+		boolean isEncodeURI = true;
+		String encodeURI = r2oConceptMapping.getEncodeURI();
+		
+		if(encodeURI == null) {
+			encodeURI = R2OConstants.STRING_TRUE;
 		}
+
+		if(encodeURI.equalsIgnoreCase(R2OConstants.STRING_FALSE)) {
+			isEncodeURI = false;
+		}
+		
 
 		long counter = 0;
 		while(rs.next()) {
@@ -97,7 +102,7 @@ public abstract class R2OPostProcessor {
 					if(appliesIfIsConjuctiveConditionalExpr) { //only process the non-delegable ones
 						boolean allConditionTrue = true;
 						for(R2OCondition condition : appliesIf.flatConjuctiveConditionalExpression()) {
-							if(processRecord && !condition.isDelegableCondition(this.properties)) {
+							if(processRecord && !condition.isDelegableCondition()) {
 								if(!this.processCondition(condition, rs)) {
 									allConditionTrue = false;
 								}
@@ -119,25 +124,28 @@ public abstract class R2OPostProcessor {
 						subjectURI = rs.getString(alias);
 						//uri = this.processDelegableTransformationExpression(rs, alias).toString();
 					} else {
-						subjectURI = (String) this.processNonDelegableTransformationExpression(rs, conceptMappingURIAsTransformationExpression);
+						subjectURI = (String) this.processNonDelegableTransformationExpression(
+								rs, conceptMappingURIAsTransformationExpression);
 					}
 					if(subjectURI == null) {
 						throw new Exception("null uri is not allowed!");
 					}
 
-					if(encodeURI) {
+					if(isEncodeURI) {
 						subjectURI = Utility.encodeURI(subjectURI);
 					}
 
 
-					/*
 					if(counter % 10000 == 0) {
-						logger.info("Processing record no " + counter + " : " + uri);
+						logger.info("Processing record no " + counter + " : " + subjectURI);
 					}
-					 */
 					counter++;
 
 					Resource subject = model.createResource(subjectURI);
+					String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
+					if(rdfLanguage == null) {
+						rdfLanguage = "RDF/XML";
+					}
 					if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
 						String triple = 
 							this.createTriple(
@@ -157,10 +165,11 @@ public abstract class R2OPostProcessor {
 
 
 					//logger.info("Processing property mappings.");
-					this.processPropertyMappings(r2oConceptMapping, rs, model, subject, outputFileWriter, rdfLanguage);
+					this.processPropertyMappings(r2oConceptMapping, rs, model, subject, outputFileWriter);
 				}
 
 			} catch(Exception e) {
+				//e.printStackTrace();
 				logger.error("Error processing record no " + counter + " because " + e.getMessage());
 			}
 
@@ -187,7 +196,8 @@ public abstract class R2OPostProcessor {
 	}
 	 */
 
-	private Object processNonDelegableTransformationExpression(ResultSet rs, R2OTransformationExpression transformationExpression) throws Exception {
+	private Object processNonDelegableTransformationExpression(
+			ResultSet rs, R2OTransformationExpression transformationExpression) throws PostProcessorException, InvalidRestrictionType, SQLException {
 		if(transformationExpression.getOperId().equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_SUBSTRING)) {
 			return this.processSubstringTransformationExpression(rs, transformationExpression);
 		} else if(transformationExpression.getOperId().equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CUSTOM_TRANSFORMATION)) {
@@ -199,13 +209,17 @@ public abstract class R2OPostProcessor {
 			}
 			return this.processCustomFunctionTransformationExpression(arguments);
 		} else {
-			throw new Exception("Not supported transformation operation : " + transformationExpression.getOperId());
+			String errorMessage = "Not supported transformation operation : " + transformationExpression.getOperId();
+			logger.error(errorMessage);
+			throw new PostProcessorException(errorMessage);
 		}
 	}
 
-	protected abstract Object processCustomFunctionTransformationExpression(List<Object> arguments) throws Exception;
+	protected abstract Object processCustomFunctionTransformationExpression(List<Object> arguments) 
+	throws PostProcessorException;
 
-	private String processSubstringTransformationExpression(ResultSet rs, R2OTransformationExpression transformationExpression) throws Exception {
+	private String processSubstringTransformationExpression(
+			ResultSet rs, R2OTransformationExpression transformationExpression) throws PostProcessorException, InvalidRestrictionType, SQLException {
 		List<R2OArgumentRestriction> argumentRestrictions = transformationExpression.getArgRestrictions();
 		String argument0 = (String) this.processRestriction(argumentRestrictions.get(0).getRestriction(), rs); 
 		Integer beginIndex = Integer.parseInt(this.processRestriction(argumentRestrictions.get(1).getRestriction(), rs).toString());
@@ -215,13 +229,14 @@ public abstract class R2OPostProcessor {
 	}
 
 	private void processPropertyMappings(R2OConceptMapping r2oConceptMapping, ResultSet rs, Model model, Resource subject
-			, Writer outputFileWriter, String rdfLanguage) throws Exception {
+			, Writer outputFileWriter) throws Exception {
 		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
 		if(propertyMappings != null) {
 			for(R2OPropertyMapping propertyMapping : propertyMappings) {
 				if(propertyMapping instanceof R2OAttributeMapping) {
 					try {
-						this.processAttributeMapping((R2OAttributeMapping) propertyMapping, rs, model, subject, outputFileWriter, rdfLanguage);
+						this.processAttributeMapping(
+								(R2OAttributeMapping) propertyMapping, rs, model, subject, outputFileWriter);
 					} catch(Exception e) {
 						String newErrorMessage = e.getMessage() + " while processing attribute mapping " + propertyMapping.getId();
 						logger.error(newErrorMessage);
@@ -230,7 +245,8 @@ public abstract class R2OPostProcessor {
 
 				} else if(propertyMapping instanceof R2ORelationMapping) {
 					try {
-						this.processRelationMapping((R2ORelationMapping) propertyMapping, rs, model, subject, outputFileWriter, rdfLanguage);
+						this.processRelationMapping(
+								(R2ORelationMapping) propertyMapping, rs, model, subject, outputFileWriter);
 					} catch(Exception e) {
 						String newErrorMessage = e.getMessage() + " while processing relation mapping " + propertyMapping.getId();
 						logger.error(newErrorMessage);
@@ -277,7 +293,9 @@ public abstract class R2OPostProcessor {
 
 	//XML Schema states that xml:Lang is not meaningful on xsd datatypes.
 	//Thus for almost all typed literals there is no xml:Lang tag.
-	private void addDataTypeProperty(String propName, Object propVal, String datatype, String lang, Model model, Resource subject, Writer outputFileWriter, String rdfLanguage) 
+	private void addDataTypeProperty(
+			String propName, Object propVal, String datatype, String lang
+			, Model model, Resource subject, Writer outputFileWriter) 
 	throws Exception {
 		Literal literal;
 
@@ -299,6 +317,11 @@ public abstract class R2OPostProcessor {
 		} else {
 			literal =  model.createTypedLiteral(propVal, datatype);
 			literalString = this.createDataTypeLiteral(propVal.toString(), datatype);
+		}
+
+		String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
+		if(rdfLanguage == null) {
+			rdfLanguage = R2OConstants.OUTPUT_FORMAT_NTRIPLE;
 		}
 
 		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
@@ -387,7 +410,7 @@ public abstract class R2OPostProcessor {
 	}
 
 	private void processRelationMapping(R2ORelationMapping r2oRelationMapping, ResultSet rs, Model model, Resource subject
-			, Writer outputFileWriter, String rdfLanguage) throws Exception {
+			, Writer outputFileWriter) throws Exception {
 		String relationName = r2oRelationMapping.getRelationName();
 		Property property = model.createProperty(relationName);
 
@@ -396,6 +419,7 @@ public abstract class R2OPostProcessor {
 			if(rangeURI != null) {
 				rangeURI = Utility.encodeURI(rangeURI);
 
+				String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
 				if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
 					String triple = 
 						this.createTriple(
@@ -428,7 +452,8 @@ public abstract class R2OPostProcessor {
 						//else, evaluate the applies-if condition
 
 						if(this.isDelegableConditionalExpression(selectorAppliesIf)) {
-							int appliesIfValue = rs.getInt(R2OConstants.APPLIES_IF_ALIAS + selector.hashCode());
+							String selectorAppliesIfAlias = selector.generateAppliesIfAlias(); 
+							int appliesIfValue = rs.getInt(selectorAppliesIfAlias);
 							if(appliesIfValue == 0) {
 								selectorAppliesIfValue = false;
 							} else if(appliesIfValue == 1) {
@@ -463,7 +488,7 @@ public abstract class R2OPostProcessor {
 						if(propVal != null) {
 							String propValString = propVal.toString();
 
-							if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
+							if(R2ORunner.configurationProperties.getRdfLanguage().equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
 								String triple = 
 									this.createTriple(
 											this.createURIref(subject.getURI())
@@ -489,7 +514,8 @@ public abstract class R2OPostProcessor {
 
 
 
-	private void processAttributeMapping(R2OAttributeMapping attributeMapping, ResultSet rs, Model model, Resource subject, Writer outputFileWriter, String rdfLanguage) throws Exception {
+	private void processAttributeMapping(
+			R2OAttributeMapping attributeMapping, ResultSet rs, Model model, Resource subject, Writer outputFileWriter) throws Exception {
 		String propName = attributeMapping.getName();
 		String amDataType = attributeMapping.getDatatype();
 		String lang = null;
@@ -506,12 +532,12 @@ public abstract class R2OPostProcessor {
 			String columnName = attributeMapping.getUseDBCol();
 			String alias = columnName.replaceAll("\\.", "_");
 			Object dbColValue = this.processSQLExpression(columnName, alias, attributeMapping.getUseDBColDatatype(), rs);
-			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter, rdfLanguage);
+			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter);
 		} else if(attributeMapping.getUseSQL() != null) {
 			String expression = attributeMapping.getUseSQL();
 			String alias = attributeMapping.getUseSQLAlias();
 			Object dbColValue = this.processSQLExpression(expression, alias, attributeMapping.getUseSQLDataType(), rs);
-			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter, rdfLanguage);			
+			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter);			
 		} else {
 			Collection<R2OSelector> attributeMappingSelectors = attributeMapping.getSelectors();
 			if(attributeMappingSelectors != null) {
@@ -525,7 +551,8 @@ public abstract class R2OPostProcessor {
 						//else, evaluate the applies-if condition
 
 						if(this.isDelegableConditionalExpression(attributeMappingSelectorAppliesIf)) {
-							int appliesIfValue = rs.getInt(R2OConstants.APPLIES_IF_ALIAS + attributeMappingSelector.hashCode());
+							String selectorAppliesIfAlias = attributeMappingSelector.generateAppliesIfAlias();
+							int appliesIfValue = rs.getInt(selectorAppliesIfAlias);
 							if(appliesIfValue == 0) {
 								attributeMappingSelectorAppliesIfValue = false;
 							} else if(appliesIfValue == 1) {
@@ -561,14 +588,16 @@ public abstract class R2OPostProcessor {
 							if(isCollection.equalsIgnoreCase(R2OConstants.DATATYPE_COLLECTION)) {
 								Collection<Object> propCol = (Collection<Object>) propVal;
 								for(Object propColItem : propCol) {
-									this.addDataTypeProperty(propName, propColItem, amDataType, lang, model, subject, outputFileWriter, rdfLanguage);
+									this.addDataTypeProperty(
+											propName, propColItem, amDataType, lang, model, subject, outputFileWriter);
 								}
 							} else {
 								throw new Exception("Unsupported return type : " + selectorDataType);
 							}
 						} else {
 							if(propVal!= null && propVal != "" && !propVal.equals("")) {
-								this.addDataTypeProperty(propName, propVal, amDataType, lang, model, subject, outputFileWriter, rdfLanguage);							
+								this.addDataTypeProperty(
+										propName, propVal, amDataType, lang, model, subject, outputFileWriter);							
 							}
 						}
 					}
@@ -588,7 +617,7 @@ public abstract class R2OPostProcessor {
 			operationId = condition.getPrimitiveCondition();
 		}
 
-		if(Utility.inArray(this.properties.getDelegableConditionalOperations(), operationId)) {
+		if(Utility.inArray(R2ORunner.primitiveOperationsProperties.getDelegableConditionalOperations(), operationId)) {
 			return true;
 		} else {
 			return false;
@@ -880,10 +909,9 @@ public abstract class R2OPostProcessor {
 		}
 	}
 
-	private Object processSQLExpression(String expression, String alias, String dataType, ResultSet rs) throws Exception {
+	private Object processSQLExpression(String expression, String alias, String dataType, ResultSet rs) throws SQLException {
 		try {
 			Object result = null;
-
 
 			if(dataType == null || dataType == "") {
 				result = rs.getObject(alias);
@@ -901,50 +929,52 @@ public abstract class R2OPostProcessor {
 				} else {
 					result = rs.getObject(alias);
 				}
-
 			}
 
-
-
-			//rs.getDouble(columnLabel)
 			return result;			
 		} catch(SQLException e) {
+			e.printStackTrace();
+			logger.error("Error while retrieving SQL records!");
 			throw e;
 		}
 
 	}
 
-	private Object processRestriction(R2ORestriction restriction, ResultSet rs) throws Exception {
-		try {
-			Object result = null;
-			if(restriction.getRestrictionType() == RestrictionType.HAS_COLUMN) {
-				String columnName = restriction.getHasColumn();
-				String alias = columnName.replaceAll("\\.", "_");
-				result = this.processSQLExpression(columnName, alias, restriction.getRestrictionDataType(), rs);
-			} else if(restriction.getRestrictionType() == RestrictionType.HAS_VALUE) {
-				result = restriction.getHasValue();
-			} else if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION) {
+	private Object processRestriction(R2ORestriction restriction, ResultSet rs) throws PostProcessorException, InvalidRestrictionType, SQLException {
+		Object result = null;
 
-				R2OTransformationExpression childTransformationExpression = restriction.getHasTransformation();
-				Object subresult = this.processNonDelegableTransformationExpression(rs, childTransformationExpression);
-				return subresult;
-			} else if(restriction.getRestrictionType() == RestrictionType.HAS_SQL) {
-				String expression = restriction.getHasSQL();
-				String alias = restriction.getAlias();
-				if(alias == null || alias == "") {
-					alias = R2OConstants.RESTRICTION_ALIAS + restriction.hashCode();
-				}
-
-				result = this.processSQLExpression(expression, alias, restriction.getRestrictionDataType(), rs);
-			} else {
-				throw new Exception("Unsupported restriction type : " + restriction.getRestrictionType());
+		if(restriction instanceof R2OColumnRestriction) {
+			R2OColumnRestriction restrictionColumn = (R2OColumnRestriction) restriction;
+			String columnName = restrictionColumn.getDatabaseColumn().getColumnName();
+			String dataType = restrictionColumn.getDatabaseColumn().getDataType();
+			String alias = columnName.replaceAll("\\.", "_");
+			result = this.processSQLExpression(columnName, alias, dataType, rs);
+		} else if(restriction instanceof R2OConstantRestriction) {
+			R2OConstantRestriction restrictionConstant = (R2OConstantRestriction) restriction;
+			result = restrictionConstant.getConstantValue();
+		} else if(restriction instanceof R2OTransformationRestriction) {
+			R2OTransformationRestriction restrictionTransformation = 
+				(R2OTransformationRestriction) restriction;
+			R2OTransformationExpression childTransformationExpression = 
+				restrictionTransformation.getTransformationExpression();
+			Object subresult = this.processNonDelegableTransformationExpression(rs, childTransformationExpression);
+			return subresult;
+		} else if(restriction instanceof R2OSQLRestriction) {
+			R2OSQLRestriction restrictionSQL = (R2OSQLRestriction) restriction;
+			String expression = restrictionSQL.getHasSQL();
+			String alias = restrictionSQL.getAlias();
+			if(alias == null || alias == "") {
+				alias = R2OConstants.RESTRICTION_ALIAS + restriction.hashCode();
 			}
 
-			return result;			
-		} catch(SQLException e) {
-			//e.printStackTrace();
-			throw e;
+			result = this.processSQLExpression(expression, alias, null, rs);
+		} else {
+			String errorMessage = "Unsupported restriction type!";
+			logger.error(errorMessage);
+			throw new InvalidRestrictionType(errorMessage);
 		}
+
+		return result;			
 
 	}
 
@@ -1018,30 +1048,31 @@ public abstract class R2OPostProcessor {
 	}
 
 
-	void setProperties(R2OProperties properties) {
-		this.properties = properties;
 
-
-	}
 
 	private boolean isDelegableTransformationExpression(R2OTransformationExpression transformationExpression) {
 		String operator = transformationExpression.getOperId();
 
 		//if the root operator is not delegable, then return false 
-		if(!Utility.inArray(this.properties.getDelegableTransformationOperations(), operator)) {
+		if(!Utility.inArray(R2ORunner.primitiveOperationsProperties.getDelegableTransformationOperations(), operator)) {
 			return false;
 		}
 
 		//if one of the arguments has non delegable transformation, then return false
 		for(R2OArgumentRestriction argRestriction : transformationExpression.getArgRestrictions()) {
 			R2ORestriction restriction = argRestriction.getRestriction();
-			if(restriction.getRestrictionType() == RestrictionType.HAS_TRANSFORMATION 
-					&& !isDelegableTransformationExpression(restriction.getHasTransformation())) {
-				return false;
+			if(restriction instanceof R2OTransformationRestriction) {
+				R2OTransformationRestriction restrictionTransformation = 
+					(R2OTransformationRestriction) restriction;
+				if(!isDelegableTransformationExpression(
+						restrictionTransformation.getTransformationExpression())) {
+					return false;
+				}
 			}
 		}
 
 		return true;
 	}
+
 
 }

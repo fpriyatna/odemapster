@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -30,17 +31,125 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPostProcessor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OUnfolder;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 
 public class RunnerTest extends XMLTestCase {
 	private static Logger logger = Logger.getLogger(RunnerTest.class);
-	private static String R2O_DIR_UBUNTU = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
-
+	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+//	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+	
 	public static void main(String args[]) {
-		RunnerTest.testBSBMOffer();
+		RunnerTest.testUniversidades();
 	}
 
+	@Test
+	public static void testUniversidades() {
+		String r2oConfigurationFile = "universidades.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/testcases/universidades/");
+	}
+	
+	@Test
+	public static void testBSBMQuery10() {
+		String r2oConfigurationFile = "query10.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+
+	
+	@Test
+	public static void testBSBMQuery08() {
+		String r2oConfigurationFile = "query08.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+
+	@Test
+	public static void testBSBMQuery07() {
+		String r2oConfigurationFile = "query07.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+	
+	@Test
+	public static void testBSBMQuery00() {
+		String dir = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+//		String dir = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+		String r2oConfigurationFile = "query00.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+	public static void testBSBMQuery04() {
+		String r2oConfigurationFile = "query04.r2o.properties";
+//		String r2oConfigurationFile = "query02(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+	
+	public static void testBSBMQuery03() {
+		String r2oConfigurationFile = "query03.r2o.properties";
+//		String r2oConfigurationFile = "query02(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+	
+	public static void testBSBMQuery02() {
+//		String dir = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+		String dir = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+		String r2oConfigurationFile = "query02.r2o.properties";
+//		String r2oConfigurationFile = "query02(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+	
+	@Test	
+	public static void testBSBMQuery01() {
+		String r2oConfigurationFile = "query01.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+	
+	public static void testBSBMReview2() {
+		//String dir = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+		String dir = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+		String r2oConfigurationFile = "review2(monetdb).r2o.properties";
+//		String r2oConfigurationFile = "review2.r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+	public static void testBSBMOffer() {
+		//String dir = "/home/fpriyatna/Dropbox/bsbm/mapping-r2o/";
+		String dir = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+//		String r2oConfigurationFile = "offer(monetdb).r2o.properties";
+		String r2oConfigurationFile = "offer.r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+	public static void testPSSA2() {
+		String dir = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/testcases/pssa2/";
+		//String dir = "D:/Users/fpriyatna/My Dropbox/bsbm/mapping-r2o/";
+		String r2oConfigurationFile = "pssa.r2o.properties";
+		//String r2oConfigurationFile = "product(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+
+
+	
+	public static void testVOC() {
+		String dir = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/testcases/voc/";
+//		String dir = "/Users/freddy_priyatna/Dropbox/oeg/odemapster/testcases/testcase55/";
+		String r2oConfigurationFile = "voc.r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
+	public static void testTestcase07() {
+		String dir = "C:/Users/fpriyatna/My Dropbox/temp/mappings/FAO/testcase07/good/";
+//		String dir = "/Users/freddy_priyatna/Dropbox/oeg/odemapster/testcases/testcase55/";
+		String r2oConfigurationFile = dir + "r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, dir);
+	}
+	
 	public static void testTestcase56() {
 		String dir = "D:/Users/fpriyatna/My Dropbox/oeg/odemapster/testcases/testcase56/";
 //		String dir = "/Users/freddy_priyatna/Dropbox/oeg/odemapster/testcases/testcase55/";
@@ -55,15 +164,10 @@ public class RunnerTest extends XMLTestCase {
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 
-	public static void testBSBMReview2() {
-		String dir = "/home/fpriyatna/Dropbox/bsbm/mapping-r2o/";
-		//String dir = "D:/Users/fpriyatna/My Dropbox/bsbm/mapping-r2o/";
-		String r2oConfigurationFile = dir + "review2.r2o.properties";
-		RunnerTest.testProcess(r2oConfigurationFile, dir);
-	}
+
 	
 	public static void testBSBMReview() {
-		String dir = "/home/fpriyatna/Dropbox/bsbm/mapping-r2o/";
+		String dir = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
 		//String dir = "D:/Users/fpriyatna/My Dropbox/bsbm/mapping-r2o/";
 		String r2oConfigurationFile = dir + "review.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
@@ -76,12 +180,7 @@ public class RunnerTest extends XMLTestCase {
 		RunnerTest.testProcess(r2oConfigurationFile, dir);
 	}
 	
-	public static void testBSBMOffer() {
-		//String dir = "/home/fpriyatna/Dropbox/bsbm/mapping-r2o/";
-		String dir = "D:/Users/fpriyatna/My Dropbox/bsbm/mapping-r2o/";
-		String r2oConfigurationFile = dir + "offer.r2o.properties";
-		RunnerTest.testProcess(r2oConfigurationFile, dir);
-	}
+
 
 	
 	public static void testOffice() {
@@ -262,16 +361,28 @@ public class RunnerTest extends XMLTestCase {
 	private static void testProcess(String r2oConfigurationFile, String mappingDirectory) {
 		PropertyConfigurator.configure("log4j.properties");
 		logger.info("==========================Starting==========================");
+		String absoluteR2OConfigurationFile = r2oConfigurationFile;
+		if(absoluteR2OConfigurationFile != null) {
+			absoluteR2OConfigurationFile = mappingDirectory + r2oConfigurationFile;
+		}
 		try {
 			long startMemory = Runtime.getRuntime().freeMemory();
-			AbstractRunner runner = new R2ORunner();
-			runner.run(r2oConfigurationFile);
+			R2ORunner runner = new R2ORunner();
+			runner.run(mappingDirectory, r2oConfigurationFile);
 			long endMemory = Runtime.getRuntime().freeMemory();
 			long memoryUsage = (startMemory - endMemory) / 1024;
 			logger.info("Memory usage was "+(memoryUsage)+" KB.\n\n");
+		} catch(SQLException e) {
+			String errorMessage = "Error processing mapping file : " + absoluteR2OConfigurationFile;
+			logger.error(errorMessage);
+		} catch(RelationMappingUnfolderException e) {
+			String errorMessage = "Error processing mapping file : " + absoluteR2OConfigurationFile;
+			logger.error(errorMessage);			
 		} catch(Exception e) {
 			e.printStackTrace();
-			logger.error("Error occured : " + e.getMessage());
+			String errorMessage = "Error processing mapping file : " + absoluteR2OConfigurationFile; 
+			logger.error(errorMessage);
+			logger.error("Error message = " + e.getMessage());
 			//assertTrue(e.getMessage(), false);
 		}
 		assertTrue(true);

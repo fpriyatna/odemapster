@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.element;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -9,22 +10,27 @@ import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 
-public class R2OSelector implements R2OElement {
-	
+public class R2OSelector implements R2OElement, Cloneable {
+	private Logger logger = Logger.getLogger(R2OSelector.class);
 	
 //	(38) selector::= selector (applies-if cond-expr)?
 //            (aftertransform transformation)?
 	private R2OConditionalExpression appliesIf;
 	private R2OTransformationExpression afterTransform;
 	
+	public R2OSelector(Element element) throws ParseException {
+		this.parse(element);
+	}
+	
 	@Override
-	public R2OSelector parse(Element element) throws ParseException {
-		R2OSelector result = new R2OSelector();
+	public void parse(Element element) throws ParseException {
+		//R2OSelector result = new R2OSelector();
 		NodeList afterTransformElements = element.getElementsByTagName(R2OConstants.AFTERTRANSFORM_TAG);
 		if(afterTransformElements != null && afterTransformElements.getLength() > 0) {
 			Element afterTransformElement = (Element) afterTransformElements.item(0);
-			result.afterTransform = new R2OTransformationExpression().parse(afterTransformElement);
+			this.afterTransform = new R2OTransformationExpression(afterTransformElement);
 		}
 		
 		
@@ -32,10 +38,9 @@ public class R2OSelector implements R2OElement {
 		if(appliesIfElements != null && appliesIfElements.getLength() > 0) {
 			Element appliesIfElement = (Element) appliesIfElements.item(0);
 			Element conditionalExpressionElement = XMLUtility.getChildElements(appliesIfElement).get(0);
-			result.appliesIf = new R2OConditionalExpression().parse(conditionalExpressionElement);
+			this.appliesIf = new R2OConditionalExpression(conditionalExpressionElement);
 		}
 		
-		return result;
 	}
 
 	@Override
@@ -65,6 +70,31 @@ public class R2OSelector implements R2OElement {
 	public R2OTransformationExpression getAfterTransform() {
 		return afterTransform;
 	}
+
+	public String generateAppliesIfAlias() {
+		return R2OConstants.APPLIES_IF_ALIAS + this.hashCode();
+	}
+
+	public String generateAfterTransformAlias() {
+		return R2OConstants.AFTERTRANSFORM_ALIAS + this.hashCode();
+	}
+
+	public void setAppliesIf(R2OConditionalExpression appliesIf) {
+		this.appliesIf = appliesIf;
+	}
+
+	@Override
+	public R2OSelector clone() {
+		try {
+			return (R2OSelector) super.clone();	
+		} catch(Exception e) {
+			logger.error("Error occured while cloning R2OSelector object.");
+			logger.error("Error message = " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	
 	
 }

@@ -8,7 +8,7 @@ public class R2ODefaultPostProcessor extends R2OPostProcessor {
 
 	@Override
 	protected Object processCustomFunctionTransformationExpression(
-			List<Object> arguments) throws Exception {
+			List<Object> arguments) {
 		// TODO Auto-generated method stub
 		return null;
 	}

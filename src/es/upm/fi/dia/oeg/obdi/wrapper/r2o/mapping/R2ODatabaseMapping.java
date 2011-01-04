@@ -16,19 +16,22 @@ public class R2ODatabaseMapping implements R2OElement {
 	private String name;
 	private List<R2ODatabaseTable> hasTables;
 	
+	public void R2ODatabaseMapping(Element element) throws ParseException {
+		this.parse(element);
+	}
+	
 	@Override
-	public R2ODatabaseMapping parse(Element element) throws ParseException {
-		R2ODatabaseMapping result = new R2ODatabaseMapping();
-		result.name = element.getAttribute(R2OConstants.NAME_ATTRIBUTE);
+	public void parse(Element element) throws ParseException {
+		//R2ODatabaseMapping result = new R2ODatabaseMapping();
+		this.name = element.getAttribute(R2OConstants.NAME_ATTRIBUTE);
 		
-		result.hasTables = new ArrayList<R2ODatabaseTable>();
+		this.hasTables = new ArrayList<R2ODatabaseTable>();
 		NodeList nlHasTable = element.getElementsByTagName(R2OConstants.HAS_TABLE_TAG);
 		for(int i=0; i<nlHasTable.getLength(); i++) {
 			Element hasTableElement = (Element) nlHasTable.item(i);
-			R2ODatabaseTable databaseTable = new R2ODatabaseTable().parse(hasTableElement);
-			result.hasTables.add(databaseTable);
+			R2ODatabaseTable databaseTable = new R2ODatabaseTable(hasTableElement);
+			this.hasTables.add(databaseTable);
 		}
-		return result;
 	}
 
 	@Override

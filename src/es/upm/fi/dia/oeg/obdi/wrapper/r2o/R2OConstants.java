@@ -11,8 +11,11 @@ public class R2OConstants {
 	public static final String ARG_RESTRICTION_TAG="arg-restriction";
 	public static final String HAS_VALUE_TAG="has-value";
 	public static final String HAS_COLUMN_TAG="has-column";
+	public static final String HAS_VIEW_TAG="has-view";
+	public static final String HAS_CONCEPT_TAG="has-concept";
 	public static final String HAS_DOMAIN_TAG="has-domain";
 	public static final String HAS_RANGE_TAG="has-range";
+	
 	public static final String HAS_TRANSFORMATION_TAG="has-transform";
 	public static final String HAS_SQL_TAG="has-sql";
 	public static final String HAS_LANGUAGE_TAG="has-language";
@@ -31,11 +34,13 @@ public class R2OConstants {
 	
 
 	//aliases
-	public static final String URI_AS_ALIAS="URI_";
-	public static final String APPLIES_IF_ALIAS="AI_";
-	public static final String AFTERTRANSFORM_ALIAS="AT_";
-	public static final String RELATIONMAPPING_ALIAS="RM_";
-	public static final String RESTRICTION_ALIAS="R_";
+	public static final String URI_AS_ALIAS="uri_";
+	public static final String APPLIES_IF_ALIAS="ai_";
+	public static final String AFTERTRANSFORM_ALIAS="at_";
+	public static final String RELATIONMAPPING_ALIAS="rm_";
+	public static final String RESTRICTION_ALIAS="r_";
+	public static final String RANGE_TABLE_ALIAS="rt_";
+	public static final String VIEW_ALIAS="v_";
 	
 	
 	//R2O xml attributes
@@ -46,6 +51,7 @@ public class R2OConstants {
 	public static final String IDENTIFIED_BY_ATTRIBUTE="identified-by";
 	public static final String OPER_ID_ATTRIBUTE="oper-id";
 	public static final String TO_CONCEPT_ATTRIBUTE="to-concept";
+	public static final String TO_TABLE_ATTRIBUTE="to-table";
 	public static final String DATATYPE_ATTRIBUTE="datatype";
 	public static final String JOINS_TYPE_ATTRIBUTE = "joins-type";
 	public static final String DATE_FORMAT_ATTRIBUTE="date-format";
@@ -57,6 +63,7 @@ public class R2OConstants {
 	//constants related to database mapping elements
 	public static final String DBSCHEMA_DESC_TAG = "dbschema-desc";
 	public static final String HAS_TABLE_TAG = "has-table";
+	public static final String HAS_INTERMEDIATE_TABLE_TAG = "has-intermediate-table";
 	public static final String KEYCOL_DESC_TAG = "keycol-desc";
 	public static final String FORKEYCOL_DESC_TAG = "forkeycol-desc";
 	public static final String NONKEYCOL_DESC_TAG = "nonkeycol-desc";
@@ -152,4 +159,11 @@ public class R2OConstants {
 	public static final String OUTPUT_FORMAT_NTRIPLE = "N-TRIPLE";
 	public static final String OUTPUT_FORMAT_TURTLE = "TURTLE";
 	public static final String OUTPUT_FORMAT_N3 = "N3";
+	
+	public static final String DATABASE_MONETDB = "MonetDB";
+	public static final String DATABASE_ORACLE = "Oracle";
+	public static final String DATABASE_MYSQL = "MySQL";
+
+	public static final String JOINS_TYPE_INNER = "INNER";
+	public static final String JOINS_TYPE_LEFT = "LEFT";
 }

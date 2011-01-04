@@ -16,7 +16,7 @@ public class ModelWriter {
 		try {
 			if(model != null) {
 				logger.debug("Size of model = " + model.size());
-				logger.info("Writing (stream mode) model to " + outputFilename + " ......");
+				logger.info("Writing model to " + outputFilename + " ......");
 				long startWritingModel = System.currentTimeMillis();
 				FileOutputStream resultOutputStream = new FileOutputStream(outputFilename);
 				model.write(resultOutputStream, rdfLanguage);

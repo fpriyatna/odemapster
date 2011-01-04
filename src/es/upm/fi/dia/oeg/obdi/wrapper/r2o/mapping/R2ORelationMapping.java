@@ -3,7 +3,9 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Vector;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
@@ -11,69 +13,95 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidRelationMappingException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseView;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OJoin;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.test.RunnerTest;
 
 
-public class R2ORelationMapping extends R2OPropertyMapping implements R2OElement, IRelationMapping {
+public class R2ORelationMapping extends R2OPropertyMapping 
+implements R2OElement, IRelationMapping, Cloneable
+{
+	private static Logger logger = Logger.getLogger(R2ORelationMapping.class);
+
 	private String toConcept;
-	private R2OConditionalExpression joinsVia;
+	private Vector<R2ODatabaseTable> hasTables;
 	private Collection<R2OSelector> rmSelectors;
-	private String joinType;
+	private R2OJoin joinsVia;
+	private R2ODatabaseView hasView;
 
-	public static final String JOINS_TYPE_INNER = "inner";
-	public static final String JOINS_TYPE_LEFT = "left";
+	public R2ORelationMapping(Element rmElement, R2OConceptMapping parent) throws ParseException {
+		super(parent);
+		this.parse(rmElement);
+	}
 	
 	@Override
-	public R2ORelationMapping parse(Element rmElement) throws ParseException {
-		R2ORelationMapping result = new R2ORelationMapping();
-		result.name = rmElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
-		
-		//parse identifiedBy attribute
-		result.id = rmElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
-		
+	public void parse(Element rmElement) throws ParseException {
 		int noOfBases = 0;
-		result.toConcept = rmElement.getAttribute(R2OConstants.TO_CONCEPT_ATTRIBUTE);
-		if(result.toConcept == "") { result.toConcept = null; }
-		if(result.toConcept != null) { noOfBases++;}
-		List<Element> rmSelectorsElements = XMLUtility.getChildElementsByTagName(rmElement, R2OConstants.SELECTOR_TAG);
-		if(rmSelectorsElements != null) { noOfBases++;}		
-		if(noOfBases == 0) {
-			String errorMessage = "Specify either toConcept+joinsVia or selector!";
-			throw new ParseException(errorMessage);			
-		} else if (noOfBases > 1) {
-			String errorMessage = "Specify only one of toConcept+joinsVia or selector!";
-			throw new ParseException(errorMessage);			
-		}
-		
-		if(result.toConcept != null) {
-			Element joinsViaElement = XMLUtility.getFirstChildElementByTagName(rmElement, R2OConstants.JOINS_VIA_TAG);
-			if(joinsViaElement != null) {
-				result.joinType = joinsViaElement.getAttribute(R2OConstants.JOINS_TYPE_ATTRIBUTE);
-				if(result.joinType == null || result.joinType == "") {
-					result.joinType = R2ORelationMapping.JOINS_TYPE_LEFT;
-					//throw new ParseException("join-type attribute needs to be defined on joins-via element");
-				}
-				
-				Element joinsViaConditionElement = XMLUtility.getFirstChildElementByTagName(joinsViaElement, R2OConstants.CONDITION_TAG);
-				result.joinsVia = new R2OConditionalExpression().parse(joinsViaConditionElement);			
+
+		//R2ORelationMapping result = new R2ORelationMapping();
+		this.name = rmElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
+
+		//parse identifiedBy attribute
+		this.id = rmElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
+
+
+		this.toConcept = rmElement.getAttribute(R2OConstants.TO_CONCEPT_ATTRIBUTE);
+		if(this.toConcept == "") { this.toConcept = null; }
+		if(this.toConcept != null) { noOfBases++;}
+
+		//parse has-intermediate-table
+		List<Element> hasIntermediateTable = XMLUtility.getChildElementsByTagName(
+				rmElement, R2OConstants.HAS_TABLE_TAG);
+		if(hasIntermediateTable != null && hasIntermediateTable.size() > 0) {
+			if(hasIntermediateTable.size() > 1) {
+				throw new InvalidRelationMappingException("Multiple tables is not implemented yet!");
 			}
+			this.hasTables = new Vector<R2ODatabaseTable>();
+			for(Element hasTableElement : hasIntermediateTable) {
+				R2ODatabaseTable dbTable = new R2ODatabaseTable(hasTableElement);
+				this.hasTables.add(dbTable);
+			}
+		} 
+
+		List<Element> rmSelectorsElements = XMLUtility.getChildElementsByTagName(rmElement, R2OConstants.SELECTOR_TAG);
+		if(rmSelectorsElements != null) { noOfBases++;}
+
+		if(noOfBases == 0) {
+			String errorMessage = "Error parsing " + this.name + " ,specify either toConcept+joinsVia or selector!";
+			logger.error(errorMessage);
+
+			throw new InvalidRelationMappingException(errorMessage);			
+		} else if (noOfBases > 1) {
+			String errorMessage = "Specify only one of toConcept or selector!";
+			logger.error(errorMessage);
+			throw new InvalidRelationMappingException(errorMessage);			
 		}
-		
+
+		Element joinsViaElement = 
+			XMLUtility.getFirstChildElementByTagName(rmElement, R2OConstants.JOINS_VIA_TAG);
+		if(joinsViaElement != null) {
+			this.joinsVia = new R2OJoin(joinsViaElement);
+		}
+
 		if(rmSelectorsElements != null) {
-			result.rmSelectors = new ArrayList<R2OSelector>();
+			this.rmSelectors = new ArrayList<R2OSelector>();
 			for(Element childElement : rmSelectorsElements) {
-				R2OSelector selector = new R2OSelector().parse(childElement);
-				result.rmSelectors.add(selector);
+				R2OSelector selector = new R2OSelector(childElement);
+				this.rmSelectors.add(selector);
 			}						
 		}
-		
 
-
-		
-		return result;
+		Element hasViewElement = XMLUtility.getFirstChildElementByTagName(
+				rmElement, R2OConstants.HAS_VIEW_TAG);
+		if(hasViewElement != null) {
+			this.hasView = new R2ODatabaseView(hasViewElement);
+		}
 	}
 
 	@Override
@@ -84,40 +112,46 @@ public class R2ORelationMapping extends R2OPropertyMapping implements R2OElement
 	@Override
 	public String toString() {
 		StringBuffer result = new StringBuffer();
-		
+
 		result.append("<" + R2OConstants.DBRELATION_DEF_TAG + " ");
 		result.append(R2OConstants.NAME_ATTRIBUTE+"=\"" + this.name + "\" ");
 		if(this.toConcept != null) {
 			result.append(R2OConstants.TO_CONCEPT_ATTRIBUTE +"=\"" + this.toConcept + "\" ");
 		}
-		
+
+
 		if(this.id != null && this.id != "") {
 			result.append(R2OConstants.IDENTIFIED_BY_ATTRIBUTE +"=\"" + this.id + "\" ");
 		}
 		result.append(">\n");
 
-		
-		if(this.joinsVia != null) {
-			result.append("<" + R2OConstants.JOINS_VIA_TAG + " ");
-			result.append(R2OConstants.JOINS_TYPE_ATTRIBUTE+"=\"" + this.joinType + "\" ");
-			result.append(">\n");
-			
-			result.append(this.joinsVia.toString() + "\n");
-			result.append(XMLUtility.toCloseTag(R2OConstants.JOINS_VIA_TAG)+ "\n");
-			
+		if(this.hasView != null) {
+			result.append(this.hasView.toString() + "\n");
 		}
-		
+
+		if(this.hasTables != null && this.hasTables.size() > 0) {
+			for(R2ODatabaseTable hasIntermediateTable : this.hasTables) {
+				result.append(hasIntermediateTable.toString() + "\n");
+			}
+		}
+
+		if(this.joinsVia != null) {
+			result.append(this.joinsVia.toString()  + "\n");
+
+		}
+
+
 		if(this.rmSelectors != null) {
 			for(R2OSelector selector : this.rmSelectors) {
 				result.append(selector.toString() + "\n");
 			}
 		}
-		
+
 		result.append(XMLUtility.toCloseTag(R2OConstants.DBRELATION_DEF_TAG)+ "\n");
 		return result.toString();
 	}
 
-	public R2OConditionalExpression getJoinsVia() {
+	public R2OJoin getJoinsVia() {
 		return joinsVia;
 	}
 
@@ -125,12 +159,35 @@ public class R2ORelationMapping extends R2OPropertyMapping implements R2OElement
 		return toConcept;
 	}
 
-	public String getJoinType() {
-		return joinType;
-	}
-
 	public Collection<R2OSelector> getRmSelectors() {
 		return rmSelectors;
 	}
+
+	public Vector<R2ODatabaseTable> getHasTables() {
+		return hasTables;
+	}
+
+	public R2ODatabaseView getHasView() {
+		return hasView;
+	}
+
+	public void setJoinsVia(R2OJoin joinsVia) {
+		this.joinsVia = joinsVia;
+	}
+
+	@Override
+	public R2ORelationMapping clone(){
+		try {
+			return (R2ORelationMapping) super.clone();	
+		} catch(Exception e) {
+			logger.error("Error occured while cloning R2ORelationMapping object.");
+			logger.error("Error message = " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+
+
 
 }
