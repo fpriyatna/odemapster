@@ -29,6 +29,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.ModelWriter;
 import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.translator.SPARQL2MappingTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
@@ -74,8 +75,8 @@ public class R2ORunner extends AbstractRunner {
 			throw e;
 		}
 	}
+
 	
-		
 	public void run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
 		long start = System.currentTimeMillis();
 
@@ -91,50 +92,64 @@ public class R2ORunner extends AbstractRunner {
 		
 		//parsing r2o mapping document
 		R2OParser parser = new R2OParser(); 
-		R2OMappingDocument r2oMappingDocument = 
+		R2OMappingDocument originalMappingDocument = 
 			(R2OMappingDocument) parser.parse(configurationProperties.getR2oFilePath());
 		
 		//test the parsing result
-		parser.testParseResult(configurationProperties.getR2oFilePath(), r2oMappingDocument);
+		parser.testParseResult(configurationProperties.getR2oFilePath(), originalMappingDocument);
 
 
 		
 		//parsing sparql file
 		String queryFilePath = configurationProperties.getQueryFilePath();
+		R2OMappingDocument translationResultMappingDocument = null;
 		if(queryFilePath != null) {
+			logger.info("Parsing query file : " + queryFilePath);
 			Query query = QueryFactory.read(queryFilePath);
+			SPARQL2MappingTranslator translator = 
+				new SPARQL2MappingTranslator(originalMappingDocument, query);
+			translationResultMappingDocument = translator.processQuery();
+			logger.debug("translationResult = " + translationResultMappingDocument);
 		}
 		
-
-
+		R2OMappingDocument mappingDocument;
+		if(translationResultMappingDocument == null) {
+			mappingDocument = originalMappingDocument;
+		} else {
+			mappingDocument = translationResultMappingDocument;
+		}
+		
 		//preparing output file
 		FileWriter fileWriter = 
 			new FileWriter(configurationProperties.getOutputFilePath());
 
 		Model model = null;
 		Collection<AbstractConceptMapping> conceptMappings = 
-			r2oMappingDocument.getConceptMappings();
+			mappingDocument.getConceptMappings();
 		long startGeneratingModel = System.currentTimeMillis();
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			try {
 				//unfold mapped concepts
 				logger.info("Unfolding concept " + conceptMapping.getConceptName());
 				R2OUnfolder unfolder = 
-					new R2OUnfolder(r2oMappingDocument, primitiveOperationsProperties, configurationProperties);
+					new R2OUnfolder(mappingDocument, primitiveOperationsProperties, configurationProperties);
 				String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
+				if(sqlQuery != null) {
+					//evaluate query
+					ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, configurationProperties.getConn());
 
-				//evaluate query
-				ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, configurationProperties.getConn());
+					if(model == null) {
+						model = postProcessor.createModel(
+								configurationProperties.getJenaMode(), mappingDocument.hashCode() + "");
+					}
+					postProcessor.processConceptMapping(rs, model, conceptMapping, fileWriter);
 
-				if(model == null) {
-					model = postProcessor.createModel(
-							configurationProperties.getJenaMode(), r2oMappingDocument.hashCode() + "");
+					//cleaning up
+					Utility.closeStatement(rs.getStatement());
+					Utility.closeRecordSet(rs);					
 				}
-				postProcessor.processConceptMapping(rs, model, conceptMapping, fileWriter);
 
-				//cleaning up
-				Utility.closeStatement(rs.getStatement());
-				Utility.closeRecordSet(rs);
+
 			} catch(SQLException e) {
 				String errorMessage = "Error processing " + conceptMapping.getName();
 				logger.error(errorMessage);				

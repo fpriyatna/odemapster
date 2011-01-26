@@ -1,55 +1,23 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.sparql.engine.main.LeftJoinClassifier;
-
-import Zql.ZConstant;
-import Zql.ZExp;
-import Zql.ZExpression;
-import Zql.ZFromItem;
 import Zql.ZQuery;
-import Zql.ZSelectItem;
 import Zql.ZUtils;
 import es.upm.fi.dia.oeg.obdi.ILogicalQuery;
-import es.upm.fi.dia.oeg.obdi.Utility;
-import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
+import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseColumn;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OJoin;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OColumnRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConceptRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConstantRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSQLRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.RestrictionValue;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ORelationMapping;
 
 
 public class R2OUnfolder extends AbstractUnfolder {
@@ -61,6 +29,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 	private R2OConfigurationProperties configurationProperties;
 
 	public R2OUnfolder(R2OMappingDocument r2oMappingDocument) {
+		ZUtils.addCustomFunction("concat", 2);
 		this.r2oMappingDocument = r2oMappingDocument;
 	}
 
@@ -259,17 +228,33 @@ public class R2OUnfolder extends AbstractUnfolder {
 	public String unfoldConceptMapping(AbstractConceptMapping mapping)
 			throws Exception {
 		R2OQuery mainQuery = new R2OQuery();
-		Collection<ZQuery> leftJoinQueries = new Vector<ZQuery>();
-		Collection<ZQuery> innerJoinQueries = new Vector<ZQuery>();
 
-		
+
 		R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) mapping;
-		R2OConceptMappingUnfolder r2oConceptMappingUnfolder = new R2OConceptMappingUnfolder(
-				primitiveOperationsProperties, configurationProperties, r2oConceptMapping, r2oMappingDocument);
-		String conceptMappingUnfoldingSQL = 
-			r2oConceptMappingUnfolder.unfoldConceptMapping(mainQuery);
 		
-		// TODO Auto-generated method stub
+		boolean proceedToUnfolding = true;
+		if(r2oConceptMapping.getMaterialize() == null) {
+			proceedToUnfolding = true;
+		} else {
+			if(r2oConceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_FALSE) ||
+					r2oConceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_NO)) {
+				proceedToUnfolding = false;
+			} else if(r2oConceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_TRUE) ||
+					r2oConceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_FALSE)) { 
+				proceedToUnfolding = true;
+			}
+			
+		}
+		
+		String conceptMappingUnfoldingSQL = null;
+		if(proceedToUnfolding) {
+			R2OConceptMappingUnfolder r2oConceptMappingUnfolder = new R2OConceptMappingUnfolder(
+					primitiveOperationsProperties, configurationProperties, r2oConceptMapping, r2oMappingDocument);
+			conceptMappingUnfoldingSQL = 
+				r2oConceptMappingUnfolder.unfoldConceptMapping(mainQuery);
+ 
+		}
+		
 		return conceptMappingUnfoldingSQL;
 	}
 

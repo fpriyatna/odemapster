@@ -155,9 +155,47 @@ public class R2OConditionalExpression extends R2OExpression implements Cloneable
 			
 			return result;
 		}
+	}
 
+	
+	public static R2OConditionalExpression addConditionalExpression(
+			R2OConditionalExpression currentCE, String operator
+			, R2OConditionalExpression newConditionalExpression) {
 		
+		if(currentCE == newConditionalExpression) {
+			return currentCE; 
+		}
 		
+		if(currentCE == null) {
+			R2OConditionalExpression result = newConditionalExpression;
+			return result;
+		} else {
+			if(currentCE.contains(newConditionalExpression)) {
+				return currentCE; 
+			} else {
+				R2OConditionalExpression result = new R2OConditionalExpression();
+				result.operator = operator;
+				result.condExprs = new ArrayList<R2OConditionalExpression>();
+
+				if(currentCE.condExprs == null || currentCE.condExprs.size() == 0) {
+					if(currentCE.condition == null) { //this will not happened
+						
+					} else {
+						result.condExprs.add(newConditionalExpression);
+
+						R2OConditionalExpression ce2 = new R2OConditionalExpression(currentCE.condition);
+						result.condExprs.add(ce2);
+					}
+				} else {
+					result.condExprs.add(newConditionalExpression);
+					
+					result.condExprs.addAll(currentCE.condExprs);
+				}
+				
+				return result;				
+			}
+
+		}
 	}
 	
 	@Override
@@ -242,4 +280,74 @@ public class R2OConditionalExpression extends R2OExpression implements Cloneable
 			return null;
 		}
 	}
+
+	public boolean contains(R2OCondition c) {
+		if(this.condition != null) {
+			if(this.condition.equals(c)) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if(this.condExprs != null && this.condExprs.size() > 0){
+			for(R2OConditionalExpression ce : this.condExprs) {
+				if(ce.contains(c)) {
+					return true;
+				}
+			}
+			return false;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean contains(R2OConditionalExpression ce) {
+		if(ce.condition != null) {
+			if(this.condition != null && this.condition.equals(ce.condition)) {
+				return true;
+			}
+		} else if(ce.hasSQL != null) {
+			if(this.hasSQL != null && this.hasSQL.equals(ce.hasSQL)) {
+				return true;
+			}
+		} else if (ce.operator != null) {
+			if(this.operator != null && ce.operator.equals(this.operator)) {
+				for(R2OConditionalExpression thisCE : this.condExprs) {
+					for(R2OConditionalExpression ce2 : ce.condExprs) {
+						if(!thisCE.contains(ce2)) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/*
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		}
+		
+		R2OConditionalExpression ce2 = (R2OConditionalExpression) obj;
+		if(this.condition != null && ce2.condition != null && this.condition.equals(ce2.condition)) {
+			return true;
+		}
+		if(this.hasSQL != null && ce2.hasSQL != null && this.hasSQL.equals(ce2.hasSQL)) {
+			return true;
+		}
+		if(this.operator != null && ce2.operator != null && this.operator.equals(ce2.operator) {
+			return false;
+		}
+		
+		return false;
+			
+
+	}
+	*/
+	
+	
 }

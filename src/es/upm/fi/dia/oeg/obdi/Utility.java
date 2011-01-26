@@ -142,6 +142,7 @@ public class Utility {
 			result = new URI(null, uri, null).toASCIIString();
 			result = result.replaceAll(",", "%2C");
 			result = result.replaceAll("'", "%27");
+			result = result.replaceAll("%23", "#");
 			//System.out.println("result = " + result);
 
 			/*

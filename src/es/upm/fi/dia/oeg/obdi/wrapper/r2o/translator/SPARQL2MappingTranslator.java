@@ -43,6 +43,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.MergeException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
@@ -66,7 +67,8 @@ public class SPARQL2MappingTranslator {
 		this.query = query;
 	}
 
-	public void processQuery() throws R2OTranslationException {
+	public R2OMappingDocument processQuery() throws R2OTranslationException, MergeException {
+		R2OMappingDocument mappingDocumentResult = null;
 		Op op = Algebra.compile(query) ;
 		if(op instanceof OpProject) {
 			OpProject opProject = (OpProject) op;
@@ -74,17 +76,51 @@ public class SPARQL2MappingTranslator {
 
 			if(opProjectSubOp instanceof OpBGP) {
 				OpBGP opbg = (OpBGP) opProjectSubOp;
-				this.processBGP(opbg);
+				Collection<R2OConceptMapping> cmsTranslated = this.processBGP(opbg);
+
+				mappingDocumentResult = new R2OMappingDocument(cmsTranslated);
+
+				//add range of relation mappings if not defined in the translated mapping document
+				Collection<R2ORelationMapping> rms = 
+					mappingDocumentResult.getR2ORelationMappings();
+				for(R2ORelationMapping rm : rms) {
+					String toConceptID = rm.getToConcept();
+					R2OConceptMapping cmRange = mappingDocumentResult.getConceptMappingsByMappingId(toConceptID);
+					R2OConceptMapping cmRangeStripped;
+					if(cmRange == null) {
+						cmRange = this.mappingDocument.getConceptMappingsByMappingId(toConceptID);
+						cmRangeStripped = cmRange.getStripped();
+						cmRangeStripped.setMaterialize(R2OConstants.STRING_FALSE);
+					} else {
+						cmRangeStripped = cmRange.getStripped();
+					}
+					mappingDocumentResult.addConceptMapping(cmRangeStripped);
+				}
 			}
 		} else {
 			throw new R2OTranslationException("Unsupported query!");
 		}
+
+		logger.debug("mappingDocumentResult = \n" + mappingDocumentResult);
+		
+		Collection<String> distinctCMNames = 
+			mappingDocumentResult.getDistinctConceptMappingsNames();
+		R2OMappingDocument mappingDocumentResultDistinct = new R2OMappingDocument();
+		for(String distinctCMName : distinctCMNames) {
+			Collection<R2OConceptMapping> cms =  
+				mappingDocumentResult.getR2OConceptMappings(distinctCMName);
+			R2OConceptMapping mergedCM = R2OConceptMapping.merge(cms);
+			mappingDocumentResultDistinct.addConceptMapping(mergedCM);
+		}
+		
+		logger.debug("mappingDocumentResultDistinct = \n" + mappingDocumentResultDistinct);
+		return mappingDocumentResultDistinct;
 	}
 
 
 
 
-	
+
 	private void initMapNodeConceptMappingByRDFType(OpBGP bgp) throws R2OTranslationException {
 		BasicPattern bp = bgp.getPattern();
 		List<Triple> bpTriples = bp.getList();
@@ -123,10 +159,10 @@ public class SPARQL2MappingTranslator {
 			if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
 				Node subject = tp.getSubject();
 				R2OConceptMapping cmSubject = this.mapNodeConceptMapping.get(subject);
-				
+
 				Node object = tp.getObject();
 				R2OConceptMapping cmObject = this.mapNodeConceptMapping.get(object);
-				
+
 				if(cmSubject == null && cmObject == null) //unknown subject nor object 
 				{
 					Collection<AbstractPropertyMapping> pms = this.mappingDocument.getPropertyMappingsByPropertyURI(predicateURI);
@@ -139,7 +175,7 @@ public class SPARQL2MappingTranslator {
 					}
 					R2OPropertyMapping pm = (R2OPropertyMapping) pms.iterator().next();
 					R2OConceptMapping subjectConceptMapping = pm.getParent();
-					
+
 					logger.info("Type of : " + subject + " = " + subjectConceptMapping.getConceptName());
 					this.mapNodeConceptMapping.put(subject, subjectConceptMapping);
 					if(pm instanceof R2ORelationMapping) {
@@ -147,7 +183,7 @@ public class SPARQL2MappingTranslator {
 						String rangeConceptMappingID = rm.getToConcept();
 						R2OConceptMapping rangeConceptMapping = 
 							this.mappingDocument.getConceptMappingsByMappingId(rangeConceptMappingID);
-						
+
 						logger.info("Type of : " + object + " = " + rangeConceptMapping.getConceptName());
 						this.mapNodeConceptMapping.put(object, rangeConceptMapping);
 					}
@@ -159,12 +195,14 @@ public class SPARQL2MappingTranslator {
 
 
 
-	private void processBGP(OpBGP bgp) throws R2OTranslationException {
+	private Collection<R2OConceptMapping> processBGP(OpBGP bgp) throws R2OTranslationException {
+		Collection<R2OConceptMapping> result = new ArrayList<R2OConceptMapping>();
+
 		this.mapNodeConceptMapping = new HashMap<Node, R2OConceptMapping>();
 		this.mapPredicatePropertyMapping = new HashMap<Node, R2OPropertyMapping>();
 
 		//to get a type of a node, 
-		
+
 		//1. by explicit rdf type
 		this.initMapNodeConceptMappingByRDFType(bgp);
 
@@ -174,7 +212,7 @@ public class SPARQL2MappingTranslator {
 			mapNodeCMSizeBeforeIteration = this.mapNodeConceptMapping.size();
 			//2. object type detection with defined subject
 			this.initMapNodeConceptMappingByDefinedSubject(bgp);
-			
+
 			//3. subject type detection with defined object
 			this.initMapNodeConceptMappingByDefinedObject(bgp);
 			mapNodeCMSizeAfterIteration = this.mapNodeConceptMapping.size();			
@@ -191,10 +229,11 @@ public class SPARQL2MappingTranslator {
 		for(Triple tp : bpTriples) {
 			logger.debug("tp = " + tp);
 			try {
-				if(!RDF.type.getURI().equalsIgnoreCase(tp.getPredicate().getURI())) {
-					R2OConceptMapping cmStripped = this.processTriplePattern(tp);
-					logger.debug("cmStripped = \n" + cmStripped);				
-				}	
+				//if(!RDF.type.getURI().equalsIgnoreCase(tp.getPredicate().getURI())) {
+				R2OConceptMapping cmTranslated = this.processTriplePattern(tp);
+				logger.debug("cmTranslated = \n" + cmTranslated);
+				result.add(cmTranslated);
+				//}	
 			} catch(R2OTranslationException e) {
 				logger.error("Error processing tp : " + tp);
 				throw e;
@@ -202,9 +241,11 @@ public class SPARQL2MappingTranslator {
 				logger.error("Error processing tp : " + tp);
 				throw new R2OTranslationException(e.getMessage(), e);
 			}
-			
-
 		}
+
+
+		return result;
+
 	}
 
 
@@ -219,10 +260,10 @@ public class SPARQL2MappingTranslator {
 			if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
 				Node subject = tp.getSubject();
 				R2OConceptMapping cmSubject = this.mapNodeConceptMapping.get(subject);
-				
+
 				Node object = tp.getObject();
 				R2OConceptMapping cmObject = this.mapNodeConceptMapping.get(object);
-				
+
 				if(cmSubject != null && cmObject == null) //known subject type only
 				{
 					Collection<R2OPropertyMapping> pms = cmSubject.getPropertyMappings(predicateURI);
@@ -236,11 +277,11 @@ public class SPARQL2MappingTranslator {
 					R2OPropertyMapping pm = pms.iterator().next();
 					if(pm instanceof R2ORelationMapping) {
 						//this.mapPredicatePropertyMapping.put(predicate, pm);
-						
+
 						R2ORelationMapping rm = (R2ORelationMapping) pm;
 						String rangeConceptMappingID = rm.getToConcept();
 						R2OConceptMapping rangeConceptMapping = this.mappingDocument.getConceptMappingsByMappingId(rangeConceptMappingID);
-						
+
 						logger.info("Type of : " + object + " = " + rangeConceptMapping.getConceptName());
 						this.mapNodeConceptMapping.put(object, rangeConceptMapping);
 					}
@@ -259,10 +300,10 @@ public class SPARQL2MappingTranslator {
 			if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
 				Node subject = tp.getSubject();
 				R2OConceptMapping cmSubject = this.mapNodeConceptMapping.get(subject);
-				
+
 				Node object = tp.getObject();
 				R2OConceptMapping cmObject = this.mapNodeConceptMapping.get(object);
-				
+
 				if(cmSubject == null && cmObject != null) { //known object type only
 					String rangeConcept = cmObject.getConceptName();
 					Collection<R2ORelationMapping> rms = 
@@ -277,7 +318,7 @@ public class SPARQL2MappingTranslator {
 					}
 					R2OPropertyMapping rm = rms.iterator().next();
 					R2OConceptMapping domainConceptMapping = rm.getParent();
-					
+
 					logger.info("Type of : " + subject + " = " + domainConceptMapping.getConceptName());
 					this.mapNodeConceptMapping.put(subject, domainConceptMapping);
 
@@ -290,19 +331,20 @@ public class SPARQL2MappingTranslator {
 	private R2OConceptMapping processTriplePattern(Triple triple) throws R2OTranslationException {
 
 		Node subject = triple.getSubject();
-		//			logger.debug("subject = " + subject);
+		Node predicate = triple.getPredicate();
+		String predicateURI = predicate.getURI();
+
+
 		R2OConceptMapping cmFull = this.processSubject(subject);
-//					logger.debug("cmFull = " + cmFull);
+		if(RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
+			return cmFull.getStripped();
+		} else {
+			R2OConceptMapping cmStripped = cmFull.getStripped();
 
-		R2OConceptMapping cmStripped = new R2OConceptMapping(cmFull.getConceptName(),
-				cmFull.getHasTables(), cmFull.getAppliesIf(), cmFull.getURIAs());
-
-		cmStripped = this.processPredicateObject(
-				triple.getPredicate(), triple.getObject(), cmFull, cmStripped);
-
-		return cmStripped;
-
-
+			cmStripped = this.processPredicateObject(
+					triple.getPredicate(), triple.getObject(), cmFull, cmStripped);
+			return cmStripped;
+		}
 	}
 
 	private R2OConceptMapping processSubject(Node subject) throws R2OTranslationException {
@@ -327,7 +369,7 @@ public class SPARQL2MappingTranslator {
 			R2OTransformationRestriction tr = new R2OTransformationRestriction(cm2URIAs);
 			R2OArgumentRestriction uriAsAR = new R2OArgumentRestriction(tr);
 
-			
+
 			List<R2OArgumentRestriction> argRestrictions = new ArrayList<R2OArgumentRestriction>();
 			argRestrictions.add(subjectAR);
 			argRestrictions.add(uriAsAR);
@@ -446,26 +488,26 @@ public class SPARQL2MappingTranslator {
 		cr.setConstantValue(object.getLiteralValue());
 		R2OArgumentRestriction objectAsArgumentRestriction = new R2OArgumentRestriction(cr);
 
-		
-		
+
+
 		List<R2OArgumentRestriction> argRestrictions = new ArrayList<R2OArgumentRestriction>();
 		argRestrictions.add(selectorAfterTransformRestriction);
 		argRestrictions.add(objectAsArgumentRestriction);
 		R2OCondition condition = new R2OCondition(R2OConstants.CONDITION_TAG
 				, argRestrictions, R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME);
-		
+
 		/*
 		R2OConditionalExpression selectorAppliesIf = selector.getAppliesIf();
 		R2OConditionalExpression newSelectorAppliesIf = R2OConditionalExpression.addCondition(
 				selectorAppliesIf, R2OConstants.AND_TAG, condition);
 		am2.getSelectors().iterator().next().setAppliesIf(newSelectorAppliesIf);
-		*/
-		
+		 */
+
 		R2OConditionalExpression cmStrippedAI = cmStripped.getAppliesIf();
 		R2OConditionalExpression cmStrippedAI2 = R2OConditionalExpression.addCondition(cmStrippedAI, R2OConstants.AND_TAG, condition);
 		cmStripped.setAppliesIf(cmStrippedAI2);
-		
-		
+
+
 
 		return cmStripped;
 	}
@@ -474,6 +516,7 @@ public class SPARQL2MappingTranslator {
 	private R2ORelationMapping processObjectPropertyObject(Node predicate, Node object
 			, R2OConceptMapping cmFull, R2ORelationMapping rm) 
 	throws R2OTranslationException {
+
 		if(object.isURI()) {
 			R2ORelationMapping rm2 = this.processObjectPredicateObjectURI(object, rm);
 			return rm2;
@@ -517,7 +560,7 @@ public class SPARQL2MappingTranslator {
 		argRestrictions.add(objectAsArgumentRestriction);
 		R2OCondition condition = new R2OCondition(R2OConstants.CONDITION_TAG
 				, argRestrictions, R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME);
-		
+
 		R2OJoin joinVia = rm.getJoinsVia();
 
 		R2OJoin joinVia2 = joinVia.clone();

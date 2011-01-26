@@ -39,6 +39,22 @@ public class R2OMappingDocument implements IMappingDocument {
 	Collection<R2OPropertyMapping> propertymapDefs;
 	
 	
+	public R2OMappingDocument(Collection<R2OConceptMapping> conceptmapDefs) {
+		super();
+		this.conceptmapDefs = conceptmapDefs;
+	}
+
+	public R2OMappingDocument() {
+	}
+
+	public void addConceptMapping(R2OConceptMapping cm) {
+		if(this.conceptmapDefs == null) {
+			this.conceptmapDefs = new ArrayList<R2OConceptMapping>();
+		}
+		
+		this.conceptmapDefs.add(cm);
+	}
+	
 	@Override
 	public Collection<IAttributeMapping> getAttributeMappings() {
 		Collection<IAttributeMapping> result = new ArrayList<IAttributeMapping>();
@@ -71,6 +87,20 @@ public class R2OMappingDocument implements IMappingDocument {
 		}
 		return result;
 	}
+	
+	public Collection<String> getDistinctConceptMappingsNames() {
+		Collection<String> result = new ArrayList<String>();
+		
+		for(R2OConceptMapping cm : conceptmapDefs) {
+			String cmName = cm.getName();
+			if(!result.contains(cmName)) {
+				result.add(cmName);
+			}
+		}
+		
+		return result;
+		
+	}
 
 
 	@Override
@@ -78,6 +108,17 @@ public class R2OMappingDocument implements IMappingDocument {
 		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
 		
 		for(AbstractConceptMapping conceptMapping : this.conceptmapDefs) {
+			if(conceptMapping.getName().equals(conceptName)) {
+				result.add(conceptMapping);
+			}
+		}
+		return result;
+	}
+
+	public Collection<R2OConceptMapping> getR2OConceptMappings(String conceptName) {
+		Collection<R2OConceptMapping> result = new ArrayList<R2OConceptMapping>();
+		
+		for(R2OConceptMapping conceptMapping : this.conceptmapDefs) {
 			if(conceptMapping.getName().equals(conceptName)) {
 				result.add(conceptMapping);
 			}
@@ -201,17 +242,25 @@ public class R2OMappingDocument implements IMappingDocument {
 		
 		result.append("<" + R2OConstants.R2O_TAG + ">\n");
 
-		for(R2ODatabaseMapping dbm : this.dbschemaDescs) {
-			result.append(dbm.toString() + "\n");
+		if(this.dbschemaDescs != null) {
+			for(R2ODatabaseMapping dbm : this.dbschemaDescs) {
+				result.append(dbm.toString() + "\n");
+			}			
 		}
 
-		for(R2OConceptMapping conceptMapping : this.conceptmapDefs) {
-			result.append(conceptMapping.toString() + "\n");
+		if(this.conceptmapDefs != null) {
+			for(R2OConceptMapping conceptMapping : this.conceptmapDefs) {
+				result.append(conceptMapping.toString() + "\n\n\n");
+			}			
 		}
 
-		for(R2OPropertyMapping propertyMapping : this.propertymapDefs) {
-			result.append(propertyMapping.toString() + "\n");
+		if(this.propertymapDefs != null) {
+			for(R2OPropertyMapping propertyMapping : this.propertymapDefs) {
+				result.append(propertyMapping.toString() + "\n");
+			}			
 		}
+		
+
 
 		result.append("</" + R2OConstants.R2O_TAG + ">\n");
 		
@@ -264,6 +313,16 @@ public class R2OMappingDocument implements IMappingDocument {
 		return result;
 	}
 	
+	public Collection<R2ORelationMapping> getR2ORelationMappings() {
+		Collection<R2ORelationMapping> result = new ArrayList<R2ORelationMapping>();
+		
+		Collection<IRelationMapping> rms = this.getRelationMappings();
+		for(IRelationMapping rm : rms) {
+			result.add((R2ORelationMapping) rm);
+		}
+		return result;
+	}
+			
 	public Collection<R2ORelationMapping> getRelationMappingsByRelationRange(
 			String rangeType) {
 		Collection<R2ORelationMapping> result = new ArrayList<R2ORelationMapping>();

@@ -52,7 +52,7 @@ public class R2OConceptMappingUnfolder {
 	public String unfoldConceptMapping(R2OQuery cmQuery) throws Exception {
 		logger.debug("Unfolding = " + conceptMapping.getConceptName());
 
-		ZUtils.addCustomFunction("concat", 2);
+		//ZUtils.addCustomFunction("concat", 2);
 		cmQuery.addFrom(new Vector<String>());
 		cmQuery.addSelect(new Vector<ZSelectItem>());
 

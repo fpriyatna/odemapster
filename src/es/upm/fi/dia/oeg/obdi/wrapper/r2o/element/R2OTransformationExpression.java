@@ -194,7 +194,7 @@ public class R2OTransformationExpression extends R2OExpression {
 				R2OTransformationRestriction rt = (R2OTransformationRestriction) restriction;
 				R2OTransformationExpression restrictionValueTransformation = 
 					(R2OTransformationExpression) rt.getTransformationExpression();
-				if(!isDelegableTransformationExpression()) {
+				if(!restrictionValueTransformation.isDelegableTransformationExpression()) {
 					return false;
 				}
 			}

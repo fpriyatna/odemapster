@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.tdb.TDBFactory;
@@ -92,9 +94,18 @@ public abstract class R2OPostProcessor {
 		if(encodeURI.equalsIgnoreCase(R2OConstants.STRING_FALSE)) {
 			isEncodeURI = false;
 		}
-		
 
+		boolean useNTriple = false;
+		String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
+		if(rdfLanguage == null) {
+			rdfLanguage = "RDF/XML";
+		}
+		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
+			useNTriple = true;
+		}
+		
 		long counter = 0;
+		String previousSubjectURI = null;
 		while(rs.next()) {
 			try {
 
@@ -130,42 +141,31 @@ public abstract class R2OPostProcessor {
 					if(subjectURI == null) {
 						throw new Exception("null uri is not allowed!");
 					}
-
+					
+					
+					
 					if(isEncodeURI) {
 						subjectURI = Utility.encodeURI(subjectURI);
 					}
 
 
-					if(counter % 10000 == 0) {
+					if(counter % 1000 == 0) {
 						logger.info("Processing record no " + counter + " : " + subjectURI);
 					}
 					counter++;
 
 					Resource subject = model.createResource(subjectURI);
-					String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
-					if(rdfLanguage == null) {
-						rdfLanguage = "RDF/XML";
+					
+					//create rdf type triple if the subject is different from the previous one
+					if(!subjectURI.equals(previousSubjectURI)) {
+						this.createRDFTypeTriple(useNTriple, subjectURI, conceptName
+								, outputFileWriter, model, subject, object);
+						
 					}
-					if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-						String triple = 
-							this.createTriple(
-									this.createURIref(subjectURI)
-									, this.createURIref(RDF.type.toString())
-									, this.createURIref(conceptName)); 
-						outputFileWriter.append(triple);							
-
-					} else {
-						subject = model.createResource(subjectURI);
-						Statement statement = model.createStatement(subject, RDF.type, object);
-						model.add(statement);						
-					}
-
-
-
-
 
 					//logger.info("Processing property mappings.");
 					this.processPropertyMappings(r2oConceptMapping, rs, model, subject, outputFileWriter);
+					previousSubjectURI = subjectURI;
 				}
 
 			} catch(Exception e) {
@@ -188,7 +188,24 @@ public abstract class R2OPostProcessor {
 
 	}
 
+	private void createRDFTypeTriple(boolean useNTriple, String subjectURI, String conceptName
+			, Writer outputFileWriter, Model model, Resource subject, RDFNode object) 
+	throws IOException {
+		if(useNTriple) {
+			String triple = 
+				this.createTriple(
+						this.createURIref(subjectURI)
+						, this.createURIref(RDF.type.toString())
+						, this.createURIref(conceptName)); 
+			outputFileWriter.append(triple);							
 
+		} else {
+			subject = model.createResource(subjectURI);
+			Statement statement = model.createStatement(subject, RDF.type, object);
+			model.add(statement);						
+		}
+	}
+	
 	/*
 	private Object processDelegableTransformationExpression(ResultSet rs, String alias) throws SQLException {
 		Object result = rs.getObject(alias);;

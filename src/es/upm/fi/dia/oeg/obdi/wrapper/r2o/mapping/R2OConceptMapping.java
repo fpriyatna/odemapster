@@ -47,17 +47,23 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	private R2OSelector selectorURIAs;//original version
 	private R2OTransformationExpression uriAs;//odemapster 1 version
 	private String encodeURI;
+	private String materialize;
 	private List<R2OPropertyMapping> describedBy; //describedBy
 	private R2OConditionalExpression appliesIf;//original version
 	private R2OConditionalExpression appliesIfTop;//odemapster 1 version
-	private Logger logger = Logger.getLogger(R2OConceptMapping.class);
+	private static Logger logger = Logger.getLogger(R2OConceptMapping.class);
 
-	public R2OConceptMapping(String cmName, Vector<R2ODatabaseTable> hasTables
+	private R2OConceptMapping(String cmName, String id, Vector<R2ODatabaseTable> hasTables
 			, R2OConditionalExpression appliesIf, R2OTransformationExpression uriAs) {
 		this.name = cmName;
+		this.id = id;
 		this.hasTables = hasTables;
 		this.appliesIf = appliesIf;
 		this.uriAs = uriAs;
+	}
+	
+	private R2OConceptMapping() {
+		
 	}
 	
 	public R2OConceptMapping(Element conceptMappingElement) throws ParseException{
@@ -86,6 +92,24 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		//parse identifiedBy attribute
 		this.id = conceptMappingElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
 
+		//parse identifiedBy attribute
+		this.materialize = conceptMappingElement.getAttribute(R2OConstants.MATERIALIZE_ATTRIBUTE);
+		if(this.materialize == "") {
+			this.materialize = null;
+		}
+		if(this.materialize != null) {
+			if(!this.materialize.equalsIgnoreCase(R2OConstants.STRING_FALSE) &&
+					!this.materialize.equalsIgnoreCase(R2OConstants.STRING_TRUE) &&
+					!this.materialize.equalsIgnoreCase(R2OConstants.STRING_YES) &&
+					!this.materialize.equalsIgnoreCase(R2OConstants.STRING_NO)) 
+			{
+				String errorMessage = "Invalid value for materialize option of concept mapping!";
+				logger.error(errorMessage);
+				throw new ParseException(errorMessage);				
+			}
+				
+		}
+		
 		//parse has-table
 		List<Element> hasTableElements = XMLUtility.getChildElementsByTagName(conceptMappingElement, R2OConstants.HAS_TABLE_TAG);
 		if(hasTableElements != null && hasTableElements.size() > 0) {
@@ -189,6 +213,10 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			result.append(R2OConstants.IDENTIFIED_BY_ATTRIBUTE +"=\"" + this.id + "\" ");
 		}
 
+		if(this.materialize != null && this.materialize != "") {
+			result.append(R2OConstants.MATERIALIZE_ATTRIBUTE +"=\"" + this.materialize + "\" ");
+		}
+
 		result.append(">\n");
 
 		if(this.hasTables != null && this.hasTables.size() > 0) {
@@ -196,6 +224,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 				result.append(hasTable.toString() + "\n");
 			}
 		}
+		result.append("\n");
 
 		if(this.orderBy != null && this.orderBy.size() != 0) {
 			for(String orderByString : this.orderBy) {
@@ -213,34 +242,36 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 				result.append(R2OConstants.ENCODE_URI_ATTRIBUTE +"=\"" + R2OConstants.STRING_FALSE + "\" ");
 			}			
 		}
-
 		result.append(">\n");
-		
 		if(this.selectorURIAs != null) {
 			result.append(this.selectorURIAs.toString() + "\n");
 		} else {
 			result.append(this.uriAs.toString() + "\n");
 		}
 		result.append("</" + R2OConstants.URI_AS_TAG + ">\n");
-
+		result.append("\n");
+		
 
 		if(this.appliesIf != null) {
 			result.append("<" + R2OConstants.APPLIES_IF_TAG + ">\n");
 			result.append(this.appliesIf.toString());
 			result.append("</" + R2OConstants.APPLIES_IF_TAG + ">\n");
+			result.append("\n");
 		} else {
 			if(this.appliesIfTop != null) {
 				result.append("<" + R2OConstants.APPLIES_IF_TOP_TAG + ">\n");
 				result.append(this.appliesIfTop.toString());
-				result.append("</" + R2OConstants.APPLIES_IF_TOP_TAG + ">\n");			
+				result.append("</" + R2OConstants.APPLIES_IF_TOP_TAG + ">\n");
+				result.append("\n");
 			}
 		}
+		
 
 
 		if(describedBy != null) {
-			result.append("<" + R2OConstants.DESCRIBED_BY_TAG + ">\n");
+			result.append("<" + R2OConstants.DESCRIBED_BY_TAG + ">");
 			for(R2OPropertyMapping propertyMapping : describedBy) {
-				result.append(propertyMapping.toString() + "\n");
+				result.append("\n" + propertyMapping.toString());
 			}
 			result.append("</" + R2OConstants.DESCRIBED_BY_TAG + ">\n");
 		}
@@ -294,6 +325,14 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			}
 		}
 		return result;
+	}
+	
+	public void addPropertyMapping(R2OPropertyMapping pm) {
+		if(this.describedBy == null) {
+			this.describedBy = new ArrayList<R2OPropertyMapping>();
+		}
+		
+		this.describedBy.add(pm);
 	}
 	
 	public void addAttributeMapping(R2OAttributeMapping am) {
@@ -393,6 +432,105 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		this.appliesIf = appliesIf;
 	}
 
-	
+	public R2OConceptMapping getStripped() {
+		R2OConceptMapping cmStripped = new R2OConceptMapping(this.getConceptName(), this.getId(),
+				this.getHasTables(), this.getAppliesIf(), this.getURIAs());
 
+		return cmStripped;
+	}
+
+	
+	public static R2OConceptMapping merge(Collection<R2OConceptMapping> cms) 
+	throws MergeException {
+		R2OConceptMapping result = null;;
+		
+		if(cms != null && cms.size() > 0) {
+			if(cms.size() == 0) {
+				result = cms.iterator().next();
+			} else {
+				for(R2OConceptMapping cm : cms) {
+					result = R2OConceptMapping.merge(result, cm);
+				}				
+			}
+		}
+		
+		return result;
+	}
+	
+	private static R2OConceptMapping merge(R2OConceptMapping cm1, R2OConceptMapping cm2) 
+	throws MergeException {
+		R2OConceptMapping result = new R2OConceptMapping();
+		
+		
+		if(cm1 == null && cm2 == null) {
+			String errorMessage = "Both concept mappings are null!";
+			logger.error(errorMessage);
+			throw new MergeException(errorMessage);			
+		} else if(cm1 == null && cm2 != null) {
+			result = cm2.clone();
+		} else if(cm1 != null && cm2 == null) {
+			result = cm1.clone();
+		} else {
+			result.id = cm1.id;
+			if(cm1.id != cm2.id) {
+				String errorMessage = "Unconsistent identified-by values!";
+				throw new MergeException(errorMessage);
+			}
+			
+			result.name = cm1.name;
+			if(cm1.name != cm2.name) {
+				String errorMessage = "Unconsistent name values!";
+				logger.error(errorMessage);
+				throw new MergeException(errorMessage);			
+			}
+			
+			result.hasTables = cm1.hasTables;
+			if(cm1.hasTables != null && !cm1.hasTables.equals(cm2.hasTables)) {
+				String errorMessage = "Unconsistent has-table values!";
+				throw new MergeException(errorMessage);			
+			}
+
+			if(cm1.appliesIf != cm2.appliesIf) {
+				result.appliesIf = R2OConditionalExpression.addConditionalExpression(
+						cm1.appliesIf, R2OConstants.AND_TAG, cm2.appliesIf);				
+			}
+
+			
+			result.uriAs = cm1.uriAs;
+			if(cm1.uriAs != cm2.uriAs) {
+				String errorMessage = "Unconsistent uri-as values!";
+				throw new MergeException(errorMessage);			
+			}
+			
+			result.describedBy = cm1.describedBy;
+			if(result.describedBy == null) {
+				result.describedBy = new ArrayList<R2OPropertyMapping>();
+			}
+			
+			if(cm2.describedBy != null) {
+				for(R2OPropertyMapping pm : cm2.describedBy) {
+					String pmName = pm.getName();
+					List<R2OPropertyMapping> pms = result.getPropertyMappings(pmName);
+					if(pms == null || pms.size() == 0) {
+						result.describedBy.add(pm);
+					}
+				}				
+			}
+			
+		}
+
+		
+
+		
+		return result;
+		
+	}
+
+	public String getMaterialize() {
+		return materialize;
+	}
+
+	public void setMaterialize(String materialize) {
+		this.materialize = materialize;
+	}
 }

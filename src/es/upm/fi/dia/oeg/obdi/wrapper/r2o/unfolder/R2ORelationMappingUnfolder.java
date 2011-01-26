@@ -389,6 +389,7 @@ public class R2ORelationMappingUnfolder {
 		if(this.rangeConceptMapping == null) {
 			String toConcept = relationMapping.getToConcept();
 			String errorMessage = "Concept mapping with id " + toConcept + " is not defined!";
+			logger.error(errorMessage);
 			throw new InvalidRelationMappingException(errorMessage);
 		}
 
@@ -406,6 +407,7 @@ public class R2ORelationMappingUnfolder {
 				result.addAll(r2oTransformationExpressionUnfolder.unfold(alias));
 			} else {
 				String errorMessage = "Unsupported transformation operation : " + uriAsOperator;
+				logger.error(errorMessage);
 				throw new InvalidRelationMappingException("Unsupported transformation operation : " + uriAsOperator);
 			}
 		}

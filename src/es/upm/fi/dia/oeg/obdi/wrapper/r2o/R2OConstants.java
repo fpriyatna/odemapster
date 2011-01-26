@@ -49,6 +49,7 @@ public class R2OConstants {
 	public static final String ALIAS_ATTRIBUTE="alias";
 	public static final String DOCUMENTATION_ATTRIBUTE="documentation";
 	public static final String IDENTIFIED_BY_ATTRIBUTE="identified-by";
+	public static final String MATERIALIZE_ATTRIBUTE="materialize";
 	public static final String OPER_ID_ATTRIBUTE="oper-id";
 	public static final String TO_CONCEPT_ATTRIBUTE="to-concept";
 	public static final String TO_TABLE_ATTRIBUTE="to-table";

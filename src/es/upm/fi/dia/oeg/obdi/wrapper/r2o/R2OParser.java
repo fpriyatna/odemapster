@@ -32,7 +32,7 @@ public class R2OParser extends AbstractParser {
 		
 		long endParsingR2OFile = System.currentTimeMillis();
 		long durationParsingR2OFile = (endParsingR2OFile-startParsingR2OFile) / 1000;
-		logger.debug("Parsing R2O file time was "+(durationParsingR2OFile)+" s.");
+		//logger.debug("Parsing R2O file time was "+(durationParsingR2OFile)+" s.");
 
 		return result;
 	}
