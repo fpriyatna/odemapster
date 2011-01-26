@@ -41,12 +41,29 @@ public class RunnerTest extends XMLTestCase {
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
 	
 	public static void main(String args[]) {
-		RunnerTest.testUniversidades();
+		RunnerTest.testHospital();
 	}
 
 	@Test
+	public static void testHospital() {
+		//String r2oConfigurationFile = "universidades.r2o.properties";
+		String r2oConfigurationFile = "dot.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/hospital/");
+	}
+	
+	@Test
+	public static void testSPARQL2Mapping() {
+		//String r2oConfigurationFile = "universidades.r2o.properties";
+		String r2oConfigurationFile = "bsbm.r2o.properties";
+//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, MAPPING_DIRECTORY);
+	}
+	
+	@Test
 	public static void testUniversidades() {
-		String r2oConfigurationFile = "universidades.r2o.properties";
+		//String r2oConfigurationFile = "universidades.r2o.properties";
+		String r2oConfigurationFile = "inv.r2o.properties";
 //		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/testcases/universidades/");
 	}

@@ -2,6 +2,8 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.test;
 
 import static org.junit.Assert.*;
 
+import java.util.Collection;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
@@ -11,34 +13,37 @@ import com.hp.hpl.jena.query.QueryFactory;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.translator.SPARQL2MappingTranslator;
 
 public class SPARQLToMappingTranslatorTest {
 	private static Logger logger = Logger.getLogger(SPARQL2MappingTranslator.class);
-//	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
-		private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
-//	private static String QUERY_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/query2mapping/";
-		private static String QUERY_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/query2mapping/";
+	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+//		private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+	private static String QUERY_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/query2mapping/";
+//		private static String QUERY_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/query2mapping/";
 
 	@Test
-	public void testQuery00()
+	public void testQuery()
 	{
-		String mappingURL = MAPPING_DIRECTORY + "query.r2o.xml";
-		String queryURL = QUERY_DIRECTORY + "query00.sparql";
+		String mappingURL = MAPPING_DIRECTORY + "bsbm.r2o.xml";
+		String queryURL = QUERY_DIRECTORY + "bsbm.sparql";
 
 		try {
 			PropertyConfigurator.configure("log4j.properties");
-			logger.info("\n\n==========================Starting testQuery00==========================");
+			logger.info("==========================STARTING testQuery==========================");
 			R2OMappingDocument r2oMappingDocument = 
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
 				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+			R2OMappingDocument translationResult = translator.processQuery();
+			logger.debug("translationResult = " + translationResult);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
 		}
+		logger.info("==========================testQuery DONE==========================");
 	}
 
 	public void testQuery01()
