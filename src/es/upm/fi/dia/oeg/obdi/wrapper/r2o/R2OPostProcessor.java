@@ -148,7 +148,6 @@ public abstract class R2OPostProcessor {
 						subjectURI = Utility.encodeURI(subjectURI);
 					}
 
-
 					if(counter % 1000 == 0) {
 						logger.info("Processing record no " + counter + " : " + subjectURI);
 					}

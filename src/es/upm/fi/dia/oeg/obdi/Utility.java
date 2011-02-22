@@ -226,11 +226,19 @@ public class Utility {
 			}
 
 	public static void main(String args[]) throws SQLException {
-		String uri = "http://www.google.com/esp'a�a spain#lang=en,es";
-		String uri2 = "http://geo.linkeddata.es/resource/�Qui�nes disfrutamos del parque?, Senda de educaci�n ambiental 1.2 o variante |";
-		String newURI = Utility.encodeURI(uri2);
+		String uri = "http://www.google.com/españa spain#lang=en,es";
+		String uri2 = "http://geo.linkeddata.es/HospitalesMadrid#Hospitál110051";
+		String text1 = "Índice";
+		//String uri2 = "http://geo.linkeddata.es/resource/�Qui�nes disfrutamos del parque?, Senda de educaci�n ambiental 1.2 o variante |";
+		String newURI = Utility.encodeURI(uri);
+		String newURI2 = Utility.encodeURI(uri2);
+		String newText1 = Utility.encodeURI(text1);
+		
 		System.out.println("newURI = " + newURI);
+		System.out.println("newURI = " + newURI2);
+		System.out.println("newText1 = " + newText1);
 
+		/*
 		Connection conn = Utility.getLocalConnection("bsbm1m", "bsbm1m"
 				, "nl.cwi.monetdb.jdbc.MonetDriver", "jdbc:monetdb://localhost/demo", null);
 		String bsbmQuery01 = "SELECT distinct nr, label"
@@ -242,6 +250,7 @@ public class Utility {
 			+ " ORDER BY label"
 			+ " LIMIT 10";
 		Utility.executeQuery(conn, bsbmQuery01);
+		*/
 	}
 
 	public static ZConstant constructDatabaseColumn(String columnName) {

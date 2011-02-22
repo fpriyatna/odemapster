@@ -103,13 +103,13 @@ public class R2ORunner extends AbstractRunner {
 		//parsing sparql file
 		String queryFilePath = configurationProperties.getQueryFilePath();
 		R2OMappingDocument translationResultMappingDocument = null;
-		if(queryFilePath != null) {
+		if(queryFilePath != null && !queryFilePath.equals("")) {
 			logger.info("Parsing query file : " + queryFilePath);
 			Query query = QueryFactory.read(queryFilePath);
 			SPARQL2MappingTranslator translator = 
 				new SPARQL2MappingTranslator(originalMappingDocument, query);
 			translationResultMappingDocument = translator.processQuery();
-			logger.debug("translationResult = " + translationResultMappingDocument);
+			//logger.debug("translationResult = " + translationResultMappingDocument);
 		}
 		
 		R2OMappingDocument mappingDocument;

@@ -101,7 +101,7 @@ public class SPARQL2MappingTranslator {
 			throw new R2OTranslationException("Unsupported query!");
 		}
 
-		logger.debug("mappingDocumentResult = \n" + mappingDocumentResult);
+		//logger.debug("mappingDocumentResult = \n" + mappingDocumentResult);
 		
 		Collection<String> distinctCMNames = 
 			mappingDocumentResult.getDistinctConceptMappingsNames();
@@ -113,7 +113,7 @@ public class SPARQL2MappingTranslator {
 			mappingDocumentResultDistinct.addConceptMapping(mergedCM);
 		}
 		
-		logger.debug("mappingDocumentResultDistinct = \n" + mappingDocumentResultDistinct);
+		//logger.debug("mappingDocumentResultDistinct = \n" + mappingDocumentResultDistinct);
 		return mappingDocumentResultDistinct;
 	}
 
@@ -231,7 +231,7 @@ public class SPARQL2MappingTranslator {
 			try {
 				//if(!RDF.type.getURI().equalsIgnoreCase(tp.getPredicate().getURI())) {
 				R2OConceptMapping cmTranslated = this.processTriplePattern(tp);
-				logger.debug("cmTranslated = \n" + cmTranslated);
+//				logger.debug("cmTranslated = \n" + cmTranslated);
 				result.add(cmTranslated);
 				//}	
 			} catch(R2OTranslationException e) {

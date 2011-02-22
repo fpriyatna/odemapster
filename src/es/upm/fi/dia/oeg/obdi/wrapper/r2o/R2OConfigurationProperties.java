@@ -106,7 +106,7 @@ public class R2OConfigurationProperties extends Properties {
 		if(r2oConfigurationDir != null) {
 			this.r2oFilePath = r2oConfigurationDir + r2oFilePath;
 			this.outputFilePath = r2oConfigurationDir + outputFilePath;
-			if(this.queryFilePath != null) {
+			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
 				this.queryFilePath = r2oConfigurationDir + queryFilePath;
 			}
 		}

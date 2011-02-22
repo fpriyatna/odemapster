@@ -220,7 +220,11 @@ public class R2ORelationMappingUnfolder {
 	}
 
 	private R2OQuery processToConcept(R2OQuery cmQuery) throws Exception {
-		String cmBaseTable = this.parentMapping.getHasTables().get(0).getName();
+		R2ODatabaseTable r2oBaseTable = this.parentMapping.getHasTables().get(0);
+		String cmBaseTable = r2oBaseTable.getName();
+		if(r2oBaseTable.getAlias() != null && r2oBaseTable.getAlias() != "") {
+			cmBaseTable = r2oBaseTable.getAlias();
+		}
 		
 		R2OJoinQuery rmQuery = new R2OJoinQuery();
 		cmQuery.addSubQuery(rmQuery);

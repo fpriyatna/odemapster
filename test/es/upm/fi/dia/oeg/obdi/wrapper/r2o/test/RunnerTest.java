@@ -41,15 +41,31 @@ public class RunnerTest extends XMLTestCase {
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
 	
 	public static void main(String args[]) {
-		RunnerTest.testHospital();
+		RunnerTest.testR2RMLTC0008();
 	}
 
+	public static void testR2RMLTC0008() {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/office/";
+		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/R2RMLTC0008/";
+		String r2oConfigurationFile = "R2RMLTC0008.r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
+	}
+	
+	public static void testOffice() {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/office/";
+		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/office/";
+		String r2oConfigurationFile = "office.r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
+	}
+	
 	@Test
 	public static void testHospital() {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
+		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
 		//String r2oConfigurationFile = "universidades.r2o.properties";
 		String r2oConfigurationFile = "dot.r2o.properties";
 //		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
-		RunnerTest.testProcess(r2oConfigurationFile, "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/hospital/");
+		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
 	@Test
@@ -200,12 +216,7 @@ public class RunnerTest extends XMLTestCase {
 
 
 	
-	public static void testOffice() {
-		//String dir = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/odemapster2_report/example/";
-		String dir = "D:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/odemapster2_report/example/";
-		String r2oConfigurationFile = dir + "r2o.properties";
-		RunnerTest.testProcess(r2oConfigurationFile, dir);
-	}
+
 
 	public static void testTestcase53() {
 		//String dir = "D:/Users/fpriyatna/My Dropbox/Public/odemapster/testcases/testcase52/";
@@ -393,6 +404,7 @@ public class RunnerTest extends XMLTestCase {
 			String errorMessage = "Error processing mapping file : " + absoluteR2OConfigurationFile;
 			logger.error(errorMessage);
 		} catch(RelationMappingUnfolderException e) {
+			e.printStackTrace();
 			String errorMessage = "Error processing mapping file : " + absoluteR2OConfigurationFile;
 			logger.error(errorMessage);			
 		} catch(Exception e) {

@@ -41,6 +41,7 @@ public class R2OConstants {
 	public static final String RESTRICTION_ALIAS="r_";
 	public static final String RANGE_TABLE_ALIAS="rt_";
 	public static final String VIEW_ALIAS="v_";
+	public static final String TABLE_ALIAS_PREFIX="t_";
 	
 	
 	//R2O xml attributes

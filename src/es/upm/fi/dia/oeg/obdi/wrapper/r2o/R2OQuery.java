@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 import java.util.Collection;
 import java.util.Vector;
 
+import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZFromItem;
 import Zql.ZQuery;
@@ -42,10 +43,24 @@ public class R2OQuery extends ZQuery {
 		Vector<ZFromItem> mainQueryFromItems = this.getFrom();
 		for(ZFromItem mainQueryFromItem : mainQueryFromItems) {
 			//fromSQL += mainQueryFromItem.getTable();
-			fromSQL += mainQueryFromItem.toString();
-			String mainQueryFromItemAlias = mainQueryFromItem.getAlias(); 
+			//fromSQL += mainQueryFromItem.toString();
+			
+			if(mainQueryFromItem.getSchema() != null) {
+				fromSQL += mainQueryFromItem.getSchema() + ".";
+			}
+			if(mainQueryFromItem.getTable() != null) {
+				fromSQL += mainQueryFromItem.getTable() + ".";
+			}
+			if(mainQueryFromItem.getColumn() != null) {
+				fromSQL += mainQueryFromItem.getColumn() + ".";
+			}
+			fromSQL = fromSQL.substring(0, fromSQL.length()-1);
+						
+			
+			String mainQueryFromItemAlias = mainQueryFromItem.getAlias();
 			if(mainQueryFromItemAlias != null && mainQueryFromItemAlias.length() > 0) {
 				//fromSQL += " AS " + mainQueryFromItem.getAlias() + ", ";
+				
 				fromSQL += " " + mainQueryFromItem.getAlias() + ", ";
 			} else {
 				fromSQL += ", ";
