@@ -21,7 +21,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseView;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OJoin;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.test.RunnerTest;
 
 
 public class R2ORelationMapping extends R2OPropertyMapping 
