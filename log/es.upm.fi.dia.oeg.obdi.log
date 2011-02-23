@@ -2869,3 +2869,51 @@ INNER JOIN  r2rmltcdb8.Student_Sport ON (r2rmltcdb8.Student_Sport.ID_Sport = r2r
 2011-02-02 19:18:33 INFO  RunnerTest.testProcess:402  - Memory usage was 12160 KB.
 
 
+2011-02-23 11:56:28 INFO  RunnerTest.testProcess:393  - ==========================Starting==========================
+2011-02-23 11:56:28 DEBUG R2ORunner.loadPrimitiveOperationsFile:68  - Loading R2O operations file : primitiveOperations.cfg
+2011-02-23 11:56:28 DEBUG R2OPrimitiveOperationsProperties.initOperations:25  - delegableConditionaloperations = equals, not-equals, lo-than, loeq-than, hi-than, hieq-than, in-keyword, between
+2011-02-23 11:56:28 DEBUG R2OPrimitiveOperationsProperties.initOperations:29  - nonDelegableConditionaloperations = match-regexp,not-match-regexp
+2011-02-23 11:56:28 DEBUG R2OPrimitiveOperationsProperties.initOperations:33  - delegableTransformationoperations = constant, concat
+2011-02-23 11:56:28 DEBUG R2OPrimitiveOperationsProperties.initOperations:37  - nonDelegableTransformationoperations = match-regexp,not-match-regexp
+2011-02-23 11:56:28 INFO  R2ORunner.loadConfigurationFile:54  - Active Directory = /home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/R2RMLTC0008/
+2011-02-23 11:56:28 INFO  R2ORunner.loadConfigurationFile:55  - Loading R2O configuration file : R2RMLTC0008.r2o.properties
+2011-02-23 11:56:29 INFO  Utility.getLocalConnection:95  - Opening database connection.
+2011-02-23 11:56:30 DEBUG R2OConfigurationProperties.readConfigurationFile:115  - rdf language = N-TRIPLE
+2011-02-23 11:56:30 DEBUG R2OConfigurationProperties.readConfigurationFile:118  - Jena mode = memory
+2011-02-23 11:56:30 INFO  R2OParser.parse:23  - Parsing r2o mapping document file /home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/R2RMLTC0008/R2RMLTC0008.r2o.xml
+2011-02-23 11:56:30 INFO  R2OConceptMapping.parse:87  - Parsing concept http://geo.linkeddata.es/ontology/Sport
+2011-02-23 11:56:30 INFO  R2OConceptMapping.parse:87  - Parsing concept http://geo.linkeddata.es/ontology/Student
+2011-02-23 11:56:30 DEBUG R2OParser.testParseResult:41  - Validating parsed file....
+2011-02-23 11:56:31 INFO  R2ORunner.run:133  - Unfolding concept http://geo.linkeddata.es/ontology/Sport
+2011-02-23 11:56:31 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:53  - Unfolding = http://geo.linkeddata.es/ontology/Sport
+2011-02-23 11:56:31 INFO  Utility.executeQuery:63  - Executing query = 
+SELECT concat('http://geo.linkeddata.es/resource/Sport/',r2rmltcdb8.Sport.ID) AS uri_cmSport
+FROM r2rmltcdb8.Sport
+
+2011-02-23 11:56:31 INFO  Utility.executeQuery:69  - SQL execution time was 12 ms.
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:58  - Post processing for http://geo.linkeddata.es/ontology/Sport
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:152  - Processing record no 0 : http://geo.linkeddata.es/resource/Sport/110
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:179  - 3 instances retrieved.
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:185  - Post Processing time was 0 s.
+2011-02-23 11:56:31 INFO  R2ORunner.run:133  - Unfolding concept http://geo.linkeddata.es/ontology/Student
+2011-02-23 11:56:31 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:53  - Unfolding = http://geo.linkeddata.es/ontology/Student
+2011-02-23 11:56:31 INFO  Utility.executeQuery:63  - Executing query = 
+SELECT concat('http://geo.linkeddata.es/resource/Student',r2rmltcdb8.Student.ID) AS uri_cmStudent, r2rmltcdb8.Student.FirstName AS at_1189111555, r2rmltcdb8.Student.LastName AS at_915085903, concat('http://geo.linkeddata.es/resource/Sport/',v_1151330954.ID) AS rm_1229322553
+FROM r2rmltcdb8.Student
+INNER JOIN (SELECT r2rmltcdb8.Sport.ID, r2rmltcdb8.Student_Sport.ID_Student
+FROM r2rmltcdb8.Sport
+INNER JOIN  r2rmltcdb8.Student_Sport ON (r2rmltcdb8.Student_Sport.ID_Sport = r2rmltcdb8.Sport.ID)
+) AS v_1151330954 ON (r2rmltcdb8.Student.ID = v_1151330954.ID_Student)
+
+2011-02-23 11:56:31 INFO  Utility.executeQuery:69  - SQL execution time was 60 ms.
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:58  - Post processing for http://geo.linkeddata.es/ontology/Student
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:152  - Processing record no 0 : http://geo.linkeddata.es/resource/Student10
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:179  - 4 instances retrieved.
+2011-02-23 11:56:31 INFO  R2OPostProcessor.processConceptMapping:185  - Post Processing time was 0 s.
+2011-02-23 11:56:31 INFO  R2ORunner.run:170  - Post Processing all concepts time was 0 s.
+2011-02-23 11:56:32 INFO  Utility.closeConnection:110  - Closing db connection.
+2011-02-23 11:56:32 INFO  R2ORunner.run:199  - Execution time was 3 s.
+2011-02-23 11:56:32 INFO  R2ORunner.run:200  - done.
+2011-02-23 11:56:32 INFO  RunnerTest.testProcess:404  - Memory usage was -654 KB.
+
+

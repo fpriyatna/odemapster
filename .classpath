@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/arq-2.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/icu4j-3.4.4.jar"/>
@@ -18,5 +19,31 @@
 	<classpathentry kind="lib" path="lib/xercesImpl-2.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/Zql.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/antlr-2.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/arq.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/commons-lang-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/d2r-server-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/d2rq-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/icu4j_3_4.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/iri.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/jena.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/jetty-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/jetty-util-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/joseki.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/json.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/log4j-1.2.12.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/mysql-connector-java-5.1.7-bin.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/postgresql-8.2dev-503.jdbc3.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/servlet-api-2.5-6.1.10.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/slf4j-api-1.5.6.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/slf4j-log4j12-1.5.6.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/velocity-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="lib/d2r-lib/xml-apis.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

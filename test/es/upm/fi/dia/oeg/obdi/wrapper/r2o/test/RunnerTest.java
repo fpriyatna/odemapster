@@ -1,5 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.test;
 
+//package es.upm.fi.dia.oeg.obdi.wrapper.r2o.test;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.sql.Connection;
