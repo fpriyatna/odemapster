@@ -2917,3 +2917,29 @@ INNER JOIN  r2rmltcdb8.Student_Sport ON (r2rmltcdb8.Student_Sport.ID_Sport = r2r
 2011-02-23 11:56:32 INFO  RunnerTest.testProcess:404  - Memory usage was -654 KB.
 
 
+2011-03-10 11:44:43 INFO  RunnerTest.testProcess:400  - ==========================Starting==========================
+2011-03-10 11:44:43 DEBUG R2ORunner.loadPrimitiveOperationsFile:68  - Loading R2O operations file : primitiveOperations.cfg
+2011-03-10 11:44:43 DEBUG R2OPrimitiveOperationsProperties.initOperations:25  - delegableConditionaloperations = equals, not-equals, lo-than, loeq-than, hi-than, hieq-than, in-keyword, between
+2011-03-10 11:44:43 DEBUG R2OPrimitiveOperationsProperties.initOperations:29  - nonDelegableConditionaloperations = match-regexp,not-match-regexp
+2011-03-10 11:44:43 DEBUG R2OPrimitiveOperationsProperties.initOperations:33  - delegableTransformationoperations = constant, concat
+2011-03-10 11:44:43 DEBUG R2OPrimitiveOperationsProperties.initOperations:37  - nonDelegableTransformationoperations = match-regexp,not-match-regexp
+2011-03-10 11:44:43 INFO  R2ORunner.loadConfigurationFile:54  - Active Directory = /home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole01/
+2011-03-10 11:44:43 INFO  R2ORunner.loadConfigurationFile:55  - Loading R2O configuration file : upmlod.r2o.properties
+2011-03-10 11:44:43 INFO  Utility.getLocalConnection:95  - Opening database connection.
+2011-03-10 11:44:44 DEBUG R2OConfigurationProperties.readConfigurationFile:115  - rdf language = RDF/XML
+2011-03-10 11:44:44 DEBUG R2OConfigurationProperties.readConfigurationFile:118  - Jena mode = memory
+2011-03-10 11:44:44 INFO  R2OParser.parse:23  - Parsing r2o mapping document file /home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole01/(201102241543)_0.2.r2o.xml
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Grupo
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/CentroInstituto
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Centro
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Categor%C3%ADa
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/AreaConocimiento
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Departamento
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/LineaInvestigaci%C3%B3n
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Miembro
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/OtroParticipante
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Actividad
+2011-03-10 11:44:44 INFO  R2OConceptMapping.parse:87  - Parsing concept http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Explotaci%C3%B3nTransferencia
+2011-03-10 11:44:44 ERROR R2OConceptMapping.parse:135  - Error parsing : http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Explotaci%C3%B3nTransferencia , hasTables element should be defined on a concept mapping!
+2011-03-10 11:44:44 ERROR RunnerTest.testProcess:422  - Error processing mapping file : /home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole01/upmlod.r2o.properties
+2011-03-10 11:44:44 ERROR RunnerTest.testProcess:423  - Error message = Error parsing : http://edu.linkeddata.es/ontology/Investigaci%C3%B3n/Explotaci%C3%B3nTransferencia , hasTables element should be defined on a concept mapping!

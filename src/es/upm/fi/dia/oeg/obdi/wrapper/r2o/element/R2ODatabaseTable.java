@@ -28,8 +28,8 @@ public class R2ODatabaseTable implements R2OElement {
 		this.nameAsAttribute = element.getAttribute(R2OConstants.NAME_ATTRIBUTE);
 		if(this.nameAsAttribute == "") {this.nameAsAttribute = null;}
 		
-		this.nameInsideTag = element.getTextContent();
-		if(this.nameInsideTag == "") {this.nameInsideTag = null;}
+		this.nameInsideTag = element.getTextContent().trim();
+		if(this.nameInsideTag.equals("")) {this.nameInsideTag = null;}
 		
 		if(this.nameAsAttribute != null && this.nameInsideTag != null 
 				&& !this.nameAsAttribute.equals(this.nameInsideTag)) {
