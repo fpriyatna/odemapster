@@ -134,18 +134,17 @@ public class Utility {
 		}
 	}
 
-	public static String encodeURI(String uri)  {
-		String result = uri;
+	public static String encodeURI(String originalURI)  {
+		String uri = originalURI;
 		try {
 
 
-			result = new URI(null, uri, null).toASCIIString();
-			result = result.replaceAll(",", "%2C");
-			result = result.replaceAll("'", "%27");
-			result = result.replaceAll("(", "%28");
-			result = result.replaceAll(")", "%29");
-			
-			result = result.replaceAll("%23", "#");
+			uri = new URI(null, originalURI, null).toASCIIString();
+			uri = uri.replaceAll(",", "%2C");
+			uri = uri.replaceAll("'", "%27");
+			uri = uri.replaceAll("\\(", "%28");
+			uri = uri.replaceAll("\\)", "%29");
+			uri = uri.replaceAll("%23", "#");
 			//System.out.println("result = " + result);
 
 			/*
@@ -153,10 +152,10 @@ public class Utility {
 			System.out.println("result = " + result);
 			 */
 		} catch(Exception e) {
-			logger.error("Error encoding uri for uri = " + uri + " because of " + e.getMessage());
+			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
 		}
 
-		return result;
+		return uri;
 	}
 
 	public static boolean inArray(String[] delegableOperations, String operationId) {
@@ -229,16 +228,23 @@ public class Utility {
 			}
 
 	public static void main(String args[]) throws SQLException {
+		String str1 = "abc(def";
+		str1 = str1.replaceAll("\\(", "%28");
+		
 		String uri = "http://www.google.com/españa spain#lang=en,es";
 		String uri2 = "http://geo.linkeddata.es/HospitalesMadrid#Hospitál110051";
+		String uri3 = "http://edu.linkeddata.es/UPM/resource/Fecha/31/12/2004";
+		
 		String text1 = "Índice";
 		//String uri2 = "http://geo.linkeddata.es/resource/�Qui�nes disfrutamos del parque?, Senda de educaci�n ambiental 1.2 o variante |";
 		String newURI = Utility.encodeURI(uri);
 		String newURI2 = Utility.encodeURI(uri2);
+		String newURI3 = Utility.encodeURI(uri3);
 		String newText1 = Utility.encodeURI(text1);
 		
 		System.out.println("newURI = " + newURI);
 		System.out.println("newURI = " + newURI2);
+		System.out.println("newURI3 = " + newURI3);
 		System.out.println("newText1 = " + newText1);
 
 		/*

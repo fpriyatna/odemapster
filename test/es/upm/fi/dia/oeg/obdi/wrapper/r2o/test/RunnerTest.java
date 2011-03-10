@@ -43,9 +43,16 @@ public class RunnerTest extends XMLTestCase {
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
 	
 	public static void main(String args[]) {
-		RunnerTest.testSole01();
+		RunnerTest.testSole02();
 	}
 
+	public static void testSole02() {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/office/";
+		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole02/";
+		String r2oConfigurationFile = "upmlod.r2o.properties";
+		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
+	}
+	
 	public static void testSole01() {
 //		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/office/";
 		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole01/";
