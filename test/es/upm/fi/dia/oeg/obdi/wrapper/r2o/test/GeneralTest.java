@@ -22,7 +22,7 @@ public class GeneralTest {
 	 * @throws SQLException 
 	 * @throws FileNotFoundException 
 	 */
-	public static void main(String[] args) throws SQLException, FileNotFoundException {
+	public static void main(String[] args) throws Exception {
 		
 		String input = "http://www.google.com/Hello Río";
 		System.out.println(Utility.encodeURI(input));

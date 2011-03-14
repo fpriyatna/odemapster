@@ -148,7 +148,7 @@ public abstract class R2OPostProcessor {
 						subjectURI = Utility.encodeURI(subjectURI);
 					}
 
-					if(counter % 1000 == 0) {
+					if(counter % 50000 == 0) {
 						logger.info("Processing record no " + counter + " : " + subjectURI);
 					}
 					counter++;
@@ -170,6 +170,7 @@ public abstract class R2OPostProcessor {
 			} catch(Exception e) {
 				//e.printStackTrace();
 				logger.error("Error processing record no " + counter + " because " + e.getMessage());
+				//throw e;
 			}
 
 
@@ -949,7 +950,7 @@ public abstract class R2OPostProcessor {
 
 			return result;			
 		} catch(SQLException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			logger.error("Error while retrieving SQL records!");
 			throw e;
 		}

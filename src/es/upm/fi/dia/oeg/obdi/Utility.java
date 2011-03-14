@@ -134,29 +134,6 @@ public class Utility {
 		}
 	}
 
-	public static String encodeURI(String originalURI)  {
-		String uri = originalURI;
-		try {
-
-
-			uri = new URI(null, originalURI, null).toASCIIString();
-			uri = uri.replaceAll(",", "%2C");
-			uri = uri.replaceAll("'", "%27");
-			uri = uri.replaceAll("\\(", "%28");
-			uri = uri.replaceAll("\\)", "%29");
-			uri = uri.replaceAll("%23", "#");
-			//System.out.println("result = " + result);
-
-			/*
-			result = new URI(null, uri, null).toURL().toString();
-			System.out.println("result = " + result);
-			 */
-		} catch(Exception e) {
-			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
-		}
-
-		return uri;
-	}
 
 	public static boolean inArray(String[] delegableOperations, String operationId) {
 		boolean isDelegableOperation = false;
@@ -227,40 +204,7 @@ public class Utility {
 		return result;
 			}
 
-	public static void main(String args[]) throws SQLException {
-		String str1 = "abc(def";
-		str1 = str1.replaceAll("\\(", "%28");
-		
-		String uri = "http://www.google.com/españa spain#lang=en,es";
-		String uri2 = "http://geo.linkeddata.es/HospitalesMadrid#Hospitál110051";
-		String uri3 = "http://edu.linkeddata.es/UPM/resource/Fecha/31/12/2004";
-		
-		String text1 = "Índice";
-		//String uri2 = "http://geo.linkeddata.es/resource/�Qui�nes disfrutamos del parque?, Senda de educaci�n ambiental 1.2 o variante |";
-		String newURI = Utility.encodeURI(uri);
-		String newURI2 = Utility.encodeURI(uri2);
-		String newURI3 = Utility.encodeURI(uri3);
-		String newText1 = Utility.encodeURI(text1);
-		
-		System.out.println("newURI = " + newURI);
-		System.out.println("newURI = " + newURI2);
-		System.out.println("newURI3 = " + newURI3);
-		System.out.println("newText1 = " + newText1);
 
-		/*
-		Connection conn = Utility.getLocalConnection("bsbm1m", "bsbm1m"
-				, "nl.cwi.monetdb.jdbc.MonetDriver", "jdbc:monetdb://localhost/demo", null);
-		String bsbmQuery01 = "SELECT distinct nr, label"
-			+ " FROM product p, producttypeproduct ptp"
-			+ " WHERE p.nr = ptp.product AND ptp.\"productType\"=105"
-			+ " AND p.propertyNum1 > 486"
-			+ "	AND p.nr IN (SELECT distinct product FROM productfeatureproduct WHERE productFeature=815)"
-			+ "	AND p.nr IN (SELECT distinct product FROM productfeatureproduct WHERE productFeature=814)"
-			+ " ORDER BY label"
-			+ " LIMIT 10";
-		Utility.executeQuery(conn, bsbmQuery01);
-		*/
-	}
 
 	public static ZConstant constructDatabaseColumn(String columnName) {
 		String databaseType = R2ORunner.configurationProperties.getDatabaseType();
@@ -333,5 +277,110 @@ public class Utility {
 		}
 	}
 
+	public static String encodeURI(String originalURI)  throws Exception {
+		String uri = originalURI;
+		try {
+			uri = uri.trim();
+			
+//			uri = uri.replaceAll("\\(", "%28");
+//			uri = uri.replaceAll("\\)", "%29");
+//			uri = uri.replaceAll("\\[", "%5B");
+//			uri = uri.replaceAll("\\]", "%5D");
+			uri = uri.replaceAll("\\(", "_");
+			uri = uri.replaceAll("\\)", "_");
+			uri = uri.replaceAll("\\[", "_");
+			uri = uri.replaceAll("\\]", "_");
+			uri = uri.replaceAll("\\.", "_");
+			uri = uri.replaceAll("\n", " ");
+			uri = uri.replaceAll("\\n", " ");
+			uri = uri.replaceAll("\t", " ");
+			uri = uri.replaceAll("\\t", " ");
+			uri = uri.replaceAll("\"", "_");
+			
+			uri = uri.replaceAll(",", "%2C");
+			uri = uri.replaceAll("'", "%27");
+			uri = uri.replaceAll(" ", "%20");
+			uri = uri.replaceAll("\\\\", "%5C");
+			uri = uri.replaceAll("\\b\\s{2,}\\b", " ");
+			
 
+			
+//			uri = new URI(uri).toASCIIString();
+			uri = new URI(null, uri, null).toASCIIString();
+			
+			
+			
+			uri = uri.replaceAll("%23", "#");
+			//System.out.println("result = " + result);
+
+			/*
+			result = new URI(null, uri, null).toURL().toString();
+			System.out.println("result = " + result);
+			 */
+		} catch(Exception e) {
+			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
+			throw e;
+		}
+
+		return uri;
+	}
+
+	public static void main(String args[]) throws Exception {
+		
+		String str1 = "[\nabc";
+		System.out.println("str1Encoded = " + Utility.encodeURI(str1));
+
+		String str2 = "_";
+		System.out.println("str2Encoded = " + Utility.encodeURI(str2));
+		
+		String str3 = "\\";
+		System.out.println("str3Encoded = " + Utility.encodeURI(str3));
+
+		String str4 = "Índi%ce";
+		System.out.println("str4Encoded = " + Utility.encodeURI(str4));
+
+		String str5 = "	?";
+		System.out.println("str5Encoded = " + Utility.encodeURI(str5));
+
+		String uri1 = "http://edu.linkeddata.es/UPM/resource/Actividad/Manual de la calidad del Laboratorio de Ensayos QuÝmicos Industriales , (LEQIM), Rev.10";
+		System.out.println("uri1Encoded = " + Utility.encodeURI(uri1));
+		
+		String uri2 = "http://edu.linkeddata.es/UPM/resource/LineaInvestigaci%C3%B3n/31656_Análisis del Sector de las TIC\\s";
+		System.out.println("uri2Encoded = " + Utility.encodeURI(uri2));
+
+		String uri3 = "http://edu.linkeddata.es/UPM/resource/OtroParticipante/ Gallardo	_Fernando";
+		System.out.println("uri3Encoded = " + Utility.encodeURI(uri3));
+			
+		String uri4 = "http://www.google.com/españa spain#lang=en,es";
+		System.out.println("uri4Encoded = " + Utility.encodeURI(uri4));
+		
+		String uri5 = "http://geo.linkeddata.es/HospitalesMadrid#Hospitál110051";
+		System.out.println("uri5Encoded = " + Utility.encodeURI(uri5));
+		
+		String uri6 = "http://edu.linkeddata.es/UPM/resource/Fecha/31/12/2004";
+		System.out.println("uri6Encoded = " + Utility.encodeURI(uri6));
+
+		String uri7 = "http://edu.linkeddata.es/UPM/resource/OtroParticipante/LABORATORIO \"SALVADOR VELAYOS\"_INSTITUTO DE MAGNETISMO APLICADO";
+		System.out.println("uri7Encoded = " + Utility.encodeURI(uri7));
+
+		String uri8 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÁLISIS%20E%20INVESTIGACIÓN%20DE%20ACELERACIÓN%20DE\n%20VALORACIÓN%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
+		System.out.println("uri8Encoded = " + Utility.encodeURI(uri8));
+		
+		
+			
+
+		/*
+		Connection conn = Utility.getLocalConnection("bsbm1m", "bsbm1m"
+				, "nl.cwi.monetdb.jdbc.MonetDriver", "jdbc:monetdb://localhost/demo", null);
+		String bsbmQuery01 = "SELECT distinct nr, label"
+			+ " FROM product p, producttypeproduct ptp"
+			+ " WHERE p.nr = ptp.product AND ptp.\"productType\"=105"
+			+ " AND p.propertyNum1 > 486"
+			+ "	AND p.nr IN (SELECT distinct product FROM productfeatureproduct WHERE productFeature=815)"
+			+ "	AND p.nr IN (SELECT distinct product FROM productfeatureproduct WHERE productFeature=814)"
+			+ " ORDER BY label"
+			+ " LIMIT 10";
+		Utility.executeQuery(conn, bsbmQuery01);
+		*/
+	}
 }

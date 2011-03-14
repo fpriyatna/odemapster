@@ -159,9 +159,10 @@ public class R2ORunner extends AbstractRunner {
 				logger.error(errorMessage);				
 				throw e;				
 			} catch(Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
 				logger.error(errorMessage);
+				throw e;
 			}
 
 		}
