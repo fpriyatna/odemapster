@@ -32,6 +32,7 @@ public class R2ORestrictionUnfolder {
 		ZExp result = null;
 		if(restriction instanceof R2OColumnRestriction) {
 			result = this.unfoldHasColumnRestriction((R2OColumnRestriction) restriction);
+			
 		} else if(restriction instanceof R2OConstantRestriction) {
 			R2OConstantRestriction restrictionConstant = 
 				(R2OConstantRestriction) restriction;
@@ -75,7 +76,7 @@ public class R2ORestrictionUnfolder {
 	private ZConstant unfoldHasColumnRestriction(R2OColumnRestriction restrictionColumn) {
 		R2ODatabaseColumn restrictionValue = 
 			(R2ODatabaseColumn) restrictionColumn.getDatabaseColumn();
-		ZConstant result = Utility.constructDatabaseColumn(restrictionValue.getColumnName()); 
+		ZConstant result = Utility.constructDatabaseColumn(restrictionValue.getFullColumnName()); 
 		
 		return result;
 	}

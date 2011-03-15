@@ -68,6 +68,13 @@ public class R2ORelationMappingUnfolder {
 			this.rangeConceptMapping.getURIAs().getInvolvedExpression();
 		viewQuerySelectItems.addAll(rangeURIAsSelectItems);
 
+		if(this.rangeConceptMapping.getAppliesIf() != null) {
+			Collection<ZSelectItem> rangeAppliesIfSelectItems =
+				this.rangeConceptMapping.getAppliesIf().getInvolvedColumnsSelectItems();
+			viewQuerySelectItems.addAll(rangeAppliesIfSelectItems);			
+		}
+
+		
 		//add joins-via columns to the view select items
 		//the ones not corresponding to domain concept mapping has-table
 		R2OConditionalExpression joinsViaCondition = 

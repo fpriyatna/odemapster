@@ -8,6 +8,8 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
+import Zql.ZSelectItem;
+
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
@@ -69,6 +71,18 @@ public class R2OConditionalExpression extends R2OExpression implements Cloneable
 		return result;
 	}
 
+	public Collection<ZSelectItem> getInvolvedColumnsSelectItems() {
+		Collection<ZSelectItem> result2 = new Vector<ZSelectItem>();
+		Collection<String> involvedColumns = this.getInvolvedColumns();
+		
+		for(String involvedColumn : involvedColumns) {
+			ZSelectItem selectItem = new ZSelectItem(involvedColumn);
+			result2.add(selectItem);
+		}
+
+		return result2;
+	}
+	
 	public Collection<String> getInvolvedTables() {
 		Collection<String> result = new Vector<String>();
 

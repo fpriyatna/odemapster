@@ -36,7 +36,7 @@ public class R2OColumnRestriction extends R2ORestriction{
 
 		result.append(" >");
 		
-		result.append(dbColumn.getColumnName());
+		result.append(dbColumn.getFullColumnName());
 		result.append(XMLUtility.toCloseTag(R2OConstants.HAS_COLUMN_TAG));
 		
 		return result.toString();

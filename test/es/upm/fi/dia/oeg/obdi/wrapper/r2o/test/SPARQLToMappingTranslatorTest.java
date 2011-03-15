@@ -36,8 +36,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			R2OMappingDocument translationResult = translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			R2OMappingDocument translationResult = translator.processQuery(query);
 			logger.debug("translationResult = " + translationResult);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -58,8 +58,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
@@ -81,8 +81,8 @@ public class SPARQLToMappingTranslatorTest {
 
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -103,8 +103,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
@@ -123,8 +123,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
@@ -144,8 +144,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
@@ -165,8 +165,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
@@ -186,8 +186,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());
@@ -207,8 +207,8 @@ public class SPARQLToMappingTranslatorTest {
 				(R2OMappingDocument) new R2OParser().parse(mappingURL);
 			Query query = QueryFactory.read(queryURL) ;
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(r2oMappingDocument, query);
-			translator.processQuery();
+				new SPARQL2MappingTranslator(r2oMappingDocument);
+			translator.processQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail("Exception " + e.getMessage());

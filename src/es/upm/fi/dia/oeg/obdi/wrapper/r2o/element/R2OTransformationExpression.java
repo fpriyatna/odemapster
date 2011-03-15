@@ -107,8 +107,8 @@ public class R2OTransformationExpression extends R2OExpression {
 			if(restriction instanceof R2OColumnRestriction) {
 				R2OColumnRestriction restrictionColumn = (R2OColumnRestriction) restriction;
 				R2ODatabaseColumn dbColumn = restrictionColumn.getDatabaseColumn();
-				String columnName = dbColumn.getColumnName();
-				ZConstant zColumn = Utility.constructDatabaseColumn(dbColumn.getColumnName());
+				String columnName = dbColumn.getFullColumnName();
+				ZConstant zColumn = Utility.constructDatabaseColumn(dbColumn.getFullColumnName());
 				ZSelectItem selectItem = new ZSelectItem();
 				selectItem.setExpression(zColumn);
 				String alias = dbColumn.getAlias();
@@ -149,7 +149,7 @@ public class R2OTransformationExpression extends R2OExpression {
 			R2ORestriction restriction = argRestriction.getRestriction();
 			if(restriction instanceof R2OColumnRestriction) {
 				R2OColumnRestriction restrictionColumn = (R2OColumnRestriction) restriction;
-				String columnName = restrictionColumn.getDatabaseColumn().getColumnName();				
+				String columnName = restrictionColumn.getDatabaseColumn().getFullColumnName();				
 				String tableName = columnName.substring(0, columnName.lastIndexOf("."));
 				result.add(tableName);
 			}

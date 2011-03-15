@@ -35,6 +35,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
@@ -86,7 +87,7 @@ public abstract class R2OPostProcessor {
 
 		boolean isEncodeURI = true;
 		String encodeURI = r2oConceptMapping.getEncodeURI();
-		
+
 		if(encodeURI == null) {
 			encodeURI = R2OConstants.STRING_TRUE;
 		}
@@ -103,7 +104,7 @@ public abstract class R2OPostProcessor {
 		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
 			useNTriple = true;
 		}
-		
+
 		long counter = 0;
 		String previousSubjectURI = null;
 		while(rs.next()) {
@@ -141,9 +142,9 @@ public abstract class R2OPostProcessor {
 					if(subjectURI == null) {
 						throw new Exception("null uri is not allowed!");
 					}
-					
-					
-					
+
+
+
 					if(isEncodeURI) {
 						subjectURI = Utility.encodeURI(subjectURI);
 					}
@@ -154,12 +155,12 @@ public abstract class R2OPostProcessor {
 					counter++;
 
 					Resource subject = model.createResource(subjectURI);
-					
+
 					//create rdf type triple if the subject is different from the previous one
 					if(!subjectURI.equals(previousSubjectURI)) {
 						this.createRDFTypeTriple(useNTriple, subjectURI, conceptName
 								, outputFileWriter, model, subject, object);
-						
+
 					}
 
 					//logger.info("Processing property mappings.");
@@ -168,9 +169,10 @@ public abstract class R2OPostProcessor {
 				}
 
 			} catch(Exception e) {
-				//e.printStackTrace();
+//				e.printStackTrace();
 				logger.error("Error processing record no " + counter + " because " + e.getMessage());
-				//throw e;
+
+				throw e;
 			}
 
 
@@ -205,7 +207,7 @@ public abstract class R2OPostProcessor {
 			model.add(statement);						
 		}
 	}
-	
+
 	/*
 	private Object processDelegableTransformationExpression(ResultSet rs, String alias) throws SQLException {
 		Object result = rs.getObject(alias);;
@@ -255,7 +257,7 @@ public abstract class R2OPostProcessor {
 						this.processAttributeMapping(
 								(R2OAttributeMapping) propertyMapping, rs, model, subject, outputFileWriter);
 					} catch(Exception e) {
-						String newErrorMessage = e.getMessage() + " while processing attribute mapping " + propertyMapping.getId();
+						String newErrorMessage = e.getMessage() + " while processing attribute mapping " + propertyMapping.getName();
 						logger.error(newErrorMessage);
 						throw e;
 					}
@@ -265,7 +267,7 @@ public abstract class R2OPostProcessor {
 						this.processRelationMapping(
 								(R2ORelationMapping) propertyMapping, rs, model, subject, outputFileWriter);
 					} catch(Exception e) {
-						String newErrorMessage = e.getMessage() + " while processing relation mapping " + propertyMapping.getId();
+						String newErrorMessage = e.getMessage() + " while processing relation mapping " + propertyMapping.getName();
 						logger.error(newErrorMessage);
 						throw e;
 					}
@@ -555,72 +557,73 @@ public abstract class R2OPostProcessor {
 			String alias = attributeMapping.getUseSQLAlias();
 			Object dbColValue = this.processSQLExpression(expression, alias, attributeMapping.getUseSQLDataType(), rs);
 			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter);			
-		} else {
+		} else if(attributeMapping.getSelectors() != null){
 			Collection<R2OSelector> attributeMappingSelectors = attributeMapping.getSelectors();
-			if(attributeMappingSelectors != null) {
-				for(R2OSelector attributeMappingSelector : attributeMappingSelectors) {
-					R2OConditionalExpression attributeMappingSelectorAppliesIf = attributeMappingSelector.getAppliesIf();
-					boolean attributeMappingSelectorAppliesIfValue = false;
-					if(attributeMappingSelectorAppliesIf == null) {
-						//if there is no applies-if specified in the selector, then the condition is true
-						attributeMappingSelectorAppliesIfValue = true;
-					} else {
-						//else, evaluate the applies-if condition
 
-						if(this.isDelegableConditionalExpression(attributeMappingSelectorAppliesIf)) {
-							String selectorAppliesIfAlias = attributeMappingSelector.generateAppliesIfAlias();
-							int appliesIfValue = rs.getInt(selectorAppliesIfAlias);
-							if(appliesIfValue == 0) {
-								attributeMappingSelectorAppliesIfValue = false;
-							} else if(appliesIfValue == 1) {
-								attributeMappingSelectorAppliesIfValue = true;
-							}
-						} else {
-							attributeMappingSelectorAppliesIfValue = this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs); 
-							//this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs, ATTRIBUTE_MAPPING_SELECTOR);							
+			for(R2OSelector attributeMappingSelector : attributeMappingSelectors) {
+				R2OConditionalExpression attributeMappingSelectorAppliesIf = attributeMappingSelector.getAppliesIf();
+				boolean attributeMappingSelectorAppliesIfValue = false;
+				if(attributeMappingSelectorAppliesIf == null) {
+					//if there is no applies-if specified in the selector, then the condition is true
+					attributeMappingSelectorAppliesIfValue = true;
+				} else {
+					//else, evaluate the applies-if condition
 
+					if(this.isDelegableConditionalExpression(attributeMappingSelectorAppliesIf)) {
+						String selectorAppliesIfAlias = attributeMappingSelector.generateAppliesIfAlias();
+						int appliesIfValue = rs.getInt(selectorAppliesIfAlias);
+						if(appliesIfValue == 0) {
+							attributeMappingSelectorAppliesIfValue = false;
+						} else if(appliesIfValue == 1) {
+							attributeMappingSelectorAppliesIfValue = true;
 						}
+					} else {
+						attributeMappingSelectorAppliesIfValue = this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs); 
+						//this.processConditionalExpression(attributeMappingSelectorAppliesIf, rs, ATTRIBUTE_MAPPING_SELECTOR);							
 
 					}
 
-					if(attributeMappingSelectorAppliesIfValue) {
-						//String alias = attributeMapping.getId() + attributeMappingSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
-						R2OTransformationExpression attMapSelAT = attributeMappingSelector.getAfterTransform();
-						String selectorDataType = attMapSelAT.getDatatype();
+				}
+
+				if(attributeMappingSelectorAppliesIfValue) {
+					//String alias = attributeMapping.getId() + attributeMappingSelector.hashCode() + R2OConstants.AFTERTRANSFORM_TAG;
+					R2OTransformationExpression attMapSelAT = attributeMappingSelector.getAfterTransform();
+					String selectorDataType = attMapSelAT.getDatatype();
 
 
-						Object propVal = null;
-						if(isDelegableTransformationExpression(attMapSelAT)) {
-							String alias = R2OConstants.AFTERTRANSFORM_ALIAS + attributeMappingSelector.hashCode();
+					Object propVal = null;
+					if(isDelegableTransformationExpression(attMapSelAT)) {
+						String alias = R2OConstants.AFTERTRANSFORM_ALIAS + attributeMappingSelector.hashCode();
 
-							propVal = this.processSQLExpression(alias, alias, selectorDataType, rs);
-							//propVal = this.processDelegableTransformationExpression(rs, alias);							
-						} else {
-							propVal = this.processNonDelegableTransformationExpression(rs, attMapSelAT);
-						}
+						propVal = this.processSQLExpression(alias, alias, selectorDataType, rs);
+						//propVal = this.processDelegableTransformationExpression(rs, alias);							
+					} else {
+						propVal = this.processNonDelegableTransformationExpression(rs, attMapSelAT);
+					}
 
 
-						String isCollection = attMapSelAT.getIsCollection();
-						if(isCollection != null && isCollection != "") {
-							if(isCollection.equalsIgnoreCase(R2OConstants.DATATYPE_COLLECTION)) {
-								Collection<Object> propCol = (Collection<Object>) propVal;
-								for(Object propColItem : propCol) {
-									this.addDataTypeProperty(
-											propName, propColItem, amDataType, lang, model, subject, outputFileWriter);
-								}
-							} else {
-								throw new Exception("Unsupported return type : " + selectorDataType);
-							}
-						} else {
-							if(propVal!= null && propVal != "" && !propVal.equals("")) {
+					String isCollection = attMapSelAT.getIsCollection();
+					if(isCollection != null && isCollection != "") {
+						if(isCollection.equalsIgnoreCase(R2OConstants.DATATYPE_COLLECTION)) {
+							Collection<Object> propCol = (Collection<Object>) propVal;
+							for(Object propColItem : propCol) {
 								this.addDataTypeProperty(
-										propName, propVal, amDataType, lang, model, subject, outputFileWriter);							
+										propName, propColItem, amDataType, lang, model, subject, outputFileWriter);
 							}
+						} else {
+							throw new Exception("Unsupported return type : " + selectorDataType);
+						}
+					} else {
+						if(propVal!= null && propVal != "" && !propVal.equals("")) {
+							this.addDataTypeProperty(
+									propName, propVal, amDataType, lang, model, subject, outputFileWriter);							
 						}
 					}
 				}
-
 			}
+
+		} else {
+			throw new Exception("Unsupported attribue mapping.");
 		}
 
 	}
@@ -962,10 +965,19 @@ public abstract class R2OPostProcessor {
 
 		if(restriction instanceof R2OColumnRestriction) {
 			R2OColumnRestriction restrictionColumn = (R2OColumnRestriction) restriction;
-			String columnName = restrictionColumn.getDatabaseColumn().getColumnName();
-			String dataType = restrictionColumn.getDatabaseColumn().getDataType();
-			String alias = columnName.replaceAll("\\.", "_");
-			result = this.processSQLExpression(columnName, alias, dataType, rs);
+			R2ODatabaseColumn dbColumn = restrictionColumn.getDatabaseColumn();
+			String fullColumnName = dbColumn.getFullColumnName();
+			String columnNameOnly = dbColumn.getColumnNameOnly();
+			String dataType = dbColumn.getDataType();
+			
+			String alias = columnNameOnly;
+//			if(restrictionColumn.getDatabaseColumn().getAlias() != null) {
+//				alias = restrictionColumn.getDatabaseColumn().getAlias();
+//			}
+			//alias can be used only if the container is delegable 
+			//String alias = columnName.replaceAll("\\.", "_");
+			
+			result = this.processSQLExpression(fullColumnName, alias, dataType, rs);
 		} else if(restriction instanceof R2OConstantRestriction) {
 			R2OConstantRestriction restrictionConstant = (R2OConstantRestriction) restriction;
 			result = restrictionConstant.getConstantValue();

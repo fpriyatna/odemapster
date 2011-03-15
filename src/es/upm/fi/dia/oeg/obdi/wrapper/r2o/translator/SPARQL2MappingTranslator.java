@@ -11,35 +11,22 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
-import com.hp.hpl.jena.sparql.algebra.op.Op0;
-import com.hp.hpl.jena.sparql.algebra.op.Op1;
-import com.hp.hpl.jena.sparql.algebra.op.Op2;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
-import com.hp.hpl.jena.sparql.algebra.op.OpExt;
-import com.hp.hpl.jena.sparql.algebra.op.OpModifier;
-import com.hp.hpl.jena.sparql.algebra.op.OpN;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
-import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
-import com.hp.hpl.jena.tdb.store.Hash;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConstantRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OJoin;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationRestriction;
@@ -53,22 +40,35 @@ public class SPARQL2MappingTranslator {
 	private static Logger logger = Logger.getLogger(SPARQL2MappingTranslator.class);
 
 	private R2OMappingDocument mappingDocument;
-	private Query query;
+	//private Query query;
 
 	private Map<Node, R2OConceptMapping> mapNodeConceptMapping;
 	private Map<Node, R2OPropertyMapping> mapPredicatePropertyMapping;
 	//private Map<Node, R2OConceptMapping> mapObjectMappings;
 
 
-	public SPARQL2MappingTranslator(R2OMappingDocument mappingDocument,
-			Query query) {
+	public SPARQL2MappingTranslator(R2OMappingDocument mappingDocument) {
 		super();
 		this.mappingDocument = mappingDocument;
-		this.query = query;
+		//this.query = query;
 	}
 
-	public R2OMappingDocument processQuery() throws R2OTranslationException, MergeException {
-		R2OMappingDocument mappingDocumentResult = null;
+	private Collection<R2OConceptMapping> queriesToMappings(Collection<Query> queries) throws R2OTranslationException {
+		Collection<R2OConceptMapping> result = null;
+		for(Query query : queries) {
+			Collection<R2OConceptMapping> tempResult = this.queryToMappings(query);
+			
+			if(result == null) {
+				result = tempResult;
+			} else {
+				result.addAll(tempResult);
+			}
+		}
+		
+		return result;
+	}
+	
+	private Collection<R2OConceptMapping> queryToMappings(Query query) throws R2OTranslationException {
 		Op op = Algebra.compile(query) ;
 		if(op instanceof OpProject) {
 			OpProject opProject = (OpProject) op;
@@ -78,31 +78,96 @@ public class SPARQL2MappingTranslator {
 				OpBGP opbg = (OpBGP) opProjectSubOp;
 				Collection<R2OConceptMapping> cmsTranslated = this.processBGP(opbg);
 
-				mappingDocumentResult = new R2OMappingDocument(cmsTranslated);
-
-				//add range of relation mappings if not defined in the translated mapping document
-				Collection<R2ORelationMapping> rms = 
-					mappingDocumentResult.getR2ORelationMappings();
-				for(R2ORelationMapping rm : rms) {
-					String toConceptID = rm.getToConcept();
-					R2OConceptMapping cmRange = mappingDocumentResult.getConceptMappingsByMappingId(toConceptID);
-					R2OConceptMapping cmRangeStripped;
-					if(cmRange == null) {
-						cmRange = this.mappingDocument.getConceptMappingsByMappingId(toConceptID);
-						cmRangeStripped = cmRange.getStripped();
-						cmRangeStripped.setMaterialize(R2OConstants.STRING_FALSE);
-					} else {
-						cmRangeStripped = cmRange.getStripped();
-					}
-					mappingDocumentResult.addConceptMapping(cmRangeStripped);
-				}
+				return cmsTranslated;
+			} else {
+				throw new R2OTranslationException("Unsupported query!");
 			}
 		} else {
 			throw new R2OTranslationException("Unsupported query!");
 		}
 
-		//logger.debug("mappingDocumentResult = \n" + mappingDocumentResult);
+
+	}
+
+	//	public R2OMappingDocument processQuery(Query query) throws R2OTranslationException, MergeException {
+	//		R2OMappingDocument mappingDocumentResult = null;
+	//		
+	//		
+	//		Op op = Algebra.compile(query) ;
+	//		if(op instanceof OpProject) {
+	//			OpProject opProject = (OpProject) op;
+	//			Op opProjectSubOp = opProject.getSubOp();
+	//
+	//			if(opProjectSubOp instanceof OpBGP) {
+	//				OpBGP opbg = (OpBGP) opProjectSubOp;
+	//				Collection<R2OConceptMapping> cmsTranslated = this.processBGP(opbg);
+	//
+	//				mappingDocumentResult = new R2OMappingDocument(cmsTranslated);
+	//
+	//				//add range of relation mappings if not defined in the translated mapping document
+	//				Collection<R2ORelationMapping> rms = 
+	//					mappingDocumentResult.getR2ORelationMappings();
+	//				for(R2ORelationMapping rm : rms) {
+	//					String toConceptID = rm.getToConcept();
+	//					R2OConceptMapping cmRange = mappingDocumentResult.getConceptMappingsByMappingId(toConceptID);
+	//					R2OConceptMapping cmRangeStripped;
+	//					if(cmRange == null) {
+	//						cmRange = this.mappingDocument.getConceptMappingsByMappingId(toConceptID);
+	//						cmRangeStripped = cmRange.getStripped();
+	//						cmRangeStripped.setMaterialize(R2OConstants.STRING_FALSE);
+	//					} else {
+	//						cmRangeStripped = cmRange.getStripped();
+	//					}
+	//					mappingDocumentResult.addConceptMapping(cmRangeStripped);
+	//				}
+	//			}
+	//		} else {
+	//			throw new R2OTranslationException("Unsupported query!");
+	//		}
+	//
+	//		//logger.debug("mappingDocumentResult = \n" + mappingDocumentResult);
+	//		
+	//		Collection<String> distinctCMNames = 
+	//			mappingDocumentResult.getDistinctConceptMappingsNames();
+	//		R2OMappingDocument mappingDocumentResultDistinct = new R2OMappingDocument();
+	//		for(String distinctCMName : distinctCMNames) {
+	//			Collection<R2OConceptMapping> cms =  
+	//				mappingDocumentResult.getR2OConceptMappings(distinctCMName);
+	//			R2OConceptMapping mergedCM = R2OConceptMapping.merge(cms);
+	//			mappingDocumentResultDistinct.addConceptMapping(mergedCM);
+	//		}
+	//		
+	//		//logger.debug("mappingDocumentResultDistinct = \n" + mappingDocumentResultDistinct);
+	//		return mappingDocumentResultDistinct;
+	//	}
+
+
+	public R2OMappingDocument processQuery(Query query) throws R2OTranslationException, MergeException {
+		R2OMappingDocument mappingDocumentResult = null;
+
 		
+		Collection<R2OConceptMapping> cmsTranslated = this.queryToMappings(query);
+		
+		
+		mappingDocumentResult = new R2OMappingDocument(cmsTranslated);
+
+		//add range of relation mappings if not defined in the translated mapping document
+		Collection<R2ORelationMapping> rms = 
+			mappingDocumentResult.getR2ORelationMappings();
+		for(R2ORelationMapping rm : rms) {
+			String toConceptID = rm.getToConcept();
+			R2OConceptMapping cmRange = mappingDocumentResult.getConceptMappingsByMappingId(toConceptID);
+			R2OConceptMapping cmRangeStripped;
+			if(cmRange == null) {
+				cmRange = this.mappingDocument.getConceptMappingsByMappingId(toConceptID);
+				cmRangeStripped = cmRange.getStripped();
+				cmRangeStripped.setMaterialize(R2OConstants.STRING_FALSE);
+			} else {
+				cmRangeStripped = cmRange.getStripped();
+			}
+			mappingDocumentResult.addConceptMapping(cmRangeStripped);
+		}
+
 		Collection<String> distinctCMNames = 
 			mappingDocumentResult.getDistinctConceptMappingsNames();
 		R2OMappingDocument mappingDocumentResultDistinct = new R2OMappingDocument();
@@ -112,11 +177,10 @@ public class SPARQL2MappingTranslator {
 			R2OConceptMapping mergedCM = R2OConceptMapping.merge(cms);
 			mappingDocumentResultDistinct.addConceptMapping(mergedCM);
 		}
-		
+
 		//logger.debug("mappingDocumentResultDistinct = \n" + mappingDocumentResultDistinct);
 		return mappingDocumentResultDistinct;
 	}
-
 
 
 
@@ -231,7 +295,7 @@ public class SPARQL2MappingTranslator {
 			try {
 				//if(!RDF.type.getURI().equalsIgnoreCase(tp.getPredicate().getURI())) {
 				R2OConceptMapping cmTranslated = this.processTriplePattern(tp);
-//				logger.debug("cmTranslated = \n" + cmTranslated);
+				//				logger.debug("cmTranslated = \n" + cmTranslated);
 				result.add(cmTranslated);
 				//}	
 			} catch(R2OTranslationException e) {

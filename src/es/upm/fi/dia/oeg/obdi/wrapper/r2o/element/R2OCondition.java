@@ -93,7 +93,7 @@ public class R2OCondition implements R2OElement, Cloneable{
 			R2ORestriction restriction = argRestriction.getRestriction();
 			if(restriction instanceof R2OColumnRestriction) {
 				R2OColumnRestriction restrictionColumn = (R2OColumnRestriction) restriction;
-				String columnName = restrictionColumn.getDatabaseColumn().getColumnName(); 
+				String columnName = restrictionColumn.getDatabaseColumn().getFullColumnName(); 
 				result.add(columnName);
 			}
 		}

@@ -46,5 +46,6 @@
 	<classpathentry kind="lib" path="lib/d2r-lib/velocity-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/rqr4r2o.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

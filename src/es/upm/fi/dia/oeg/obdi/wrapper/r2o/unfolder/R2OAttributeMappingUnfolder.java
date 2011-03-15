@@ -21,12 +21,12 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
 
 public class R2OAttributeMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2OAttributeMappingUnfolder.class);
-	
+
 	private R2OAttributeMapping attributeMapping;
 	private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
 	private R2OConfigurationProperties configurationProperties;
-	
-	
+
+
 	public R2OAttributeMappingUnfolder(R2OAttributeMapping r2oAttributeMapping,
 			R2OPrimitiveOperationsProperties primitiveOperationsProperties,
 			R2OConfigurationProperties configurationProperties) {
@@ -40,7 +40,7 @@ public class R2OAttributeMappingUnfolder {
 	public Collection<ZSelectItem> unfold() throws AttributeMappingUnfolderException {
 		try {
 			Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-			
+
 			String langDBCol = attributeMapping.getLangDBCol();
 			if(langDBCol != null) {
 				ZSelectItem selectItem = new ZSelectItem();
@@ -67,29 +67,29 @@ public class R2OAttributeMappingUnfolder {
 				selectItem.setAlias(selectItemAlias);
 				result.add(selectItem);
 				//mainQuery.getSelect().add(selectItem);			
-			} else {
+			} else if (attributeMapping.getSelectors() != null){ //use selectors
 				Collection<R2OSelector> attributeSelectors = attributeMapping.getSelectors();
-				if(attributeSelectors != null) {
-					for(R2OSelector attributeSelector : attributeSelectors) {
-						
-						//processing selector applies if
-						R2OConditionalExpression selectorAppliesIf = attributeSelector.getAppliesIf();
-						R2OConditionalExpressionUnfolder r2oConditionalExpressionUnfolder =
-							new R2OConditionalExpressionUnfolder(selectorAppliesIf);
-						String appliesIfAlias = attributeSelector.generateAppliesIfAlias();
-						result.addAll(r2oConditionalExpressionUnfolder.unfold(appliesIfAlias));
-						
+				for(R2OSelector attributeSelector : attributeSelectors) {
 
-						//processing selector after transform
-						R2OTransformationExpression attSelectorAfterTransform = attributeSelector.getAfterTransform();
-						R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder =
-							new R2OTransformationExpressionUnfolder(attSelectorAfterTransform);
-						String afterTransformAlias = attributeSelector.generateAfterTransformAlias();
-						result.addAll(r2oTransformationExpressionUnfolder.unfold(afterTransformAlias));
-						
+					//processing selector applies if
+					R2OConditionalExpression selectorAppliesIf = attributeSelector.getAppliesIf();
+					R2OConditionalExpressionUnfolder r2oConditionalExpressionUnfolder =
+						new R2OConditionalExpressionUnfolder(selectorAppliesIf);
+					String appliesIfAlias = attributeSelector.generateAppliesIfAlias();
+					result.addAll(r2oConditionalExpressionUnfolder.unfold(appliesIfAlias));
 
-					}			
+
+					//processing selector after transform
+					R2OTransformationExpression attSelectorAfterTransform = attributeSelector.getAfterTransform();
+					R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder =
+						new R2OTransformationExpressionUnfolder(attSelectorAfterTransform);
+					String afterTransformAlias = attributeSelector.generateAfterTransformAlias();
+					result.addAll(r2oTransformationExpressionUnfolder.unfold(afterTransformAlias));
+
+
 				}			
+			} else {
+
 			}
 
 			return result;			

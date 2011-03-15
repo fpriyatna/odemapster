@@ -107,8 +107,8 @@ public class R2ORunner extends AbstractRunner {
 			logger.info("Parsing query file : " + queryFilePath);
 			Query query = QueryFactory.read(queryFilePath);
 			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(originalMappingDocument, query);
-			translationResultMappingDocument = translator.processQuery();
+				new SPARQL2MappingTranslator(originalMappingDocument);
+			translationResultMappingDocument = translator.processQuery(query);
 			//logger.debug("translationResult = " + translationResultMappingDocument);
 		}
 		

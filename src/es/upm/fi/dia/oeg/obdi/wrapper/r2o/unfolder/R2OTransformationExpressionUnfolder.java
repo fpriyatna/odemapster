@@ -39,10 +39,11 @@ public class R2OTransformationExpressionUnfolder {
 			ZExp selectExpression = this.unfoldDelegableTransformationExpression();
 			ZSelectItem zSelectItem = new ZSelectItem();
 			zSelectItem.setExpression(selectExpression);
-			zSelectItem.setAlias(alias);
+			zSelectItem.setAlias(alias); //we can only set alias in case delegable ones
 			result.add(zSelectItem);
 			//mainQuery.getSelect().add(zSelectItem);
 		} else {
+			//we can't set alias here
 			logger.debug("Non Delegable transformation expression of attribute selector.");
 			Collection<ZSelectItem> selectItems = this.unfoldNonDelegableTransformationExpression(transformationExpression);
 			for(ZSelectItem zSelectItem : selectItems) {
