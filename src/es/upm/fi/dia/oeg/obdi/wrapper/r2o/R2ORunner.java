@@ -105,9 +105,9 @@ public class R2ORunner extends AbstractRunner {
 		R2OMappingDocument translationResultMappingDocument = null;
 		if(queryFilePath != null && !queryFilePath.equals("")) {
 			logger.info("Parsing query file : " + queryFilePath);
-			Query query = QueryFactory.read(queryFilePath);
 			SPARQL2MappingTranslator translator = 
 				new SPARQL2MappingTranslator(originalMappingDocument);
+			Query query = QueryFactory.read(queryFilePath);
 			translationResultMappingDocument = translator.processQuery(query);
 			//logger.debug("translationResult = " + translationResultMappingDocument);
 		}
@@ -119,10 +119,13 @@ public class R2ORunner extends AbstractRunner {
 			mappingDocument = translationResultMappingDocument;
 		}
 		
-		//preparing output file
-		FileWriter fileWriter = 
-			new FileWriter(configurationProperties.getOutputFilePath());
+		String outputFileName = configurationProperties.getOutputFilePath();
 
+		//preparing output file
+//		FileWriter fileWriter = new FileWriter(outputFileName);
+	    FileOutputStream fileOut = new FileOutputStream (outputFileName);
+	    OutputStreamWriter out = new OutputStreamWriter (fileOut, "UTF-8");
+	    
 		Model model = null;
 		Collection<AbstractConceptMapping> conceptMappings = 
 			mappingDocument.getConceptMappings();
@@ -142,7 +145,8 @@ public class R2ORunner extends AbstractRunner {
 						model = postProcessor.createModel(
 								configurationProperties.getJenaMode(), mappingDocument.hashCode() + "");
 					}
-					postProcessor.processConceptMapping(rs, model, conceptMapping, fileWriter);
+//					postProcessor.processConceptMapping(rs, model, conceptMapping, fileWriter);
+					postProcessor.processConceptMapping(rs, model, conceptMapping, out);
 
 					//cleaning up
 					Utility.closeStatement(rs.getStatement());
@@ -186,8 +190,10 @@ public class R2ORunner extends AbstractRunner {
 
 		//cleaning up
 		try {
-			fileWriter.flush();
-			fileWriter.close();
+//			fileWriter.flush();
+//			fileWriter.close();
+			out.flush(); out.close();
+			fileOut.flush(); fileOut.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {

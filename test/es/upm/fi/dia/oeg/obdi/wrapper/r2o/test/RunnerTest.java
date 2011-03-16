@@ -41,57 +41,64 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderExcept
 
 public class RunnerTest extends TestCase {
 	private static Logger logger = Logger.getLogger(RunnerTest.class);
-	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+//	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
+	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/";
+	
 	
 	public static void main(String args[]) throws Exception {
-		RunnerTest.testSole05();
+		RunnerTest.testR2RMLTC0008();
 	}
 
 	public static void testSole05() throws Exception {
-		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole05/";
-//		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole03/";
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole05/";
+//		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole05/";
+		String mappingDirectory = MAPPING_DIRECTORY + "sole05/";
 		String r2oConfigurationFile = "upmlod_2.26.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
 	public static void testSole04() throws Exception {
-		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole04/";
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole04/";
 //		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole03/";
+		String mappingDirectory = MAPPING_DIRECTORY + "sole04/";
 		String r2oConfigurationFile = "upmlod_2.26.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
 	
 	public static void testSole03() throws Exception {
-		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole03/";
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole03/";
 //		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole03/";
+		String mappingDirectory = MAPPING_DIRECTORY + "sole03/";
 		String r2oConfigurationFile = "upmlod_2.26.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	private static void testSole02() throws Exception {
-		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole02/";
+	public static void testSole02() throws Exception {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole02/";
 //		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole02/";
+		String mappingDirectory = MAPPING_DIRECTORY + "sole02/";
 		String r2oConfigurationFile = "upmlod.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	private static void testSole01() throws Exception {
-		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole01/";
+	public static void testSole01() throws Exception {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/sole01/";
 //		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/sole01/";
+		String mappingDirectory = MAPPING_DIRECTORY + "sole01/";
 		String r2oConfigurationFile = "upmlod.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	private static void testR2RMLTC0008() throws Exception {
+	public static void testR2RMLTC0008() throws Exception {
 //		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/office/";
 		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/R2RMLTC0008/";
 		String r2oConfigurationFile = "R2RMLTC0008.r2o.properties";
 		RunnerTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	private static void testOffice() throws Exception {
+	public static void testOffice() throws Exception {
 //		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/office/";
 		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/office/";
 		String r2oConfigurationFile = "office.r2o.properties";
@@ -99,9 +106,9 @@ public class RunnerTest extends TestCase {
 	}
 	
 	@Test
-	private static void testHospital() throws Exception {
-		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
-//		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
+	public static void testHospital() throws Exception {
+//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
+		String mappingDirectory = "/home/fpriyatna/Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
 		//String r2oConfigurationFile = "universidades.r2o.properties";
 		String r2oConfigurationFile = "dot.r2o.properties";
 //		String r2oConfigurationFile = "query01(monetdb).r2o.properties";

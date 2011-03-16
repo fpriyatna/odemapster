@@ -277,10 +277,27 @@ public class Utility {
 		}
 	}
 
+
+	public static String encodeLiteral(String originalLiteral) {
+		String result = originalLiteral;
+		try {
+			if(result != null) {
+				result = result.replaceAll("\"", "\\\\\"");
+				result = result.replaceAll("\'", "\\\\\'");
+				result = result.replaceAll("\\\\n", " ");
+				result = result.replaceAll("\\\\r", " ");
+			}
+		} catch(Exception e) {
+			logger.error("Error encoding literal for literal = " + originalLiteral + " because of " + e.getMessage());
+		}
+		
+		return result;
+	}
+	
 	public static String encodeURI(String originalURI)  throws Exception {
 		String uri = originalURI;
 		try {
-			uri = uri.trim();
+			//uri = uri.trim();
 			
 //			uri = uri.replaceAll("\\(", "%28");
 //			uri = uri.replaceAll("\\)", "%29");
@@ -290,16 +307,16 @@ public class Utility {
 			uri = uri.replaceAll("\\)", "_");
 			uri = uri.replaceAll("\\[", "_");
 			uri = uri.replaceAll("\\]", "_");
-			uri = uri.replaceAll("\\.", "_");
+//			uri = uri.replaceAll("\\.", "_");
 			uri = uri.replaceAll("\n", " ");
 			uri = uri.replaceAll("\\n", " ");
 			uri = uri.replaceAll("\t", " ");
 			uri = uri.replaceAll("\\t", " ");
-			uri = uri.replaceAll("\"", "_");
+//			uri = uri.replaceAll("\"", "_");
 			
-			uri = uri.replaceAll(",", "%2C");
-			uri = uri.replaceAll("'", "%27");
-			uri = uri.replaceAll(" ", "%20");
+			
+			
+			
 			uri = uri.replaceAll("\\\\", "%5C");
 			uri = uri.replaceAll("\\b\\s{2,}\\b", " ");
 			
@@ -307,8 +324,9 @@ public class Utility {
 			
 //			uri = new URI(uri).toASCIIString();
 			uri = new URI(null, uri, null).toASCIIString();
-			
-			
+			uri = uri.replaceAll(",", "%2C");
+			uri = uri.replaceAll("'", "%27");
+			uri = uri.replaceAll(" ", "%20");
 			
 			uri = uri.replaceAll("%23", "#");
 			//System.out.println("result = " + result);
@@ -327,7 +345,7 @@ public class Utility {
 
 	public static void main(String args[]) throws Exception {
 		
-		String str1 = "[\nabc";
+		String str1 = "[\nab,c";
 		System.out.println("str1Encoded = " + Utility.encodeURI(str1));
 
 		String str2 = "_";
@@ -341,6 +359,18 @@ public class Utility {
 
 		String str5 = "	?";
 		System.out.println("str5Encoded = " + Utility.encodeURI(str5));
+
+		String str6 = ",";
+		System.out.println("str6Encoded = " + Utility.encodeURI(str6));
+
+		String str7 = "'";
+		System.out.println("str7Encoded = " + Utility.encodeURI(str7));
+
+		String str8 = "abc def";
+		System.out.println("str8Encoded = " + Utility.encodeURI(str8));
+
+		String str9 = "\"";
+		System.out.println("str9Encoded = " + Utility.encodeURI(str9));
 
 		String uri1 = "http://edu.linkeddata.es/UPM/resource/Actividad/Manual de la calidad del Laboratorio de Ensayos QuÝmicos Industriales , (LEQIM), Rev.10";
 		System.out.println("uri1Encoded = " + Utility.encodeURI(uri1));
@@ -366,7 +396,14 @@ public class Utility {
 		String uri8 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÁLISIS%20E%20INVESTIGACIÓN%20DE%20ACELERACIÓN%20DE\n%20VALORACIÓN%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
 		System.out.println("uri8Encoded = " + Utility.encodeURI(uri8));
 		
+		String literal1 = "Say \\r \"Hello World\"";
+		System.out.println("literal1 = " + literal1);
+		System.out.println("literal1Encoded = " + Utility.encodeLiteral(literal1));
 		
+		String literal2 = "Say \\n \'Hello World\'";
+		System.out.println("literal2 = " + literal2);
+		System.out.println("literal2Encoded = " + Utility.encodeLiteral(literal2));
+
 			
 
 		/*

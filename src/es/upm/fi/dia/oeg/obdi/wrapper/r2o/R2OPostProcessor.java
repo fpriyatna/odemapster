@@ -344,12 +344,12 @@ public abstract class R2OPostProcessor {
 		}
 
 		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-			String triple = 
-				this.createTriple(
-						this.createURIref(subject.getURI())
-						, this.createURIref(propName)
-						, this.createURIref(literalString)); 
-			outputFileWriter.append(triple);			
+			String tripleSubject = this.createURIref(subject.getURI());
+			String triplePredicate = this.createURIref(propName);
+			//String tripleObject = this.createURIref(literalString);
+			String tripleObject = literalString;
+			String tripleString = this.createTriple(tripleSubject, triplePredicate, tripleObject); 
+			outputFileWriter.append(tripleString);			
 		} else {
 			subject.addProperty(model.createProperty(propName), literal);
 		}
@@ -378,6 +378,7 @@ public abstract class R2OPostProcessor {
 	//Create Literal
 	private String createLiteral(String value)
 	{
+		value = Utility.encodeLiteral(value);
 		StringBuffer result = new StringBuffer();
 		result.append("\"");
 		result.append(value);
@@ -388,6 +389,7 @@ public abstract class R2OPostProcessor {
 	//Create typed literal
 	private String createDataTypeLiteral(String value, String datatypeURI)
 	{
+		value = Utility.encodeLiteral(value);
 		StringBuffer result = new StringBuffer();
 		result.append("\"");
 		result.append(value);
@@ -399,6 +401,7 @@ public abstract class R2OPostProcessor {
 	//Create language tagged literal
 	private String createLanguageLiteral(String text, String languageCode)
 	{
+		text = Utility.encodeLiteral(text);
 		StringBuffer result = new StringBuffer();
 		result.append("\"");
 		result.append(text);
