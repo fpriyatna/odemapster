@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Vector;
 
-public class R2ODefaultPostProcessor extends R2OPostProcessor {
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
+
+public class R2ODefaultPostProcessor extends R2ODataTranslator {
 
 	@Override
 	protected Object processCustomFunctionTransformationExpression(

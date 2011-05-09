@@ -17,10 +17,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
 
 public class R2OConditionalExpressionUnfolder {
 	private static Logger logger = Logger.getLogger(R2OConditionalExpressionUnfolder.class);
@@ -83,8 +83,9 @@ public class R2OConditionalExpressionUnfolder {
 
 
 
-	private Collection<String> unfoldNonDelegableConditionalExpression(R2OConditionalExpression conditionalExpression) {
-		return conditionalExpression.getInvolvedColumns();
+	private Collection<ZSelectItem> unfoldNonDelegableConditionalExpression(
+			R2OConditionalExpression conditionalExpression) {
+		return conditionalExpression.getSelectItems();
 	}
 
 
@@ -110,13 +111,13 @@ public class R2OConditionalExpressionUnfolder {
 				//mainQuery.getSelect().add(selectorAppliesIfSQL);							
 			} else {
 				//logger.debug("Non Delegable conditional expression of attribute selector.");
-				Collection<String> involvedColumns = this.unfoldNonDelegableConditionalExpression(this.conditionalExpression);
-				for(String columnName : involvedColumns) {
-					ZSelectItem zSelectItem = new ZSelectItem();
-					String columnNameAlias = columnName.replaceAll("\\.", "_");
-					zSelectItem.setExpression(new ZConstant(columnName, ZConstant.COLUMNNAME));
-					zSelectItem.setAlias(columnNameAlias);	
-					result.add(zSelectItem);
+				Collection<ZSelectItem> involvedColumns = 
+					this.unfoldNonDelegableConditionalExpression(this.conditionalExpression);
+				for(ZSelectItem selectItem : involvedColumns) {
+					String columnNameAlias = selectItem.toString().replaceAll("\\.", "_");
+//					zSelectItem.setExpression(new ZConstant(columnName, ZConstant.COLUMNNAME));
+					selectItem.setAlias(columnNameAlias);	
+					result.add(selectItem);
 					//mainQuery.getSelect().add(zSelectItem);
 				}
 			}

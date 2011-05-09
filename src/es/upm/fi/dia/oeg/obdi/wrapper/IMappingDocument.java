@@ -5,12 +5,15 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 
 
 public interface IMappingDocument extends IParseable {
+	
+	
 	public void parse(Element xmlElement) throws ParseException;
-
+	public String getMappingDocumentID();
+	
 	public List<String> getMappedConcepts();
 	public Collection<AbstractConceptMapping> getConceptMappings();
 	public Collection<AbstractConceptMapping> getConceptMappingsByConceptURI(String conceptURI);

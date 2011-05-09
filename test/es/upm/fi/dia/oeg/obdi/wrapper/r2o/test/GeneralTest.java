@@ -26,6 +26,15 @@ public class GeneralTest {
 		
 		String input = "http://www.google.com/Hello Río";
 		System.out.println(Utility.encodeURI(input));
+		String inputString1 = "INSERT INTO TBLSTUDENT(CL1, CL2, CL3, CL4, CL5, CL6) VALUES (a, b, c, d, e, f);";
+		String inputString2 = "INSERT INTO TBLSTUDENT(a, b, c, d, e ,f);";
+		
+		String[] inputString1Split = inputString1.split("\\s");
+		System.out.println(inputString1Split.length);
+		
+		String[] inputString2Split = inputString2.split("\\s");
+		System.out.println(inputString2Split.length);
+		
 	}
 
 }

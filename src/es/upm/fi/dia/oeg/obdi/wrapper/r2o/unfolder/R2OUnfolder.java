@@ -17,7 +17,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 
 
 public class R2OUnfolder extends AbstractUnfolder {

@@ -15,6 +15,7 @@ public class R2OConfigurationProperties extends Properties {
 	private Logger logger = Logger.getLogger(R2OConfigurationProperties.class);
 
 	Connection conn;
+	private String ontologyFilePath;
 	private String r2oFilePath;
 	private String outputFilePath;
 	private String queryFilePath;
@@ -99,6 +100,7 @@ public class R2OConfigurationProperties extends Properties {
 		}
 
 		this.r2oFilePath = this.getProperty(R2OConstants.R2OFILE_PROP_NAME);
+		this.ontologyFilePath = this.getProperty(R2OConstants.ONTOFILE_PROP_NAME);
 		this.outputFilePath = this.getProperty(R2OConstants.OUTPUTFILE_PROP_NAME);
 		this.queryFilePath = this.getProperty(R2OConstants.QUERYFILE_PROP_NAME);
 		
@@ -109,6 +111,10 @@ public class R2OConfigurationProperties extends Properties {
 			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
 				this.queryFilePath = r2oConfigurationDir + queryFilePath;
 			}
+			if(this.ontologyFilePath != null && !this.ontologyFilePath.equals("")) {
+				this.ontologyFilePath = r2oConfigurationDir + ontologyFilePath;
+			}
+			
 		}
 
 		this.rdfLanguage = this.getProperty(R2OConstants.OUTPUTFILE_RDF_LANGUAGE);
@@ -151,6 +157,10 @@ public class R2OConfigurationProperties extends Properties {
 
 	public String getQueryFilePath() {
 		return queryFilePath;
+	}
+
+	public String getOntologyFilePath() {
+		return ontologyFilePath;
 	}
 
 }

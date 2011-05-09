@@ -24,19 +24,20 @@ import es.upm.fi.dia.oeg.obdi.wrapper.IParseable;
 import es.upm.fi.dia.oeg.obdi.wrapper.IPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OElement;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ODatabaseMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ORelationMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ODatabaseMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
 
 public class R2OMappingDocument implements IMappingDocument {
 	private static Logger logger = Logger.getLogger(R2OMappingDocument.class);
 	
-	Collection<R2ODatabaseMapping> dbschemaDescs;
-	Collection<R2OConceptMapping> conceptmapDefs;
-	Collection<R2OPropertyMapping> propertymapDefs;
+	private String mappingDocumentID;
+	private Collection<R2ODatabaseMapping> dbschemaDescs;
+	private Collection<R2OConceptMapping> conceptmapDefs;
+	private Collection<R2OPropertyMapping> propertymapDefs;
 	
 	
 	public R2OMappingDocument(Collection<R2OConceptMapping> conceptmapDefs) {
@@ -337,6 +338,16 @@ public class R2OMappingDocument implements IMappingDocument {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public String getMappingDocumentID() {
+		if(this.mappingDocumentID != null) {
+			return this.mappingDocumentID;
+		} else {
+			return "md" + this.hashCode() + "";
+		}
+			
 	}
 	
 }

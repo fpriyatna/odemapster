@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -16,18 +17,18 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OJoinQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseView;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OJoin;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConceptRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTableRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.RestrictionValue;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2ORelationMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConceptRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseView;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OJoin;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTableRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.RestrictionValue;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
 
 public class R2ORelationMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2ORelationMappingUnfolder.class);
@@ -52,8 +53,8 @@ public class R2ORelationMappingUnfolder {
 
 		R2OQuery viewQuery = new R2OQuery();
 
-		Vector<ZSelectItem> viewQuerySelectItems = new Vector<ZSelectItem>();
-		viewQuery.addSelect(viewQuerySelectItems);
+		Collection<ZSelectItem> setViewQuerySelectItems = new HashSet<ZSelectItem>();
+		
 		Vector<ZFromItem> viewQueryFromItems = new Vector<ZFromItem>();
 		viewQuery.addFrom(viewQueryFromItems);
 
@@ -65,13 +66,15 @@ public class R2ORelationMappingUnfolder {
 
 		//add uri-as columns to the view select items
 		Collection<ZSelectItem> rangeURIAsSelectItems =
-			this.rangeConceptMapping.getURIAs().getInvolvedExpression();
-		viewQuerySelectItems.addAll(rangeURIAsSelectItems);
+			this.rangeConceptMapping.getURIAs().getSelectItems();
+		logger.debug("rangeURIAsSelectItems = " + rangeURIAsSelectItems);
+		setViewQuerySelectItems.addAll(rangeURIAsSelectItems);
 
 		if(this.rangeConceptMapping.getAppliesIf() != null) {
 			Collection<ZSelectItem> rangeAppliesIfSelectItems =
-				this.rangeConceptMapping.getAppliesIf().getInvolvedColumnsSelectItems();
-			viewQuerySelectItems.addAll(rangeAppliesIfSelectItems);			
+				this.rangeConceptMapping.getAppliesIf().getSelectItems();
+			logger.debug("rangeAppliesIfSelectItems = " + rangeAppliesIfSelectItems);
+			setViewQuerySelectItems.addAll(rangeAppliesIfSelectItems);			
 		}
 
 		
@@ -79,16 +82,20 @@ public class R2ORelationMappingUnfolder {
 		//the ones not corresponding to domain concept mapping has-table
 		R2OConditionalExpression joinsViaCondition = 
 			joinsVia.getJoinConditionalExpression();
-		Collection<String> rmJoinsViaSelectItems =
-			joinsViaCondition.getInvolvedColumns();
-		String parentMappingHasTable = this.parentMapping.getHasTable().getName();
-		parentMappingHasTable += ".";
-		for(String rmJoinsViaSelectItem : rmJoinsViaSelectItems) {
-			if(!rmJoinsViaSelectItem.startsWith(parentMappingHasTable)) {
-				ZConstant zColumn = Utility.constructDatabaseColumn(rmJoinsViaSelectItem);
-				ZSelectItem selectItem = new ZSelectItem();
-				selectItem.setExpression(zColumn);
-				viewQuerySelectItems.add(selectItem);
+		logger.debug("joinsViaCondition = " + joinsViaCondition);
+		Collection<ZSelectItem> rmJoinsViaSelectItems = joinsViaCondition.getSelectItems();
+		logger.debug("rmJoinsViaSelectItems = " + rmJoinsViaSelectItems);
+		String parentMappingTableName = this.parentMapping.getHasTable().getName();
+		logger.debug("parentMappingTableName = " + parentMappingTableName);
+		parentMappingTableName += ".";
+		for(ZSelectItem rmJoinsViaSelectItem : rmJoinsViaSelectItems) {
+			logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
+			if(!rmJoinsViaSelectItem.toString().startsWith(parentMappingTableName)) {
+//				ZConstant zColumn = Utility.constructDatabaseColumn(rmJoinsViaSelectItem);
+//				ZSelectItem selectItem = new ZSelectItem();
+//				selectItem.setExpression(zColumn);
+				logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
+				setViewQuerySelectItems.add(rmJoinsViaSelectItem);
 			}
 		}
 
@@ -183,6 +190,11 @@ public class R2ORelationMappingUnfolder {
 		ZExpression joinsViaExpression = condExprUnfolder.unfoldDelegableConditionalExpression();
 		viewQueryJoinQuery.setOnExpression(joinsViaExpression);
 
+		Vector<ZSelectItem> viewQuerySelectItems = new Vector<ZSelectItem>();
+		viewQuerySelectItems.addAll(setViewQuerySelectItems);
+		viewQuery.addSelect(viewQuerySelectItems);
+		
+		logger.debug("viewQuery = " + viewQuery);
 		return viewQuery;
 
 	}
@@ -320,6 +332,7 @@ public class R2ORelationMappingUnfolder {
 
 	public R2OQuery unfold(R2OQuery cmQuery) 
 	throws RelationMappingUnfolderException {
+		logger.debug("Unfolding relation mapping = " + relationMapping.getRelationName());
 		String toConcept = this.relationMapping.getToConcept();
 
 		try {

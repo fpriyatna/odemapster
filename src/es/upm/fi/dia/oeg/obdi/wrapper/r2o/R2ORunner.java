@@ -9,10 +9,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -22,6 +25,8 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
+import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
+import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractParser;
@@ -29,7 +34,9 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.ModelWriter;
 import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.translator.SPARQL2MappingTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODefaultDataTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2MappingTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
@@ -38,13 +45,13 @@ public class R2ORunner extends AbstractRunner {
 	private static final String PRIMITIVE_OPERATIONS_FILE = "primitiveOperations.cfg";
 	public static R2OConfigurationProperties configurationProperties;
 	public static R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	private R2OPostProcessor postProcessor; 	
+	private R2ODataTranslator postProcessor; 	
 
 	public R2ORunner() {
-		this.postProcessor = new R2ODefaultPostProcessor();
+		this.postProcessor = new R2ODefaultDataTranslator();
 	}
 
-	public R2ORunner(R2OPostProcessor postProcessor) {
+	public R2ORunner(R2ODataTranslator postProcessor) {
 		this.postProcessor = postProcessor;
 	}
 
@@ -88,91 +95,80 @@ public class R2ORunner extends AbstractRunner {
 		R2ORunner.configurationProperties = 
 			this.loadConfigurationFile(mappingDirectory, r2oConfigurationFile);
 
-
+		//loading ontology file
+		String ontologyFilePath = configurationProperties.getOntologyFilePath();
 		
 		//parsing r2o mapping document
 		R2OParser parser = new R2OParser(); 
+		String r2oMappingDocumentPath = configurationProperties.getR2oFilePath();
 		R2OMappingDocument originalMappingDocument = 
-			(R2OMappingDocument) parser.parse(configurationProperties.getR2oFilePath());
+			(R2OMappingDocument) parser.parse(r2oMappingDocumentPath);
 		
 		//test the parsing result
 		parser.testParseResult(configurationProperties.getR2oFilePath(), originalMappingDocument);
 
 
 		
-		//parsing sparql file
+		//parsing sparql file path
 		String queryFilePath = configurationProperties.getQueryFilePath();
-		R2OMappingDocument translationResultMappingDocument = null;
-		if(queryFilePath != null && !queryFilePath.equals("")) {
+//		R2OMappingDocument translationResultMappingDocument = null;
+		Collection<R2OMappingDocument> translationResultMappingDocuments = new ArrayList<R2OMappingDocument>();
+		
+		if(queryFilePath == null || queryFilePath.equals("")) {
+//			translationResultMappingDocument = originalMappingDocument;
+			translationResultMappingDocuments.add(originalMappingDocument);
+		} else {
+			//process SPARQL file
 			logger.info("Parsing query file : " + queryFilePath);
 			SPARQL2MappingTranslator translator = 
 				new SPARQL2MappingTranslator(originalMappingDocument);
-			Query query = QueryFactory.read(queryFilePath);
-			translationResultMappingDocument = translator.processQuery(query);
-			//logger.debug("translationResult = " + translationResultMappingDocument);
+			Query originalQuery = QueryFactory.read(queryFilePath);
+			List<Query> queries = new ArrayList<Query>();
+			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
+				queries.add(originalQuery);
+			} else {
+				//rewrite the query based on the mappings and ontology
+				logger.info("Rewriting query...");
+				Collection <String> mappedOntologyElements = 
+					MappingsExtractor.getMappedPredicatesFromR2O(r2oMappingDocumentPath);
+				String rewritterWrapperMode = "N";
+				RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
+				queries = rewritterWapper.rewrite(originalQuery);
+				logger.info("No of rewriting query result = " + queries.size());
+			}
+
+			for(int i=0; i<queries.size(); i++) {
+//				translationResultMappingDocument = translator.processQuery(query);
+				Query query = queries.get(i);
+				logger.info("query(" + i + ") = " + query);
+				translationResultMappingDocuments.add(translator.processQuery(query));
+			}
+			
+			
+			//logger.debug("translationResult = " + translationResultMappingDocument);			 
 		}
 		
-		R2OMappingDocument mappingDocument;
-		if(translationResultMappingDocument == null) {
-			mappingDocument = originalMappingDocument;
-		} else {
-			mappingDocument = translationResultMappingDocument;
-		}
 		
 		String outputFileName = configurationProperties.getOutputFilePath();
 
 		//preparing output file
 //		FileWriter fileWriter = new FileWriter(outputFileName);
-	    FileOutputStream fileOut = new FileOutputStream (outputFileName);
-	    OutputStreamWriter out = new OutputStreamWriter (fileOut, "UTF-8");
+	    OutputStream fileOut = new FileOutputStream (outputFileName);
+	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
 	    
-		Model model = null;
-		Collection<AbstractConceptMapping> conceptMappings = 
-			mappingDocument.getConceptMappings();
+	    String jenaModel = configurationProperties.getJenaMode();
+		Model model = Utility.createJenaModel(jenaModel);
+		
 		long startGeneratingModel = System.currentTimeMillis();
-		for(AbstractConceptMapping conceptMapping : conceptMappings) {
-			try {
-				//unfold mapped concepts
-				logger.info("Unfolding concept " + conceptMapping.getConceptName());
-				R2OUnfolder unfolder = 
-					new R2OUnfolder(mappingDocument, primitiveOperationsProperties, configurationProperties);
-				String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
-				if(sqlQuery != null) {
-					//evaluate query
-					ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, configurationProperties.getConn());
-
-					if(model == null) {
-						model = postProcessor.createModel(
-								configurationProperties.getJenaMode(), mappingDocument.hashCode() + "");
-					}
-//					postProcessor.processConceptMapping(rs, model, conceptMapping, fileWriter);
-					postProcessor.processConceptMapping(rs, model, conceptMapping, out);
-
-					//cleaning up
-					Utility.closeStatement(rs.getStatement());
-					Utility.closeRecordSet(rs);					
-				}
-
-
-			} catch(SQLException e) {
-				String errorMessage = "Error processing " + conceptMapping.getName();
-				logger.error(errorMessage);				
-				throw e;
-			} catch(RelationMappingUnfolderException e) {
-				String errorMessage = "Error processing " + conceptMapping.getName();
-				logger.error(errorMessage);				
-				throw e;				
-			} catch(Exception e) {
-				//e.printStackTrace();
-				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
-				logger.error(errorMessage);
-				throw e;
-			}
-
+		R2OMappingDocumentMaterializer materializer = 
+			new R2OMappingDocumentMaterializer(postProcessor, model, out);
+		for(R2OMappingDocument translationResultMappingDocument : translationResultMappingDocuments) {
+			materializer.materialize(translationResultMappingDocument);
 		}
+		
 		long endGeneratingModel = System.currentTimeMillis();
 		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
-		logger.info("Post Processing all concepts time was "+(durationGeneratingModel)+" s.");
+		logger.info("Materializing Mapping Document time was "+(durationGeneratingModel)+" s.");
 
 		if(model == null) {
 			logger.warn("Model was empty!");

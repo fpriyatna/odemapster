@@ -47,5 +47,8 @@
 	<classpathentry kind="lib" path="lib/d2r-lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/rqr4r2o.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/owlapi-bin.jar"/>
+	<classpathentry kind="lib" path="lib/HermiT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

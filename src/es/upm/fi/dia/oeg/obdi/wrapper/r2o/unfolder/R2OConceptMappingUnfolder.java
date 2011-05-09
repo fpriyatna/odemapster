@@ -17,12 +17,12 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OCondition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 
 public class R2OConceptMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2OConceptMappingUnfolder.class);
@@ -72,7 +72,8 @@ public class R2OConceptMappingUnfolder {
 				cmQuery.getSelect().add(zSelectItemConceptURI);				
 			} else {
 				logger.debug("Non delegable transformation expression of concept mapping uri-as.");
-				Collection<ZSelectItem> selectItems = conceptMappingURIAsTransformationExpression.getInvolvedExpression();
+				Collection<ZSelectItem> selectItems = 
+					conceptMappingURIAsTransformationExpression.getSelectItems();
 				logger.debug("selectItems = " + selectItems);
 				for(ZSelectItem zSelectItem : selectItems) {
 					cmQuery.getSelect().add(zSelectItem);
@@ -115,23 +116,26 @@ public class R2OConceptMappingUnfolder {
 							ZExp conditionUnfolded = r2oConditionUnfolder.unfold();
 							cmQuery.addWhere(conditionUnfolded);							
 						} else {
-							Collection<String> conditionColumns = condition.getInvolvedColumns();
+//							Collection<String> conditionColumns = condition.getInvolvedColumns();
+							Collection<ZSelectItem> conditionColumns = condition.getSelectItems();
+							
 							logger.debug("conditionColumns = " + conditionColumns);
-							for(String conditionColumn : conditionColumns) {
-								ZSelectItem zSelectItem = new ZSelectItem(conditionColumn);
-								zSelectItem.setAlias(conditionColumn.replaceAll("\\.", "_"));
-								cmQuery.getSelect().add(zSelectItem);
+							for(ZSelectItem conditionColumn : conditionColumns) {
+								String alias = conditionColumn.toString().replaceAll("\\.", "_");
+								conditionColumn.setAlias(alias);
+								cmQuery.getSelect().add(conditionColumn);
 							}							
 						}
 					}
 				} else {
 					logger.debug("Non delegable conditional expression of concept mapping.");
-					Collection<String> cmAppliesIfColumns = cmAppliesIf.getInvolvedColumns();
+//					Collection<String> cmAppliesIfColumns = cmAppliesIf.getInvolvedColumns();
+					Collection<ZSelectItem> cmAppliesIfColumns = cmAppliesIf.getSelectItems();
 					logger.debug("cmAppliesIfColumns = " + cmAppliesIfColumns);
-					for(String cmAppliesIfColumn : cmAppliesIfColumns) {
-						ZSelectItem zSelectItem = new ZSelectItem(cmAppliesIfColumn);
-						zSelectItem.setAlias(cmAppliesIfColumn.replaceAll("\\.", "_"));
-						cmQuery.getSelect().add(zSelectItem);
+					for(ZSelectItem cmAppliesIfColumn : cmAppliesIfColumns) {
+						String alias = cmAppliesIfColumn.toString().replaceAll("\\.", "_");
+						cmAppliesIfColumn.setAlias(alias);
+						cmQuery.getSelect().add(cmAppliesIfColumn);
 					}					
 				}
 

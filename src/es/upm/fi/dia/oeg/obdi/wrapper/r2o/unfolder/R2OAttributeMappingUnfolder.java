@@ -14,10 +14,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSelector;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 
 public class R2OAttributeMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2OAttributeMappingUnfolder.class);
@@ -38,6 +38,8 @@ public class R2OAttributeMappingUnfolder {
 
 
 	public Collection<ZSelectItem> unfold() throws AttributeMappingUnfolderException {
+		logger.debug("Unfolding attribute mapping = " + attributeMapping.getAttributeName());
+
 		try {
 			Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 

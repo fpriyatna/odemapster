@@ -9,15 +9,15 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.MonetDBColumn;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ODatabaseColumn;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OColumnRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OConstantRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OSQLRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.RestrictionValue;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.MonetDBColumn;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConstantRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSQLRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.RestrictionValue;
 
 public class R2ORestrictionUnfolder {
 	private R2ORestriction restriction;

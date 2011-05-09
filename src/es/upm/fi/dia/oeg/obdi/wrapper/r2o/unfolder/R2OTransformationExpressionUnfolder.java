@@ -14,9 +14,9 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OArgumentRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 
 public class R2OTransformationExpressionUnfolder {
 	private R2OTransformationExpression transformationExpression;
@@ -81,8 +81,9 @@ public class R2OTransformationExpressionUnfolder {
 		}		
 	}
 	
-	private Collection<ZSelectItem> unfoldNonDelegableTransformationExpression(R2OTransformationExpression transformationExpression) {
-		return transformationExpression.getInvolvedExpression();
+	private Collection<ZSelectItem> unfoldNonDelegableTransformationExpression(
+			R2OTransformationExpression transformationExpression) {
+		return transformationExpression.getSelectItems();
 	}
 
 }

@@ -13,8 +13,8 @@ import com.hp.hpl.jena.query.QueryFactory;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.mapping.R2OConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.translator.SPARQL2MappingTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2MappingTranslator;
 
 public class SPARQLToMappingTranslatorTest {
 	private static Logger logger = Logger.getLogger(SPARQL2MappingTranslator.class);
