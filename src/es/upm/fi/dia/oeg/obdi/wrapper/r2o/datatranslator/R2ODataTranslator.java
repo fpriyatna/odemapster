@@ -139,7 +139,7 @@ public abstract class R2ODataTranslator {
 				if(processRecord) {
 					String subjectURI = null;
 					if(uriAsIsDelegableTransformationExpr) {
-						String alias = R2OConstants.URI_AS_ALIAS + r2oConceptMapping.getId();
+						String alias = r2oConceptMapping.generateURIAlias();
 						subjectURI = rs.getString(alias);
 						//uri = this.processDelegableTransformationExpression(rs, alias).toString();
 					} else {
@@ -436,9 +436,7 @@ public abstract class R2ODataTranslator {
 						//if(isDelegableTransformationExpression(selectorAT)) {
 						if(selectorAT.isDelegableTransformationExpression()) {
 							String returnType = selectorAT.getDatatype();
-
-							String alias = R2OConstants.AFTERTRANSFORM_ALIAS + selector.hashCode();
-
+							String alias = selector.generateAfterTransformAlias();
 							propVal = this.processSQLExpression(alias, alias, returnType, rs);
 							//propVal = this.processDelegableTransformationExpression(rs, alias);							
 						} else {
@@ -537,8 +535,7 @@ public abstract class R2ODataTranslator {
 					Object propVal = null;
 					//if(isDelegableTransformationExpression(attMapSelAT)) {
 					if(attMapSelAT.isDelegableTransformationExpression()) {
-						String alias = R2OConstants.AFTERTRANSFORM_ALIAS + attributeMappingSelector.hashCode();
-
+						String alias = attributeMappingSelector.generateAfterTransformAlias();
 						propVal = this.processSQLExpression(alias, alias, selectorDataType, rs);
 						//propVal = this.processDelegableTransformationExpression(rs, alias);							
 					} else {
