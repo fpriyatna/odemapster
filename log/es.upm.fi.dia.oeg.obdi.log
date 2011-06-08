@@ -1,0 +1,246 @@
+2011-06-08 13:01:27 INFO  ODEMapsterTest.testProcess:529  - ==========================Starting==========================
+2011-06-08 13:01:27 DEBUG R2ORunner.loadPrimitiveOperationsFile:78  - Loading R2O operations file : primitiveOperations.cfg
+2011-06-08 13:01:27 DEBUG R2OPrimitiveOperationsProperties.initOperations:25  - delegableConditionaloperations = equals, not-equals, lo-than, loeq-than, hi-than, hieq-than, in-keyword, between
+2011-06-08 13:01:27 DEBUG R2OPrimitiveOperationsProperties.initOperations:29  - nonDelegableConditionaloperations = match-regexp,not-match-regexp
+2011-06-08 13:01:27 DEBUG R2OPrimitiveOperationsProperties.initOperations:33  - delegableTransformationoperations = constant, concat
+2011-06-08 13:01:27 DEBUG R2OPrimitiveOperationsProperties.initOperations:37  - nonDelegableTransformationoperations = match-regexp,not-match-regexp
+2011-06-08 13:01:27 DEBUG R2ORunner.loadConfigurationFile:64  - Active Directory = C:/Users/Freddy/Dropbox/jose-mora/freddy/mapping-collection/r2o/TC0009/
+2011-06-08 13:01:27 DEBUG R2ORunner.loadConfigurationFile:65  - Loading R2O configuration file : TC0009(mysql).r2o.properties
+2011-06-08 13:01:27 INFO  Utility.getLocalConnection:170  - Opening database connection.
+2011-06-08 13:01:27 DEBUG R2OConfigurationProperties.readConfigurationFile:120  - rdf language = RDF/XML
+2011-06-08 13:01:27 DEBUG R2OConfigurationProperties.readConfigurationFile:123  - Jena mode = memory
+2011-06-08 13:01:27 INFO  R2OParser.parse:23  - Parsing r2o mapping document file C:/Users/Freddy/Dropbox/jose-mora/freddy/mapping-collection/r2o/TC0009/TC0009(mysql).r2o.xml
+2011-06-08 13:01:27 INFO  R2OConceptMapping.parse:87  - Parsing concept http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:27 INFO  R2OAttributeMapping.parse:61  - Parsing attribute http://mappingpedia.linkeddata.es/ontologies/hasName
+2011-06-08 13:01:27 INFO  R2OAttributeMapping.parse:61  - Parsing attribute http://mappingpedia.linkeddata.es/ontologies/email
+2011-06-08 13:01:27 INFO  R2OAttributeMapping.parse:61  - Parsing attribute http://mappingpedia.linkeddata.es/ontologies/web
+2011-06-08 13:01:27 INFO  R2ORelationMapping.parse:48  - Parsing attribute http://mappingpedia.linkeddata.es/ontologies/hasSport
+2011-06-08 13:01:27 INFO  R2OConceptMapping.parse:87  - Parsing concept http://mappingpedia.linkeddata.es/ontologies/Sport
+2011-06-08 13:01:27 INFO  R2OAttributeMapping.parse:61  - Parsing attribute http://mappingpedia.linkeddata.es/ontologies/hasSportName
+2011-06-08 13:01:27 DEBUG R2OParser.testParseResult:41  - Validating parsed file....
+2011-06-08 13:01:28 INFO  R2ORunner.run:132  - Parsing query file : C:/Users/Freddy/Dropbox/jose-mora/freddy/mapping-collection/r2o/TC0009/R2RMLTC0009.sparql
+2011-06-08 13:01:28 INFO  TranslatorUtility.initMapNodeConceptMappingByPredicateURI:265  - Type of : ?st = http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.trans:122  - op instanceof OpUnion
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:178  - tp = ?st @http://mappingpedia.linkeddata.es/ontologies/hasName ?n
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:47  - Unfolding = http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:98  - Delegable conditional expression of concept mapping applies-if.
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/hasName
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/email
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/web
+2011-06-08 13:01:28 DEBUG R2ORelationMappingUnfolder.unfold:338  - Unfolding relation mapping = http://mappingpedia.linkeddata.es/ontologies/hasSport
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:186  - alpha(tp) = SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:189  - beta(tp,sub) = uri_cmStudent
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:191  - beta(tp,pre) = 'http://mappingpedia.linkeddata.es/ontologies/hasName'
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:193  - beta(tp,obj) = at_27929635
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:196  - genCondSQL(tp,beta) = ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:200  - genPRSQL(tp,beta,name) = [uri_cmStudent st, 'http://mappingpedia.linkeddata.es/ontologies/hasName' hasName, at_27929635 n]
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:218  - tpQuery = SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_5171887
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+
+
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:178  - tp = ?st @http://mappingpedia.linkeddata.es/ontologies/email ?e
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:47  - Unfolding = http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:98  - Delegable conditional expression of concept mapping applies-if.
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/hasName
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/email
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/web
+2011-06-08 13:01:28 DEBUG R2ORelationMappingUnfolder.unfold:338  - Unfolding relation mapping = http://mappingpedia.linkeddata.es/ontologies/hasSport
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:186  - alpha(tp) = SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:189  - beta(tp,sub) = uri_cmStudent
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:191  - beta(tp,pre) = 'http://mappingpedia.linkeddata.es/ontologies/email'
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:193  - beta(tp,obj) = at_20436132
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:196  - genCondSQL(tp,beta) = ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:200  - genPRSQL(tp,beta,name) = [uri_cmStudent st, 'http://mappingpedia.linkeddata.es/ontologies/email' email, at_20436132 e]
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:218  - tpQuery = SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_4395216
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+
+
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:178  - tp = ?st @http://mappingpedia.linkeddata.es/ontologies/email ?e
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:47  - Unfolding = http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:98  - Delegable conditional expression of concept mapping applies-if.
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/hasName
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/email
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/web
+2011-06-08 13:01:28 DEBUG R2ORelationMappingUnfolder.unfold:338  - Unfolding relation mapping = http://mappingpedia.linkeddata.es/ontologies/hasSport
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:186  - alpha(tp) = SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:189  - beta(tp,sub) = uri_cmStudent
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:191  - beta(tp,pre) = 'http://mappingpedia.linkeddata.es/ontologies/email'
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:193  - beta(tp,obj) = at_20436132
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:196  - genCondSQL(tp,beta) = ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:200  - genPRSQL(tp,beta,name) = [uri_cmStudent st, 'http://mappingpedia.linkeddata.es/ontologies/email' email, at_20436132 e]
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:218  - tpQuery = SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_1706726
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+
+
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:178  - tp = ?st @http://mappingpedia.linkeddata.es/ontologies/hasName ?n
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:47  - Unfolding = http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:28 DEBUG R2OConceptMappingUnfolder.unfoldConceptMapping:98  - Delegable conditional expression of concept mapping applies-if.
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/hasName
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/email
+2011-06-08 13:01:28 DEBUG R2OAttributeMappingUnfolder.unfold:35  - Unfolding attribute mapping = http://mappingpedia.linkeddata.es/ontologies/web
+2011-06-08 13:01:28 DEBUG R2ORelationMappingUnfolder.unfold:338  - Unfolding relation mapping = http://mappingpedia.linkeddata.es/ontologies/hasSport
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:186  - alpha(tp) = SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:189  - beta(tp,sub) = uri_cmStudent
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:191  - beta(tp,pre) = 'http://mappingpedia.linkeddata.es/ontologies/hasName'
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:193  - beta(tp,obj) = at_27929635
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:196  - genCondSQL(tp,beta) = ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transTP:200  - genPRSQL(tp,beta,name) = [uri_cmStudent st, 'http://mappingpedia.linkeddata.es/ontologies/hasName' hasName, at_27929635 n]
+2011-06-08 13:01:28 INFO  SPARQL2SQLTranslator.transTP:218  - tpQuery = SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_22975191
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transUNION:287  - query1 = SELECT hasName  AS hasName, n  AS n, email  AS email, e  AS e, v_17940412R1.st  AS st
+FROM (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_5171887
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+ ) v_17940412R1
+LEFT JOIN (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_4395216
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+ ) AS v_17103907R2 ON null
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transUNION:288  - query2 = SELECT hasName  AS hasName, n  AS n, email  AS email, e  AS e, v_29461068R3.st  AS st
+FROM (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_1706726
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+ ) v_29461068R3
+LEFT JOIN (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_22975191
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+ ) AS v_33187868R4 ON null
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.transUNION:292  - query1 UNION query2 = SELECT hasName  AS hasName, n  AS n, email  AS email, e  AS e, v_17940412R1.st  AS st
+FROM (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_5171887
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+ ) v_17940412R1
+LEFT JOIN (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_4395216
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+ ) AS v_17103907R2 ON null
+UNION SELECT hasName  AS hasName, n  AS n, email  AS email, e  AS e, v_29461068R3.st  AS st
+FROM (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_1706726
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+ ) v_29461068R3
+LEFT JOIN (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_22975191
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+ ) AS v_33187868R4 ON null
+
+2011-06-08 13:01:28 DEBUG SPARQL2SQLTranslator.query2SQL:169  - sparql2sql result = SELECT hasName  AS hasName, n  AS n, email  AS email, e  AS e, v_17940412R1.st  AS st
+FROM (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_5171887
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+ ) v_17940412R1
+LEFT JOIN (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_4395216
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+ ) AS v_17103907R2 ON null
+UNION SELECT hasName  AS hasName, n  AS n, email  AS email, e  AS e, v_29461068R3.st  AS st
+FROM (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/email'  AS email, at_20436132  AS e
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_1706726
+WHERE ((TRUE AND (at_20436132 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/email' = 'http://mappingpedia.linkeddata.es/ontologies/email'))
+ ) v_29461068R3
+LEFT JOIN (SELECT uri_cmStudent  AS st, 'http://mappingpedia.linkeddata.es/ontologies/hasName'  AS hasName, at_27929635  AS n
+FROM (SELECT concat('http://mappingpedia.linkeddata.es/resource/Student/',TC0009.Student.ID)  AS uri_cmStudent, TC0009.Student.Name  AS at_27929635, TC0009.Student.Email  AS at_20436132, TC0009.Student.Web  AS at_6906832, concat('http://mappingpedia.linkeddata.es/resource/Sport/',rt_16398807.ID)  AS rm_16398807
+FROM TC0009.Student
+LEFT JOIN TC0009.Sport  AS rt_16398807 ON (TC0009.Student.Sport = rt_16398807.ID)
+WHERE (TC0009.Student.status = 'active')
+ ) v_22975191
+WHERE ((TRUE AND (at_27929635 IS NOT NULL)) AND ('http://mappingpedia.linkeddata.es/ontologies/hasName' = 'http://mappingpedia.linkeddata.es/ontologies/hasName'))
+ ) AS v_33187868R4 ON null
+
+2011-06-08 13:01:28 INFO  R2ORunner.run:157  - query(0) = PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT  ?x
+WHERE
+  {   { ?st  <http://mappingpedia.linkeddata.es/ontologies/hasName>  ?n . }
+    UNION
+      { ?st  <http://mappingpedia.linkeddata.es/ontologies/email>  ?e . }
+  }
+
+2011-06-08 13:01:28 INFO  TranslatorUtility.initMapNodeConceptMappingByPredicateURI:265  - Type of : ?st = http://mappingpedia.linkeddata.es/ontologies/Student
+2011-06-08 13:01:28 ERROR ODEMapsterTest.testProcess:555  - Error processing mapping file : C:/Users/Freddy/Dropbox/jose-mora/freddy/mapping-collection/r2o/TC0009/TC0009(mysql).r2o.properties
+2011-06-08 13:01:28 ERROR ODEMapsterTest.testProcess:556  - Error message = Unsupported query!
