@@ -6,8 +6,11 @@ import Zql.ZExpression;
 
 public class R2OJoinQuery {
 	private String joinType;
-	private ZExp joinSource;
-	private String joinSourceAlias;
+	//private ZExp joinSource;
+	//private String joinSourceAlias;
+	
+	private R2OFromItem joinSource;
+	
 	private ZExpression onExpression;
 	
 	public void setOnExpression(ZExpression onExpression) {
@@ -18,24 +21,35 @@ public class R2OJoinQuery {
 		this.joinType = joinType;
 	}
 	
-	public void setJoinSource(ZExp joinSource) {
-		this.joinSource = joinSource;
-	}
+//	public void setJoinSource(ZExp joinSource) {
+//		this.joinSource = joinSource;
+//	}
 	
+	public void setJoinSource(R2OFromItem fromItem) {
+	this.joinSource = fromItem;
+}
 	
 	@Override
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		result.append(this.joinType + " JOIN ");
 		
-		if(this.joinSourceAlias == null) {
+		//if(this.joinSourceAlias == null) {
+		if(this.joinSource.getAlias() == null) {
 			result.append(" " + this.joinSource);
 		} else {
-			if(this.joinSource instanceof ZConstant) {
-				result.append(this.joinSource + " AS " + this.joinSourceAlias);
+			String databaseType = R2ORunner.configurationProperties.getDatabaseType();
+			String joinSourceAlias = this.joinSource.getAlias();
+			this.joinSource.setAlias("");
+			
+			//if(this.joinSource instanceof ZConstant) {
+			if(this.joinSource.getForm() == R2OFromItem.FORM_TABLE) {
+				result.append(this.joinSource + " AS " + joinSourceAlias);
 			} else {
-				result.append("(" + this.joinSource + ") AS " + this.joinSourceAlias);
+				result.append("(" + this.joinSource + ") AS " + joinSourceAlias);
 			}
+			this.joinSource.setAlias(joinSourceAlias);
+
 			
 		}
 		
@@ -45,9 +59,9 @@ public class R2OJoinQuery {
 
 	}
 
-	public void setJoinSourceAlias(String joinSourceAlias) {
-		this.joinSourceAlias = joinSourceAlias;
-	}
-	
+//	public void setJoinSourceAlias(String joinSourceAlias) {
+//		this.joinSourceAlias = joinSourceAlias;
+//	}
+//	
 	
 }

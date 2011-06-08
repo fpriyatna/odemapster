@@ -21,6 +21,8 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import Zql.ZUtils;
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -37,6 +39,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODefaultDataTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2MappingTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2SQLTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
@@ -58,8 +61,8 @@ public class R2ORunner extends AbstractRunner {
 	private R2OConfigurationProperties loadConfigurationFile(
 			String mappingDirectory, String r2oConfigurationFile) 
 	throws IOException, SQLException, InvalidConfigurationPropertiesException {
-		logger.info("Active Directory = " + mappingDirectory);
-		logger.info("Loading R2O configuration file : " + r2oConfigurationFile);
+		logger.debug("Active Directory = " + mappingDirectory);
+		logger.debug("Loading R2O configuration file : " + r2oConfigurationFile);
 		
 		try {
 			R2OConfigurationProperties r2oProperties = 
@@ -87,6 +90,10 @@ public class R2ORunner extends AbstractRunner {
 	public void run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
 		long start = System.currentTimeMillis();
 
+		ZUtils.addCustomFunction("concat", 2);
+		ZUtils.addCustomFunction("convert", 2);
+		ZUtils.addCustomFunction("coalesce", 2);
+		
 		//loading operations file
 		R2ORunner.primitiveOperationsProperties = 
 			this.loadPrimitiveOperationsFile(PRIMITIVE_OPERATIONS_FILE);
@@ -118,11 +125,18 @@ public class R2ORunner extends AbstractRunner {
 //			translationResultMappingDocument = originalMappingDocument;
 			translationResultMappingDocuments.add(originalMappingDocument);
 		} else {
+			//sparql2sql
+			
+			
 			//process SPARQL file
 			logger.info("Parsing query file : " + queryFilePath);
 			SPARQL2MappingTranslator translator = 
 				new SPARQL2MappingTranslator(originalMappingDocument);
 			Query originalQuery = QueryFactory.read(queryFilePath);
+			SPARQL2SQLTranslator sparql2sql = new SPARQL2SQLTranslator(originalMappingDocument);
+			R2OQuery r2oQuery = sparql2sql.query2SQL(originalQuery);
+			String sql = r2oQuery.toString();
+			
 			List<Query> queries = new ArrayList<Query>();
 			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
 				queries.add(originalQuery);

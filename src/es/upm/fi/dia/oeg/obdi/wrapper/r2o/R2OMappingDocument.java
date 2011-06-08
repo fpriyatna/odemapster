@@ -24,6 +24,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.IParseable;
 import es.upm.fi.dia.oeg.obdi.wrapper.IPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants.MappingType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
@@ -70,7 +71,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			String domain, String range) {
 		Collection<IAttributeMapping> result = new ArrayList<IAttributeMapping>();
 		
-		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptURI(domain);
+		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptName(domain);
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping; 
 			result.addAll(r2oConceptMapping.getAttributeMappings());
@@ -105,7 +106,7 @@ public class R2OMappingDocument implements IMappingDocument {
 
 
 	@Override
-	public Collection<AbstractConceptMapping> getConceptMappingsByConceptURI(String conceptName) {
+	public Collection<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptName) {
 		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
 		
 		for(AbstractConceptMapping conceptMapping : this.conceptmapDefs) {
@@ -170,7 +171,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			String domain, String range) {
 		Collection<IPropertyMapping> result = new ArrayList<IPropertyMapping>();
 		
-		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptURI(domain);
+		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptName(domain);
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping; 
 			result.addAll(r2oConceptMapping.getPropertyMappings());
@@ -192,7 +193,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			String domain, String range) {
 		Collection<IRelationMapping> result = new ArrayList<IRelationMapping>();
 		
-		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptURI(domain);
+		Collection<AbstractConceptMapping> conceptMappings = this.getConceptMappingsByConceptName(domain);
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
 			R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping; 
 			result.addAll(r2oConceptMapping.getRelationMappings());
@@ -274,9 +275,9 @@ public class R2OMappingDocument implements IMappingDocument {
 	}
 
 	@Override
-	public R2OConceptMapping getConceptMappingsByMappingId(String mappingId) {
+	public R2OConceptMapping getConceptMappingByConceptMappingId(String conceptMappingId) {
 		for(R2OConceptMapping conceptMapping : this.conceptmapDefs) {
-			if(conceptMapping.getId().equals(mappingId)) {
+			if(conceptMapping.getId().equals(conceptMappingId)) {
 				return conceptMapping;
 			}
 		}
@@ -331,7 +332,7 @@ public class R2OMappingDocument implements IMappingDocument {
 			Collection<R2ORelationMapping> rms = conceptmapDef.getRelationMappings();
 			for(R2ORelationMapping rm : rms) {
 				String rangeConceptID = rm.getToConcept();
-				R2OConceptMapping rangeConceptMapping = this.getConceptMappingsByMappingId(rangeConceptID);
+				R2OConceptMapping rangeConceptMapping = this.getConceptMappingByConceptMappingId(rangeConceptID);
 				if(rangeType.equals(rangeConceptMapping.getConceptName())) {
 					result.add(rm);
 				}
@@ -349,5 +350,56 @@ public class R2OMappingDocument implements IMappingDocument {
 		}
 			
 	}
+
+	@Override
+	public String getMappedConceptURI(String conceptMappingID) {
+		for(R2OConceptMapping conceptMapping : this.conceptmapDefs) {
+			if(conceptMapping.getId().equals(conceptMappingID)) {
+				return conceptMapping.getName();
+				
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getMappedPropertyURI(String propertyMappingID) {
+		for(R2OConceptMapping conceptmapDef : this.conceptmapDefs) {
+			Collection<R2OPropertyMapping> pms = conceptmapDef.getDescribedBy();
+			for(R2OPropertyMapping pm : pms) {
+				if(pm.getId().equals(propertyMappingID)) {
+					return pm.getName();
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public MappingType getMappingType(String propertyMappingID) {
+		R2OPropertyMapping pm = this.getPropertyMappingByPropertyMappingID(propertyMappingID);
+		if(pm instanceof R2OAttributeMapping) {
+			return MappingType.ATTRIBUTE;
+		} else if (pm instanceof R2ORelationMapping) {
+			return MappingType.RELATION;
+		}
+		return null;
+	}
+
+	@Override
+	public R2OPropertyMapping getPropertyMappingByPropertyMappingID(
+			String propertyMappingID) {
+		for(R2OConceptMapping conceptmapDef : this.conceptmapDefs) {
+			Collection<R2OPropertyMapping> pms = conceptmapDef.getDescribedBy();
+			for(R2OPropertyMapping pm : pms) {
+				if(pm.getId().equals(propertyMappingID)) {
+					return pm;
+				}
+			}
+		}
+		return null;
+	}
+
+	
 	
 }

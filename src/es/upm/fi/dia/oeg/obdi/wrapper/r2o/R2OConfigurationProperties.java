@@ -87,12 +87,11 @@ public class R2OConfigurationProperties extends Properties {
 
 			try {
 				this.conn = Utility.getLocalConnection(
-						databaseUser, databasePassword, 
+						databaseUser, databaseName, databasePassword, 
 						databaseDriver, 
 						databaseURL, "R2ORunner");
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				String errorMessage = "Error loading database!";
+				String errorMessage = "Error loading database, error message = " + e.getMessage();
 				logger.error(errorMessage);
 				//e.printStackTrace();
 				throw e;
