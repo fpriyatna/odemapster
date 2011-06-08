@@ -1,16 +1,12 @@
 package es.upm.fi.dia.oeg.obdi;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
@@ -31,8 +27,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 
 public class XMLUtility {
 	private static Logger logger = Logger.getLogger(XMLUtility.class);
