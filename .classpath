@@ -50,5 +50,6 @@
 	<classpathentry kind="lib" path="lib/antlr-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/owlapi-bin.jar"/>
 	<classpathentry kind="lib" path="lib/HermiT.jar"/>
+	<classpathentry kind="lib" path="lib/sqljdbc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

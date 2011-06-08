@@ -32,11 +32,11 @@ public class D2RQTest {
 		
 		// Set up the ModelD2RQ using a mapping file
 //		ModelD2RQ m = new ModelD2RQ("/home/fpriyatna/Downloads/mapping-iswc.n3");
-		ModelD2RQ bsbm_model_mysql = new ModelD2RQ("C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-d2r-mapping/d2r-mapping(mysql).n3");
+		ModelD2RQ bsbm_model_mysql = new ModelD2RQ("C:/Users/Freddy/Dropbox/jose-mora/freddy/mapping-collection/r2o/TC0009/mapping.n3");
 		//ModelD2RQ bsbm_model_monetdb = new ModelD2RQ("/home/fpriyatna/Dropbox/bsbm/bsbm-d2r-mapping/d2r-mapping(monetdb).n3");
 //		String sparql = Utility.readFileAsString("/home/fpriyatna/Documents/iswc.sparql");
 //		String bsbm_query00 = Utility.readFileAsString("C:/Users/fpriyatna/My Dropbox/bsbm/queries1m/query00.sparql");
-		String bsbm_query01 = Utility.readFileAsString("C:/Users/fpriyatna/My Dropbox/bsbm/queries1m/query01.sparql");
+		String bsbm_query01 = Utility.readFileAsString("C:/Users/Freddy/Dropbox/jose-mora/freddy/mapping-collection/r2o/TC0009/R2RMLTC0009(d2r).sparql");
 //		String bsbm_query02 = Utility.readFileAsString("/home/fpriyatna/Dropbox/bsbm/queries1m/query02.sparql");
 //		String bsbm_query03 = Utility.readFileAsString("/home/fpriyatna/Dropbox/bsbm/queries1m/query03.sparql");
 //		String bsbm_query04 = Utility.readFileAsString("/home/fpriyatna/Dropbox/bsbm/query2mapping/query04.sparql");
