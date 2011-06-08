@@ -155,7 +155,7 @@ public class Utility {
 	}
 
 	public static Connection getLocalConnection(
-			String username, String password, String driverString, String url, String requester) 
+			String username, String databaseName, String password, String driverString, String url, String requester) 
 	throws SQLException {
 		Connection conn;
 
@@ -163,6 +163,7 @@ public class Utility {
 			Properties prop = new Properties();
 			prop.put("ResultSetMetaDataOptions", "1");
 			prop.put("user", username);
+			prop.put("database", databaseName);
 			prop.put("password", password);
 			prop.put("autoReconnect", "true");
 			Class.forName(driverString);
@@ -239,6 +240,8 @@ public class Utility {
 					String operandConstantValue = operandConstant.getValue();
 					operandConstantValue = operandConstantValue.replaceAll("\'", "");
 					if(!operandConstantValue.startsWith(tableName + ".")) {
+						//be careful here when passing sql server column names that have 4 elements 
+						//(db.schema.table.column)
 						ZAliasedName oldColumnName = new ZAliasedName(
 								operandConstantValue, ZAliasedName.FORM_COLUMN);
 						String newColumnName = viewName + "." + oldColumnName.getColumn();
@@ -296,7 +299,7 @@ public class Utility {
 		if(databaseType.equalsIgnoreCase(R2OConstants.DATABASE_MONETDB)) {
 			zColumn = new MonetDBColumn(columnName, ZConstant.COLUMNNAME);
 		} else if(databaseType.equalsIgnoreCase(R2OConstants.DATABASE_MYSQL)) {
-//			zColumn = new ZConstant("\'" + columnName + "\'", ZConstant.COLUMNNAME);
+			//			zColumn = new ZConstant("\'" + columnName + "\'", ZConstant.COLUMNNAME);
 			zColumn = new ZConstant(columnName, ZConstant.COLUMNNAME);
 		} else {
 			zColumn = new ZConstant(columnName, ZConstant.COLUMNNAME);
@@ -391,11 +394,11 @@ public class Utility {
 
 		uri = uri.replaceAll("\\\\", "%5C");
 		uri = uri.replaceAll("\\b\\s{2,}\\b", " ");
-		
+
 		return uri;
-		
+
 	}
-	
+
 	private static String postEncoding(String uri) {
 		uri = uri.replaceAll(",", "%2C");
 		uri = uri.replaceAll("&", "%26");
@@ -408,7 +411,7 @@ public class Utility {
 
 		return uri;
 	}
-	
+
 	public static String encodeURI(String originalURI)  throws Exception {
 		String uri = originalURI;
 		try {
@@ -416,7 +419,7 @@ public class Utility {
 
 			//	uri = new URI(uri).toASCIIString();
 			uri = new URI(null, uri, null).toASCIIString();
-			
+
 			uri = Utility.postEncoding(uri);
 		} catch(Exception e) {
 			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
@@ -508,7 +511,7 @@ public class Utility {
 		 */
 	}
 
-	
+
 	//Creates a triple
 	public static String createTriple(String subject, String predicate, String object)
 	{
