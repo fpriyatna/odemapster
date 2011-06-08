@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZQuery;
@@ -14,6 +15,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
@@ -57,6 +59,8 @@ public class R2OTransformationExpressionUnfolder {
 	
 	public ZExp unfoldDelegableTransformationExpression() throws InvalidTransfomationExperessionException 
 	{
+		String databaseType = R2ORunner.configurationProperties.getDatabaseType();
+		
 		String operator = transformationExpression.getOperId();
 		if(operator == null) {
 			return null;
@@ -68,6 +72,37 @@ public class R2OTransformationExpressionUnfolder {
 			R2ORestrictionUnfolder r2oRestrictionUnfolder = 
 				new R2ORestrictionUnfolder(restriction); 
 			return r2oRestrictionUnfolder.unfoldRestriction();				
+		} if(operator.equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CONCAT)) {
+			if(databaseType.equalsIgnoreCase(R2OConstants.DATABASE_SQLSERVER)) {
+				ZExpression selectExpression = new ZExpression("+");
+				for(R2OArgumentRestriction argumentRestriction : argumentRestrictions) {
+					R2ORestriction restriction = argumentRestriction.getRestriction();
+					R2ORestrictionUnfolder r2oRestrictionUnfolder = 
+						new R2ORestrictionUnfolder(restriction);				
+					ZExp restrictionExpression = r2oRestrictionUnfolder.unfoldRestriction();
+					if(restrictionExpression instanceof ZConstant) {
+						ZConstant restrictionExpressionConstant = (ZConstant) restrictionExpression;
+						if(restrictionExpressionConstant.getType() == ZConstant.COLUMNNAME) {
+							restrictionExpression = new ZExpression("CONVERT", new ZConstant("VARCHAR", ZConstant.UNKNOWN), restrictionExpressionConstant);
+							logger.debug("new expression for sqlserver = " + restrictionExpression);
+						}
+					}
+					 
+					selectExpression.addOperand(restrictionExpression);
+				}
+				return selectExpression;
+			} else {
+				ZExpression selectExpression = new ZExpression(operator);
+				for(R2OArgumentRestriction argumentRestriction : argumentRestrictions) {
+					R2ORestriction restriction = argumentRestriction.getRestriction();
+					R2ORestrictionUnfolder r2oRestrictionUnfolder = 
+						new R2ORestrictionUnfolder(restriction);				
+					ZExp restrictionExpression = r2oRestrictionUnfolder.unfoldRestriction();
+					selectExpression.addOperand(restrictionExpression);
+				}
+				return selectExpression;	
+			}
+
 		} else {
 			ZExpression selectExpression = new ZExpression(operator);
 			for(R2OArgumentRestriction argumentRestriction : argumentRestrictions) {

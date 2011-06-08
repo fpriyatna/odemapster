@@ -23,17 +23,11 @@ public class R2OAttributeMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2OAttributeMappingUnfolder.class);
 
 	private R2OAttributeMapping attributeMapping;
-	private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	private R2OConfigurationProperties configurationProperties;
 
 
-	public R2OAttributeMappingUnfolder(R2OAttributeMapping r2oAttributeMapping,
-			R2OPrimitiveOperationsProperties primitiveOperationsProperties,
-			R2OConfigurationProperties configurationProperties) {
+	public R2OAttributeMappingUnfolder(R2OAttributeMapping r2oAttributeMapping) {
 		super();
 		this.attributeMapping = r2oAttributeMapping;
-		this.primitiveOperationsProperties = primitiveOperationsProperties;
-		this.configurationProperties = configurationProperties;
 	}
 
 

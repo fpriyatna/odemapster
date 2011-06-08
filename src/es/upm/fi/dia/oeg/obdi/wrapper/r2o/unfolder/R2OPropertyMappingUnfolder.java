@@ -16,22 +16,16 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
 public class R2OPropertyMappingUnfolder {
 	private R2OConceptMapping parentMapping;
 	private R2OPropertyMapping r2oPropertyMapping;
-	private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	private R2OConfigurationProperties configurationProperties;
 	private R2OMappingDocument r2oMappingDocument;
 	
 	
 	public R2OPropertyMappingUnfolder(
 			R2OConceptMapping parentMapping,
 			R2OPropertyMapping r2oPropertyMapping,
-			R2OPrimitiveOperationsProperties primitiveOperationsProperties,
-			R2OConfigurationProperties configurationProperties,
 			R2OMappingDocument r2oMappingDocument) {
 		super();
 		this.parentMapping = parentMapping;
 		this.r2oPropertyMapping = r2oPropertyMapping;
-		this.primitiveOperationsProperties = primitiveOperationsProperties;
-		this.configurationProperties = configurationProperties;
 		this.r2oMappingDocument = r2oMappingDocument;
 	}
 
@@ -42,7 +36,7 @@ public class R2OPropertyMappingUnfolder {
 		if(r2oPropertyMapping instanceof R2OAttributeMapping) {
 			R2OAttributeMapping r2oAttributeMapping = (R2OAttributeMapping) r2oPropertyMapping;
 			R2OAttributeMappingUnfolder r2oAttributeMappingUnfolder =
-				new R2OAttributeMappingUnfolder(r2oAttributeMapping, primitiveOperationsProperties, configurationProperties);
+				new R2OAttributeMappingUnfolder(r2oAttributeMapping);
 			Collection<ZSelectItem> attMappingUnfoldingItems = r2oAttributeMappingUnfolder.unfold();
 			cmQuery.getSelect().addAll(attMappingUnfoldingItems);
 		} else if(r2oPropertyMapping instanceof R2ORelationMapping) {
@@ -50,11 +44,10 @@ public class R2OPropertyMappingUnfolder {
 			
 			String toConcept = r2oRelationMapping.getToConcept();
 			R2OConceptMapping rangeConceptMapping = 
-				(R2OConceptMapping) this.r2oMappingDocument.getConceptMappingsByMappingId(toConcept);
+				(R2OConceptMapping) this.r2oMappingDocument.getConceptMappingByConceptMappingId(toConcept);
 			
 			R2ORelationMappingUnfolder r2oRelationMappingUnfolder = new R2ORelationMappingUnfolder(
-					this.parentMapping, (R2ORelationMapping) r2oPropertyMapping);
-			r2oRelationMappingUnfolder.setRangeConceptMapping(rangeConceptMapping);
+					this.parentMapping, (R2ORelationMapping) r2oPropertyMapping, rangeConceptMapping);
 			r2oRelationMappingUnfolder.unfold(cmQuery);
 		}
 	}

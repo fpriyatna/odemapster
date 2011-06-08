@@ -29,7 +29,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 	private R2OConfigurationProperties configurationProperties;
 
 	public R2OUnfolder(R2OMappingDocument r2oMappingDocument) {
-		ZUtils.addCustomFunction("concat", 2);
+
 		this.r2oMappingDocument = r2oMappingDocument;
 	}
 
@@ -227,9 +227,6 @@ public class R2OUnfolder extends AbstractUnfolder {
 	@Override
 	public String unfoldConceptMapping(AbstractConceptMapping mapping)
 			throws Exception {
-		R2OQuery mainQuery = new R2OQuery();
-
-
 		R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) mapping;
 		
 		boolean proceedToUnfolding = true;
@@ -249,9 +246,9 @@ public class R2OUnfolder extends AbstractUnfolder {
 		String conceptMappingUnfoldingSQL = null;
 		if(proceedToUnfolding) {
 			R2OConceptMappingUnfolder r2oConceptMappingUnfolder = new R2OConceptMappingUnfolder(
-					primitiveOperationsProperties, configurationProperties, r2oConceptMapping, r2oMappingDocument);
+					r2oConceptMapping, r2oMappingDocument);
 			conceptMappingUnfoldingSQL = 
-				r2oConceptMappingUnfolder.unfoldConceptMapping(mainQuery);
+				r2oConceptMappingUnfolder.unfoldConceptMapping().toString();
  
 		}
 		

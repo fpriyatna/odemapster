@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZAliasedName;
 import Zql.ZConstant;
 import Zql.ZExpression;
 import Zql.ZFromItem;
@@ -15,6 +16,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidConditionOperationException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidRelationMappingException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OFromItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OJoinQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConceptRestriction;
@@ -34,15 +36,14 @@ public class R2ORelationMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2ORelationMappingUnfolder.class);
 
 	private R2OConceptMapping parentMapping;
-	//private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
 	private R2ORelationMapping relationMapping;
-	//private R2OConfigurationProperties configurationProperties;
 	private R2OConceptMapping rangeConceptMapping;
 
-	public R2ORelationMappingUnfolder(R2OConceptMapping parentMapping,R2ORelationMapping relationMapping) {
+	public R2ORelationMappingUnfolder(R2OConceptMapping parentMapping,R2ORelationMapping relationMapping, R2OConceptMapping rangeConceptMapping) {
 		super();
 		this.parentMapping = parentMapping;
 		this.relationMapping = relationMapping;
+		this.rangeConceptMapping = rangeConceptMapping;
 	}
 
 	private R2OQuery processHasView(R2ODatabaseView rmHasView) 
@@ -105,7 +106,7 @@ public class R2ORelationMappingUnfolder {
 		//add join query to the view
 		R2OJoinQuery viewQueryJoinQuery = new R2OJoinQuery();
 		viewQueryJoinQuery.setJoinType(r2oViewJoin.getJoinType());
-		viewQuery.addSubQuery(viewQueryJoinQuery);
+		viewQuery.addJoinQuery(viewQueryJoinQuery);
 		
 		
 		R2ORestriction firstArgumentRestrictionValue = 
@@ -157,7 +158,7 @@ public class R2ORelationMappingUnfolder {
 			R2OTableRestriction restrictionTable = (R2OTableRestriction) secondArgumentRestrictionValue;
 			R2ODatabaseTable r2oDatabaseTable = restrictionTable.getDatabaseTable();
 			String tableName = r2oDatabaseTable.getName();
-			ZConstant zTableName = new ZConstant(tableName, ZConstant.UNKNOWN); 
+			R2OFromItem zTableName = new R2OFromItem(tableName, ZAliasedName.FORM_TABLE); 
 			viewQueryJoinQuery.setJoinSource(zTableName);
 		} else if(secondArgumentRestrictionValue instanceof R2OConceptRestriction) {
 			R2OConceptRestriction restrictionConcept = 
@@ -175,8 +176,8 @@ public class R2ORelationMappingUnfolder {
 				logger.error(errorMessage);
 				throw new RelationMappingUnfolderException(errorMessage);								
 			}
-			ZConstant subQueryJoinQueryFromItem = 
-				new ZConstant(rangeTables.get(0).getName(), ZConstant.UNKNOWN);
+			R2OFromItem subQueryJoinQueryFromItem = 
+				new R2OFromItem(rangeTables.get(0).getName(), ZAliasedName.FORM_TABLE);
 			viewQueryJoinQuery.setJoinSource(subQueryJoinQueryFromItem);
 		} else {
 			String errorMessage = "Invalid has-view elements!";
@@ -246,7 +247,7 @@ public class R2ORelationMappingUnfolder {
 		}
 		
 		R2OJoinQuery rmQuery = new R2OJoinQuery();
-		cmQuery.addSubQuery(rmQuery);
+		cmQuery.addJoinQuery(rmQuery);
 		rmQuery.setJoinType(this.relationMapping.getJoinsVia().getJoinType());
 
 		//unfold range URI
@@ -283,10 +284,10 @@ public class R2ORelationMappingUnfolder {
 				rtAlias = R2OConstants.RANGE_TABLE_ALIAS + this.relationMapping.hashCode();
 			}
 			
-			ZConstant joinSource = new ZConstant(
-					rangeTable.getName(), ZConstant.UNKNOWN);
+			R2OFromItem joinSource = new R2OFromItem(
+					rangeTable.getName(), ZAliasedName.FORM_TABLE);
+			joinSource.setAlias(rtAlias);
 			rmQuery.setJoinSource(joinSource);
-			rmQuery.setJoinSourceAlias(rtAlias);
 
 			ZExpression onExpressionRenamed = Utility.renameColumnsIfNotMatch(
 					rmQueryOnExpression, cmBaseTable, rtAlias);
@@ -311,8 +312,10 @@ public class R2ORelationMappingUnfolder {
 
 			//process has-view
 			R2OQuery rmViewQuery = this.processHasView(rmHasView);
-			rmQuery.setJoinSource(rmViewQuery);
-			rmQuery.setJoinSourceAlias(rmHasView.generateViewAlias());
+			R2OFromItem fromItem = new R2OFromItem(
+					rmViewQuery.toString(), R2OFromItem.FORM_QUERY);
+			fromItem.setAlias(rmHasView.generateViewAlias());
+			rmQuery.setJoinSource(fromItem);
 			
 			ZExpression onExpressionRenamed = Utility.renameColumnsIfNotMatch(
 					rmQueryOnExpression, cmBaseTable, rmHasView.generateViewAlias());
@@ -371,7 +374,7 @@ public class R2ORelationMappingUnfolder {
 
 	}
 
-	public void setRangeConceptMapping(R2OConceptMapping rangeConceptMapping) {
+	private void setRangeConceptMapping(R2OConceptMapping rangeConceptMapping) {
 		this.rangeConceptMapping = rangeConceptMapping;
 	}
 
@@ -396,7 +399,7 @@ public class R2ORelationMappingUnfolder {
 				R2OTransformationExpression attSelectorAfterTransform = selector.getAfterTransform();
 				R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder =
 					new R2OTransformationExpressionUnfolder(attSelectorAfterTransform);
-				String afterTransformAlias = R2OConstants.AFTERTRANSFORM_ALIAS + selector.hashCode();
+				String afterTransformAlias = selector.generateAfterTransformAlias();
 				Collection<ZSelectItem> afterTransformSelectItems = 
 					r2oTransformationExpressionUnfolder.unfold(afterTransformAlias);
 				result.addAll(afterTransformSelectItems);
@@ -406,7 +409,7 @@ public class R2ORelationMappingUnfolder {
 		return result;
 	}
 
-	private Collection<ZSelectItem> unfoldRangeURI() 
+	public Collection<ZSelectItem> unfoldRangeURI() 
 	throws InvalidRelationMappingException, InvalidTransfomationExperessionException, InvalidConditionOperationException {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 

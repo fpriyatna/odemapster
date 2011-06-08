@@ -26,8 +26,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 
 public class R2OConceptMappingUnfolder {
 	private static Logger logger = Logger.getLogger(R2OConceptMappingUnfolder.class);
-	private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	private R2OConfigurationProperties configurationProperties;
 	private R2OConceptMapping conceptMapping;
 	private R2OMappingDocument r2oMappingDocument;
 	
@@ -35,13 +33,9 @@ public class R2OConceptMappingUnfolder {
 
 
 	public R2OConceptMappingUnfolder(
-			R2OPrimitiveOperationsProperties primitiveOperationsProperties,
-			R2OConfigurationProperties configurationProperties,
 			R2OConceptMapping conceptMapping,
 			R2OMappingDocument r2oMappingDocument) {
 		super();
-		this.primitiveOperationsProperties = primitiveOperationsProperties;
-		this.configurationProperties = configurationProperties;
 		this.conceptMapping = conceptMapping;
 		this.r2oMappingDocument = r2oMappingDocument;
 	}
@@ -49,9 +43,10 @@ public class R2OConceptMappingUnfolder {
 
 
 
-	public String unfoldConceptMapping(R2OQuery cmQuery) throws Exception {
+	public R2OQuery unfoldConceptMapping() throws Exception {
 		logger.debug("Unfolding = " + conceptMapping.getConceptName());
 
+		R2OQuery cmQuery = new R2OQuery();
 		//ZUtils.addCustomFunction("concat", 2);
 		cmQuery.addFrom(new Vector<String>());
 		cmQuery.addSelect(new Vector<ZSelectItem>());
@@ -68,7 +63,8 @@ public class R2OConceptMappingUnfolder {
 				ZExp selectExpression = r2oTransformationExpressionUnfolder.unfoldDelegableTransformationExpression();
 				ZSelectItem zSelectItemConceptURI = new ZSelectItem();
 				zSelectItemConceptURI.setExpression(selectExpression);
-				zSelectItemConceptURI.setAlias(R2OConstants.URI_AS_ALIAS + conceptMapping.getId());
+				String alias = conceptMapping.generateURIAlias();
+				zSelectItemConceptURI.setAlias(alias);
 				cmQuery.getSelect().add(zSelectItemConceptURI);				
 			} else {
 				logger.debug("Non delegable transformation expression of concept mapping uri-as.");
@@ -154,14 +150,13 @@ public class R2OConceptMappingUnfolder {
 		if(propertyMappings != null) {
 			for(R2OPropertyMapping propertyMappping : propertyMappings) {
 				R2OPropertyMappingUnfolder r2oPropertyMappingUnfolder = new R2OPropertyMappingUnfolder(
-						this.conceptMapping, propertyMappping
-						, primitiveOperationsProperties, configurationProperties, r2oMappingDocument);
+						this.conceptMapping, propertyMappping, r2oMappingDocument);
 				r2oPropertyMappingUnfolder.unfold(cmQuery);
 			}			
 		}
 
-
-		return cmQuery.toString();
+		//logger.info("cmQuery2 = " + cmQuery);
+		return cmQuery;
 
 	}
 }
