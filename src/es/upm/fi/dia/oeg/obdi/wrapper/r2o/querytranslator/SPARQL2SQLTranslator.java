@@ -22,11 +22,23 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.E_Bound;
+import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
+import com.hp.hpl.jena.sparql.expr.E_LogicalNot;
+import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprFunction;
+import com.hp.hpl.jena.sparql.expr.ExprFunction1;
+import com.hp.hpl.jena.sparql.expr.ExprList;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementOptional;
@@ -46,8 +58,8 @@ public class SPARQL2SQLTranslator {
 	private R2OMappingDocument mappingDocument;
 	Map<Node, R2OConceptMapping> mapNodeConceptMapping;
 
-	private AbstractAlphaGenerator alphaGenerator;
-	private AbstractBetaGenerator betaGenerator;
+//	private AbstractAlphaGenerator alphaGenerator;
+//	private AbstractBetaGenerator betaGenerator;
 	private NameGenerator nameGenerator;
 
 	public SPARQL2SQLTranslator(R2OMappingDocument mappingDocument) {
@@ -100,7 +112,7 @@ public class SPARQL2SQLTranslator {
 					List<Triple> gp2TripleList = triples.subList(1, triples.size());
 					OpBGP gp2 = new OpBGP(BasicPattern.wrap(gp2TripleList));
 
-					result = this.transANDOPT(gp1, gp2, this.alphaGenerator, this.betaGenerator
+					result = this.transANDOPT(gp1, gp2, alphaGenerator, betaGenerator
 							, R2OConstants.JOINS_TYPE_INNER);					
 				}
 			}
@@ -109,21 +121,27 @@ public class SPARQL2SQLTranslator {
 			OpJoin opJoin = (OpJoin) op;
 			Op opLeft = opJoin.getLeft();
 			Op opRight = opJoin.getRight();
-			result = this.transANDOPT(opLeft, opRight, this.alphaGenerator, this.betaGenerator
+			result = this.transANDOPT(opLeft, opRight, alphaGenerator, betaGenerator
 					, R2OConstants.JOINS_TYPE_INNER);
 		} else if(op instanceof OpLeftJoin) { //OPT pattern
 			logger.debug("op instanceof OpLeftJoin");
 			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
 			Op opLeft = opLeftJoin.getLeft();
 			Op opRight = opLeftJoin.getRight();
-			result = this.transANDOPT(opLeft, opRight, this.alphaGenerator, this.betaGenerator
+			result = this.transANDOPT(opLeft, opRight, alphaGenerator, betaGenerator
 					, R2OConstants.JOINS_TYPE_LEFT);
 		} else if(op instanceof OpUnion) { //UNION pattern
 			logger.debug("op instanceof OpUnion");
 			OpUnion opUnion = (OpUnion) op;
 			Op opLeft = opUnion.getLeft();
 			Op opRight = opUnion.getRight();
-			result = this.transUNION(opLeft, opRight, alphaGenerator, betaGenerator);			
+			result = this.transUNION(opLeft, opRight, alphaGenerator, betaGenerator);
+		} else if(op instanceof OpFilter) { //FILTER pattern
+			logger.debug("op instanceof OpFilter");
+			OpFilter opFilter = (OpFilter) op;
+			Op OpFilterSubOp = opFilter.getSubOp();
+			ExprList exprList = opFilter.getExprs();
+			result = this.transFilter(OpFilterSubOp, exprList, alphaGenerator, betaGenerator);
 		} else {
 			throw new R2OTranslationException("Unsupported query!");
 		}
@@ -143,9 +161,9 @@ public class SPARQL2SQLTranslator {
 
 		TranslatorUtility tu = new TranslatorUtility(mappingDocument);
 		this.mapNodeConceptMapping = tu.initializeMapConceptMapping(opQueryPattern);
-		this.alphaGenerator = 
+		AbstractAlphaGenerator alphaGenerator = 
 			new AlphaGenerator1(mapNodeConceptMapping, mappingDocument);
-		this.betaGenerator = 
+		AbstractBetaGenerator betaGenerator = 
 			new BetaGenerator1(mapNodeConceptMapping, this.mappingDocument);
 		if(opQuery instanceof OpProject) {
 			OpProject opProject = (OpProject) opQuery;
@@ -294,6 +312,90 @@ public class SPARQL2SQLTranslator {
 		
 	}
 	
+	private R2OQuery transFilter(Op gp, ExprList exprList, AbstractAlphaGenerator alphaGenerator
+			, AbstractBetaGenerator betaGenerator)
+	throws Exception  {
+		R2OQuery result = new R2OQuery();
+		result.addSelect(new ZSelectItem("*"));
+		
+		R2OQuery transGP = this.trans(gp, alphaGenerator, betaGenerator);
+		String transGPAlias = transGP.generateAlias();
+		R2OFromItem fromItem = new R2OFromItem(transGP.toString(), R2OFromItem.FORM_QUERY);
+		fromItem.setAlias(transGPAlias);
+		result.addFrom(fromItem);
+		
+		Collection<ZExp> zExps = this.transExpr(exprList);
+		if(zExps.size() > 0) {
+			if(zExps.size() == 1) {
+				result.addWhere(zExps.iterator().next());
+			} else {
+				ZExpression whereExpression = new ZExpression("AND");
+				for(ZExp expression : zExps) {
+					whereExpression.addOperand(expression);
+				}
+				result.addWhere(whereExpression);
+			}
+		}
+		
+		return result;
+	}
+	
+	private Collection<ZExp> transExpr(ExprList exprList) {
+		Collection<ZExp> result = new HashSet<ZExp>();
+		List<Expr> exprs = exprList.getList();
+		for(Expr expr : exprs) {
+			result.add(this.transExpr(expr));
+		}
+		return result;
+	}
+	
+	private ZExp transExpr(Expr expr) {
+		ZExp result = null;
+		
+		if(expr.isVariable()) {
+			logger.debug("expr is var");
+			result = new ZConstant(nameGenerator.generateName(expr.asVar()), ZConstant.COLUMNNAME);
+		} else if(expr.isConstant()) {
+			logger.debug("expr is constant");
+			NodeValue nodeValue = expr.getConstant();
+			Node node = nodeValue.getNode();
+			if(nodeValue.isLiteral()) {
+				if(nodeValue.isNumber()) {
+					result = new ZConstant(node.getLiteralValue().toString(), ZConstant.NUMBER);	
+				} else {
+					result = new ZConstant(node.getLiteralValue().toString(), ZConstant.STRING);
+				}
+			} else if(nodeValue.isIRI()) {
+				result = new ZConstant(node.getLocalName(), ZConstant.COLUMNNAME);
+			}
+		} else if(expr.isFunction()) {
+			logger.debug("expr is function");
+			
+			ExprFunction exprFunction = expr.getFunction();
+			String functionSymbol;
+			if(exprFunction instanceof E_Bound) {
+				functionSymbol = "IS NOT NULL";
+			} else if(exprFunction instanceof E_LogicalNot) {
+				functionSymbol = "NOT";
+			} else if(exprFunction instanceof E_LogicalAnd) {
+				functionSymbol = "AND";
+			} else if(exprFunction instanceof E_LogicalOr) {
+				functionSymbol = "OR";
+			} else {
+				functionSymbol = exprFunction.getOpName();
+			}
+			result = new ZExpression(functionSymbol);
+			
+			List<Expr> args = exprFunction.getArgs();
+			for(Expr arg : args) {
+				((ZExpression)result).addOperand(this.transExpr(arg));
+			}
+		}
+		
+
+		
+		return result;
+	}
 	
 	private R2OQuery transANDOPT(Op gp1, Op gp2, AbstractAlphaGenerator alphaGenerator
 			, AbstractBetaGenerator betaGenerator
@@ -345,18 +447,6 @@ public class SPARQL2SQLTranslator {
 		}
 		logger.debug("selectItemsC = " + selectItemsC);
 		selectItems.addAll(selectItemsC);
-
-
-
-		
-
-
-
-
-
-
-
-
 
 
 		ZExp joinOnExpression = new ZConstant("TRUE", ZConstant.UNKNOWN);

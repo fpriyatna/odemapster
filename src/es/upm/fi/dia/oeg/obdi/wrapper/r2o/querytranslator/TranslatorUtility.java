@@ -114,6 +114,9 @@ public class TranslatorUtility {
 			OpJoin opJoin = (OpJoin) op;
 			this.initMapNodeConceptMappingByRDFType(opJoin.getLeft());
 			this.initMapNodeConceptMappingByRDFType(opJoin.getRight());
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			this.initMapNodeConceptMappingByRDFType(opFilter.getSubOp());
 		}
 
 
@@ -172,6 +175,9 @@ public class TranslatorUtility {
 			OpUnion opUnion = (OpUnion) op;
 			this.initMapNodeConceptMappingByDefinedSubject(opUnion.getLeft());
 			this.initMapNodeConceptMappingByDefinedSubject(opUnion.getRight());
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			this.initMapNodeConceptMappingByDefinedSubject(opFilter.getSubOp());
 		}
 
 	}
@@ -226,8 +232,10 @@ public class TranslatorUtility {
 			OpUnion opUnion = (OpUnion) op;
 			this.initMapNodeConceptMappingByDefinedObject(opUnion.getLeft());
 			this.initMapNodeConceptMappingByDefinedObject(opUnion.getRight());
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			this.initMapNodeConceptMappingByDefinedObject(opFilter.getSubOp());
 		}
-
 
 		//logger.info("translator.mapPropertyMappings = " + this.getMapPropertyMappings());	
 	}
@@ -289,8 +297,10 @@ public class TranslatorUtility {
 			OpUnion opUnion = (OpUnion) op;
 			this.initMapNodeConceptMappingByPredicateURI(opUnion.getLeft());
 			this.initMapNodeConceptMappingByPredicateURI(opUnion.getRight());
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			this.initMapNodeConceptMappingByPredicateURI(opFilter.getSubOp());
 		}
-
 	}
 
 

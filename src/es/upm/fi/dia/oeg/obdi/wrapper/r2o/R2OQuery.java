@@ -26,6 +26,14 @@ public class R2OQuery extends ZQuery {
 		this.addFrom(new Vector<ZFromItem>()); 
 	}
 
+	public void addSelect(ZSelectItem selectItem) {
+		if(this.getSelect() == null) {
+			this.addSelect(new Vector<ZSelectItem>());
+		}
+		
+		this.getSelect().add(selectItem);
+	}
+	
 	public void addJoinQuery(R2OJoinQuery joinQuery) {
 		if(this.joinQueries == null) {
 			this.joinQueries = new Vector<R2OJoinQuery>();
