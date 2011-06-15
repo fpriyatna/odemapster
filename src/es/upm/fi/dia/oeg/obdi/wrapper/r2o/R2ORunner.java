@@ -125,18 +125,11 @@ public class R2ORunner extends AbstractRunner {
 //			translationResultMappingDocument = originalMappingDocument;
 			translationResultMappingDocuments.add(originalMappingDocument);
 		} else {
-			//sparql2sql
-			
-			
 			//process SPARQL file
 			logger.info("Parsing query file : " + queryFilePath);
-			SPARQL2MappingTranslator translator = 
-				new SPARQL2MappingTranslator(originalMappingDocument);
 			Query originalQuery = QueryFactory.read(queryFilePath);
-			SPARQL2SQLTranslator sparql2sql = new SPARQL2SQLTranslator(originalMappingDocument);
-			R2OQuery r2oQuery = sparql2sql.query2SQL(originalQuery);
-			String sql = r2oQuery.toString();
 			
+			//rewrite the SPARQL query if necessary
 			List<Query> queries = new ArrayList<Query>();
 			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
 				queries.add(originalQuery);
@@ -149,13 +142,24 @@ public class R2ORunner extends AbstractRunner {
 				RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				queries = rewritterWapper.rewrite(originalQuery);
 				logger.info("No of rewriting query result = " + queries.size());
-			}
+			}			
+			
+			//translate sparql into sql
+			SPARQL2SQLTranslator sparql2sql = new SPARQL2SQLTranslator(originalMappingDocument);
+			SPARQL2MappingTranslator translator = 
+				new SPARQL2MappingTranslator(originalMappingDocument);
 
 			for(int i=0; i<queries.size(); i++) {
 //				translationResultMappingDocument = translator.processQuery(query);
 				Query query = queries.get(i);
 				logger.info("query(" + i + ") = " + query);
-				translationResultMappingDocuments.add(translator.processQuery(query));
+				String sparql2SQLResult = sparql2sql.query2SQL(originalQuery).toString();
+				
+				//translationResultMappingDocuments.add(translator.processQuery(query));
+				
+				
+				
+
 			}
 			
 			

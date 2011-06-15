@@ -73,17 +73,22 @@ public class SPARQL2SQLTranslator {
 		R2OQuery result = new R2OQuery();
 		
 		List<Triple> triples = tb.getPattern().getList();
-		Vector<ZSelectItem> selectItems = (Vector<ZSelectItem>) this.genPRSQLTripleBlock(
+		Vector<ZSelectItem> selectItems = (Vector<ZSelectItem>) this.genPRSQLTB(
 				triples, betaGenerator, nameGenerator);
-		logger.debug("genPRSQL = " + selectItems);
+		logger.debug("genPRSQLTB = " + selectItems);
 		result.addSelect(selectItems);
 
 		R2OQuery alphaTB = (R2OQuery) alphaGenerator.calculateAlpha(triples);
-		logger.debug("alphaTB = " + alphaTB);
+		logger.debug("alphaTBTB = " + alphaTB);
 		R2OFromItem fromItem = new R2OFromItem(alphaTB.toString(), R2OFromItem.FORM_QUERY);
 		fromItem.setAlias(fromItem.generateAlias());
 		result.addFrom(fromItem);	
 
+		ZExp condSQL = this.genCondSQLTB(triples, betaGenerator);
+		logger.debug("genCondSQLTB = " + condSQL);
+		
+		result.addWhere(condSQL);
+		
 		return result;
 	}
 
@@ -101,7 +106,7 @@ public class SPARQL2SQLTranslator {
 				result = this.transTP(tp, alphaGenerator, betaGenerator);
 			} else { //bgp pattern
 				boolean isTB = TranslatorUtility.isTripleBlock(bgp);
-				isTB = false;
+				//isTB = false;
 				logger.debug("isTB = " + isTB);
 				if(isTB) {
 					result = this.transTB(bgp, alphaGenerator, betaGenerator);
@@ -142,6 +147,8 @@ public class SPARQL2SQLTranslator {
 			Op OpFilterSubOp = opFilter.getSubOp();
 			ExprList exprList = opFilter.getExprs();
 			result = this.transFilter(OpFilterSubOp, exprList, alphaGenerator, betaGenerator);
+		} else if(op instanceof OpProject) { //SELECT solution modifier
+			
 		} else {
 			throw new R2OTranslationException("Unsupported query!");
 		}
@@ -166,9 +173,22 @@ public class SPARQL2SQLTranslator {
 		AbstractBetaGenerator betaGenerator = 
 			new BetaGenerator1(mapNodeConceptMapping, this.mappingDocument);
 		if(opQuery instanceof OpProject) {
+			sparql2sqlResult = new R2OQuery();
+			
 			OpProject opProject = (OpProject) opQuery;
 			Op opProjectSubOp = opProject.getSubOp();
-			sparql2sqlResult = this.trans(opProjectSubOp, alphaGenerator, betaGenerator);
+			R2OQuery gpSQL = this.trans(opProjectSubOp, alphaGenerator, betaGenerator);
+			logger.info("gpSQL result = " + gpSQL.toString());
+
+			List<Var> selectVars = opProject.getVars();
+			for(Var selectVar : selectVars) {
+				String nameSelectVar = nameGenerator.generateName(selectVar);
+				sparql2sqlResult.addSelect(new ZSelectItem(nameSelectVar));
+			}
+			R2OFromItem fromItem = new R2OFromItem(gpSQL.toString(), R2OFromItem.FORM_QUERY);
+			fromItem.setAlias(gpSQL.generateAlias());
+			sparql2sqlResult.addFrom(fromItem);
+			
 		} else {
 			throw new R2OTranslationException("Unsupported query!");
 		}	
@@ -184,7 +204,8 @@ public class SPARQL2SQLTranslator {
 			logger.debug("queryPattern instanceof ElementUnion");
 		}
 
-		logger.info("sparql2sql result = " + sparql2sqlResult.toString());
+		logger.info("sparql2sqlResult result = " + sparql2sqlResult.toString());
+
 		return sparql2sqlResult;
 	}
 
@@ -494,7 +515,18 @@ public class SPARQL2SQLTranslator {
 	enum POS {sub, pre, obj};
 
 
-
+	private ZExp genCondSQLTB(Collection<Triple> tripleBlock, AbstractBetaGenerator betaGenerator) throws Exception {
+		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
+		
+		for(Triple tp : tripleBlock) {
+			ZExp cond = this.genCondSQL(tp, betaGenerator);
+			result = new ZExpression("AND", result, cond);
+		}
+		
+		return result;
+		
+	}
+	
 	private ZExp genCondSQL(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception {
 		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
 		Node subject = tp.getSubject();
@@ -579,7 +611,7 @@ public class SPARQL2SQLTranslator {
 	}
 
 
-	private Collection<ZSelectItem> genPRSQLTripleBlock(
+	private Collection<ZSelectItem> genPRSQLTB(
 			Collection<Triple> tripleBlock, AbstractBetaGenerator betaGenerator, NameGenerator nameGenerator)
 			throws Exception {
 		Collection<ZSelectItem> prList = new Vector<ZSelectItem>();
