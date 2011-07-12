@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -33,7 +34,8 @@ implements R2OElement, IRelationMapping, Cloneable
 	private Collection<R2OSelector> rmSelectors;
 	private R2OJoin joinsVia;
 	private R2ODatabaseView hasView;
-
+	private String rangeURIAlias;
+	
 	public R2ORelationMapping(Element rmElement, R2OConceptMapping parent) throws ParseException {
 		super(parent);
 		this.parse(rmElement);
@@ -178,7 +180,10 @@ implements R2OElement, IRelationMapping, Cloneable
 	@Override
 	public R2ORelationMapping clone(){
 		try {
-			return (R2ORelationMapping) super.clone();	
+			R2ORelationMapping result = (R2ORelationMapping) super.clone();
+			//regenerate range uri alias
+			result.rangeURIAlias = R2OConstants.RELATIONMAPPING_ALIAS + new Random().nextInt(10000);
+			return result;
 		} catch(Exception e) {
 			logger.error("Error occured while cloning R2ORelationMapping object.");
 			logger.error("Error message = " + e.getMessage());
@@ -189,5 +194,11 @@ implements R2OElement, IRelationMapping, Cloneable
 	}
 
 
+	public String generateRangeURIAlias() {
+		if(this.rangeURIAlias == null) {
+			this.rangeURIAlias = R2OConstants.RELATIONMAPPING_ALIAS + new Random().nextInt(10000);
+		}
+		return this.rangeURIAlias;
+	}
 
 }

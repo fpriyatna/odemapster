@@ -1,20 +1,31 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
+import org.apache.log4j.Logger;
+
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.TranslatorUtility;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 
 public class R2OJoinQuery {
+	private static Logger logger = Logger.getLogger(R2OJoinQuery.class);
+	
 	private String joinType;
 	//private ZExp joinSource;
 	//private String joinSourceAlias;
 	
 	private R2OFromItem joinSource;
 	
-	private ZExpression onExpression;
+	private ZExp onExp;
 	
-	public void setOnExpression(ZExpression onExpression) {
-		this.onExpression = onExpression;
+	public void setOnExpression(ZExp onExp) {
+		if(onExp instanceof ZConstant ||
+				onExp instanceof ZExpression) {
+			this.onExp = onExp;
+		} else {
+			logger.error("Invalid join on expression");
+		}
+		
 	}
 
 	public void setJoinType(String joinType) {
@@ -54,7 +65,7 @@ public class R2OJoinQuery {
 		}
 		
 		
-		result.append(" ON " + this.onExpression);
+		result.append(" ON " + this.onExp);
 		return result.toString();
 
 	}

@@ -8,17 +8,22 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2SQLTranslator.P
 
 public class NameGenerator {
 	public String generateName(Node node) {
+		String nodeHashCode = (node.hashCode() + "").replaceAll("-", "");
+		String result = null;
 		if(node.isVariable()) {
-			return node.getName();
+			result = this.generateName((Var) node);
 		} else if(node.isURI()) {
 			String localName = node.getLocalName(); 
-			return localName;
-		} 
+			result = "uri_" + localName + nodeHashCode;
+		} else if(node.isLiteral()) {
+			result = "lit_" + nodeHashCode;
+		}
 
-		return null;
+		 
+		return result;
 	}
 	
 	public String generateName(Var var) {
-		return var.getName();
+		return "var_" + var.getName();
 	}
 }

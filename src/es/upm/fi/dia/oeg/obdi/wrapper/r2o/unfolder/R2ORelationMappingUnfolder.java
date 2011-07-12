@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -91,7 +92,9 @@ public class R2ORelationMappingUnfolder {
 		parentMappingTableName += ".";
 		for(ZSelectItem rmJoinsViaSelectItem : rmJoinsViaSelectItems) {
 			logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
-			if(!rmJoinsViaSelectItem.toString().startsWith(parentMappingTableName)) {
+			String rmJoinsViaSelectItemString = rmJoinsViaSelectItem.getSchema() + "." + rmJoinsViaSelectItem.getTable() + "." + rmJoinsViaSelectItem.getColumn();
+			rmJoinsViaSelectItemString = rmJoinsViaSelectItemString.replaceAll("\"", "");
+			if(!rmJoinsViaSelectItemString.startsWith(parentMappingTableName)) {
 //				ZConstant zColumn = Utility.constructDatabaseColumn(rmJoinsViaSelectItem);
 //				ZSelectItem selectItem = new ZSelectItem();
 //				selectItem.setExpression(zColumn);
@@ -240,6 +243,9 @@ public class R2ORelationMappingUnfolder {
 	}
 
 	private R2OQuery processToConcept(R2OQuery cmQuery) throws Exception {
+//		String rmIdentifiedBy = this.relationMapping.getId();
+//		R2ODatabaseTable rangeBaseTable = this.rangeConceptMapping.getHasTable();
+		
 		R2ODatabaseTable r2oBaseTable = this.parentMapping.getHasTables().get(0);
 		String cmBaseTable = r2oBaseTable.getName();
 		if(r2oBaseTable.getAlias() != null && r2oBaseTable.getAlias() != "") {
@@ -252,7 +258,7 @@ public class R2ORelationMappingUnfolder {
 
 		//unfold range URI
 		Collection<ZSelectItem> rangeURISelectItems = this.unfoldRangeURI();
-
+		
 
 		//unfold range applies-if && joins-via
 		R2OConditionalExpression rangeAppliesIf = rangeConceptMapping.getAppliesIf();
@@ -312,18 +318,19 @@ public class R2ORelationMappingUnfolder {
 
 			//process has-view
 			R2OQuery rmViewQuery = this.processHasView(rmHasView);
+
 			R2OFromItem fromItem = new R2OFromItem(
 					rmViewQuery.toString(), R2OFromItem.FORM_QUERY);
-			fromItem.setAlias(rmHasView.generateViewAlias());
+			String fromItemAlias = R2OConstants.VIEW_ALIAS + new Random().nextInt(1000);
+			fromItem.setAlias(fromItemAlias);
 			rmQuery.setJoinSource(fromItem);
 			
 			ZExpression onExpressionRenamed = Utility.renameColumnsIfNotMatch(
-					rmQueryOnExpression, cmBaseTable, rmHasView.generateViewAlias());
-
+					rmQueryOnExpression, cmBaseTable, fromItemAlias);
 			rmQuery.setOnExpression(onExpressionRenamed);
 
 			Collection<ZSelectItem> rangeURISelectItemsRenamed = 
-				Utility.renameColumnsIfNotMatch(rangeURISelectItems, cmBaseTable, rmHasView.generateViewAlias());
+				Utility.renameColumnsIfNotMatch(rangeURISelectItems, cmBaseTable, fromItemAlias);
 			
 			cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
 		}
@@ -420,7 +427,6 @@ public class R2ORelationMappingUnfolder {
 			throw new InvalidRelationMappingException(errorMessage);
 		}
 
-
 		//this.processURIAs(rangeConceptMapping, r2oRelationMapping.getId());
 		R2OTransformationExpression rangeURIAsTransformationExpression = 
 			rangeConceptMapping.getURIAs();
@@ -430,14 +436,16 @@ public class R2ORelationMappingUnfolder {
 			if(rangeURIAsTransformationExpression.isDelegableTransformationExpression()) {
 				R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder = 
 					new R2OTransformationExpressionUnfolder(rangeURIAsTransformationExpression);
-				String alias = R2OConstants.RELATIONMAPPING_ALIAS + relationMapping.hashCode();
-				result.addAll(r2oTransformationExpressionUnfolder.unfold(alias));
+				String rangeURIAlias = relationMapping.generateRangeURIAlias();
+				result.addAll(r2oTransformationExpressionUnfolder.unfold(rangeURIAlias));
 			} else {
 				String errorMessage = "Unsupported transformation operation : " + uriAsOperator;
 				logger.error(errorMessage);
 				throw new InvalidRelationMappingException("Unsupported transformation operation : " + uriAsOperator);
 			}
 		}
+
+		
 		return result;
 	}
 

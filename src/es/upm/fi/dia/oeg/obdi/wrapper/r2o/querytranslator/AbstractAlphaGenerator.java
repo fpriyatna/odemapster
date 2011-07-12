@@ -24,5 +24,9 @@ public abstract class AbstractAlphaGenerator {
 	
 	abstract ZQuery calculateAlpha(Triple tp) throws Exception;
 	abstract ZQuery calculateAlpha(Collection<Triple> triples) throws Exception;
+	abstract R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception;
+	abstract R2OConceptMapping calculateAlphaCM(Collection<Triple> triples) throws Exception;
+
+
 
 }

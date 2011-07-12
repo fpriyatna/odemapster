@@ -27,4 +27,5 @@ public abstract class AbstractBetaGenerator {
 
 
 	abstract ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception;
+	abstract ZSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm) throws Exception;
 }

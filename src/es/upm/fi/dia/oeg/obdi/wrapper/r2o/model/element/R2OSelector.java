@@ -1,5 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element;
 
+import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -19,6 +21,7 @@ public class R2OSelector implements R2OElement, Cloneable {
 //            (aftertransform transformation)?
 	private R2OConditionalExpression appliesIf;
 	private R2OTransformationExpression afterTransform;
+	private String afterTransformAlias;
 	
 	public R2OSelector(Element element) throws ParseException {
 		this.parse(element);
@@ -76,7 +79,10 @@ public class R2OSelector implements R2OElement, Cloneable {
 	}
 
 	public String generateAfterTransformAlias() {
-		return R2OConstants.AFTERTRANSFORM_ALIAS + this.hashCode();
+		if(this.afterTransformAlias == null) {
+			this.afterTransformAlias = R2OConstants.AFTERTRANSFORM_ALIAS + new Random().nextInt(10000);
+		}
+		return this.afterTransformAlias;
 	}
 
 	public void setAppliesIf(R2OConditionalExpression appliesIf) {

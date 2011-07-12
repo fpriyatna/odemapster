@@ -63,7 +63,7 @@ public abstract class R2ORestriction implements R2OElement {
 			selectItem.setExpression(selectItemExpression);
 			String alias = restrictionSQL.getAlias();
 			if(alias == null || alias=="") {
-				alias = R2OConstants.RESTRICTION_ALIAS + this.hashCode();
+				alias = this.generateRestrictionAlias();
 			}
 			selectItem.setAlias(alias);
 			result.add(selectItem);
@@ -78,5 +78,7 @@ public abstract class R2ORestriction implements R2OElement {
 		return result;
 	}
 	
-	
+	public String generateRestrictionAlias() {
+		return R2OConstants.RESTRICTION_ALIAS + this.hashCode();
+	}	
 }

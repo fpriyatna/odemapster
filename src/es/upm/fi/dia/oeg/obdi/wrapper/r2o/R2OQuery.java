@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -11,6 +12,7 @@ import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZFromItem;
+import Zql.ZOrderBy;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 
@@ -18,20 +20,62 @@ public class R2OQuery extends ZQuery {
 	private static Logger logger = Logger.getLogger(TranslatorUtility.class);
 	private Collection<R2OJoinQuery> joinQueries;
 	private Collection<R2OQuery> unionQueries;
-
+	private String alias;
+	private long slice = -1;
 	
+	public void setSlice(long slice) {
+		this.slice = slice;
+	}
+
 	public R2OQuery() {
 		super();
 		this.addSelect(new Vector<ZSelectItem>());
 		this.addFrom(new Vector<ZFromItem>()); 
 	}
 
-	public void addSelect(ZSelectItem selectItem) {
-		if(this.getSelect() == null) {
+	public void clearSelectItems() {
+		Collection<ZSelectItem> selectItems = this.getSelect();
+		selectItems = new Vector<ZSelectItem>();
+	}
+	
+	public void setSelectItems(Collection<ZSelectItem> newSelectItems) {
+		this.clearSelectItems();
+		
+		for(ZSelectItem newSelectItem : newSelectItems) {
+			this.addSelect(newSelectItem);
+		}
+	}
+	
+	public void addSelect(ZSelectItem newSelectItem) {
+		Collection<ZSelectItem> selectItems = this.getSelect();
+		if(selectItems == null) {
 			this.addSelect(new Vector<ZSelectItem>());
 		}
 		
-		this.getSelect().add(selectItem);
+		String newSelectItemAlias = newSelectItem.getAlias();
+		newSelectItem.setAlias("");
+		
+		boolean alreadySelected = false;
+		for(ZSelectItem selectItem : selectItems) {
+			String selectItemAlias = selectItem.getAlias();
+			selectItem.setAlias("");
+			if(selectItemAlias != null && !selectItemAlias.equals("")) {
+				if(selectItemAlias.equalsIgnoreCase(newSelectItemAlias)) {
+					alreadySelected = true;
+					logger.warn(selectItemAlias + " already selected");
+				}
+				selectItem.setAlias(selectItemAlias);
+			}			
+		}
+		
+		if(newSelectItemAlias != null && !newSelectItemAlias.equals("")) {
+			newSelectItem.setAlias(newSelectItemAlias);
+		}
+		
+		if(!alreadySelected) {
+			selectItems.add(newSelectItem);
+		}
+		
 	}
 	
 	public void addJoinQuery(R2OJoinQuery joinQuery) {
@@ -146,12 +190,37 @@ public class R2OQuery extends ZQuery {
 			}
 		}
 		
+		if(this.getOrderBy() != null) {
+			String orderBySQL = "";
+			for(Object orderByObject : this.getOrderBy()) {
+				ZOrderBy orderBy = (ZOrderBy) orderByObject;
+				orderBy.getAscOrder();
+				ZExp orderByExpression = orderBy.getExpression();
+				orderBySQL += orderByExpression;
+				if(! orderBy.getAscOrder()) {
+					orderBySQL += "DESC ";
+				}
+				orderBySQL += ", ";
+			}
+			orderBySQL = orderBySQL.substring(0, orderBySQL.length() - 2);
+			orderBySQL = "ORDER BY " + orderBySQL ; 
+			result.append(orderBySQL + "\n");
+			
+		}
+		
+		if(this.slice != -1) {
+			result.append("LIMIT " + this.slice);
+		}
 		return result.toString();
 
 	}
 	
 	public String generateAlias() {
-		return R2OConstants.VIEW_ALIAS + this.hashCode();
+		//return R2OConstants.VIEW_ALIAS + this.hashCode();
+		if(this.alias == null) {
+			this.alias = R2OConstants.VIEW_ALIAS + new Random().nextInt(10000);
+		}
+		return this.alias;
 	}
 
 

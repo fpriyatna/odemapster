@@ -374,7 +374,9 @@ public abstract class R2ODataTranslator {
 		Property property = model.createProperty(relationName);
 
 		if(r2oRelationMapping.getToConcept() != null) {
-			String rangeURI = rs.getString(R2OConstants.RELATIONMAPPING_ALIAS + r2oRelationMapping.hashCode());
+			//String rangeURIAlias = R2OConstants.RELATIONMAPPING_ALIAS + r2oRelationMapping.hashCode();
+			String rangeURIAlias = r2oRelationMapping.generateRangeURIAlias();
+			String rangeURI = rs.getString(rangeURIAlias);
 			if(rangeURI != null) {
 				rangeURI = Utility.encodeURI(rangeURI);
 
@@ -946,7 +948,7 @@ public abstract class R2ODataTranslator {
 			String expression = restrictionSQL.getHasSQL();
 			String alias = restrictionSQL.getAlias();
 			if(alias == null || alias == "") {
-				alias = R2OConstants.RESTRICTION_ALIAS + restriction.hashCode();
+				alias = restriction.generateRestrictionAlias();
 			}
 
 			result = this.processSQLExpression(expression, alias, null, rs);

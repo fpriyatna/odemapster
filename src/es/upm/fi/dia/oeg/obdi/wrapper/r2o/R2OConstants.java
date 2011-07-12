@@ -174,6 +174,8 @@ public class R2OConstants {
 	public static final String MAPPING_DOCUMENT_TAGS = "mappingdocument.tags";
 	public static final String MAPPING_DOCUMENT_ORGANIZATION = "mappingdocument.organization";
 	
+	public static final String OPTIMIZE_TB = "querytranslator.optimizetb";
+	
 	public enum MappingType {
 		CONCEPT, ATTRIBUTE, RELATION
 	}

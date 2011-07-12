@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,15 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConstantRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OJoin;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
@@ -411,10 +420,9 @@ public class TranslatorUtility {
 		return false;
 	}
 	
-	public static boolean isTripleBlock(OpBGP bgp) {
-		List<Triple> triples = bgp.getPattern().getList();
-		if(triples.size() == 1) {
-			return true;
+	public static boolean isTripleBlock(List<Triple> triples) {
+		if(triples.size() <= 1) {
+			return false;
 		} else {
 			String prevSubject = triples.get(0).getSubject().toString();
 			String currSubject;
@@ -431,31 +439,64 @@ public class TranslatorUtility {
 		
 	}
 	
+	public static boolean isTripleBlock(OpBGP bgp) {
+		List<Triple> triples = bgp.getPattern().getList();
+		return TranslatorUtility.isTripleBlock(triples);
+	}
+	
 	public static boolean isTripleBlock(Op op) {
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
 			return TranslatorUtility.isTripleBlock(bgp);
-		} else if(op instanceof OpLeftJoin ) {
-			OpLeftJoin leftJoin = (OpLeftJoin) op;
-			boolean result1 = TranslatorUtility.isTripleBlock(leftJoin.getLeft());
-			boolean result2 = TranslatorUtility.isTripleBlock(leftJoin.getRight());
-			return result1 && result2;
-		} else if(op instanceof OpJoin ) {
-			OpJoin opJoin = (OpJoin) op;
-			boolean result1 = TranslatorUtility.isTripleBlock(opJoin.getLeft());
-			boolean result2 = TranslatorUtility.isTripleBlock(opJoin.getRight());
-			return result1 && result2;			
-		} else if(op instanceof OpFilter) {
-			OpFilter filter = (OpFilter) op;
-			return TranslatorUtility.isTripleBlock(filter.getSubOp());
-		} else if(op instanceof OpUnion) {
-			OpUnion opUnion = (OpUnion) op;
-			boolean result1 = TranslatorUtility.isTripleBlock(opUnion.getLeft());
-			boolean result2 = TranslatorUtility.isTripleBlock(opUnion.getRight());
-			return result1 && result2;
 		} else {
-			logger.warn("unsupported pattern for isTripleBlock function");
 			return false;
 		}
+	}
+	
+	public static int getFirstTBEndIndex(List<Triple> triples) {
+		int result = 1;
+		for(int i=0; i<triples.size(); i++) {
+			List<Triple> sublist = triples.subList(0, i);
+			if(TranslatorUtility.isTripleBlock(sublist)) {
+				result = i;
+			}
+		}
+		
+		return result;
+	}
+	
+	public static R2ORelationMapping processObjectPredicateObjectURI(
+			Node object , R2ORelationMapping rm, R2OMappingDocument md) 
+	throws R2OTranslationException
+	{
+		String toConcept = rm.getToConcept();
+		R2OConceptMapping rangeConceptMapping = 
+			(R2OConceptMapping) md.getConceptMappingByConceptMappingId(toConcept);
+		R2OTransformationExpression rangeUriAs = rangeConceptMapping.getURIAs();
+		R2OTransformationRestriction tr = new R2OTransformationRestriction(rangeUriAs);
+		R2OArgumentRestriction rangeUriAsArgumentRestriction = new R2OArgumentRestriction(tr);
+
+		R2OConstantRestriction cr = new R2OConstantRestriction();
+		cr.setConstantValue(object.getURI());
+		R2OArgumentRestriction objectAsArgumentRestriction = new R2OArgumentRestriction(cr);
+
+		List<R2OArgumentRestriction> argRestrictions = new ArrayList<R2OArgumentRestriction>();
+		argRestrictions.add(rangeUriAsArgumentRestriction);
+		argRestrictions.add(objectAsArgumentRestriction);
+		R2OCondition condition = new R2OCondition(R2OConstants.CONDITION_TAG
+				, argRestrictions, R2OConstants.CONDITIONAL_OPERATOR_EQUALS_NAME);
+
+		R2OJoin joinVia = rm.getJoinsVia();
+
+		R2OJoin joinVia2 = joinVia.clone();
+		R2OConditionalExpression joinsViaCE1 = joinVia.getJoinConditionalExpression();
+		R2OConditionalExpression joinsViaCE2 = 
+			R2OConditionalExpression.addCondition(joinsViaCE1, R2OConstants.AND_TAG, condition);
+		joinVia2.setJoinConditionalExpression(joinsViaCE2);
+
+		R2ORelationMapping rm2 = rm.clone();
+		rm2.setJoinsVia(joinVia2);
+
+		return rm2;
 	}
 }

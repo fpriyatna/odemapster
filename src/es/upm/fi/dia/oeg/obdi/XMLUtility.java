@@ -82,7 +82,7 @@ public class XMLUtility {
 		return document;
 	}
 
-	public static Document createNewXMLDocument() throws ParserConfigurationException, TransformerException, FileNotFoundException
+	public static Document createNewXMLDocument() throws ParserConfigurationException 
 	{
 		DocumentBuilderFactory documentBuilderFactory = 
 			DocumentBuilderFactory.newInstance();

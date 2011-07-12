@@ -5,9 +5,10 @@ import org.w3c.dom.Element;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.IPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants.MappingType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 
-public abstract class R2OPropertyMapping extends AbstractPropertyMapping implements R2OElement, IPropertyMapping {
+public abstract class R2OPropertyMapping extends AbstractPropertyMapping implements R2OElement, IPropertyMapping, Cloneable {
 	private R2OConceptMapping parent;
 //	private String id;
 	
@@ -55,7 +56,21 @@ public abstract class R2OPropertyMapping extends AbstractPropertyMapping impleme
 	public String getId() {
 		return this.getPropertyMappingID();
 	}
+
+
+	@Override
+	public R2OPropertyMapping clone() throws CloneNotSupportedException {
+		return (R2OPropertyMapping) super.clone();
+	}
 	
+	public MappingType getMappingType() {
+		if(this instanceof R2OAttributeMapping) {
+			return MappingType.ATTRIBUTE;
+		} else if (this instanceof R2ORelationMapping) {
+			return MappingType.RELATION;
+		}
+		return null;
+	}
 	
 	
 	

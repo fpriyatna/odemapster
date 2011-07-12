@@ -135,5 +135,12 @@ public class BetaGenerator2 extends AbstractBetaGenerator {
 		return selectItem;
 	}
 
+	@Override
+	ZSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

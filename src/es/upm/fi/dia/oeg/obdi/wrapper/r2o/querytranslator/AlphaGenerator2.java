@@ -69,4 +69,17 @@ public class AlphaGenerator2 extends AbstractAlphaGenerator {
 		return null;
 	}
 
+	@Override
+	R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	R2OConceptMapping calculateAlphaCM(Collection<Triple> triples)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

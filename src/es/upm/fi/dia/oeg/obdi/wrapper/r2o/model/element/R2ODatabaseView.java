@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.w3c.dom.Element;
 
@@ -14,6 +15,7 @@ public class R2ODatabaseView implements R2OElement {
 	private String name;
 	private List<R2OArgumentRestriction> argRestricts;
 	private R2OJoin joinsVia;
+	private String alias;
 	
 	public R2ODatabaseView(Element xmlElement) throws ParseException {
 		this.parse(xmlElement);
@@ -85,11 +87,12 @@ public class R2ODatabaseView implements R2OElement {
 	}
 	
 	public String generateViewAlias() {
-		String viewAlias = this.name;
-		if(viewAlias == null || viewAlias == "") {
-			viewAlias = R2OConstants.VIEW_ALIAS + this.hashCode();
+		//String viewAlias = this.name;
+		if(this.alias == null || this.alias == "") {
+			//viewAlias = R2OConstants.VIEW_ALIAS + this.hashCode();
+			this.alias = R2OConstants.VIEW_ALIAS + new Random().nextInt(10000);
 		}
-		return viewAlias;
+		return this.alias;
 	}
 
 }

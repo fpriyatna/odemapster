@@ -318,7 +318,9 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			}			
 		}
 		
-
+		if(result.size() == 0) {
+			logger.warn("property mapping : " + propertyURI + " is not found for concept mapping " + this.getId());
+		}
 		return result;
 	}
 
@@ -342,6 +344,14 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		}
 		
 		this.describedBy.add(pm);
+	}
+	
+	public void addPropertyMappings(Collection<R2OPropertyMapping> pms) {
+		if(this.describedBy == null) {
+			this.describedBy = new ArrayList<R2OPropertyMapping>();
+		}
+		
+		this.describedBy.addAll(pms);
 	}
 	
 	public void addAttributeMapping(R2OAttributeMapping am) {

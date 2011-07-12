@@ -15,6 +15,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
@@ -35,21 +36,30 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 
 	@Override
 	ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
+		R2OConceptMapping cm = this.mapNodeConceptMapping.get(tp.getSubject());
+		return this.calculateBetaCM(tp, pos, cm);
+	}
+
+
+	@Override
+	R2OSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm)
+			throws Exception {
 		Node subject = tp.getSubject();
 		String predicateURI = tp.getPredicate().getURI();;
-		ZSelectItem selectItem = null;
-		R2OConceptMapping cm = this.mapNodeConceptMapping.get(subject);
+		R2OSelectItem selectItem = null;
+		
 
 		if(pos == POS.sub) {
-			selectItem = new ZSelectItem(cm.generateURIAlias());
+			String cmURIAlias = cm.generateURIAlias();
+			selectItem = new R2OSelectItem(cmURIAlias);
 		} else if(pos == POS.pre) {
 			ZConstant predicateURIConstant = new ZConstant(predicateURI, ZConstant.STRING);
-			selectItem = new ZSelectItem();
+			selectItem = new R2OSelectItem();
 			selectItem.setExpression(predicateURIConstant);
 		} else if(pos == POS.obj) {
 			if(RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
 				ZConstant conceptNameConstant = new ZConstant(cm.getConceptName(), ZConstant.STRING);
-				selectItem = new ZSelectItem();
+				selectItem = new R2OSelectItem();
 				selectItem.setExpression(conceptNameConstant);
 			} else {
 				List<R2OPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
@@ -81,7 +91,7 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 										throw new Exception(newErrorMessage);
 									} 
 
-									selectItem = new ZSelectItem(selector.generateAfterTransformAlias());
+									selectItem = new R2OSelectItem(selector.generateAfterTransformAlias());
 								}
 							}
 							catch(Exception e) {
@@ -105,7 +115,9 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 									throw new Exception(newErrorMessage);									
 								}
 
-								selectItem = new ZSelectItem(selectItems.iterator().next().getAlias());
+								//String rangeURIAlias = selectItems.iterator().next().getAlias();
+								String rangeURIAlias = rm.generateRangeURIAlias();
+								selectItem = new R2OSelectItem(rangeURIAlias);
 							} catch(Exception e) {
 								String newErrorMessage = e.getMessage() + " while processing relation mapping " + pm.getName();
 								logger.error(newErrorMessage);
@@ -121,4 +133,5 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 		return selectItem;
 	}
 
+	
 }

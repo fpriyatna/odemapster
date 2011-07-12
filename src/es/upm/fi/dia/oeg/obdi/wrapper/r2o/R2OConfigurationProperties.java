@@ -22,7 +22,12 @@ public class R2OConfigurationProperties extends Properties {
 	private String rdfLanguage;
 	private String jenaMode;
 	private String databaseType;
+	private boolean optimizeTB;
 	
+	public boolean isOptimizeTB() {
+		return optimizeTB;
+	}
+
 	public R2OConfigurationProperties(
 			String r2oConfigurationDir, String r2oConfigurationFile) 
 	throws IOException, InvalidConfigurationPropertiesException, SQLException 
@@ -129,6 +134,14 @@ public class R2OConfigurationProperties extends Properties {
 				logger.warn("Split output is not supported anymore");
 			}
 		}
+
+		String optimizeTBString = this.getProperty(R2OConstants.OPTIMIZE_TB);
+		if(optimizeTBString != null) {
+			if(optimizeTBString.equalsIgnoreCase("yes") || optimizeTBString.equalsIgnoreCase("true")) {
+				this.optimizeTB = true;
+			}
+		}
+		logger.debug("optimizeTB = " + this.optimizeTB);
 
 	}
 

@@ -103,7 +103,7 @@ public class R2OConceptMappingUnfolder {
 				cmQuery.addWhere(cmAppliesIfExp);
 			} else {
 				if(cmAppliesIf.isConjuctiveConditionalExpression()) {
-					logger.debug("Conjuctive delegable conditional expression of concept mapping.");
+					logger.debug("Conjuctive conditional expression of concept mapping.");
 					Collection<R2OCondition> flatConditionalExpression = cmAppliesIf.flatConjuctiveConditionalExpression();
 					for(R2OCondition condition : flatConditionalExpression) {
 						if(condition.isDelegableCondition()) {
