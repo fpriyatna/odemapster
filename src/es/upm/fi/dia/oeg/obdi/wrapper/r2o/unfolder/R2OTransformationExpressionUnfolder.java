@@ -38,9 +38,23 @@ public class R2OTransformationExpressionUnfolder {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 		
 		if(this.transformationExpression.isDelegableTransformationExpression()) {
+			ZSelectItem zSelectItem;
+			
 			ZExp selectExpression = this.unfoldDelegableTransformationExpression();
-			ZSelectItem zSelectItem = new ZSelectItem();
-			zSelectItem.setExpression(selectExpression);
+			if(selectExpression instanceof ZConstant) {
+				ZConstant selectConstant = (ZConstant) selectExpression;
+				if(selectConstant.getType() == ZConstant.COLUMNNAME) {
+					String selectConstantValue = selectConstant.getValue();
+					zSelectItem = new ZSelectItem(selectConstantValue);
+				} else {
+					zSelectItem = new ZSelectItem();
+					zSelectItem.setExpression(selectConstant);
+				}
+			} else {
+				zSelectItem = new ZSelectItem();
+				zSelectItem.setExpression(selectExpression);
+			}
+			
 			if(alias != null) {
 				zSelectItem.setAlias(alias); //we can only set alias in case delegable ones
 			}

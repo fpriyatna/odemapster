@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.db.DBConnection;
 import com.hp.hpl.jena.db.IDBConnection;
+import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -32,10 +33,14 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidRestrictionType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.AbstractMaterializer;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.RDFXMLMaterializer;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
@@ -52,17 +57,58 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 public abstract class R2ODataTranslator {
 	private static Logger logger = Logger.getLogger(R2ODataTranslator.class);
+	private AbstractMaterializer materializer;
 
 
-	public void processConceptMapping(ResultSet rs, Model model, AbstractConceptMapping conceptMapping
-			, Writer outputFileWriter) throws Exception {
+	public void processMappingDocument(R2OMappingDocument mappingDocument) throws Exception {
+		Collection<AbstractConceptMapping> conceptMappings = 
+			mappingDocument.getConceptMappings();
+		for(AbstractConceptMapping conceptMapping : conceptMappings) {
+			try {
+				//unfold mapped concepts
+				logger.info("Unfolding concept " + conceptMapping.getConceptName());
+				R2OUnfolder unfolder = 
+					new R2OUnfolder(mappingDocument, R2ORunner.primitiveOperationsProperties, R2ORunner.configurationProperties);
+				String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
+				if(sqlQuery != null) {
+					//evaluate query
+					ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, R2ORunner.configurationProperties.getConn());
+
+					this.processConceptMapping(rs, conceptMapping);
+
+					//cleaning up
+					Utility.closeStatement(rs.getStatement());
+					Utility.closeRecordSet(rs);					
+				}
+
+
+			} catch(SQLException e) {
+				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
+				logger.error(errorMessage);				
+				throw e;
+			} catch(RelationMappingUnfolderException e) {
+				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
+				logger.error(errorMessage);				
+				throw e;				
+			} catch(Exception e) {
+				//e.printStackTrace();
+				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
+				logger.error(errorMessage);
+				throw e;
+			}
+
+		}
+	}
+	
+	private void processConceptMapping(ResultSet rs, AbstractConceptMapping conceptMapping) throws Exception {
 		String conceptName = conceptMapping.getConceptName();
 		logger.info("Post processing for " + conceptName);
 		long startGeneratingModel = System.currentTimeMillis();
-		Resource object = model.getResource(conceptName);
 
 		R2OConceptMapping r2oConceptMapping = (R2OConceptMapping) conceptMapping;
 		R2OConditionalExpression appliesIf = r2oConceptMapping.getAppliesIf();
@@ -103,14 +149,7 @@ public abstract class R2ODataTranslator {
 			isEncodeURI = false;
 		}
 
-		boolean useNTriple = false;
-		String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
-		if(rdfLanguage == null) {
-			rdfLanguage = "RDF/XML";
-		}
-		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-			useNTriple = true;
-		}
+
 
 		long counter = 0;
 		String previousSubjectURI = null;
@@ -146,11 +185,10 @@ public abstract class R2ODataTranslator {
 						subjectURI = (String) this.processNonDelegableTransformationExpression(
 								rs, conceptMappingURIAsTransformationExpression);
 					}
+					
 					if(subjectURI == null) {
 						throw new Exception("null uri is not allowed!");
 					}
-
-
 
 					if(isEncodeURI) {
 						subjectURI = Utility.encodeURI(subjectURI);
@@ -161,17 +199,13 @@ public abstract class R2ODataTranslator {
 					}
 					counter++;
 
-					Resource subject = model.createResource(subjectURI);
-
 					//create rdf type triple if the subject is different from the previous one
 					if(!subjectURI.equals(previousSubjectURI)) {
-						this.createRDFTypeTriple(useNTriple, subjectURI, conceptName
-								, outputFileWriter, model, subject, object);
-
+						this.createRDFTypeTriple(subjectURI, conceptName);
 					}
 
 					//logger.info("Processing property mappings.");
-					this.processPropertyMappings(r2oConceptMapping, rs, model, subject, outputFileWriter);
+					this.processPropertyMappings(r2oConceptMapping, rs);
 					previousSubjectURI = subjectURI;
 				}
 
@@ -197,22 +231,16 @@ public abstract class R2ODataTranslator {
 
 	}
 
-	private void createRDFTypeTriple(boolean useNTriple, String subjectURI, String conceptName
-			, Writer outputFileWriter, Model model, Resource subject, RDFNode object) 
+	private void createRDFTypeTriple(String subjectURI, String conceptName) 
 	throws IOException {
-		if(useNTriple) {
-			String triple = 
-				Utility.createTriple(
-						Utility.createURIref(subjectURI)
-						, Utility.createURIref(RDF.type.toString())
-						, Utility.createURIref(conceptName)); 
-			outputFileWriter.append(triple);							
-
+		boolean isBlankNodeSubject;
+		if(Utility.isIRI(subjectURI)) {
+			isBlankNodeSubject = false;
 		} else {
-			subject = model.createResource(subjectURI);
-			Statement statement = model.createStatement(subject, RDF.type, object);
-			model.add(statement);						
+			isBlankNodeSubject = true;
 		}
+		this.materializer.materializeRDFTypeTriple(subjectURI, conceptName, isBlankNodeSubject);
+		
 	}
 
 	/*
@@ -254,15 +282,14 @@ public abstract class R2ODataTranslator {
 		return argument0.substring(beginIndex, endIndex);
 	}
 
-	private void processPropertyMappings(R2OConceptMapping r2oConceptMapping, ResultSet rs, Model model, Resource subject
-			, Writer outputFileWriter) throws Exception {
+	private void processPropertyMappings(R2OConceptMapping r2oConceptMapping, ResultSet rs) throws Exception {
 		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
 		if(propertyMappings != null) {
 			for(R2OPropertyMapping propertyMapping : propertyMappings) {
 				if(propertyMapping instanceof R2OAttributeMapping) {
 					try {
 						this.processAttributeMapping(
-								(R2OAttributeMapping) propertyMapping, rs, model, subject, outputFileWriter);
+								(R2OAttributeMapping) propertyMapping, rs);
 					} catch(Exception e) {
 						String newErrorMessage = e.getMessage() + " while processing attribute mapping " + propertyMapping.getName();
 						logger.error(newErrorMessage);
@@ -272,7 +299,7 @@ public abstract class R2ODataTranslator {
 				} else if(propertyMapping instanceof R2ORelationMapping) {
 					try {
 						this.processRelationMapping(
-								(R2ORelationMapping) propertyMapping, rs, model, subject, outputFileWriter);
+								(R2ORelationMapping) propertyMapping, rs);
 					} catch(Exception e) {
 						String newErrorMessage = e.getMessage() + " while processing relation mapping " + propertyMapping.getName();
 						logger.error(newErrorMessage);
@@ -320,88 +347,39 @@ public abstract class R2ODataTranslator {
 	//XML Schema states that xml:Lang is not meaningful on xsd datatypes.
 	//Thus for almost all typed literals there is no xml:Lang tag.
 	private void addDataTypeProperty(
-			String propName, Object propVal, String datatype, String lang
-			, Model model, Resource subject, Writer outputFileWriter) 
+			String predicateName, Object propVal, String datatype, String lang) 
 	throws Exception {
-		Literal literal;
-
-		if(propName.equalsIgnoreCase(RDFS.label.toString())) { //special case of rdfs:label
+		if(predicateName.equalsIgnoreCase(RDFS.label.toString())) { //special case of rdfs:label
 			if(lang == null) {
 				datatype = R2OConstants.XSD_STRING;
 			}
 		}
 
-		String literalString = null;
-		if(datatype == null) {
-			if(lang == null) {
-				literal =  model.createTypedLiteral(propVal);
-				literalString = Utility.createLiteral(propVal.toString());
-			} else {
-				literal =  model.createLiteral(propVal.toString(), lang);
-				literalString = Utility.createLanguageLiteral(propVal.toString(), lang);
-			}
-		} else {
-			literal =  model.createTypedLiteral(propVal, datatype);
-			literalString = Utility.createDataTypeLiteral(propVal.toString(), datatype);
-		}
-
-		String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
-		if(rdfLanguage == null) {
-			rdfLanguage = R2OConstants.OUTPUT_FORMAT_NTRIPLE;
-		}
-
-		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-			String tripleSubject = Utility.createURIref(subject.getURI());
-			String triplePredicate = Utility.createURIref(propName);
-			//String tripleObject = this.createURIref(literalString);
-			String tripleObject = literalString;
-			String tripleString = Utility.createTriple(tripleSubject, triplePredicate, tripleObject); 
-			outputFileWriter.append(tripleString);			
-		} else {
-			subject.addProperty(model.createProperty(propName), literal);
-		}
-
-
-
-
-
+		this.materializer.materializeDataPropertyTriple(predicateName, propVal, datatype, lang);
 	}
 
 
-	private void processRelationMapping(R2ORelationMapping r2oRelationMapping, ResultSet rs, Model model, Resource subject
-			, Writer outputFileWriter) throws Exception {
-		String relationName = r2oRelationMapping.getRelationName();
-		Property property = model.createProperty(relationName);
+	private void processRelationMapping(R2ORelationMapping rm, ResultSet rs) throws Exception {
+		String predicateName = rm.getRelationName();
 
-		if(r2oRelationMapping.getToConcept() != null) {
-			//String rangeURIAlias = R2OConstants.RELATIONMAPPING_ALIAS + r2oRelationMapping.hashCode();
-			String rangeURIAlias = r2oRelationMapping.generateRangeURIAlias();
+		if(rm.getToConcept() != null) {
+			String rangeURIAlias = rm.generateRangeURIAlias();
 			String rangeURI = rs.getString(rangeURIAlias);
+			boolean isBlankNodeObject;
 			if(rangeURI != null) {
-				rangeURI = Utility.encodeURI(rangeURI);
-
-				String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
-				if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-					String triple = 
-						Utility.createTriple(
-								Utility.createURIref(subject.getURI())
-								, Utility.createURIref(relationName)
-								, Utility.createURIref(rangeURI)); 
-					outputFileWriter.append(triple);
-
+				if(Utility.isIRI(rangeURI)) {
+					rangeURI = Utility.encodeURI(rangeURI);
+					isBlankNodeObject = false;
 				} else {
-					Resource object = model.createResource(rangeURI);
-					Statement rdfstmtInstance = model.createStatement(subject,property, object);
-					model.add(rdfstmtInstance);
-
+					isBlankNodeObject = true;
 				}
-
-
+				
+				this.materializer.materializeObjectPropertyTriple(predicateName, rangeURI, isBlankNodeObject);
 			}			
 		} 
 
-		if(r2oRelationMapping.getRmSelectors() != null) {
-			Collection<R2OSelector> selectors = r2oRelationMapping.getRmSelectors();
+		if(rm.getRmSelectors() != null) {
+			Collection<R2OSelector> selectors = rm.getRmSelectors();
 			if(selectors != null) {
 				for(R2OSelector selector : selectors) {
 					R2OConditionalExpression selectorAppliesIf = selector.getAppliesIf();
@@ -448,21 +426,17 @@ public abstract class R2ODataTranslator {
 
 						if(propVal != null) {
 							String propValString = propVal.toString();
-
-							if(R2ORunner.configurationProperties.getRdfLanguage().equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-								String triple = 
-									Utility.createTriple(
-											Utility.createURIref(subject.getURI())
-											, Utility.createURIref(relationName)
-											, Utility.createURIref(propValString)); 
-								outputFileWriter.append(triple);								
-							} else {
-
+							boolean isBlankNodeObject;
+							if(Utility.isIRI(propValString)) {
 								propValString = Utility.encodeURI(propValString);
-								Resource object = model.createResource(propValString);
-								Statement rdfstmtInstance = model.createStatement(subject,property, object);
-								model.add(rdfstmtInstance);								
+								isBlankNodeObject = false;
+							} else {
+								isBlankNodeObject = true;
 							}
+							
+							this.materializer.materializeObjectPropertyTriple(predicateName, propValString, isBlankNodeObject);
+							
+
 
 						}		
 					}
@@ -476,7 +450,7 @@ public abstract class R2ODataTranslator {
 
 
 	private void processAttributeMapping(
-			R2OAttributeMapping attributeMapping, ResultSet rs, Model model, Resource subject, Writer outputFileWriter) throws Exception {
+			R2OAttributeMapping attributeMapping, ResultSet rs) throws Exception {
 		String propName = attributeMapping.getName();
 		String amDataType = attributeMapping.getDatatype();
 		String lang = null;
@@ -493,12 +467,12 @@ public abstract class R2ODataTranslator {
 			String columnName = attributeMapping.getUseDBCol();
 			String alias = columnName.replaceAll("\\.", "_");
 			Object dbColValue = this.processSQLExpression(columnName, alias, attributeMapping.getUseDBColDatatype(), rs);
-			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter);
+			this.addDataTypeProperty(propName, dbColValue, amDataType, lang);
 		} else if(attributeMapping.getUseSQL() != null) {
 			String expression = attributeMapping.getUseSQL();
 			String alias = attributeMapping.getUseSQLAlias();
 			Object dbColValue = this.processSQLExpression(expression, alias, attributeMapping.getUseSQLDataType(), rs);
-			this.addDataTypeProperty(propName, dbColValue, amDataType, lang, model, subject, outputFileWriter);			
+			this.addDataTypeProperty(propName, dbColValue, amDataType, lang);			
 		} else if(attributeMapping.getSelectors() != null){
 			Collection<R2OSelector> attributeMappingSelectors = attributeMapping.getSelectors();
 
@@ -551,7 +525,7 @@ public abstract class R2ODataTranslator {
 							Collection<Object> propCol = (Collection<Object>) propVal;
 							for(Object propColItem : propCol) {
 								this.addDataTypeProperty(
-										propName, propColItem, amDataType, lang, model, subject, outputFileWriter);
+										propName, propColItem, amDataType, lang);
 							}
 						} else {
 							throw new Exception("Unsupported return type : " + selectorDataType);
@@ -559,7 +533,7 @@ public abstract class R2ODataTranslator {
 					} else {
 						if(propVal!= null && propVal != "" && !propVal.equals("")) {
 							this.addDataTypeProperty(
-									propName, propVal, amDataType, lang, model, subject, outputFileWriter);							
+									propName, propVal, amDataType, lang);							
 						}
 					}
 				}
@@ -960,6 +934,11 @@ public abstract class R2ODataTranslator {
 
 		return result;			
 
+	}
+
+
+	public void setMaterializer(AbstractMaterializer materializer) {
+		this.materializer = materializer;
 	}
 
 

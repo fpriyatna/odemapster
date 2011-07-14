@@ -15,6 +15,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
@@ -43,11 +44,11 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 
 	@Override
 	R2OSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm)
-			throws Exception {
+	throws Exception {
 		Node subject = tp.getSubject();
 		String predicateURI = tp.getPredicate().getURI();;
 		R2OSelectItem selectItem = null;
-		
+
 
 		if(pos == POS.sub) {
 			String cmURIAlias = cm.generateURIAlias();
@@ -104,11 +105,18 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 						} else if(pm instanceof R2ORelationMapping) {
 							try {
 								R2ORelationMapping rm = (R2ORelationMapping) pm;
-								R2OConceptMapping parentCM = rm.getParent(); 
+								R2OConceptMapping parentCM = rm.getParent();
+								R2ODatabaseTable r2oBaseTable = parentCM.getHasTables().get(0);
+								String cmBaseTable = r2oBaseTable.getName();
+								if(r2oBaseTable.getAlias() != null && r2oBaseTable.getAlias() != "") {
+									cmBaseTable = r2oBaseTable.getAlias();
+								}
+								String rangeTableAlias = rm.getRangeTableAlias();
+								
 								R2OConceptMapping rangeCM = 
 									(R2OConceptMapping) this.mappingDocument.getConceptMappingByConceptMappingId(rm.getToConcept());
 								R2ORelationMappingUnfolder rmUnfolder = new R2ORelationMappingUnfolder(parentCM, rm, rangeCM);
-								Collection<ZSelectItem> selectItems = rmUnfolder.unfoldRangeURI();
+								Collection<ZSelectItem> selectItems = rmUnfolder.unfoldRangeURI(cmBaseTable,rangeTableAlias);
 								if(selectItems.size() > 1) {
 									String newErrorMessage = "multiple columns in range uri-as in query translator is not supported yet!";
 									logger.error(newErrorMessage);
@@ -133,5 +141,5 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 		return selectItem;
 	}
 
-	
+
 }

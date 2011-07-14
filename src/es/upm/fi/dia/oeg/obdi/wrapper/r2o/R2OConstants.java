@@ -59,6 +59,7 @@ public class R2OConstants {
 	public static final String DATE_FORMAT_ATTRIBUTE="date-format";
 	public static final String RETURN_TYPE_ATTRIBUTE="return-type";
 	public static final String ENCODE_URI_ATTRIBUTE="encodeURI";
+	public static final String BLANK_NODE_ATTRIBUTE = "blankNode";
 	public static final String IS_COLLECTION_ATTRIBUTE="is-collection";
 
 	
@@ -175,6 +176,7 @@ public class R2OConstants {
 	public static final String MAPPING_DOCUMENT_ORGANIZATION = "mappingdocument.organization";
 	
 	public static final String OPTIMIZE_TB = "querytranslator.optimizetb";
+	
 	
 	public enum MappingType {
 		CONCEPT, ATTRIBUTE, RELATION

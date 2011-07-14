@@ -47,6 +47,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	private R2OSelector selectorURIAs;//original version
 	private R2OTransformationExpression uriAs;//odemapster 1 version
 	private String encodeURI;
+	private String isBlankNode;
 	private String materialize;
 	private List<R2OPropertyMapping> describedBy; //describedBy
 	private R2OConditionalExpression appliesIf;//original version
@@ -92,7 +93,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		//parse identifiedBy attribute
 		this.id = conceptMappingElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
 
-		//parse identifiedBy attribute
+		//parse materialize attribute
 		this.materialize = conceptMappingElement.getAttribute(R2OConstants.MATERIALIZE_ATTRIBUTE);
 		if(this.materialize == "") {
 			this.materialize = null;
@@ -148,6 +149,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		//parse uri-as element
 		Element uriAsElement = XMLUtility.getFirstChildElementByTagName(conceptMappingElement, R2OConstants.URI_AS_TAG);
 		this.encodeURI = uriAsElement.getAttribute(R2OConstants.ENCODE_URI_ATTRIBUTE);
+		this.isBlankNode = uriAsElement.getAttribute(R2OConstants.BLANK_NODE_ATTRIBUTE);
 		
 		Element selectorURIAsElement = XMLUtility.getFirstChildElementByTagName(uriAsElement, R2OConstants.SELECTOR_TAG);
 		//Element transformationExpressionURIAs = XMLUtility.getFirstElement(uriAsElement);
@@ -251,7 +253,11 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 				result.append(R2OConstants.ENCODE_URI_ATTRIBUTE +"=\"" + R2OConstants.STRING_FALSE + "\" ");
 			}			
 		}
+		if(this.isBlankNode != null && !this.isBlankNode.equals("")) {
+			result.append(R2OConstants.BLANK_NODE_ATTRIBUTE +"=\"" + this.isBlankNode + "\" ");
+		}
 		result.append(">\n");
+		
 		if(this.selectorURIAs != null) {
 			result.append(this.selectorURIAs.toString() + "\n");
 		} else {
@@ -555,5 +561,15 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	
 	public String generateURIAlias() {
 		return R2OConstants.URI_AS_ALIAS + this.getId();
+	}
+
+	public boolean getIsBlankNode() {
+		if(this.isBlankNode != null) {
+			if(this.isBlankNode.equalsIgnoreCase(R2OConstants.STRING_TRUE) ||
+					this.isBlankNode.equalsIgnoreCase(R2OConstants.STRING_YES)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

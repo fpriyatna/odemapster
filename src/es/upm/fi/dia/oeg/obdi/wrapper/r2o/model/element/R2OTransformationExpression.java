@@ -20,7 +20,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 
-public class R2OTransformationExpression extends R2OExpression {
+public class R2OTransformationExpression extends R2OExpression implements Cloneable {
 	private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
 	
 	//	(30) transformation::= primitive-transf (arg-restriction arg-restriction)*

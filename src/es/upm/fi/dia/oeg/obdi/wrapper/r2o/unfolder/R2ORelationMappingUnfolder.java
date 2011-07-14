@@ -56,7 +56,7 @@ public class R2ORelationMappingUnfolder {
 		R2OQuery viewQuery = new R2OQuery();
 
 		Collection<ZSelectItem> setViewQuerySelectItems = new HashSet<ZSelectItem>();
-		
+
 		Vector<ZFromItem> viewQueryFromItems = new Vector<ZFromItem>();
 		viewQuery.addFrom(viewQueryFromItems);
 
@@ -79,7 +79,7 @@ public class R2ORelationMappingUnfolder {
 			setViewQuerySelectItems.addAll(rangeAppliesIfSelectItems);			
 		}
 
-		
+
 		//add joins-via columns to the view select items
 		//the ones not corresponding to domain concept mapping has-table
 		R2OConditionalExpression joinsViaCondition = 
@@ -95,9 +95,9 @@ public class R2ORelationMappingUnfolder {
 			String rmJoinsViaSelectItemString = rmJoinsViaSelectItem.getSchema() + "." + rmJoinsViaSelectItem.getTable() + "." + rmJoinsViaSelectItem.getColumn();
 			rmJoinsViaSelectItemString = rmJoinsViaSelectItemString.replaceAll("\"", "");
 			if(!rmJoinsViaSelectItemString.startsWith(parentMappingTableName)) {
-//				ZConstant zColumn = Utility.constructDatabaseColumn(rmJoinsViaSelectItem);
-//				ZSelectItem selectItem = new ZSelectItem();
-//				selectItem.setExpression(zColumn);
+				//				ZConstant zColumn = Utility.constructDatabaseColumn(rmJoinsViaSelectItem);
+				//				ZSelectItem selectItem = new ZSelectItem();
+				//				selectItem.setExpression(zColumn);
 				logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
 				setViewQuerySelectItems.add(rmJoinsViaSelectItem);
 			}
@@ -110,8 +110,8 @@ public class R2ORelationMappingUnfolder {
 		R2OJoinQuery viewQueryJoinQuery = new R2OJoinQuery();
 		viewQueryJoinQuery.setJoinType(r2oViewJoin.getJoinType());
 		viewQuery.addJoinQuery(viewQueryJoinQuery);
-		
-		
+
+
 		R2ORestriction firstArgumentRestrictionValue = 
 			r2oView.getArgRestricts().get(0)
 			.getRestriction();
@@ -197,7 +197,7 @@ public class R2ORelationMappingUnfolder {
 		Vector<ZSelectItem> viewQuerySelectItems = new Vector<ZSelectItem>();
 		viewQuerySelectItems.addAll(setViewQuerySelectItems);
 		viewQuery.addSelect(viewQuerySelectItems);
-		
+
 		logger.debug("viewQuery = " + viewQuery);
 		return viewQuery;
 
@@ -243,22 +243,24 @@ public class R2ORelationMappingUnfolder {
 	}
 
 	private R2OQuery processToConcept(R2OQuery cmQuery) throws Exception {
-//		String rmIdentifiedBy = this.relationMapping.getId();
-//		R2ODatabaseTable rangeBaseTable = this.rangeConceptMapping.getHasTable();
-		
+		//		String rmIdentifiedBy = this.relationMapping.getId();
+		//		R2ODatabaseTable rangeBaseTable = this.rangeConceptMapping.getHasTable();
+
 		R2ODatabaseTable r2oBaseTable = this.parentMapping.getHasTables().get(0);
 		String cmBaseTable = r2oBaseTable.getName();
 		if(r2oBaseTable.getAlias() != null && r2oBaseTable.getAlias() != "") {
 			cmBaseTable = r2oBaseTable.getAlias();
 		}
+		String rangeTableAlias = this.relationMapping.getRangeTableAlias();
+
 		
 		R2OJoinQuery rmQuery = new R2OJoinQuery();
 		cmQuery.addJoinQuery(rmQuery);
 		rmQuery.setJoinType(this.relationMapping.getJoinsVia().getJoinType());
 
 		//unfold range URI
-		Collection<ZSelectItem> rangeURISelectItems = this.unfoldRangeURI();
-		
+		Collection<ZSelectItem> rangeURISelectItems = this.unfoldRangeURI(cmBaseTable, rangeTableAlias);
+
 
 		//unfold range applies-if && joins-via
 		R2OConditionalExpression rangeAppliesIf = rangeConceptMapping.getAppliesIf();
@@ -289,21 +291,21 @@ public class R2ORelationMappingUnfolder {
 			if(rtAlias == null || rtAlias == "") {
 				rtAlias = R2OConstants.RANGE_TABLE_ALIAS + this.relationMapping.hashCode();
 			}
-			
+
 			R2OFromItem joinSource = new R2OFromItem(
 					rangeTable.getName(), ZAliasedName.FORM_TABLE);
 			joinSource.setAlias(rtAlias);
 			rmQuery.setJoinSource(joinSource);
 
-			ZExpression onExpressionRenamed = Utility.renameColumnsIfNotMatch(
-					rmQueryOnExpression, cmBaseTable, rtAlias);
+			ZExpression onExpressionRenamed = Utility.renameColumns(
+					rmQueryOnExpression, cmBaseTable, rtAlias, false);
 			rmQuery.setOnExpression(onExpressionRenamed);
 
 
 			Collection<ZSelectItem> rangeURISelectItemsRenamed = 
-				Utility.renameColumnsIfNotMatch(rangeURISelectItems, cmBaseTable, rtAlias);
+				Utility.renameColumns(rangeURISelectItems, cmBaseTable, rtAlias, false);
 			cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
-			
+
 			/*
 			if(rangeTable.getAlias() != null && rangeTable.getAlias() != "") {
 				Collection<ZSelectItem> rangeURISelectItemsRenamed = 
@@ -312,7 +314,7 @@ public class R2ORelationMappingUnfolder {
 			} else {
 				cmQuery.getSelect().addAll(rangeURISelectItems);
 			}
-			*/
+			 */
 
 		} else {
 
@@ -324,14 +326,14 @@ public class R2ORelationMappingUnfolder {
 			String fromItemAlias = R2OConstants.VIEW_ALIAS + new Random().nextInt(1000);
 			fromItem.setAlias(fromItemAlias);
 			rmQuery.setJoinSource(fromItem);
-			
-			ZExpression onExpressionRenamed = Utility.renameColumnsIfNotMatch(
-					rmQueryOnExpression, cmBaseTable, fromItemAlias);
+
+			ZExpression onExpressionRenamed = Utility.renameColumns(
+					rmQueryOnExpression, cmBaseTable, fromItemAlias, false);
 			rmQuery.setOnExpression(onExpressionRenamed);
 
 			Collection<ZSelectItem> rangeURISelectItemsRenamed = 
-				Utility.renameColumnsIfNotMatch(rangeURISelectItems, cmBaseTable, fromItemAlias);
-			
+				Utility.renameColumns(rangeURISelectItems, cmBaseTable, fromItemAlias, false);
+
 			cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
 		}
 
@@ -416,8 +418,8 @@ public class R2ORelationMappingUnfolder {
 		return result;
 	}
 
-	public Collection<ZSelectItem> unfoldRangeURI() 
-	throws InvalidRelationMappingException, InvalidTransfomationExperessionException, InvalidConditionOperationException {
+	public Collection<ZSelectItem> unfoldRangeURI(String columnName, String alias) 
+	throws Exception {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 
 		if(this.rangeConceptMapping == null) {
@@ -437,7 +439,16 @@ public class R2ORelationMappingUnfolder {
 				R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder = 
 					new R2OTransformationExpressionUnfolder(rangeURIAsTransformationExpression);
 				String rangeURIAlias = relationMapping.generateRangeURIAlias();
-				result.addAll(r2oTransformationExpressionUnfolder.unfold(rangeURIAlias));
+				Collection<ZSelectItem> rangeURISelectItems = r2oTransformationExpressionUnfolder.unfold(rangeURIAlias);
+				if(columnName != null && alias != null) {
+					Collection<ZSelectItem> rangeURISelectItems2 = Utility.renameColumns(
+							rangeURISelectItems, columnName, alias, true);
+					result.addAll(rangeURISelectItems2);						
+
+				} else {
+					result.addAll(rangeURISelectItems);
+				}
+
 			} else {
 				String errorMessage = "Unsupported transformation operation : " + uriAsOperator;
 				logger.error(errorMessage);
@@ -445,8 +456,13 @@ public class R2ORelationMappingUnfolder {
 			}
 		}
 
-		
+
 		return result;
+	}
+
+	private Collection<ZSelectItem> unfoldRangeURI() 
+	throws Exception {
+		return this.unfoldRangeURI(null, null);
 	}
 
 

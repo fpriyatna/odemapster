@@ -223,8 +223,8 @@ public class Utility {
 
 	}
 
-	public static ZExpression renameColumnsIfNotMatch(
-			ZExpression zExpression, String tableName, String viewName) throws Exception 
+	public static ZExpression renameColumns(
+			ZExpression zExpression, String tableName, String viewName, boolean matchCondition) throws Exception 
 			{
 		String operator = zExpression.getOperator();
 		ZExpression result = new ZExpression(operator);
@@ -239,7 +239,7 @@ public class Utility {
 				if(operandConstant.getType() == ZConstant.COLUMNNAME) {
 					String operandConstantValue = operandConstant.getValue();
 					operandConstantValue = operandConstantValue.replaceAll("\'", "");
-					if(!operandConstantValue.startsWith(tableName + ".")) {
+					if(operandConstantValue.startsWith(tableName + ".") == matchCondition) {
 						//be careful here when passing sql server column names that have 4 elements 
 						//(db.schema.table.column)
 						ZAliasedName oldColumnName = new ZAliasedName(
@@ -256,7 +256,7 @@ public class Utility {
 				result.addOperand(newOperandConstant);
 			} else if(operand instanceof ZExpression) {
 				ZExpression operandExpression  = (ZExpression) operand;
-				result.addOperand(Utility.renameColumnsIfNotMatch(operandExpression, tableName, viewName));
+				result.addOperand(Utility.renameColumns(operandExpression, tableName, viewName, matchCondition));
 			} else {
 				throw new Exception("Unsupported columns renaming operation!");
 			}
@@ -264,22 +264,33 @@ public class Utility {
 		return result;
 			}
 
-	public static Collection<ZSelectItem> renameColumnsIfNotMatch(
-			Collection<ZSelectItem> selectItems, String tableName, String alias) throws Exception 
+	public static Collection<ZSelectItem> renameColumns(
+			Collection<ZSelectItem> selectItems, String tableName, String alias, boolean matches) throws Exception 
 			{
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 
 		for(ZSelectItem selectItem :selectItems) {
-			ZExp selectItemExp = selectItem.getExpression();
-			if(selectItemExp instanceof ZExpression) {
-				ZExpression newExpression = Utility.renameColumnsIfNotMatch((ZExpression) selectItemExp, tableName, alias);
+			boolean isExpression = selectItem.isExpression();
+			
+			
+			if(isExpression) {
+				ZExp selectItemExp = selectItem.getExpression();
+				ZExpression newExpression = Utility.renameColumns((ZExpression) selectItemExp, tableName, alias, matches);
 				selectItem.setExpression(newExpression);
 				result.add(selectItem);
-			} else if(selectItemExp instanceof ZConstant) {
-				if(tableName.equals(selectItem.getSchema() + "." + selectItem.getTable())) {
-					result.add(selectItem);
+			} else {
+				String selectItemSchema = selectItem.getSchema() ;
+				String selectItemTable = selectItem.getTable();
+				
+				if(tableName.equals(selectItemSchema + "." + selectItemTable) == matches) {
+					ZSelectItem newSelectItem = new ZSelectItem(alias + "." + selectItem.getColumn());
+					if(selectItem.getAlias() != null) {
+						newSelectItem.setAlias(selectItem.getAlias());
+					}
+					result.add(newSelectItem);
 				} else {
-					result.add(new ZSelectItem(alias + "." + selectItem.getColumn()));
+					result.add(selectItem);
+					
 				}
 			}
 		}
@@ -583,5 +594,22 @@ public class Utility {
 		return result.toString();
 	}
 
+	//Create blank node from id
+	public static String createBlankNode(String id)
+	{
+		StringBuffer result = new StringBuffer();
+		result.append("_:");
+		result.append(id);
+		return result.toString();
+	}
+	
+	//TODO improve this
+	public static boolean isIRI(String id) {
+		if(id != null && id.startsWith("http://")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 }

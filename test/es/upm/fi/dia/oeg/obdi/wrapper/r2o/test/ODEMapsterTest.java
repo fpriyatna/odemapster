@@ -24,7 +24,7 @@ public class ODEMapsterTest extends TestCase {
 	
 	public static void main(String args[]) throws Exception {
 //		ODEMapsterTest.testBSBMQuery05Mysql();
-		ODEMapsterTest.testPSSA06Mysql();
+		ODEMapsterTest.testHospital();
 	}
 
 	@Test	
@@ -221,11 +221,9 @@ public class ODEMapsterTest extends TestCase {
 	
 	@Test
 	public static void testHospital() throws Exception {
-//		String mappingDirectory = "C:/Users/fpriyatna/My Dropbox/oeg/odemapster/odemapster2/testcases/hospital/";
 		String mappingDirectory = getMappingDirectoryByOS() + "hospital/";
 		//String r2oConfigurationFile = "universidades.r2o.properties";
-		String r2oConfigurationFile = "dot.r2o.properties";
-//		String r2oConfigurationFile = "query01(monetdb).r2o.properties";
+		String r2oConfigurationFile = "dot(email).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	

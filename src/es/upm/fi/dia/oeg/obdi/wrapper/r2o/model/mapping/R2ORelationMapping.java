@@ -30,6 +30,7 @@ implements R2OElement, IRelationMapping, Cloneable
 	private static Logger logger = Logger.getLogger(R2ORelationMapping.class);
 
 	private String toConcept;
+	private String rangeTableAlias;
 	private Vector<R2ODatabaseTable> hasTables;
 	private Collection<R2OSelector> rmSelectors;
 	private R2OJoin joinsVia;
@@ -57,6 +58,9 @@ implements R2OElement, IRelationMapping, Cloneable
 		if(this.toConcept == "") { this.toConcept = null; }
 		if(this.toConcept != null) { noOfBases++;}
 
+		this.rangeTableAlias = rmElement.getAttribute(R2OConstants.ALIAS_ATTRIBUTE);
+		if(this.rangeTableAlias == "") { this.rangeTableAlias = null; }
+		
 		//parse has-intermediate-table
 		List<Element> hasIntermediateTable = XMLUtility.getChildElementsByTagName(
 				rmElement, R2OConstants.HAS_TABLE_TAG);
@@ -121,10 +125,15 @@ implements R2OElement, IRelationMapping, Cloneable
 			result.append(R2OConstants.TO_CONCEPT_ATTRIBUTE +"=\"" + this.toConcept + "\" ");
 		}
 
+		if(this.rangeTableAlias != null) {
+			result.append(R2OConstants.ALIAS_ATTRIBUTE  +"=\"" + this.rangeTableAlias + "\" ");
+		}
 
 		if(this.id != null && this.id != "") {
 			result.append(R2OConstants.IDENTIFIED_BY_ATTRIBUTE +"=\"" + this.id + "\" ");
 		}
+		
+		
 		result.append(">\n");
 
 		if(this.hasView != null) {
@@ -199,6 +208,10 @@ implements R2OElement, IRelationMapping, Cloneable
 			this.rangeURIAlias = R2OConstants.RELATIONMAPPING_ALIAS + new Random().nextInt(10000);
 		}
 		return this.rangeURIAlias;
+	}
+
+	public String getRangeTableAlias() {
+		return rangeTableAlias;
 	}
 
 }

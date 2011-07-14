@@ -44,6 +44,9 @@ import es.upm.fi.dia.oeg.obdi.wrapper.ModelWriter;
 import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODefaultDataTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.NTripleMaterializer;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.AbstractMaterializer;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.RDFXMLMaterializer;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2MappingTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2SQLTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
@@ -54,14 +57,14 @@ public class R2ORunner extends AbstractRunner {
 	private static final String PRIMITIVE_OPERATIONS_FILE = "primitiveOperations.cfg";
 	public static R2OConfigurationProperties configurationProperties;
 	public static R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	private R2ODataTranslator postProcessor; 	
-
+	private R2ODataTranslator dataTranslator;
+	
 	public R2ORunner() {
-		this.postProcessor = new R2ODefaultDataTranslator();
+		this.dataTranslator = new R2ODefaultDataTranslator();
 	}
 
-	public R2ORunner(R2ODataTranslator postProcessor) {
-		this.postProcessor = postProcessor;
+	public R2ORunner(R2ODataTranslator dataTranslator) {
+		this.dataTranslator = dataTranslator;
 	}
 
 	private R2OConfigurationProperties loadConfigurationFile(
@@ -104,44 +107,50 @@ public class R2ORunner extends AbstractRunner {
 	
 	private void materializeMappingDocuments(String outputFileName, Collection<R2OMappingDocument> translationResultMappingDocuments) throws Exception {
 		long start = System.currentTimeMillis();
-
-		//preparing output file
-//		FileWriter fileWriter = new FileWriter(outputFileName);
-	    OutputStream fileOut = new FileOutputStream (outputFileName);
-	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
-	    
-	    String jenaModel = configurationProperties.getJenaMode();
-		Model model = Utility.createJenaModel(jenaModel);
 		
-		long startGeneratingModel = System.currentTimeMillis();
-		R2OMappingDocumentMaterializer materializer = 
-			new R2OMappingDocumentMaterializer(postProcessor, model, out);
-		for(R2OMappingDocument translationResultMappingDocument : translationResultMappingDocuments) {
-			materializer.materialize(translationResultMappingDocument);
+		String rdfLanguage = R2ORunner.configurationProperties.getRdfLanguage();
+		if(rdfLanguage == null) {
+			rdfLanguage = R2OConstants.OUTPUT_FORMAT_RDFXML;
 		}
 		
-		long endGeneratingModel = System.currentTimeMillis();
-		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
-		logger.info("Materializing Mapping Document time was "+(durationGeneratingModel)+" s.");
+		//preparing output file
+	    OutputStream fileOut = new FileOutputStream (outputFileName);
+	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
+	    String jenaModel = configurationProperties.getJenaMode();
+		Model model = Utility.createJenaModel(jenaModel);
 
-		if(model == null) {
-			logger.warn("Model was empty!");
+		AbstractMaterializer materializer;
+		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
+			materializer = new NTripleMaterializer(out);
+		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
+			materializer = new RDFXMLMaterializer(out, model);
+			
+
 		} else {
-			if(configurationProperties.getRdfLanguage().equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-				//done
+			materializer = new NTripleMaterializer(out);
+		}
+		
+		this.dataTranslator.setMaterializer(materializer);
+		
+		//materializing model
+		long startGeneratingModel = System.currentTimeMillis();
+		for(R2OMappingDocument translationResultMappingDocument : translationResultMappingDocuments) {
+			this.dataTranslator.processMappingDocument(translationResultMappingDocument);
+		}
+		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
+			if(model == null) {
+				logger.warn("Model was empty!");
 			} else {
 				ModelWriter.writeModelStream(model, configurationProperties.getOutputFilePath(), configurationProperties.getRdfLanguage());
 				model.close();				
 			}
-				
-				
 		}
-
+		long endGeneratingModel = System.currentTimeMillis();
+		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
+		logger.info("Materializing Mapping Document time was "+(durationGeneratingModel)+" s.");
 
 		//cleaning up
 		try {
-//			fileWriter.flush();
-//			fileWriter.close();
 			out.flush(); out.close();
 			fileOut.flush(); fileOut.close();
 		} catch(Exception e) {
@@ -194,6 +203,9 @@ public class R2ORunner extends AbstractRunner {
 		if(queryFilePath == null || queryFilePath.equals("")) {
 //			translationResultMappingDocument = originalMappingDocument;
 			translationResultMappingDocuments.add(originalMappingDocument);
+			
+
+			
 			this.materializeMappingDocuments(outputFileName, translationResultMappingDocuments);
 		} else {
 			//process SPARQL file
@@ -342,5 +354,9 @@ public class R2ORunner extends AbstractRunner {
 		}
 
 
+	}
+
+	public void setDataTranslator(R2ODataTranslator dataTranslator) {
+		this.dataTranslator = dataTranslator;
 	}
 }
