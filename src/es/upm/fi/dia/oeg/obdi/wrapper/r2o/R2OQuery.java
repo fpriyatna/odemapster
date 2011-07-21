@@ -22,11 +22,16 @@ public class R2OQuery extends ZQuery {
 	private Collection<R2OQuery> unionQueries;
 	private String alias;
 	private long slice = -1;
+	private boolean distinct = false;
 	
 	public void setSlice(long slice) {
 		this.slice = slice;
 	}
 
+	public void setDistinct(boolean distinct) {
+		this.distinct = distinct;
+	}
+	
 	public R2OQuery() {
 		super();
 		this.addSelect(new Vector<ZSelectItem>());
@@ -109,6 +114,10 @@ public class R2OQuery extends ZQuery {
 		Vector<ZSelectItem> mainQuerySelectItems = (Vector<ZSelectItem>) this.getSelect();
 		
 		String selectSQL = "SELECT ";
+		if(this.distinct) {
+			selectSQL += " DISTINCT ";
+		}
+		
 		if(mainQuerySelectItems != null && mainQuerySelectItems.size()!=0) {
 			for(ZSelectItem mainQuerySelectItem : mainQuerySelectItems) {
 				String selectItemAlias = mainQuerySelectItem.getAlias();

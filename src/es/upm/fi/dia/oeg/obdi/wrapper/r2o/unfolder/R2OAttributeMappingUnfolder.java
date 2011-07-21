@@ -69,10 +69,12 @@ public class R2OAttributeMappingUnfolder {
 
 					//processing selector applies if
 					R2OConditionalExpression selectorAppliesIf = attributeSelector.getAppliesIf();
-					R2OConditionalExpressionUnfolder r2oConditionalExpressionUnfolder =
-						new R2OConditionalExpressionUnfolder(selectorAppliesIf);
-					String appliesIfAlias = attributeSelector.generateAppliesIfAlias();
-					result.addAll(r2oConditionalExpressionUnfolder.unfold(appliesIfAlias));
+					if(selectorAppliesIf != null) {
+						R2OConditionalExpressionUnfolder r2oConditionalExpressionUnfolder =
+							new R2OConditionalExpressionUnfolder(selectorAppliesIf);
+						String appliesIfAlias = attributeSelector.generateAppliesIfAlias();
+						result.addAll(r2oConditionalExpressionUnfolder.unfold(appliesIfAlias));
+					}
 
 
 					//processing selector after transform
@@ -80,8 +82,9 @@ public class R2OAttributeMappingUnfolder {
 					R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder =
 						new R2OTransformationExpressionUnfolder(attSelectorAfterTransform);
 					String afterTransformAlias = attributeSelector.generateAfterTransformAlias();
-					result.addAll(r2oTransformationExpressionUnfolder.unfold(afterTransformAlias));
-
+					Collection<ZSelectItem> afterTransformSelectItems = 
+						r2oTransformationExpressionUnfolder.unfold(afterTransformAlias);
+					result.addAll(afterTransformSelectItems);
 
 				}			
 			} else {

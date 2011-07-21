@@ -12,10 +12,12 @@ import Zql.ZQuery;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConstantRestriction;
@@ -68,7 +70,7 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 	}
 
 	@Override
-	R2OConceptMapping calculateAlphaCM(Collection<Triple> triples)
+	R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
 	throws Exception {
 		Triple firstTriple = triples.iterator().next();
 		Node subject = firstTriple.getSubject();
@@ -96,12 +98,32 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 	private R2OConceptMapping calculateAlphaAux(Node subject, R2OConceptMapping cm) {
 		//mapping selection for corresponding literal subject
 		if(subject.isURI()) {
-			R2OConstantRestriction cr = new R2OConstantRestriction();
-			cr.setConstantValue(subject.getURI());
-			R2OArgumentRestriction subjectAR = new R2OArgumentRestriction(cr);
+			R2OArgumentRestriction subjectAR;
+			R2OConstantRestriction cr;
+			R2OArgumentRestriction uriAsAR;
 			R2OTransformationExpression cmURIAs = cm.getURIAs();
-			R2OTransformationRestriction tr = new R2OTransformationRestriction(cmURIAs);
-			R2OArgumentRestriction uriAsAR = new R2OArgumentRestriction(tr);
+			if(Utility.isWellDefinedURIExpression(cmURIAs)) {
+				R2OColumnRestriction cr2 = (R2OColumnRestriction) cmURIAs.getLastRestriction();
+				uriAsAR = new R2OArgumentRestriction(cr2);				
+				String pkDataType = cr2.getDatabaseColumn().getDataType();
+				
+				cr = new R2OConstantRestriction();
+				String subjectURI = subject.getURI();
+				int subjectURILengthWithoutPK = Utility.getIRILengthWithoutPK(cmURIAs);
+				String subjectURIWithoutPK = subjectURI.substring(0, subjectURILengthWithoutPK);
+				String subjectPKOnly = subjectURI.substring(subjectURIWithoutPK.length(), subjectURI.length()); 
+				cr.setConstantValue(subjectPKOnly);
+				if(pkDataType != null && !pkDataType.equals("")) {
+					cr.setDatatype(pkDataType);
+				}
+			} else {
+				cr = new R2OConstantRestriction();
+				cr.setConstantValue(subject.getURI());
+				
+				R2OTransformationRestriction tr = new R2OTransformationRestriction(cmURIAs);
+				uriAsAR = new R2OArgumentRestriction(tr);
+			}
+			subjectAR = new R2OArgumentRestriction(cr);
 			List<R2OArgumentRestriction> argRestrictions = new ArrayList<R2OArgumentRestriction>();
 			argRestrictions.add(subjectAR);
 			argRestrictions.add(uriAsAR);
@@ -152,8 +174,8 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 
 
 	@Override
-	ZQuery calculateAlpha(Collection<Triple> triples) throws Exception {
-		R2OConceptMapping cmStripped = this.calculateAlphaCM(triples);
+	ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception {
+		R2OConceptMapping cmStripped = this.calculateAlphaCMTB(triples);
 		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped, this.mappingDocument);
 		R2OQuery cmQuery = cmu.unfoldConceptMapping();
 		return cmQuery;

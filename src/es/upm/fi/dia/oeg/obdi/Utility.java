@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -33,6 +34,11 @@ import com.hp.hpl.jena.tdb.TDBFactory;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.MonetDBColumn;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConstantRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 
 import Zql.ZAliasedName;
 import Zql.ZConstant;
@@ -612,4 +618,39 @@ public class Utility {
 		}
 	}
 
+	public static boolean isWellDefinedURIExpression(R2OTransformationExpression te) {
+		String operator = te.getOperId();
+
+		if(operator.equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CONCAT)) {
+			List<R2OArgumentRestriction> argumentRestrictions = te.getArgRestrictions();
+
+			for(int i=0; i<argumentRestrictions.size()-1; i++) {
+				R2OArgumentRestriction ar = argumentRestrictions.get(i);
+				R2ORestriction restriction = ar.getRestriction();
+				if((restriction instanceof R2OConstantRestriction) == false) {
+					return false;
+				}
+			}
+			
+			R2ORestriction lastRestriction = argumentRestrictions.get(argumentRestrictions.size()-1).getRestriction();
+			if(!(lastRestriction instanceof R2OColumnRestriction)) {
+				return false;
+			}
+			
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public static int getIRILengthWithoutPK(R2OTransformationExpression te) {
+		int result=0;
+		List<R2OArgumentRestriction> argumentRestrictions = te.getArgRestrictions();
+		for(int i=0; i<argumentRestrictions.size()-1; i++) {
+			R2OArgumentRestriction ar = argumentRestrictions.get(i);
+			R2OConstantRestriction restriction = (R2OConstantRestriction) ar.getRestriction();
+			result += restriction.getConstantValueAsString().length();
+		}
+		return result;
+	}
 }

@@ -11,6 +11,8 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2OFreddyPostProcessor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 
@@ -24,9 +26,16 @@ public class ODEMapsterTest extends TestCase {
 	
 	public static void main(String args[]) throws Exception {
 //		ODEMapsterTest.testBSBMQuery05Mysql();
-		ODEMapsterTest.testHospital();
+		ODEMapsterTest.testBSBMQuery04Mysql();
 	}
 
+	@Test
+	public static void testRoberto01() throws Exception {
+		String mappingDirectory = getMappingDirectoryByOS() + "roberto01/";
+		String r2oConfigurationFile = "TC0009(sqlserver).r2o.properties";
+		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
+	}
+	
 	@Test	
 	private static void testStudentSport() throws Exception {
 		String testcaseName = "studentsport";
@@ -689,7 +698,9 @@ public class ODEMapsterTest extends TestCase {
 		}
 		try {
 			long startMemory = Runtime.getRuntime().freeMemory();
-			R2ORunner runner = new R2ORunner();
+			R2ODataTranslator postProcessor = new R2OFreddyPostProcessor();
+			R2ORunner runner = new R2ORunner(postProcessor);
+			
 			runner.run(mappingDirectory, r2oConfigurationFile);
 			long endMemory = Runtime.getRuntime().freeMemory();
 			long memoryUsage = (startMemory - endMemory) / 1024;

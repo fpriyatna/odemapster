@@ -293,6 +293,7 @@ public class R2ORunner extends AbstractRunner {
 					
 					String resultString = "result";
 					String bindingString = "binding";
+					int i=0;
 					while(rs.next()) {
 						Element resultElement = xmlDoc.createElement(resultString);
 						resultsElement.appendChild(resultElement);
@@ -304,10 +305,9 @@ public class R2ORunner extends AbstractRunner {
 							bindingElement.setTextContent(rs.getString(columnLabel));
 							resultElement.appendChild(bindingElement);
 						}
-						
-						
+						i++;
 					}
-					
+					logger.info(i  + " instance(s) retrieved ");
 					//translationResultMappingDocuments.add(translator.processQuery(query));
 				} catch(Exception e) {
 					e.printStackTrace();

@@ -256,6 +256,8 @@ public abstract class R2ODataTranslator {
 			return this.processSubstringTransformationExpression(rs, transformationExpression);
 		} else if(transformationExpression.getOperId().equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CUSTOM_TRANSFORMATION)) {
 			List<Object> arguments = new ArrayList<Object>();
+			String functionName = transformationExpression.getFunctionName();
+			arguments.add(functionName);
 			List<R2OArgumentRestriction> argumentRestrictions = transformationExpression.getArgRestrictions();
 			for(R2OArgumentRestriction argument : argumentRestrictions) {
 				Object restrictionValue = this.processRestriction(argument.getRestriction(), rs);
@@ -860,7 +862,8 @@ public abstract class R2ODataTranslator {
 			String aliasTokens[] = alias.split("\\.");
 			if(aliasTokens != null && aliasTokens.length==3) {
 				//rename alias if it's fully quantifier
-				alias = aliasTokens[1] + "." + aliasTokens[2];
+				//alias = aliasTokens[0] + aliasTokens[1] + "." + aliasTokens[2];
+				alias = aliasTokens[2];
 			}
 			
 			if(dataType == null || dataType == "") {

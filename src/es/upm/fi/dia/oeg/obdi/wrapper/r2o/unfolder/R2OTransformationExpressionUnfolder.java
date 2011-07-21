@@ -67,8 +67,8 @@ public class R2OTransformationExpressionUnfolder {
 			for(ZSelectItem zSelectItem : selectItems) {
 				result.add(zSelectItem);
 				//mainQuery.getSelect().add(zSelectItem);
-			}						
-		}		
+			}
+		}
 		
 		return result;
 	}

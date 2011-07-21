@@ -37,7 +37,7 @@ public class AlphaGenerator1 extends AbstractAlphaGenerator {
 
 
 	@Override
-	ZQuery calculateAlpha(Collection<Triple> triples) throws Exception {
+	ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception {
 		return this.calculateAlpha(triples.iterator().next());
 	}
 
@@ -50,7 +50,7 @@ public class AlphaGenerator1 extends AbstractAlphaGenerator {
 
 
 	@Override
-	R2OConceptMapping calculateAlphaCM(Collection<Triple> triples)
+	R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
 			throws Exception {
 		// TODO Auto-generated method stub
 		return null;

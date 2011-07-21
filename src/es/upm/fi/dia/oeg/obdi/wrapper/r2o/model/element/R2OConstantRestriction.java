@@ -127,6 +127,10 @@ public class R2OConstantRestriction extends R2ORestriction {
 	public void setConstantValue(Object constantValue) {
 		this.constantValue = constantValue;
 	}
+
+	public void setDatatype(String datatype) {
+		this.datatype = datatype;
+	}
 	
 	
 }

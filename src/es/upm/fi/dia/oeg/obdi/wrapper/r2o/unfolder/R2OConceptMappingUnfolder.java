@@ -11,6 +11,7 @@ import Zql.ZFromItem;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZUtils;
+import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
@@ -58,6 +59,9 @@ public class R2OConceptMappingUnfolder {
 		String uriAsOperator = conceptMappingURIAsTransformationExpression.getOperId();
 		if(uriAsOperator != null) {
 			if(conceptMappingURIAsTransformationExpression.isDelegableTransformationExpression()) {
+				boolean isWellDefinedURIExpression = Utility.isWellDefinedURIExpression(conceptMappingURIAsTransformationExpression);
+				logger.debug("isWellDefinedURIExpression = " + isWellDefinedURIExpression);
+				
 				R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder = 
 					new R2OTransformationExpressionUnfolder(conceptMappingURIAsTransformationExpression);
 				ZExp selectExpression = r2oTransformationExpressionUnfolder.unfoldDelegableTransformationExpression();

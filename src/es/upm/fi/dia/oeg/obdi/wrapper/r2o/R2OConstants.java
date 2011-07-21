@@ -61,6 +61,7 @@ public class R2OConstants {
 	public static final String ENCODE_URI_ATTRIBUTE="encodeURI";
 	public static final String BLANK_NODE_ATTRIBUTE = "blankNode";
 	public static final String IS_COLLECTION_ATTRIBUTE="is-collection";
+	public static final String FUNCTION_NAME_ATTRIBUTE="function-name";
 
 	
 	//constants related to database mapping elements

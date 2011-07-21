@@ -26,6 +26,7 @@ import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
+import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
@@ -43,9 +44,7 @@ import com.hp.hpl.jena.sparql.expr.E_NotEquals;
 import com.hp.hpl.jena.sparql.expr.E_Regex;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
-import com.hp.hpl.jena.sparql.expr.ExprFunction1;
 import com.hp.hpl.jena.sparql.expr.ExprList;
-import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
@@ -190,14 +189,18 @@ public class SPARQL2SQLTranslator {
 		
 		AbstractBetaGenerator betaGenerator = 
 			new BetaGenerator1(mapNodeConceptMapping, this.mappingDocument);
-		if(opQuery instanceof OpProject || opQuery instanceof OpSlice) {
+		if(opQuery instanceof OpProject || opQuery instanceof OpSlice || opQuery instanceof OpDistinct) {
 			sparql2sqlResult = new R2OQuery();
 			OpSlice opSlice = null;
+			OpDistinct opDistinct = null;
 			OpProject opProject = null;
 			OpOrder opOrder = null;
 			Op graphPatternOp = null;
 			long sliceLength = -1;
 			
+			//slice
+			//distinct
+			//project
 			if(opQuery instanceof OpSlice) {
 				opSlice = (OpSlice) opQuery;
 				sliceLength = opSlice.getLength();
@@ -205,9 +208,26 @@ public class SPARQL2SQLTranslator {
 				Op opSliceSubOp = opSlice.getSubOp();
 				if(opSliceSubOp instanceof OpProject) {
 					opProject = (OpProject) opSliceSubOp;
+				} else if(opSliceSubOp instanceof OpDistinct) {
+					opDistinct = (OpDistinct) opSliceSubOp;
+					Op opDistinctSubOp = opDistinct.getSubOp();
+					if (opDistinctSubOp instanceof OpProject) {
+						opProject = (OpProject) opDistinctSubOp;
+					}
 				}
+			} else if(opQuery instanceof OpDistinct) {
+				opDistinct = (OpDistinct) opQuery;
+				Op opDistinctSubOp = opDistinct.getSubOp();
+				if (opDistinctSubOp instanceof OpProject) {
+					opProject = (OpProject) opDistinctSubOp;
+				}				
 			} else if (opQuery instanceof OpProject) {
 				opProject = (OpProject) opQuery;
+			} 
+			
+
+			if(opDistinct != null) {
+				sparql2sqlResult.setDistinct(true);
 			}
 			
 			if(opProject != null) {
@@ -304,8 +324,19 @@ public class SPARQL2SQLTranslator {
 			ZSelectItem betaObj = betaGenerator.calculateBetaCM(tp, POS.obj, cm);
 			logger.debug("beta(tp,obj) = " + betaObj);
 
+			ZExp condSQLSubject = this.genCondSQLSubject(tp, betaGenerator);
 			ZExp condSQL = this.genCondSQL(tp, betaGenerator);
-			logger.debug("genCondSQL(tp,beta) = " + condSQL);
+			ZExp condSQL2 = null;
+			if(condSQLSubject == null && condSQL==null) {
+				condSQL2 = null;
+			} else if(condSQLSubject != null && condSQL==null) {
+				condSQL2 = condSQLSubject;
+			} else if(condSQLSubject == null && condSQL!=null) {
+				condSQL2 = condSQL;
+			} else {
+				condSQL2 = new ZExpression("AND", condSQLSubject, condSQL);
+			}
+			logger.debug("genCondSQL(tp,beta) = " + condSQL2);
 
 
 			Vector<ZSelectItem> prSQLList = (Vector<ZSelectItem>) genPRSQL(tp, betaGenerator, nameGenerator);
@@ -317,7 +348,10 @@ public class SPARQL2SQLTranslator {
 			query.addFrom(fromItem);
 			fromItem.setAlias(fromItem.generateAlias());
 
-			query.addWhere(condSQL);
+			if(condSQL2 != null) {
+				query.addWhere(condSQL2);
+			}
+			
 
 
 
@@ -335,7 +369,7 @@ public class SPARQL2SQLTranslator {
 			, AbstractBetaGenerator betaGenerator) throws Exception {
 		R2OQuery result = new R2OQuery();
 
-		R2OConceptMapping cm = alphaGenerator.calculateAlphaCM(triples);
+		R2OConceptMapping cm = alphaGenerator.calculateAlphaCMTB(triples);
 		for(Triple tp : triples) {
 			this.mapTripleCM.put(tp, cm);
 		}
@@ -673,38 +707,52 @@ public class SPARQL2SQLTranslator {
 
 
 	private ZExp genCondSQLTB(Collection<Triple> tripleBlock, AbstractBetaGenerator betaGenerator) throws Exception {
+		
 		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
+		Collection<ZExp> exps = new HashSet<ZExp>();
 
+		ZExp condSubject = this.genCondSQLSubject(tripleBlock.iterator().next(), betaGenerator);
+		if(condSubject != null) {
+			exps.add(condSubject);
+		}
 		for(Triple tp : tripleBlock) {
 			ZExp cond = this.genCondSQL(tp, betaGenerator);
+			if(cond != null) {
+				exps.add(cond);
+			}
 			result = new ZExpression("AND", result, cond);
 		}
 
-		return result;
+		ZExp result2;
+		if(exps.size() == 0) {
+			result2 = new ZConstant("TRUE", ZConstant.UNKNOWN);
+		} else if(exps.size() == 1) {
+			result2 = exps.iterator().next();
+		} else {
+			result2 = new ZExpression("AND");
+			for(ZExp exp : exps) {
+				((ZExpression)result2).addOperand(exp);
+			}
+		}
+		logger.debug("genCondSQLTB = " + result2);
+		return result2;
 
 	}
 
-	private ZExp genCondSQL(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception {
-		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
+	private ZExp genCondSQLSubject(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception {
+		ZExp exp = null;
 		Node subject = tp.getSubject();
-		Node predicate = tp.getPredicate();
-		Node object = tp.getObject();
 		R2OConceptMapping cm = this.mapTripleCM.get(tp);
-		
 		ZExp betaSub = betaGenerator.calculateBetaCM(tp, POS.sub, cm).getExpression();
-		ZExp betaPre = betaGenerator.calculateBetaCM(tp, POS.pre, cm).getExpression();
-		ZExp betaObj = betaGenerator.calculateBetaCM(tp, POS.obj, cm).getExpression();
-		ZExpression betaObj2 = new ZExpression("IS NOT NULL");
-		betaObj2.addOperand(betaObj);
-		result = new ZExpression("AND", result, betaObj2);
 
 		if(!subject.isVariable()) {
-			ZExp exp = null;
 			
 			if(subject.isURI()) {
+				/*
 				exp = new ZExpression("="
 						, betaSub
 						, new ZConstant(subject.toString(), ZConstant.STRING));
+				*/
 			} else if(subject.isLiteral()) {
 				logger.warn("Literal as subject is not supported!");
 				Object literalValue = subject.getLiteralValue();
@@ -723,18 +771,71 @@ public class SPARQL2SQLTranslator {
 				}
 			}
 			
-			if(exp != null) {
-				result = new ZExpression("AND", result, exp);
-			}
-			
 		}
+		
+		return exp;
+		
+	}
+	
+	private ZExp genCondSQL(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception {
+		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
+		Collection<ZExp> exps = new HashSet<ZExp>();
+		
+		Node subject = tp.getSubject();
+		Node predicate = tp.getPredicate();
+		Node object = tp.getObject();
+		R2OConceptMapping cm = this.mapTripleCM.get(tp);
+		
+		ZExp betaSub = betaGenerator.calculateBetaCM(tp, POS.sub, cm).getExpression();
+		ZExp betaPre = betaGenerator.calculateBetaCM(tp, POS.pre, cm).getExpression();
+		ZExp betaObj = betaGenerator.calculateBetaCM(tp, POS.obj, cm).getExpression();
 
+		//result = new ZExpression("AND", result, betaObj2);
+
+//		if(!subject.isVariable()) {
+//			ZExp exp = null;
+//			
+//			if(subject.isURI()) {
+//				exp = new ZExpression("="
+//						, betaSub
+//						, new ZConstant(subject.toString(), ZConstant.STRING));
+//			} else if(subject.isLiteral()) {
+//				logger.warn("Literal as subject is not supported!");
+//				Object literalValue = subject.getLiteralValue();
+//				if(literalValue instanceof String) {
+//					exp = new ZExpression("="
+//							, betaSub
+//							, new ZConstant(subject.toString(), ZConstant.STRING));				
+//				} else if (literalValue instanceof Double) {
+//					exp = new ZExpression("="
+//							, betaSub
+//							, new ZConstant(subject.toString(), ZConstant.NUMBER));
+//				} else {
+//					exp = new ZExpression("="
+//							, betaSub
+//							, new ZConstant(subject.toString(), ZConstant.STRING));				
+//				}
+//			}
+//			
+//			if(exp != null) {
+//				exps.add(exp);
+//				result = new ZExpression("AND", result, exp);
+//			}
+//		}
+		
+		
+//		ZExp genCondSQLSubjectExp = this.genCondSQLSubject(tp, betaGenerator);
+//		if(genCondSQLSubjectExp != null) {
+//			exps.add(genCondSQLSubjectExp);
+//		}
+		
+		
 		if(!predicate.isVariable()) {
 			ZExp exp = new ZExpression("="
 					, betaPre
 					, new ZConstant(predicate.toString(), ZConstant.STRING));
 
-			result = new ZExpression("AND", result, exp);
+			//result = new ZExpression("AND", result, exp);
 		}
 
 		if(!object.isVariable()) {
@@ -759,14 +860,23 @@ public class SPARQL2SQLTranslator {
 				}
 			}
 
+			if(exp != null) {
+				//result = new ZExpression("AND", result, exp);
+			}
+			
+		} else {
+			ZExpression exp = new ZExpression("IS NOT NULL");
+			exp.addOperand(betaObj);
+			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
+
 		}
 
 		if(subject == predicate) {
 			ZExp exp = new ZExpression("="
 					, betaSub
 					, betaPre);
-
+			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
 		}
 
@@ -774,7 +884,7 @@ public class SPARQL2SQLTranslator {
 			ZExp exp = new ZExpression("="
 					, betaSub
 					, betaObj);
-
+			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
 		}
 
@@ -782,11 +892,23 @@ public class SPARQL2SQLTranslator {
 			ZExp exp = new ZExpression("="
 					, betaObj
 					, betaPre);
-
+			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
 		}
 
-		return result;
+		ZExp result2;
+		if(exps.size() == 0) {
+			result2 = null;
+		} else if(exps.size() == 1) {
+			result2 = exps.iterator().next();
+		} else {
+			result2 = new ZExpression("AND");
+			for(ZExp exp : exps) {
+				((ZExpression) result2).addOperand(exp);
+			}
+		}
+		logger.debug("genCondSQL2 for tp : " + tp + " =\n " + result2);
+		return result2;
 	}
 
 

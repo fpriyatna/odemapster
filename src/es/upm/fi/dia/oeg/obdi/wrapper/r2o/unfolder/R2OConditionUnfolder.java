@@ -78,7 +78,27 @@ public class R2OConditionUnfolder {
 	}
 	
 	private ZExpression unfoldNotEqualsConditional() throws InvalidTransfomationExperessionException {
-		return new ZExpression("NOT", this.unfoldEqualsConditional());
+		//return new ZExpression("NOT", this.unfoldEqualsConditional());
+		ZExpression result = null;
+
+		List<R2OArgumentRestriction> argumentRestrictions = condition.getArgRestricts();
+
+		R2ORestriction restriction0 = argumentRestrictions.get(0).getRestriction();
+		R2ORestrictionUnfolder  r2oRestrictionUnfolder0 = new R2ORestrictionUnfolder(restriction0);
+		ZExp operand0 = r2oRestrictionUnfolder0.unfoldRestriction();
+		
+		R2ORestriction restriction1 = argumentRestrictions.get(1).getRestriction();
+		R2ORestrictionUnfolder  r2oRestrictionUnfolder1 = new R2ORestrictionUnfolder(restriction1);
+		ZExp operand1 = r2oRestrictionUnfolder1.unfoldRestriction();
+
+		if(operand0 != null && operand1 != null) {
+			ZExpression zExpression = new ZExpression("!=");
+			zExpression.addOperand(operand0);
+			zExpression.addOperand(operand1);
+			result = zExpression;
+		} 
+
+		return result;
 	}
 	
 	private ZExpression unfoldLoThanConditional() throws Exception{
