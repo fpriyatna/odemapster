@@ -21,7 +21,16 @@ public class R2OSelector implements R2OElement, Cloneable {
 //            (aftertransform transformation)?
 	private R2OConditionalExpression appliesIf;
 	private R2OTransformationExpression afterTransform;
+	
+	public R2OSelector(R2OConditionalExpression appliesIf,
+			R2OTransformationExpression afterTransform) {
+		super();
+		this.appliesIf = appliesIf;
+		this.afterTransform = afterTransform;
+	}
+
 	private String afterTransformAlias;
+	
 	
 	public R2OSelector(Element element) throws ParseException {
 		this.parse(element);

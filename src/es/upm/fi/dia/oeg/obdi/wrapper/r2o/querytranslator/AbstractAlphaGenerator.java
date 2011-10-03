@@ -13,17 +13,17 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 
 
 public abstract class AbstractAlphaGenerator {
-	Map<Node, R2OConceptMapping> mapNodeConceptMapping;
+	Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping;
 	R2OMappingDocument mappingDocument;
 	
-	public AbstractAlphaGenerator(Map<Node, R2OConceptMapping> mapNodeConceptMapping,
+	public AbstractAlphaGenerator(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		this.mapNodeConceptMapping = mapNodeConceptMapping;
 		this.mappingDocument = mappingDocument;
 	}
 	
-	abstract ZQuery calculateAlpha(Triple tp) throws Exception;
-	abstract ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception;
+	abstract Object calculateAlpha(Triple tp) throws Exception;
+	abstract Object calculateAlphaTB(Collection<Triple> triples) throws Exception;
 	abstract R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception;
 	abstract R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples) throws Exception;
 

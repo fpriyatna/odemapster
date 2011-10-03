@@ -1,11 +1,13 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.TranslatorUtility;
 
 import Zql.ZConstant;
@@ -23,32 +25,26 @@ public class R2OQuery extends ZQuery {
 	private String alias;
 	private long slice = -1;
 	private boolean distinct = false;
-	
-	public void setSlice(long slice) {
-		this.slice = slice;
-	}
 
-	public void setDistinct(boolean distinct) {
-		this.distinct = distinct;
-	}
-	
 	public R2OQuery() {
 		super();
 		this.addSelect(new Vector<ZSelectItem>());
 		this.addFrom(new Vector<ZFromItem>()); 
 	}
-
-	public void clearSelectItems() {
-		Collection<ZSelectItem> selectItems = this.getSelect();
-		selectItems = new Vector<ZSelectItem>();
-	}
 	
-	public void setSelectItems(Collection<ZSelectItem> newSelectItems) {
-		this.clearSelectItems();
-		
-		for(ZSelectItem newSelectItem : newSelectItems) {
-			this.addSelect(newSelectItem);
+	public void addFrom(ZFromItem fromItem) {
+		if(this.getFrom() == null) {
+			this.addFrom(new Vector<ZFromItem>());
 		}
+		this.getFrom().add(fromItem);
+	}
+
+	public void addJoinQuery(R2OJoinQuery joinQuery) {
+		if(this.joinQueries == null) {
+			this.joinQueries = new Vector<R2OJoinQuery>();
+		}
+
+		this.joinQueries.add(joinQuery);
 	}
 	
 	public void addSelect(ZSelectItem newSelectItem) {
@@ -82,14 +78,6 @@ public class R2OQuery extends ZQuery {
 		}
 		
 	}
-	
-	public void addJoinQuery(R2OJoinQuery joinQuery) {
-		if(this.joinQueries == null) {
-			this.joinQueries = new Vector<R2OJoinQuery>();
-		}
-
-		this.joinQueries.add(joinQuery);
-	}
 
 	public void addUnionQuery(R2OQuery unionQuery) {
 		if(this.unionQueries == null) {
@@ -99,14 +87,99 @@ public class R2OQuery extends ZQuery {
 		this.unionQueries.add(unionQuery);
 	}
 	
-	public void addFrom(ZFromItem fromItem) {
-		if(this.getFrom() == null) {
-			this.addFrom(new Vector<ZFromItem>());
+	public void addWhere(Collection<ZExp> newWheres) {
+		for(ZExp newWhere : newWheres) {
+			this.addWhere(newWhere);
 		}
-		this.getFrom().add(fromItem);
+		
+	}
+	
+	public void addWhere(ZExp newWhere) {
+		ZExp oldWhere = this.getWhere();
+		if(newWhere != null) {
+			if(oldWhere == null) {
+				super.addWhere(newWhere);
+			} else {
+				ZExp combinedWhere = new ZExpression("AND", oldWhere, newWhere);
+				super.addWhere(combinedWhere);
+			}
+		}
+	}
+	
+	public void clearSelectItems() {
+		Collection<ZSelectItem> selectItems = this.getSelect();
+		if(selectItems != null) {
+			selectItems.clear();
+		}
+		selectItems = new Vector<ZSelectItem>();
+	}
+
+	public String generateAlias() {
+		//return R2OConstants.VIEW_ALIAS + this.hashCode();
+		if(this.alias == null) {
+			this.alias = R2OConstants.VIEW_ALIAS + new Random().nextInt(10000);
+		}
+		return this.alias;
+	}
+	
+	public ZSelectItem getSelectItemByAlias(String alias) {
+		Iterator selectItems = this.getSelect().iterator();
+		while(selectItems.hasNext()) {
+			ZSelectItem selectItem = (ZSelectItem) selectItems.next();
+			String selectItemAlias = selectItem.getAlias();
+			if(alias.equals(selectItemAlias)) {
+				return selectItem;
+			}
+		}
+		return null;
 	}
 	
 
+	
+	public ZSelectItem getSelectItemByColumnValue(String value) {
+		Iterator selectItems = this.getSelect().iterator();
+		while(selectItems.hasNext()) {
+			ZSelectItem selectItem = (ZSelectItem) selectItems.next();
+			String selectItemFullValue = Utility.getValueWithoutAlias(selectItem);
+			String splitValues[] = selectItemFullValue.split("\\.");
+			String columnValue = splitValues[splitValues.length-1];
+			if(value.equals(columnValue)) {
+				return selectItem;
+			}
+		}
+		return null;
+	}
+	
+	public ZSelectItem getSelectItemByValue(String value) {
+		Iterator selectItems = this.getSelect().iterator();
+		while(selectItems.hasNext()) {
+			ZSelectItem selectItem = (ZSelectItem) selectItems.next();
+			if(value.equals(Utility.getValueWithoutAlias(selectItem))) {
+				return selectItem;
+			}
+		}
+		return null;
+	}
+
+	public Collection<R2OQuery> getUnionQueries() {
+		return unionQueries;
+	}
+
+	public void setDistinct(boolean distinct) {
+		this.distinct = distinct;
+	}
+
+	public void setSelectItems(Collection<ZSelectItem> newSelectItems) {
+		this.clearSelectItems();
+		
+		for(ZSelectItem newSelectItem : newSelectItems) {
+			this.addSelect(newSelectItem);
+		}
+	}
+
+	public void setSlice(long slice) {
+		this.slice = slice;
+	}
 	
 	@Override
 	public String toString() {
@@ -199,15 +272,16 @@ public class R2OQuery extends ZQuery {
 			}
 		}
 		
-		if(this.getOrderBy() != null) {
+		Vector<ZOrderBy> orderByConditions = this.getOrderBy(); 
+		if(orderByConditions != null) {
 			String orderBySQL = "";
-			for(Object orderByObject : this.getOrderBy()) {
+			for(Object orderByObject : orderByConditions) {
 				ZOrderBy orderBy = (ZOrderBy) orderByObject;
 				orderBy.getAscOrder();
 				ZExp orderByExpression = orderBy.getExpression();
 				orderBySQL += orderByExpression;
 				if(! orderBy.getAscOrder()) {
-					orderBySQL += "DESC ";
+					orderBySQL += " DESC";
 				}
 				orderBySQL += ", ";
 			}
@@ -223,14 +297,9 @@ public class R2OQuery extends ZQuery {
 		return result.toString();
 
 	}
-	
-	public String generateAlias() {
-		//return R2OConstants.VIEW_ALIAS + this.hashCode();
-		if(this.alias == null) {
-			this.alias = R2OConstants.VIEW_ALIAS + new Random().nextInt(10000);
-		}
-		return this.alias;
+
+	public void setUnionQueries(Collection<R2OQuery> unionQueries) {
+		this.unionQueries = unionQueries;
 	}
-
-
+	
 }

@@ -42,7 +42,11 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 	private String langDBColDataType;
 	private String langHasValue;
 
+	private boolean mappedPKColumn;
 	
+	public R2OAttributeMapping(String name) {
+		this.name = name;
+	}
 
 	public R2OAttributeMapping(Element attributeMappingElement) throws ParseException {
 		this.parse(attributeMappingElement);
@@ -58,7 +62,7 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 	public void parse(Element attributeMappingElement) throws ParseException {
 		//R2OAttributeMapping result = new R2OAttributeMapping();
 		this.name = attributeMappingElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
-		logger.info("Parsing attribute " + this.name);
+		logger.debug("Parsing attribute " + this.name);
 		
 		//parse identifiedBy attribute
 		this.id = attributeMappingElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
@@ -346,4 +350,19 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 		}
 	}
 
+	public void addSelector(R2OSelector selector) {
+		if(this.selectors == null) {
+			this.selectors = new ArrayList<R2OSelector>();
+		}
+		
+		this.selectors.add(selector);
+	}
+
+	public boolean isMappedPKColumn() {
+		return mappedPKColumn;
+	}
+
+	public void setMappedPKColumn(boolean mappedPKColumn) {
+		this.mappedPKColumn = mappedPKColumn;
+	}
 }

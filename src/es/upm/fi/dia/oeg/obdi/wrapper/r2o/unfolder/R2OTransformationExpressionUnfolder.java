@@ -18,6 +18,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 
 public class R2OTransformationExpressionUnfolder {
@@ -45,13 +46,13 @@ public class R2OTransformationExpressionUnfolder {
 				ZConstant selectConstant = (ZConstant) selectExpression;
 				if(selectConstant.getType() == ZConstant.COLUMNNAME) {
 					String selectConstantValue = selectConstant.getValue();
-					zSelectItem = new ZSelectItem(selectConstantValue);
+					zSelectItem = new R2OSelectItem(selectConstantValue);
 				} else {
-					zSelectItem = new ZSelectItem();
+					zSelectItem = new R2OSelectItem();
 					zSelectItem.setExpression(selectConstant);
 				}
 			} else {
-				zSelectItem = new ZSelectItem();
+				zSelectItem = new R2OSelectItem();
 				zSelectItem.setExpression(selectExpression);
 			}
 			

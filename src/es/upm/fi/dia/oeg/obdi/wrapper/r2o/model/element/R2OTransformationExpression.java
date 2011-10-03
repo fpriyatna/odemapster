@@ -36,6 +36,11 @@ public class R2OTransformationExpression extends R2OExpression implements Clonea
 		this.parse(element);
 	}
 	
+	public R2OTransformationExpression(String operId) {
+		this.primitiveTransf = R2OConstants.OPERATION_TAG;
+		this.operId = operId;		
+	}
+
 	@Override
 	public void parse(Element element) throws ParseException {
 		//R2OTransformationExpression result = new R2OTransformationExpression();
@@ -98,9 +103,12 @@ public class R2OTransformationExpression extends R2OExpression implements Clonea
 
 		result.append(">\n");
 		
-		for(R2OArgumentRestriction argRestriction : argRestrictions) {
-			result.append(argRestriction.toString() + "\n");
+		if(this.argRestrictions != null) {
+			for(R2OArgumentRestriction argRestriction : argRestrictions) {
+				result.append(argRestriction.toString() + "\n");
+			}			
 		}
+
 		result.append("</" + this.primitiveTransf + ">");
 		return result.toString();
 	}
@@ -184,5 +192,14 @@ public class R2OTransformationExpression extends R2OExpression implements Clonea
 
 	public R2ORestriction getLastRestriction() {
 		return this.argRestrictions.get(this.argRestrictions.size()-1).getRestriction();
+	}
+
+	
+	public void addRestriction(R2ORestriction restriction) {
+		if(this.argRestrictions == null) {
+			this.argRestrictions = new ArrayList<R2OArgumentRestriction>();
+		}
+		
+		this.argRestrictions.add(new R2OArgumentRestriction(restriction));
 	}
 }

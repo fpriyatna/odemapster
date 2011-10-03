@@ -44,7 +44,7 @@ public class R2OPropertyMappingUnfolder {
 			
 			String toConcept = r2oRelationMapping.getToConcept();
 			R2OConceptMapping rangeConceptMapping = 
-				(R2OConceptMapping) this.r2oMappingDocument.getConceptMappingByConceptMappingId(toConcept);
+				(R2OConceptMapping) this.r2oMappingDocument.getConceptMappingById(toConcept);
 			
 			R2ORelationMappingUnfolder r2oRelationMappingUnfolder = new R2ORelationMappingUnfolder(
 					this.parentMapping, (R2ORelationMapping) r2oPropertyMapping, rangeConceptMapping);

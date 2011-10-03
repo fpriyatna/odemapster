@@ -109,9 +109,9 @@ public class R2OCondition implements R2OElement, Cloneable{
 		for(R2OArgumentRestriction argRestriction : this.argRestricts) {
 			R2ORestriction restriction = argRestriction.getRestriction();
 			Collection<ZSelectItem> restrictionSelectItems = restriction.getSelectItems();
-			logger.debug("restrictionSelectItems = " + restrictionSelectItems);
+//			logger.debug("restrictionSelectItems = " + restrictionSelectItems);
 			result.addAll(restrictionSelectItems);
-			logger.debug("result = " + result);
+//			logger.debug("result = " + result);
 			/*
 			if(restriction instanceof R2OColumnRestriction) {
 				R2OColumnRestriction restrictionColumn = (R2OColumnRestriction) restriction;

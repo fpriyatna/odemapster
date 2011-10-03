@@ -18,7 +18,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OConceptMappingUnfolder;
 public class AlphaGenerator1 extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(AlphaGenerator1.class);
 	
-	public AlphaGenerator1(Map<Node, R2OConceptMapping> mapNodeConceptMapping,
+	public AlphaGenerator1(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 	}
@@ -28,7 +28,8 @@ public class AlphaGenerator1 extends AbstractAlphaGenerator {
 	ZQuery calculateAlpha(Triple tp) throws Exception {
 		Node subject = tp.getSubject();
 
-		R2OConceptMapping cm = this.mapNodeConceptMapping.get(subject);
+		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = cms.iterator().next();
 		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cm, this.mappingDocument);
 		R2OQuery cmQuery = cmu.unfoldConceptMapping();
 		

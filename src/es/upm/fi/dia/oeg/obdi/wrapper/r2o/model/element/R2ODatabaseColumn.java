@@ -19,6 +19,10 @@ public class R2ODatabaseColumn implements R2OElement  {
 		PRIMARY_KEY_COLUMN, FOREIGN_KEY_COLUMN, NORMAL_COLUMN
 	}
 
+	public R2ODatabaseColumn(String fullColumnName) {
+		this.fullColumnName = fullColumnName;
+	}
+	
 	public R2ODatabaseColumn(Element element) throws ParseException {
 		this.parse(element);
 	}
@@ -102,6 +106,27 @@ public class R2ODatabaseColumn implements R2OElement  {
 	public String getColumnNameOnly() {
 		String[] fullColumnNameSplit = this.fullColumnName.split("\\.");
 		return fullColumnNameSplit[fullColumnNameSplit.length-1];
+	}
+
+	public String getTableName() {
+		String tableName;
+		String[] fullColumnNameSplit = this.fullColumnName.split("\\.");
+		if(fullColumnNameSplit.length == 2) {
+			//VIEW.COLUMN
+			tableName = fullColumnNameSplit[1];
+		} else if(fullColumnNameSplit.length == 3) {
+			//DB.TABLE.COLUMN
+			tableName = fullColumnNameSplit[1];
+		} else if(fullColumnNameSplit.length == 4) {
+			tableName = fullColumnNameSplit[2];			
+		} else {
+			tableName = null;
+		}
+		return tableName;
+	}
+	
+	public void setFullColumnName(String fullColumnName) {
+		this.fullColumnName = fullColumnName;
 	}
 	
 }

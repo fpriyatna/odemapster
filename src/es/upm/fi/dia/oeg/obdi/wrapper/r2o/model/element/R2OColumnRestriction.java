@@ -9,6 +9,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 public class R2OColumnRestriction extends R2ORestriction{
 	private R2ODatabaseColumn dbColumn;
 	
+	public R2OColumnRestriction(R2ODatabaseColumn dbColumn) {
+		super();
+		this.dbColumn = dbColumn;
+	}
+
 	public R2OColumnRestriction(Element xmlElement) throws ParseException {
 		this.parse(xmlElement);
 	}

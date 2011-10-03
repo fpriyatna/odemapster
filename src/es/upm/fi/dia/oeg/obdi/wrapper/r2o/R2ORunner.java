@@ -165,8 +165,9 @@ public class R2ORunner extends AbstractRunner {
 		logger.info("Execution time was "+(duration)+" s.");
 	}
 	
-	public void run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
-
+	public String run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
+		String status = null;
+		
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("convert", 2);
 		ZUtils.addCustomFunction("coalesce", 2);
@@ -227,8 +228,8 @@ public class R2ORunner extends AbstractRunner {
 				queries = RewriterWrapper.rewrite(originalQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
 				
 				
-				logger.info("No of rewriting query result = " + queries.size());
-				logger.info("queries = " + queries);
+				logger.debug("No of rewriting query result = " + queries.size());
+				logger.debug("queries = " + queries);
 			}			
 			
 			
@@ -237,8 +238,9 @@ public class R2ORunner extends AbstractRunner {
 //				new SPARQL2MappingTranslator(originalMappingDocument);
 			
 			//translate sparql into sql
-			SPARQL2SQLTranslator sparql2sql = new SPARQL2SQLTranslator(originalMappingDocument);
-			sparql2sql.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());
+			SPARQL2SQLTranslator translator = new SPARQL2SQLTranslator(originalMappingDocument);
+			translator.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());
+			translator.setSubQueryElimination(this.configurationProperties.isSubQueryElimination());
 			Document xmlDoc = XMLUtility.createNewXMLDocument();
 			Connection conn = this.configurationProperties.getConn();
 
@@ -255,9 +257,9 @@ public class R2ORunner extends AbstractRunner {
 				try {
 					
 					
-					logger.info("query(i) = " + query);
-					String sparql2SQLResult = sparql2sql.query2SQL(query).toString();
-					
+					logger.debug("query(i) = " + query);
+					String sparql2SQLResult = translator.translate(query).toString();
+					logger.debug("sparql2sql = \n" + sparql2SQLResult);
 
 					ResultSet rs = Utility.executeQuery(conn, sparql2SQLResult);
 					ResultSetMetaData rsmd = rs.getMetaData();
@@ -307,11 +309,13 @@ public class R2ORunner extends AbstractRunner {
 						}
 						i++;
 					}
-					logger.info(i  + " instance(s) retrieved ");
+					status = i  + " instance(s) retrieved ";
+					logger.info(status);
 					//translationResultMappingDocuments.add(translator.processQuery(query));
 				} catch(Exception e) {
-					e.printStackTrace();
-					logger.error("error while processing query : " + query);
+					//e.printStackTrace();
+					logger.error("error processing query, error message = " + e.getMessage());
+					throw e;
 				}
 
 			}
@@ -319,7 +323,8 @@ public class R2ORunner extends AbstractRunner {
 			//logger.debug("translationResult = " + translationResultMappingDocument);			 
 		}
 		
-		logger.info("done");
+		logger.info("**********************DONE****************************\n\n");
+		return status;
 
 
 	}

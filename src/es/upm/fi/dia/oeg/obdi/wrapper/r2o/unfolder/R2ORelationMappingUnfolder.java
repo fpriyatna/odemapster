@@ -20,12 +20,16 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OFromItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OJoinQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConceptRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseView;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OJoin;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTableRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
@@ -60,22 +64,21 @@ public class R2ORelationMappingUnfolder {
 		Vector<ZFromItem> viewQueryFromItems = new Vector<ZFromItem>();
 		viewQuery.addFrom(viewQueryFromItems);
 
-
 		ZFromItem viewQueryFromItem = new ZFromItem();
-		String viewAlias = rmHasView.generateViewAlias();
+		String viewAlias = rmHasView.generateAlias();
 		viewQueryFromItem.setAlias(viewAlias);
 
 
 		//add uri-as columns to the view select items
 		Collection<ZSelectItem> rangeURIAsSelectItems =
 			this.rangeConceptMapping.getURIAs().getSelectItems();
-		logger.debug("rangeURIAsSelectItems = " + rangeURIAsSelectItems);
+		logger.debug("Range URI-AS Columns = " + rangeURIAsSelectItems);
 		setViewQuerySelectItems.addAll(rangeURIAsSelectItems);
 
 		if(this.rangeConceptMapping.getAppliesIf() != null) {
 			Collection<ZSelectItem> rangeAppliesIfSelectItems =
 				this.rangeConceptMapping.getAppliesIf().getSelectItems();
-			logger.debug("rangeAppliesIfSelectItems = " + rangeAppliesIfSelectItems);
+			logger.debug("Range Applies-If Columns = " + rangeAppliesIfSelectItems);
 			setViewQuerySelectItems.addAll(rangeAppliesIfSelectItems);			
 		}
 
@@ -84,24 +87,24 @@ public class R2ORelationMappingUnfolder {
 		//the ones not corresponding to domain concept mapping has-table
 		R2OConditionalExpression joinsViaCondition = 
 			joinsVia.getJoinConditionalExpression();
-		logger.debug("joinsViaCondition = " + joinsViaCondition);
+		//logger.debug("joinsViaCondition = " + joinsViaCondition);
 		Collection<ZSelectItem> rmJoinsViaSelectItems = joinsViaCondition.getSelectItems();
 		logger.debug("rmJoinsViaSelectItems = " + rmJoinsViaSelectItems);
 		String parentMappingTableName = this.parentMapping.getHasTable().getName();
 		logger.debug("parentMappingTableName = " + parentMappingTableName);
 		parentMappingTableName += ".";
 		for(ZSelectItem rmJoinsViaSelectItem : rmJoinsViaSelectItems) {
-			logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
 			String rmJoinsViaSelectItemString = rmJoinsViaSelectItem.getSchema() + "." + rmJoinsViaSelectItem.getTable() + "." + rmJoinsViaSelectItem.getColumn();
 			rmJoinsViaSelectItemString = rmJoinsViaSelectItemString.replaceAll("\"", "");
 			if(!rmJoinsViaSelectItemString.startsWith(parentMappingTableName)) {
 				//				ZConstant zColumn = Utility.constructDatabaseColumn(rmJoinsViaSelectItem);
 				//				ZSelectItem selectItem = new ZSelectItem();
 				//				selectItem.setExpression(zColumn);
-				logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
 				setViewQuerySelectItems.add(rmJoinsViaSelectItem);
+				logger.debug("rmJoinsViaSelectItem = " + rmJoinsViaSelectItem);
 			}
 		}
+		
 
 		R2ODatabaseView r2oView= relationMapping.getHasView();
 		R2OJoin r2oViewJoin = r2oView.getJoinsVia();
@@ -253,6 +256,7 @@ public class R2ORelationMappingUnfolder {
 		}
 		String rangeTableAlias = this.relationMapping.getRangeTableAlias();
 
+		Collection<ZSelectItem> selectItems = new HashSet<ZSelectItem>();
 		
 		R2OJoinQuery rmQuery = new R2OJoinQuery();
 		cmQuery.addJoinQuery(rmQuery);
@@ -260,6 +264,7 @@ public class R2ORelationMappingUnfolder {
 
 		//unfold range URI
 		Collection<ZSelectItem> rangeURISelectItems = this.unfoldRangeURI(cmBaseTable, rangeTableAlias);
+
 
 
 		//unfold range applies-if && joins-via
@@ -279,6 +284,10 @@ public class R2ORelationMappingUnfolder {
 		}
 
 
+		String rmAlias = this.relationMapping.generateAlias();
+		
+		R2OFromItem fromItem;
+		
 		R2ODatabaseView rmHasView = this.relationMapping.getHasView();
 		if(rmHasView == null) {
 			Vector<R2ODatabaseTable> rangeTables = this.rangeConceptMapping.getHasTables();
@@ -287,56 +296,45 @@ public class R2ORelationMappingUnfolder {
 				throw new RelationMappingUnfolderException(errorMessage);
 			}
 			R2ODatabaseTable rangeTable = rangeTables.get(0);
-			String rtAlias = rangeTable.getAlias();
-			if(rtAlias == null || rtAlias == "") {
-				rtAlias = R2OConstants.RANGE_TABLE_ALIAS + this.relationMapping.hashCode();
-			}
-
-			R2OFromItem joinSource = new R2OFromItem(
-					rangeTable.getName(), ZAliasedName.FORM_TABLE);
-			joinSource.setAlias(rtAlias);
-			rmQuery.setJoinSource(joinSource);
-
-			ZExpression onExpressionRenamed = Utility.renameColumns(
-					rmQueryOnExpression, cmBaseTable, rtAlias, false);
-			rmQuery.setOnExpression(onExpressionRenamed);
-
-
-			Collection<ZSelectItem> rangeURISelectItemsRenamed = 
-				Utility.renameColumns(rangeURISelectItems, cmBaseTable, rtAlias, false);
-			cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
-
-			/*
-			if(rangeTable.getAlias() != null && rangeTable.getAlias() != "") {
-				Collection<ZSelectItem> rangeURISelectItemsRenamed = 
-					Utility.renameColumnsIfNotMatch(rangeURISelectItems, cmBaseTable, rangeTable.getAlias());
-				cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
-			} else {
-				cmQuery.getSelect().addAll(rangeURISelectItems);
-			}
-			 */
-
+			fromItem = new R2OFromItem(rangeTable.getName(), ZAliasedName.FORM_TABLE);
 		} else {
-
 			//process has-view
 			R2OQuery rmViewQuery = this.processHasView(rmHasView);
 
-			R2OFromItem fromItem = new R2OFromItem(
-					rmViewQuery.toString(), R2OFromItem.FORM_QUERY);
-			String fromItemAlias = R2OConstants.VIEW_ALIAS + new Random().nextInt(1000);
-			fromItem.setAlias(fromItemAlias);
-			rmQuery.setJoinSource(fromItem);
-
-			ZExpression onExpressionRenamed = Utility.renameColumns(
-					rmQueryOnExpression, cmBaseTable, fromItemAlias, false);
-			rmQuery.setOnExpression(onExpressionRenamed);
-
-			Collection<ZSelectItem> rangeURISelectItemsRenamed = 
-				Utility.renameColumns(rangeURISelectItems, cmBaseTable, fromItemAlias, false);
-
-			cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
+			fromItem = new R2OFromItem(rmViewQuery.toString(), R2OFromItem.FORM_QUERY);
+			rmHasView.setAlias(rmAlias);
 		}
 
+		fromItem.setAlias(rmAlias);
+		rmQuery.setJoinSource(fromItem);
+
+		ZExpression onExpressionRenamed = Utility.renameColumns(
+				rmQueryOnExpression, cmBaseTable, rmAlias, false);
+		rmQuery.setOnExpression(onExpressionRenamed);
+
+		Collection<ZSelectItem> rangeURISelectItemsRenamed = 
+			Utility.renameColumns(rangeURISelectItems, cmBaseTable, rmAlias, false);
+		cmQuery.getSelect().addAll(rangeURISelectItemsRenamed);
+		selectItems.addAll(rangeURISelectItemsRenamed);
+
+		
+		R2OTransformationExpression rangeURIAs = this.rangeConceptMapping.getURIAs();
+		if(URIUtility.isWellDefinedURIExpression(rangeURIAs)) {
+			R2OColumnRestriction pkColumnRestriction = (R2OColumnRestriction) rangeURIAs.getLastRestriction();
+			R2ODatabaseColumn pkColumn = pkColumnRestriction.getDatabaseColumn();
+			//String pkColumnAlias = this.rangeConceptMapping.generatePKColumnAlias();
+			//String pkColumnAlias = rmAlias + "_" + pkColumn.getColumnNameOnly();
+			//String pkColumnAlias = rmAlias + R2OConstants.KEY_SUFFIX;
+			String pkColumnAlias = this.relationMapping.generateRangeURIPKAlias();
+			
+			this.rangeConceptMapping.getName();
+			
+			ZSelectItem selectItem = new R2OSelectItem(pkColumn.getFullColumnName());
+			selectItem.setAlias(pkColumnAlias);
+			selectItem = Utility.renameColumn(selectItem, cmBaseTable, rmAlias, false);
+			cmQuery.getSelect().add(selectItem);
+			selectItems.add(selectItem);
+		}
 
 		return cmQuery;
 	}

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
+import Zql.ZExp;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -29,7 +30,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2ORelationMappingUnfolder;
 public class BetaGenerator1 extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(BetaGenerator1.class);
 
-	public BetaGenerator1(Map<Node, R2OConceptMapping> mapNodeConceptMapping,
+	public BetaGenerator1(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 	}
@@ -37,7 +38,9 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 
 	@Override
 	ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
-		R2OConceptMapping cm = this.mapNodeConceptMapping.get(tp.getSubject());
+		Node subject = tp.getSubject();
+		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = cms.iterator().next();
 		return this.calculateBetaCM(tp, pos, cm);
 	}
 
@@ -46,6 +49,7 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 	R2OSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm)
 	throws Exception {
 		Node subject = tp.getSubject();
+		Node object = tp.getObject();
 		String predicateURI = tp.getPredicate().getURI();;
 		R2OSelectItem selectItem = null;
 
@@ -92,7 +96,22 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 										throw new Exception(newErrorMessage);
 									} 
 
-									selectItem = new R2OSelectItem(selector.generateAfterTransformAlias());
+									String selectorAfterTranformAlias = selector.generateAfterTransformAlias();
+									//selectItem = new R2OSelectItem(selectorAfterTranformAlias);
+									if(object.isVariable()) {
+										selectItem = new R2OSelectItem(selectorAfterTranformAlias);
+									} else if(object.isLiteral()) {
+										selectItem = new R2OSelectItem();
+										ZExp exp = new ZConstant(selectorAfterTranformAlias, ZConstant.STRING);
+										selectItem.setExpression(exp);
+									} else if(object.isURI()) {
+										selectItem = new R2OSelectItem();
+										ZExp exp = new ZConstant(selectorAfterTranformAlias, ZConstant.STRING);
+										selectItem.setExpression(exp);
+									} else {
+										selectItem =  new R2OSelectItem(selectorAfterTranformAlias);
+									}
+									
 								}
 							}
 							catch(Exception e) {
@@ -114,7 +133,7 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 								String rangeTableAlias = rm.getRangeTableAlias();
 								
 								R2OConceptMapping rangeCM = 
-									(R2OConceptMapping) this.mappingDocument.getConceptMappingByConceptMappingId(rm.getToConcept());
+									(R2OConceptMapping) this.mappingDocument.getConceptMappingById(rm.getToConcept());
 								R2ORelationMappingUnfolder rmUnfolder = new R2ORelationMappingUnfolder(parentCM, rm, rangeCM);
 								Collection<ZSelectItem> selectItems = rmUnfolder.unfoldRangeURI(cmBaseTable,rangeTableAlias);
 								if(selectItems.size() > 1) {
@@ -125,7 +144,18 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 
 								//String rangeURIAlias = selectItems.iterator().next().getAlias();
 								String rangeURIAlias = rm.generateRangeURIAlias();
-								selectItem = new R2OSelectItem(rangeURIAlias);
+								//selectItem = new R2OSelectItem(rangeURIAlias);
+								if(object.isVariable()) {
+									selectItem = new R2OSelectItem(rangeURIAlias);
+								} else if(object.isLiteral()) {
+									selectItem = new R2OSelectItem();
+									ZExp exp = new ZConstant(rangeURIAlias, ZConstant.STRING);
+									selectItem.setExpression(exp);
+								} else if(object.isURI()) {
+									selectItem = new R2OSelectItem(rangeURIAlias);
+								} else {
+									selectItem =  new R2OSelectItem(rangeURIAlias);
+								}
 							} catch(Exception e) {
 								String newErrorMessage = e.getMessage() + " while processing relation mapping " + pm.getName();
 								logger.error(newErrorMessage);

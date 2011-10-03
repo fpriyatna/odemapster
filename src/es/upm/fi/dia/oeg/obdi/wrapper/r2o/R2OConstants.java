@@ -42,6 +42,7 @@ public class R2OConstants {
 	public static final String RANGE_TABLE_ALIAS="rt_";
 	public static final String VIEW_ALIAS="v_";
 	public static final String TABLE_ALIAS_PREFIX="t_";
+	public static final String KEY_SUFFIX = "_key";
 	
 	
 	//R2O xml attributes
@@ -176,7 +177,8 @@ public class R2OConstants {
 	public static final String MAPPING_DOCUMENT_TAGS = "mappingdocument.tags";
 	public static final String MAPPING_DOCUMENT_ORGANIZATION = "mappingdocument.organization";
 	
-	public static final String OPTIMIZE_TB = "querytranslator.optimizetb";
+	public static final String OPTIMIZE_TB = "querytranslator.selfjoinelimination";
+	public static final String SUBQUERY_ELIMINATION = "querytranslator.subqueryelimination";
 	
 	
 	public enum MappingType {

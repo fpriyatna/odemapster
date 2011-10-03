@@ -17,8 +17,8 @@ public interface IMappingDocument extends IParseable {
 	
 	public List<String> getMappedConcepts();
 	public Collection<AbstractConceptMapping> getConceptMappings();
-	public Collection<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptURI);
-	public AbstractConceptMapping getConceptMappingByConceptMappingId(String conceptMappingId);
+	public Collection<AbstractConceptMapping> getConceptMappingsByName(String conceptURI);
+	public AbstractConceptMapping getConceptMappingById(String conceptMappingId);
 	
 	public List<String> getMappedProperties();
 	public Collection<IPropertyMapping> getPropertyMappings();

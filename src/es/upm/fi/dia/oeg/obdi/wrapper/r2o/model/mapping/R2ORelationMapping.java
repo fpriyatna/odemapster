@@ -35,6 +35,8 @@ implements R2OElement, IRelationMapping, Cloneable
 	private Collection<R2OSelector> rmSelectors;
 	private R2OJoin joinsVia;
 	private R2ODatabaseView hasView;
+	private String sourceAlias;
+	
 	private String rangeURIAlias;
 	
 	public R2ORelationMapping(Element rmElement, R2OConceptMapping parent) throws ParseException {
@@ -48,7 +50,7 @@ implements R2OElement, IRelationMapping, Cloneable
 
 		//R2ORelationMapping result = new R2ORelationMapping();
 		this.name = rmElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
-		logger.info("Parsing attribute " + this.name);
+		logger.debug("Parsing relation " + this.name);
 		
 		//parse identifiedBy attribute
 		this.id = rmElement.getAttribute(R2OConstants.IDENTIFIED_BY_ATTRIBUTE);
@@ -210,8 +212,41 @@ implements R2OElement, IRelationMapping, Cloneable
 		return this.rangeURIAlias;
 	}
 
+	public String generateRangeURIPKAlias() {
+		if(this.rangeURIAlias == null) {
+			this.rangeURIAlias = R2OConstants.RELATIONMAPPING_ALIAS + new Random().nextInt(10000);
+		}
+		return this.rangeURIAlias + R2OConstants.KEY_SUFFIX;
+	}
+
+	
 	public String getRangeTableAlias() {
 		return rangeTableAlias;
 	}
+	
+	public String generateRangeTableAlias() {
+		if(this.rangeTableAlias == null || this.rangeTableAlias == "") {
+			this.rangeTableAlias = R2OConstants.RANGE_TABLE_ALIAS + this.hashCode();
+		}
+		
+		return this.rangeTableAlias;
+	}
+
+	public String getSourceAlias() {
+		return sourceAlias;
+	}
+
+	public void setSourceAlias(String sourceAlias) {
+		this.sourceAlias = sourceAlias;
+	}
+
+	public String generateAlias() {
+		if(this.sourceAlias == null) {
+			this.sourceAlias = R2OConstants.VIEW_ALIAS + new Random().nextInt(10000);
+		}
+		
+		return this.sourceAlias;
+	}
+
 
 }

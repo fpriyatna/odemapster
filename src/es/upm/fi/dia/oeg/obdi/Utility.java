@@ -37,8 +37,13 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.MonetDBColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConstantRestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 
 import Zql.ZAliasedName;
 import Zql.ZConstant;
@@ -133,14 +138,15 @@ public class Utility {
 
 		Statement stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 				java.sql.ResultSet.CONCUR_READ_ONLY);
-
+		
 		try  {
+			stmt.setQueryTimeout(60);
 			stmt.setFetchSize(Integer.MIN_VALUE);
 		} catch(Exception e) {
 			logger.debug("Can't set fetch size!");
 		}
 
-		logger.info("Executing query = \n" + query);
+		logger.debug("Executing query = \n" + query);
 
 		try {
 			long start = System.currentTimeMillis();
@@ -151,8 +157,7 @@ public class Utility {
 			return result;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			logger.error("Error executing query");
-			logger.error("Error message = " + e.getMessage());
+			logger.error("Error executing query, error message = "+ e.getMessage());
 			throw e;
 		}
 
@@ -230,8 +235,12 @@ public class Utility {
 	}
 
 	public static ZExpression renameColumns(
-			ZExpression zExpression, String tableName, String viewName, boolean matchCondition) throws Exception 
+			ZExpression zExpression, String oldName, String newName, boolean matchCondition) throws Exception 
 			{
+		if(zExpression == null) {
+			return null;
+		}
+
 		String operator = zExpression.getOperator();
 		ZExpression result = new ZExpression(operator);
 
@@ -245,14 +254,16 @@ public class Utility {
 				if(operandConstant.getType() == ZConstant.COLUMNNAME) {
 					String operandConstantValue = operandConstant.getValue();
 					operandConstantValue = operandConstantValue.replaceAll("\'", "");
-					if(operandConstantValue.startsWith(tableName + ".") == matchCondition) {
+					if(operandConstantValue.startsWith(oldName + ".") == matchCondition) {
 						//be careful here when passing sql server column names that have 4 elements 
 						//(db.schema.table.column)
 						ZAliasedName oldColumnName = new ZAliasedName(
 								operandConstantValue, ZAliasedName.FORM_COLUMN);
-						String newColumnName = viewName + "." + oldColumnName.getColumn();
+						String newColumnName = newName + "." + oldColumnName.getColumn();
 						//newOperandConstant = new ZConstant(newColumnName, operandConstant.getType());
-						newOperandConstant = Utility.constructDatabaseColumn(newColumnName);						
+						newOperandConstant = Utility.constructDatabaseColumn(newColumnName);
+					} else if(operandConstantValue.equalsIgnoreCase(oldName)) {
+						newOperandConstant = Utility.constructDatabaseColumn(newName);
 					} else {
 						newOperandConstant = operandConstant;
 					}
@@ -262,7 +273,7 @@ public class Utility {
 				result.addOperand(newOperandConstant);
 			} else if(operand instanceof ZExpression) {
 				ZExpression operandExpression  = (ZExpression) operand;
-				result.addOperand(Utility.renameColumns(operandExpression, tableName, viewName, matchCondition));
+				result.addOperand(Utility.renameColumns(operandExpression, oldName, newName, matchCondition));
 			} else {
 				throw new Exception("Unsupported columns renaming operation!");
 			}
@@ -270,39 +281,61 @@ public class Utility {
 		return result;
 			}
 
-	public static Collection<ZSelectItem> renameColumns(
-			Collection<ZSelectItem> selectItems, String tableName, String alias, boolean matches) throws Exception 
-			{
-		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+	public static void renameColumns(R2OArgumentRestriction ar, String oldName, String newName, boolean matches) {
 
-		for(ZSelectItem selectItem :selectItems) {
-			boolean isExpression = selectItem.isExpression();
-			
-			
-			if(isExpression) {
-				ZExp selectItemExp = selectItem.getExpression();
-				ZExpression newExpression = Utility.renameColumns((ZExpression) selectItemExp, tableName, alias, matches);
-				selectItem.setExpression(newExpression);
-				result.add(selectItem);
-			} else {
-				String selectItemSchema = selectItem.getSchema() ;
-				String selectItemTable = selectItem.getTable();
-				
-				if(tableName.equals(selectItemSchema + "." + selectItemTable) == matches) {
-					ZSelectItem newSelectItem = new ZSelectItem(alias + "." + selectItem.getColumn());
-					if(selectItem.getAlias() != null) {
-						newSelectItem.setAlias(selectItem.getAlias());
-					}
-					result.add(newSelectItem);
-				} else {
-					result.add(selectItem);
-					
+		R2ORestriction restriction = ar.getRestriction();
+		if(restriction instanceof R2OColumnRestriction) {
+			R2OColumnRestriction columnRestriction = (R2OColumnRestriction) restriction;
+			R2ODatabaseColumn dbColumn = columnRestriction.getDatabaseColumn();
+			String dbColumnFullName = dbColumn.getFullColumnName();
+			if(dbColumnFullName.startsWith(oldName+".") == matches) {
+				String newColumnName = dbColumnFullName.replaceFirst(oldName+".", newName+".");
+				dbColumn.setFullColumnName(newColumnName);
+			} 
+		}
+	}
+
+	public static ZSelectItem renameColumn(
+			ZSelectItem selectItem, String tableName, String alias, boolean matches) throws Exception {
+		
+		ZSelectItem result;
+
+		boolean isExpression = selectItem.isExpression();
+		if(isExpression) {
+			ZExp selectItemExp = selectItem.getExpression();
+			ZExpression newExpression = Utility.renameColumns((ZExpression) selectItemExp, tableName, alias, matches);
+			selectItem.setExpression(newExpression);
+			result = selectItem;
+		} else {
+			String selectItemSchema = selectItem.getSchema() ;
+			String selectItemTable = selectItem.getTable();
+
+			if(tableName.equals(selectItemSchema + "." + selectItemTable) == matches) {
+				ZSelectItem newSelectItem = new ZSelectItem(alias + "." + selectItem.getColumn());
+				if(selectItem.getAlias() != null) {
+					newSelectItem.setAlias(selectItem.getAlias());
 				}
+				result = newSelectItem;
+			} else {
+				result = selectItem;
+
 			}
 		}
 
 		return result;
-			}
+
+	}
+
+	public static Collection<ZSelectItem> renameColumns(
+			Collection<ZSelectItem> selectItems, String tableName, String alias, boolean matches) throws Exception {
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+
+		for(ZSelectItem selectItem :selectItems) {
+			result.add(Utility.renameColumn(selectItem, tableName, alias, matches));
+		}
+
+		return result;
+	}
 
 
 
@@ -608,7 +641,7 @@ public class Utility {
 		result.append(id);
 		return result.toString();
 	}
-	
+
 	//TODO improve this
 	public static boolean isIRI(String id) {
 		if(id != null && id.startsWith("http://")) {
@@ -618,39 +651,47 @@ public class Utility {
 		}
 	}
 
-	public static boolean isWellDefinedURIExpression(R2OTransformationExpression te) {
-		String operator = te.getOperId();
 
-		if(operator.equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CONCAT)) {
-			List<R2OArgumentRestriction> argumentRestrictions = te.getArgRestrictions();
 
-			for(int i=0; i<argumentRestrictions.size()-1; i++) {
-				R2OArgumentRestriction ar = argumentRestrictions.get(i);
-				R2ORestriction restriction = ar.getRestriction();
-				if((restriction instanceof R2OConstantRestriction) == false) {
-					return false;
-				}
-			}
-			
-			R2ORestriction lastRestriction = argumentRestrictions.get(argumentRestrictions.size()-1).getRestriction();
-			if(!(lastRestriction instanceof R2OColumnRestriction)) {
-				return false;
-			}
-			
-			return true;
-		} else {
-			return false;
-		}
-	}
+
+
+
 	
-	public static int getIRILengthWithoutPK(R2OTransformationExpression te) {
-		int result=0;
-		List<R2OArgumentRestriction> argumentRestrictions = te.getArgRestrictions();
-		for(int i=0; i<argumentRestrictions.size()-1; i++) {
-			R2OArgumentRestriction ar = argumentRestrictions.get(i);
-			R2OConstantRestriction restriction = (R2OConstantRestriction) ar.getRestriction();
-			result += restriction.getConstantValueAsString().length();
+
+
+	public static String getValueWithoutAlias(ZSelectItem selectItem) {
+		String result;
+
+		String alias = selectItem.getAlias();
+		selectItem.setAlias("");
+		result = selectItem.toString();
+
+		if(alias != null) {
+			selectItem.setAlias(alias);
 		}
-		return result;
+
+		return result.trim();
 	}
+
+	public static Collection<R2OSelectItem> getSelectItemByColumnName(
+			String columnName, Collection<R2OSelectItem> selectItems) {
+		return null;
+	}
+
+//	public static R2OAttributeMapping generatePKColumnAttributeMapping(R2OConceptMapping cm, String oldName, String newName) {
+//		R2OTransformationExpression uriAs = cm.getURIAs();
+//
+//		R2OColumnRestriction pkColumnRestriction = (R2OColumnRestriction) uriAs.getLastRestriction();
+//		R2ODatabaseColumn pkColumn = pkColumnRestriction.getDatabaseColumn();
+//		R2OTransformationExpression te = new R2OTransformationExpression(R2OConstants.TRANSFORMATION_OPERATOR_CONSTANT);
+//		R2ORestriction restriction = new R2OColumnRestriction(pkColumn);
+//		te.addRestriction(restriction);
+//		R2OSelector selector = new R2OSelector(null, te);
+//		String pkColumnAlias = cm.generatePKColumnAlias();
+//		R2OAttributeMapping pkAttributeMapping = new R2OAttributeMapping(pkColumnAlias);
+//		pkAttributeMapping.addSelector(selector);
+//		pkAttributeMapping.setMappedPKColumn(true);
+//
+//		return pkAttributeMapping;
+//	}
 }

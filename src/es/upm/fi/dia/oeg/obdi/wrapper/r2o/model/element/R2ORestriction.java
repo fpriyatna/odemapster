@@ -58,7 +58,7 @@ public abstract class R2ORestriction implements R2OElement {
 			result.add(selectItem);
 		} else if(this instanceof R2OSQLRestriction) {
 			R2OSQLRestriction restrictionSQL = (R2OSQLRestriction) this;
-			ZSelectItem selectItem = new ZSelectItem(restrictionSQL.getHasSQL());
+			ZSelectItem selectItem = new R2OSelectItem(restrictionSQL.getHasSQL());
 			ZConstant selectItemExpression = new ZConstant(restrictionSQL.getHasSQL(), ZConstant.UNKNOWN);
 			selectItem.setExpression(selectItemExpression);
 			String alias = restrictionSQL.getAlias();

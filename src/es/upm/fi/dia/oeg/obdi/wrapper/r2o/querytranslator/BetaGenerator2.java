@@ -27,19 +27,20 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2ORelationMappingUnfolder;
 public class BetaGenerator2 extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(BetaGenerator2.class);
 
-	public BetaGenerator2(Map<Node, R2OConceptMapping> mapNodeConceptMapping,
+	public BetaGenerator2(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 		// TODO Auto-generated constructor stub
 	}	
-	
+
 	@Override
 	ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
 		Node subject = tp.getSubject();
 		String predicateURI = tp.getPredicate().getURI();
 		ZSelectItem selectItem = null;
 
-		R2OConceptMapping cm = this.mapNodeConceptMapping.get(subject);
+		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = cms.iterator().next();
 
 		if(pos == POS.sub) {
 			Collection<ZSelectItem> selectItems = cm.getURIAs().getSelectItems();
@@ -48,7 +49,7 @@ public class BetaGenerator2 extends AbstractBetaGenerator {
 				logger.warn(newErrorMessage);
 				throw new Exception(newErrorMessage);				
 			}
-			
+
 			selectItem = selectItems.iterator().next();
 		} else if(pos == POS.pre) {
 			ZConstant predicateURIConstant = new ZConstant(predicateURI, ZConstant.STRING);
@@ -95,7 +96,7 @@ public class BetaGenerator2 extends AbstractBetaGenerator {
 										logger.warn(newErrorMessage);
 										throw new Exception(newErrorMessage);
 									}
-									
+
 									selectItem = selectItems.iterator().next();
 								}
 							}
@@ -110,7 +111,7 @@ public class BetaGenerator2 extends AbstractBetaGenerator {
 							try {
 								R2ORelationMapping rm = (R2ORelationMapping) pm;
 								R2OConceptMapping rangeCM = 
-									(R2OConceptMapping) this.mappingDocument.getConceptMappingByConceptMappingId(rm.getToConcept());
+										(R2OConceptMapping) this.mappingDocument.getConceptMappingById(rm.getToConcept());
 								Collection<ZSelectItem> selectItems = rangeCM.getURIAs().getSelectItems();
 								if(selectItems.size() > 1) {
 									String newErrorMessage = "multiple columns in range uri-as in query translator is not supported yet!";

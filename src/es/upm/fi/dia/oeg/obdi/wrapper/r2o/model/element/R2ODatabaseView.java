@@ -86,13 +86,21 @@ public class R2ODatabaseView implements R2OElement {
 		return joinsVia;
 	}
 	
-	public String generateViewAlias() {
+	public String generateAlias() {
 		//String viewAlias = this.name;
 		if(this.alias == null || this.alias == "") {
 			//viewAlias = R2OConstants.VIEW_ALIAS + this.hashCode();
 			this.alias = R2OConstants.VIEW_ALIAS + new Random().nextInt(10000);
 		}
 		return this.alias;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 }

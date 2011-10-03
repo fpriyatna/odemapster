@@ -24,7 +24,7 @@ public class AlphaGenerator2 extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(AlphaGenerator2.class);
 
 
-	public AlphaGenerator2(Map<Node, R2OConceptMapping> mapNodeConceptMapping,
+	public AlphaGenerator2(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 	}
@@ -33,7 +33,8 @@ public class AlphaGenerator2 extends AbstractAlphaGenerator {
 	ZQuery calculateAlpha(Triple tp) throws Exception {
 		Node subject = tp.getSubject();
 
-		R2OConceptMapping cm = this.mapNodeConceptMapping.get(subject);
+		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = cms.iterator().next();
 		R2ODatabaseTable databaseTable = cm.getHasTable();
 		ZQuery query = new ZQuery();
 

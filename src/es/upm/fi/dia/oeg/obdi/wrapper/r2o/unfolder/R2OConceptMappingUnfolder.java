@@ -18,6 +18,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
@@ -45,7 +46,7 @@ public class R2OConceptMappingUnfolder {
 
 
 	public R2OQuery unfoldConceptMapping() throws Exception {
-		logger.debug("Unfolding = " + conceptMapping.getConceptName());
+		logger.debug("Unfolding concept mapping : " + conceptMapping.getConceptName());
 
 		R2OQuery cmQuery = new R2OQuery();
 		//ZUtils.addCustomFunction("concat", 2);
@@ -59,7 +60,7 @@ public class R2OConceptMappingUnfolder {
 		String uriAsOperator = conceptMappingURIAsTransformationExpression.getOperId();
 		if(uriAsOperator != null) {
 			if(conceptMappingURIAsTransformationExpression.isDelegableTransformationExpression()) {
-				boolean isWellDefinedURIExpression = Utility.isWellDefinedURIExpression(conceptMappingURIAsTransformationExpression);
+				boolean isWellDefinedURIExpression = URIUtility.isWellDefinedURIExpression(conceptMappingURIAsTransformationExpression);
 				logger.debug("isWellDefinedURIExpression = " + isWellDefinedURIExpression);
 				
 				R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder = 

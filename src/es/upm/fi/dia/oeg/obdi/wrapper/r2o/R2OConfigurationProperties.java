@@ -23,6 +23,7 @@ public class R2OConfigurationProperties extends Properties {
 	private String jenaMode;
 	private String databaseType;
 	private boolean optimizeTB;
+	private boolean subQueryElimination;
 	
 	public boolean isOptimizeTB() {
 		return optimizeTB;
@@ -141,7 +142,15 @@ public class R2OConfigurationProperties extends Properties {
 				this.optimizeTB = true;
 			}
 		}
-		logger.debug("optimizeTB = " + this.optimizeTB);
+		logger.debug("Self join elimination = " + this.optimizeTB);
+
+		String subQueryEliminationString = this.getProperty(R2OConstants.SUBQUERY_ELIMINATION);
+		if(subQueryEliminationString != null) {
+			if(subQueryEliminationString.equalsIgnoreCase("yes") || subQueryEliminationString.equalsIgnoreCase("true")) {
+				this.subQueryElimination = true;
+			}
+		}
+		logger.debug("Subquery elimination = " + this.subQueryElimination);
 
 	}
 
@@ -173,6 +182,10 @@ public class R2OConfigurationProperties extends Properties {
 
 	public String getOntologyFilePath() {
 		return ontologyFilePath;
+	}
+
+	public boolean isSubQueryElimination() {
+		return subQueryElimination;
 	}
 
 }

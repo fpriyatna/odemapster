@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -16,6 +17,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
@@ -53,6 +55,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	private R2OConditionalExpression appliesIf;//original version
 	private R2OConditionalExpression appliesIfTop;//odemapster 1 version
 	private static Logger logger = Logger.getLogger(R2OConceptMapping.class);
+	private String alias;
 
 	private R2OConceptMapping(String cmName, String id, Vector<R2ODatabaseTable> hasTables
 			, R2OConditionalExpression appliesIf, R2OTransformationExpression uriAs) {
@@ -85,7 +88,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 		//parse name attribute
 		this.name = conceptMappingElement.getAttribute(R2OConstants.NAME_ATTRIBUTE);
-		logger.info("Parsing concept " + this.name);
+		logger.debug("Parsing concept " + this.name);
 
 		//parse documentation
 		this.documentation = conceptMappingElement.getAttribute(R2OConstants.DOCUMENTATION_ATTRIBUTE);
@@ -132,9 +135,14 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 				this.hasTables.add(dbTable);
 			}
 		} else {
-			String errorMessage = "Error parsing : " + this.name + " , hasTables element should be defined on a concept mapping!";
-			logger.error(errorMessage);
-			throw new ParseException(errorMessage);
+			if(URIUtility.isWellDefinedURIExpression(uriAs)) {
+				
+			} else {
+				String errorMessage = "Error parsing : " + this.name + " , hasTables element should be defined on a concept mapping!";
+				logger.error(errorMessage);
+				throw new ParseException(errorMessage);
+				
+			}
 		}
 		
 		//parse order-by
@@ -572,4 +580,26 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		}
 		return false;
 	}
+	
+	public String generatePKColumnAlias() {
+		if(this.alias == null) {
+			this.alias = this.id + R2OConstants.KEY_SUFFIX;
+			//this.alias =  this.id + R2OConstants.KEY_SUFFIX + new Random().nextInt(10000);
+		}
+		return this.alias;
+	}
+
+	public String generatePKColumnAlias(String additionalSuffix) {
+		return this.id + R2OConstants.KEY_SUFFIX + additionalSuffix;
+	}
+
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	
 }

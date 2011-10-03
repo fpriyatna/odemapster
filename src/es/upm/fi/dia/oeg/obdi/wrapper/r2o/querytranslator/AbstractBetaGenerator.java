@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator;
 
+import java.util.Collection;
 import java.util.Map;
 
 import Zql.ZSelectItem;
@@ -13,11 +14,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2SQLTranslator.P
 
 
 public abstract class AbstractBetaGenerator {
-	Map<Node, R2OConceptMapping> mapNodeConceptMapping;
+	Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping;
 	R2OMappingDocument mappingDocument;
 
 	public AbstractBetaGenerator(
-			Map<Node, R2OConceptMapping> mapNodeConceptMapping,
+			Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super();
 		this.mapNodeConceptMapping = mapNodeConceptMapping;

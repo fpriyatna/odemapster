@@ -32,7 +32,7 @@ public class R2OAttributeMappingUnfolder {
 
 
 	public Collection<ZSelectItem> unfold() throws AttributeMappingUnfolderException {
-		logger.debug("Unfolding attribute mapping = " + attributeMapping.getAttributeName());
+		logger.debug("Unfolding attribute mapping : " + attributeMapping.getAttributeName());
 
 		try {
 			Collection<ZSelectItem> result = new Vector<ZSelectItem>();
@@ -81,7 +81,13 @@ public class R2OAttributeMappingUnfolder {
 					R2OTransformationExpression attSelectorAfterTransform = attributeSelector.getAfterTransform();
 					R2OTransformationExpressionUnfolder r2oTransformationExpressionUnfolder =
 						new R2OTransformationExpressionUnfolder(attSelectorAfterTransform);
-					String afterTransformAlias = attributeSelector.generateAfterTransformAlias();
+					String afterTransformAlias;
+					if(attributeMapping.isMappedPKColumn()) {
+						afterTransformAlias = attributeMapping.getName();
+					} else {
+						afterTransformAlias = attributeSelector.generateAfterTransformAlias();
+					}
+					
 					Collection<ZSelectItem> afterTransformSelectItems = 
 						r2oTransformationExpressionUnfolder.unfold(afterTransformAlias);
 					result.addAll(afterTransformSelectItems);

@@ -22,6 +22,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.TypeInferrer;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
@@ -41,7 +42,7 @@ public class SPARQL2MappingTranslator {
 
 	private R2OMappingDocument mappingDocument;
 
-	private Map<Node, R2OConceptMapping> mapNodeConceptMapping;
+	private Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping;
 
 
 	public SPARQL2MappingTranslator(R2OMappingDocument mappingDocument) {
@@ -69,9 +70,10 @@ public class SPARQL2MappingTranslator {
 		Op op = Algebra.compile(query) ;
 		Op opQueryPattern = Algebra.compile(query.getQueryPattern());
 		//to get a type of each node,
-		this.mapNodeConceptMapping = new HashMap<Node, R2OConceptMapping>();
+		this.mapNodeConceptMapping = new HashMap<Node, Collection<R2OConceptMapping>>();
 		TranslatorUtility translatorUtility = new TranslatorUtility(mappingDocument);
-		this.mapNodeConceptMapping = translatorUtility.initializeMapConceptMapping(opQueryPattern);
+		TypeInferrer typeInferrer = new TypeInferrer(this.mappingDocument);
+		this.mapNodeConceptMapping = typeInferrer.infer(opQueryPattern);
 
 		
 		if(op instanceof OpProject) {
@@ -160,10 +162,10 @@ public class SPARQL2MappingTranslator {
 			mappingDocumentResult.getR2ORelationMappings();
 		for(R2ORelationMapping rm : rms) {
 			String toConceptID = rm.getToConcept();
-			R2OConceptMapping cmRange = mappingDocumentResult.getConceptMappingByConceptMappingId(toConceptID);
+			R2OConceptMapping cmRange = mappingDocumentResult.getConceptMappingById(toConceptID);
 			R2OConceptMapping cmRangeStripped;
 			if(cmRange == null) {
-				cmRange = this.mappingDocument.getConceptMappingByConceptMappingId(toConceptID);
+				cmRange = this.mappingDocument.getConceptMappingById(toConceptID);
 				cmRangeStripped = cmRange.getStripped();
 				cmRangeStripped.setMaterialize(R2OConstants.STRING_FALSE);
 			} else {
@@ -177,7 +179,7 @@ public class SPARQL2MappingTranslator {
 		R2OMappingDocument mappingDocumentResultDistinct = new R2OMappingDocument();
 		for(String distinctCMName : distinctCMNames) {
 			Collection<R2OConceptMapping> cms =  
-				mappingDocumentResult.getR2OConceptMappings(distinctCMName);
+				mappingDocumentResult.getR2OConceptMappingsByName(distinctCMName);
 			R2OConceptMapping mergedCM = R2OConceptMapping.merge(cms);
 			mappingDocumentResultDistinct.addConceptMapping(mergedCM);
 		}
@@ -241,13 +243,14 @@ public class SPARQL2MappingTranslator {
 
 	private R2OConceptMapping processSubject(Node subject) throws R2OTranslationException {
 		R2OConceptMapping result = null;
+		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = cms.iterator().next();
 
 		if(subject.isVariable()) {
 			if(this.mapNodeConceptMapping.get(subject) != null) {
-				result = this.mapNodeConceptMapping.get(subject);
+				result = cm;
 			}			
 		} else if(subject.isURI()) {
-			R2OConceptMapping cm = this.mapNodeConceptMapping.get(subject);
 			result = cm.clone();
 			R2OTransformationExpression cm2URIAs = result.getURIAs();
 			R2OConditionalExpression cm2AppliesIf = result.getAppliesIf();
@@ -438,7 +441,7 @@ public class SPARQL2MappingTranslator {
 	{
 		String toConcept = rm.getToConcept();
 		R2OConceptMapping rangeConceptMapping = 
-			(R2OConceptMapping) this.mappingDocument.getConceptMappingByConceptMappingId(toConcept);
+			(R2OConceptMapping) this.mappingDocument.getConceptMappingById(toConcept);
 		R2OTransformationExpression rangeUriAs = rangeConceptMapping.getURIAs();
 		R2OTransformationRestriction tr = new R2OTransformationRestriction(rangeUriAs);
 		R2OArgumentRestriction rangeUriAsArgumentRestriction = new R2OArgumentRestriction(tr);
@@ -467,7 +470,7 @@ public class SPARQL2MappingTranslator {
 		return rm2;
 	}
 
-	public Map<Node, R2OConceptMapping> getMapSubjectMapping() {
+	public Map<Node, Collection<R2OConceptMapping>> getMapSubjectMapping() {
 		return mapNodeConceptMapping;
 	}
 
