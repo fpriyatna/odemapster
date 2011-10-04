@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2o.example;
+
 
 import java.io.File;
 import java.io.StringWriter;
