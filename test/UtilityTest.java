@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2o.test;
+
 
 import static org.junit.Assert.*;
 
