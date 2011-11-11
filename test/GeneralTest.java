@@ -13,7 +13,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
-import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
 
 public class GeneralTest {
 

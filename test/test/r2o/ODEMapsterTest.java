@@ -1,4 +1,7 @@
+package test.r2o;
 //package es.upm.fi.dia.oeg.obdi.wrapper.r2o.test;
+
+import static org.junit.Assert.*;
 
 import java.sql.SQLException;
 
@@ -8,27 +11,75 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODefaultDataTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2OFreddyPostProcessor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 
-public class ODEMapsterTest extends TestCase {
+public class ODEMapsterTest {
 	private static Logger logger = Logger.getLogger(ODEMapsterTest.class);
 //	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
-	private static String MAPPING_DIRECTORY_WINDOWS = "C:/Users/Freddy/Dropbox/shared/jose-mora/freddy/mapping-collection/r2o-mappings/";
-	private static String MAPPING_DIRECTORY_LINUX = "/home/fpriyatna/Dropbox/shared/jose-mora/freddy/mapping-collection/r2o-mappings/";
+	private static String MAPPING_DIRECTORY_WINDOWS = "C:/Users/Freddy/Dropbox/oeg/odemapster2/mappings/";
+	private static String MAPPING_DIRECTORY_LINUX = "/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/";
 	
 	
 	public static void main(String args[]) throws Exception {
+		ODEMapsterTest test = new ODEMapsterTest();
+		
+		//BSBMSQLServerTest bsbmSqlServerTest = new BSBMSQLServerTest();
+//		bsbmSqlServerTest.testBSBMQuery01SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery01TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery02SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery02TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery02ReorderedSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery03SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery03TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery03ReorderedSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery04SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery04TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery05SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery05TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery05ReorderedSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery06SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery06TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery07SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery07TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery07ReorderedSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery08SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery08TBSqlServer();
+//		bsbmSqlServerTest.testBSBMQuery10SqlServer();
+//		bsbmSqlServerTest.testBSBMQuery10TBSqlServer();
+		
+		
+//		ODEMapsterTest.testBSBMQuery01Mysql();
+//		ODEMapsterTest.testBSBMQuery01TBMysql();
+//		ODEMapsterTest.testBSBMQuery02Mysql();
+//		ODEMapsterTest.testBSBMQuery02TBMysql();
+//		ODEMapsterTest.testBSBMQuery03Mysql();
+//		ODEMapsterTest.testBSBMQuery03TBMysql();
+//		ODEMapsterTest.testBSBMQuery04Mysql();
+//		ODEMapsterTest.testBSBMQuery04TBMysql();
 //		ODEMapsterTest.testBSBMQuery05Mysql();
+//		ODEMapsterTest.testBSBMQuery05TBMysql();
+//		ODEMapsterTest.testBSBMQuery05ReorderedMysql();
+//		ODEMapsterTest.testBSBMQuery06Mysql();
+//		ODEMapsterTest.testBSBMQuery06TBMysql();
+//		ODEMapsterTest.testBSBMQuery07Mysql();
+//		ODEMapsterTest.testBSBMQuery07TBMysql();
+//		ODEMapsterTest.testBSBMQuery07ReorderedMysql();
+//		ODEMapsterTest.testBSBMQuery08Mysql();
+//		ODEMapsterTest.testBSBMQuery08TBMysql();
+//		ODEMapsterTest.testBSBMQuery10Mysql();
+//		ODEMapsterTest.testBSBMQuery10TBMysql();
+		
 		
 	}
 
-	private static String getMappingDirectoryByOS() {
+	public static String getMappingDirectoryByOS() {
 		String osName = System.getProperty("os.name");
 		if(osName.startsWith("Linux")) {
 			return MAPPING_DIRECTORY_LINUX;
@@ -39,6 +90,20 @@ public class ODEMapsterTest extends TestCase {
 		}
 	}
 
+	private static void testMcsuarez01() throws Exception {
+		String dir = "C:/Users/Freddy/Dropbox/oeg/odemapster2/mappings/mcsuarez01/";
+//		String dir = "/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/mcsuarez01/";
+		String r2oConfigurationFile = "mcsuarez01.r2o.properties";
+		ODEMapsterTest.testProcess(r2oConfigurationFile, dir);
+	}
+
+
+	public void testEsraa() throws Exception {
+		String dir = getMappingDirectoryByOS() + "esraa/";
+//		String dir = "/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/mcsuarez01/";
+		String r2oConfigurationFile = "esraa.r2o.properties";
+		ODEMapsterTest.testProcess(r2oConfigurationFile, dir);
+	}
 
 	private static void test42CanalIndividualsAttributes() throws Exception {
 		String dir = "/home/fpriyatna/Dropbox/Public/odemapster/testcases/testcase42/odemapster2/";
@@ -108,7 +173,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, dir);
 	}
 
-	@Test
 	private static void testBSBMQuery00() throws Exception {
 		String dir = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
 //		String dir = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
@@ -117,7 +181,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, dir);
 	}
 
-	@Test	
 	private static void testBSBMQuery01MonetDB() throws Exception {
 		String testcaseName = "bsbm01";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -125,11 +188,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-
-
-
-
-	@Test	
 	private static void testBSBMQuery02MonetDB() throws Exception {
 		String testcaseName = "bsbm02";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -137,39 +195,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test	
-	public static void testBSBMQuery02TBMysql() throws Exception {
-		String testcaseName = "bsbm02";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test
-	public static void testBSBMQuery01Mysql() throws Exception {
-		String testcaseName = "bsbm01";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}	
-	
-	@Test	
-	public static void testBSBMQuery01TBMysql() throws Exception {
-		String testcaseName = "bsbm01";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	public static void testBSBMQuery02Mysql() throws Exception {
-		String testcaseName = "bsbm02";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-
-	@Test	
 	private static void testBSBMQuery03MonetDB() throws Exception {
 		String testcaseName = "bsbm03";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -177,21 +202,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	public static void testBSBMQuery03Mysql() throws Exception {
-		String testcaseName = "bsbm03";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	public static void testBSBMQuery03TBMysql() throws Exception {
-		String testcaseName = "bsbm03";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
 	private static void testBSBMQuery04MonetDB() throws Exception {
 		String testcaseName = "bsbm04";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -199,23 +209,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test	
-	public static void testBSBMQuery04Mysql() throws Exception {
-		String testcaseName = "bsbm04";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery04TBMysql() throws Exception {
-		String testcaseName = "bsbm04";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-	
-	@Test	
 	private static void testBSBMQuery05MonetDB() throws Exception {
 		String testcaseName = "bsbm05";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -223,48 +216,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test	
-	public static void testBSBMQuery05Mysql() throws Exception {
-		String testcaseName = "bsbm05";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery05TBMysql() throws Exception {
-		String testcaseName = "bsbm05";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery05ReorderedMysql() throws Exception {
-		String testcaseName = "bsbm05";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "reordered.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	
-	@Test	
-	public static void testBSBMQuery06Mysql() throws Exception {
-		String testcaseName = "bsbm06";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery06TBMysql() throws Exception {
-		String testcaseName = "bsbm06";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-	
-	@Test	
 	private static void testBSBMQuery07MonetDB() throws Exception {
 		String testcaseName = "bsbm07";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -272,31 +223,7 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test	
-	public static void testBSBMQuery07Mysql() throws Exception {
-		String testcaseName = "bsbm07";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
 
-	@Test	
-	public static void testBSBMQuery07TBMysql() throws Exception {
-		String testcaseName = "bsbm07";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery07ReorderedMysql() throws Exception {
-		String testcaseName = "bsbm07";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "reordered.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
 	private static void testBSBMQuery08MonetDB() throws Exception {
 		String testcaseName = "bsbm08";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -304,23 +231,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
-	public static void testBSBMQuery08Mysql() throws Exception {
-		String testcaseName = "bsbm08";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery08TBMysql() throws Exception {
-		String testcaseName = "bsbm08";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
 	private static void testBSBMQuery10MonetDB() throws Exception {
 		String testcaseName = "bsbm10";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -328,23 +238,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
-	private static void testBSBMQuery10Mysql() throws Exception {
-		String testcaseName = "bsbm10";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + ".r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
-	public static void testBSBMQuery10TBMysql() throws Exception {
-		String testcaseName = "bsbm10";
-		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
-		String r2oConfigurationFile = testcaseName + "tb.r2o.properties";
-		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
-	}
-
-	@Test	
 	private static void testBSBMQuery11MonetDB() throws Exception {
 		String testcaseName = "bsbm11";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -352,7 +245,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
 	private static void testBSBMQuery11Mysql() throws Exception {
 		String testcaseName = "bsbm11";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -375,7 +267,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, dir);
 	}
 
-	@Test
 	private static void testCbobed01() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "cbobed01/";
 		String r2oConfigurationFile = "cbobed01.r2o.properties";
@@ -390,7 +281,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testHospital() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "hospital/";
 		//String r2oConfigurationFile = "universidades.r2o.properties";
@@ -406,7 +296,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testOCorcho01() throws Exception {
 		String testcaseName = "ocorcho01";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -421,7 +310,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	static void testProcess(String r2oConfigurationFile, String mappingDirectory) throws Exception {
 		PropertyConfigurator.configure("log4j.properties");
 		logger.info("==========================STARTING==========================");
@@ -432,8 +320,10 @@ public class ODEMapsterTest extends TestCase {
 		try {
 			long startMemory = Runtime.getRuntime().freeMemory();
 			
-			R2ODataTranslator postProcessor = new R2ODefaultDataTranslator();
-			R2ORunner runner = new R2ORunner(postProcessor);
+			//R2ODataTranslator postProcessor = new R2ODefaultDataTranslator();
+			//R2ODataTranslator postProcessor = new R2OFreddyPostProcessor();
+			R2ORunner runner = new R2ORunner();
+			
 			
 			String status = runner.run(mappingDirectory, r2oConfigurationFile);
 			long endMemory = Runtime.getRuntime().freeMemory();
@@ -462,7 +352,6 @@ public class ODEMapsterTest extends TestCase {
 		
 	}
 	
-	@Test	
 	private static void testPSSA01Mysql() throws Exception {
 		String testcaseName = "pssa01";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -470,15 +359,13 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
 	private static void testPSSA02Mysql() throws Exception {
 		String testcaseName = "pssa02";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
 		String r2oConfigurationFile = testcaseName + ".r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
-	
-	@Test	
+
 	private static void testPSSA03Mysql() throws Exception {
 		String testcaseName = "pssa03";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -486,7 +373,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
 	private static void testPSSA05Mysql() throws Exception {
 		String testcaseName = "pssa05";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -494,7 +380,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
 	private static void testPSSA06Mysql() throws Exception {
 		String testcaseName = "pssa06";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -510,14 +395,12 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testRoberto01() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "roberto01/";
 		String r2oConfigurationFile = "TC0009(sqlserver).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testRoberto02() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "roberto02/";
 		String r2oConfigurationFile = "TC0009(sqlserver).r2o.properties";
@@ -564,7 +447,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testSPARQL2Mapping() throws Exception {
 		String mappingDirectory = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
 		//String r2oConfigurationFile = "universidades.r2o.properties";
@@ -573,7 +455,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testSparql2SQL() throws Exception {
 		String testcaseName = "TCSparql2SQL";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -582,7 +463,6 @@ public class ODEMapsterTest extends TestCase {
 	}
 
 	
-	@Test	
 	private static void testStudentSport() throws Exception {
 		String testcaseName = "studentsport";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -590,14 +470,12 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0000() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0000/";
 		String r2oConfigurationFile = "TC0000(mysql).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0001() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0001/";
 		String r2oConfigurationFile = "TC0001(mysql).r2o.properties";
@@ -605,46 +483,36 @@ public class ODEMapsterTest extends TestCase {
 	}
 	
 
-
-	
-	@Test
 	private static void testTC0002() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0002/";
 		String r2oConfigurationFile = "TC0002(mysql).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0003() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0003/";
 		String r2oConfigurationFile = "TC0003(mysql).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0004() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0004/";
 		String r2oConfigurationFile = "TC0004(mysql).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0005() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0005/";
 		String r2oConfigurationFile = "TC0005(mysql).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-
-	
-	@Test
 	private static void testTC0005AppliesIfMySql() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0005AppliesIf/";
 		String r2oConfigurationFile = "TC0005(mysql).r2o.properties";
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0005AppliesIfSqlServer() throws Exception {
 		String mappingDirectory = getMappingDirectoryByOS() + "TC0005AppliesIf/";
 		String r2oConfigurationFile = "TC0005(sqlserver).r2o.properties";
@@ -652,11 +520,6 @@ public class ODEMapsterTest extends TestCase {
 	}
 	
 
-
-	
-
-
-	@Test
 	private static void testTC0006() throws Exception {
 		String testcaseName = "TC0006";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -664,7 +527,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testTC0007() throws Exception {
 		String testcaseName = "TC0007";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -672,7 +534,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0008() throws Exception {
 		String testcaseName = "TC0008";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -680,7 +541,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test
 	private static void testTC0009() throws Exception {
 		String testcaseName = "TC0009";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -688,7 +548,6 @@ public class ODEMapsterTest extends TestCase {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test
 	private static void testTC0009SqlServer() throws Exception {
 		String testcaseName = "TC0009";
 		String mappingDirectory = getMappingDirectoryByOS() + testcaseName + "/";
@@ -832,7 +691,6 @@ public class ODEMapsterTest extends TestCase {
 	}
 
 	
-	@Test
 	private static void testUniversidades() throws Exception {
 		//String r2oConfigurationFile = "universidades.r2o.properties";
 		String mappingDirectory = getMappingDirectoryByOS() + "universidades/";

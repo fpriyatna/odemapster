@@ -2,6 +2,13 @@
 
 import static org.junit.Assert.*;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.Test;
 
 import com.hp.hpl.jena.ontology.OntModel;
@@ -10,7 +17,11 @@ import es.upm.fi.dia.oeg.obdi.Utility;
 
 public class UtilityTest {
 
+	public static void main(String args[]) {
 
+		
+	}
+	
 	@Test
 	public void testGetCountryByURI() {
 		String uri2 = "http://xmlns.com/foaf/0.1/surname";
@@ -26,5 +37,6 @@ public class UtilityTest {
 		System.out.println("country 4 = " + country4);
 
 	}
-	
+
+
 }
