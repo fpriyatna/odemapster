@@ -14,7 +14,8 @@ import Zql.ZSelectItem;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
@@ -45,7 +46,7 @@ public abstract class R2ORestriction implements R2OElement {
 			R2ODatabaseColumn dbColumn = restrictionColumn.getDatabaseColumn();
 			String fullColumnName = dbColumn.getFullColumnName();
 //			ZConstant zColumn = Utility.constructDatabaseColumn(fullColumnName);
-			ZSelectItem selectItem = new R2OSelectItem(fullColumnName);
+			ZSelectItem selectItem = new SQLSelectItem(fullColumnName);
 			String alias = dbColumn.getAlias();
 			/*
 			if(alias == null || alias == "") {
@@ -58,7 +59,7 @@ public abstract class R2ORestriction implements R2OElement {
 			result.add(selectItem);
 		} else if(this instanceof R2OSQLRestriction) {
 			R2OSQLRestriction restrictionSQL = (R2OSQLRestriction) this;
-			ZSelectItem selectItem = new R2OSelectItem(restrictionSQL.getHasSQL());
+			ZSelectItem selectItem = new SQLSelectItem(restrictionSQL.getHasSQL());
 			ZConstant selectItemExpression = new ZConstant(restrictionSQL.getHasSQL(), ZConstant.UNKNOWN);
 			selectItem.setExpression(selectItemExpression);
 			String alias = restrictionSQL.getAlias();

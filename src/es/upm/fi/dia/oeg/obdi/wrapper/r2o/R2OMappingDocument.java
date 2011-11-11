@@ -18,16 +18,16 @@ import org.xml.sax.SAXException;
 import com.hp.hpl.jena.graph.Node;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractAttributeMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractRelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IAttributeMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.IParseable;
-import es.upm.fi.dia.oeg.obdi.wrapper.IPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.IParseable;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractRelationMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants.MappingType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
@@ -36,7 +36,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ODatabaseMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
 
-public class R2OMappingDocument implements IMappingDocument {
+public class R2OMappingDocument extends AbstractMappingDocument {
 	private static Logger logger = Logger.getLogger(R2OMappingDocument.class);
 	
 	private String mappingDocumentID;

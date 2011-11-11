@@ -1,6 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
 
 public class InvalidViewException extends ParseException {
 

@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.w3c.dom.Element;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 
 public class R2OConstantRestriction extends R2ORestriction {
@@ -44,7 +44,7 @@ public class R2OConstantRestriction extends R2ORestriction {
 			} else if(dataType.equalsIgnoreCase(R2OConstants.DATATYPE_DATE)) {
 				this.dateFormat = element.getAttribute(R2OConstants.DATE_FORMAT_ATTRIBUTE);
 				 
-				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+				DateFormat df;
 				if(dateFormat != null && !dateFormat.equals("")) {
 					df = new SimpleDateFormat(dateFormat);
 				} else {

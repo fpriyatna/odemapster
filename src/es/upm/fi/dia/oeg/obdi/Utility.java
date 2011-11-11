@@ -31,6 +31,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.MonetDBColumn;
@@ -39,7 +40,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConstantRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
@@ -152,11 +152,11 @@ public class Utility {
 			long start = System.currentTimeMillis();
 			ResultSet result = stmt.executeQuery(query);
 			long end = System.currentTimeMillis();
-			logger.info("SQL execution time was "+(end-start)+" ms.");
+			logger.debug("SQL execution time was "+(end-start)+" ms.");
 
 			return result;
 		} catch(SQLException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			logger.error("Error executing query, error message = "+ e.getMessage());
 			throw e;
 		}
@@ -178,7 +178,7 @@ public class Utility {
 			prop.put("password", password);
 			prop.put("autoReconnect", "true");
 			Class.forName(driverString);
-			logger.info("Opening database connection.");
+			logger.debug("Opening database connection.");
 			return DriverManager.getConnection(url, prop);
 
 		} catch (Exception e) {
@@ -247,26 +247,54 @@ public class Utility {
 		Collection<ZExp> operands = zExpression.getOperands();
 		for(ZExp operand : operands) {
 			if(operand instanceof ZConstant) {
+				//oldName = benchmark.dbo.product
+				//zExpression = benchmark.dbo.producttype.nr
+				
 				ZConstant newOperandConstant;
 
 				ZConstant operandConstant = (ZConstant) operand;
-
+				
 				if(operandConstant.getType() == ZConstant.COLUMNNAME) {
 					String operandConstantValue = operandConstant.getValue();
 					operandConstantValue = operandConstantValue.replaceAll("\'", "");
-					if(operandConstantValue.startsWith(oldName + ".") == matchCondition) {
-						//be careful here when passing sql server column names that have 4 elements 
-						//(db.schema.table.column)
-						ZAliasedName oldColumnName = new ZAliasedName(
-								operandConstantValue, ZAliasedName.FORM_COLUMN);
-						String newColumnName = newName + "." + oldColumnName.getColumn();
-						//newOperandConstant = new ZConstant(newColumnName, operandConstant.getType());
-						newOperandConstant = Utility.constructDatabaseColumn(newColumnName);
-					} else if(operandConstantValue.equalsIgnoreCase(oldName)) {
-						newOperandConstant = Utility.constructDatabaseColumn(newName);
+					SQLSelectItem oldSelectItem = new SQLSelectItem(operandConstantValue);
+					if(oldSelectItem.getSchema() == null && oldSelectItem.getTable() == null) {
+						if(operandConstantValue.equalsIgnoreCase(oldName) == matchCondition) {
+							newOperandConstant = Utility.constructDatabaseColumn(newName);
+						} else {
+							newOperandConstant = operandConstant;
+						}
+					} else if(oldSelectItem.getSchema() != null && oldSelectItem.getTable() != null) {
+						String oldTableName = oldSelectItem.getSchema() + "." + oldSelectItem.getTable();
+						
+						if(oldTableName.equalsIgnoreCase(oldName) == matchCondition) {
+							//String newOperandConstantValue = operandConstantValue.replaceAll(oldName, newName);
+							//newOperandConstant = Utility.constructDatabaseColumn(newOperandConstantValue);
+							newOperandConstant = Utility.constructDatabaseColumn(newName + "." + oldSelectItem.getColumn());
+						} else {
+							newOperandConstant = operandConstant;
+						}
+						
 					} else {
 						newOperandConstant = operandConstant;
 					}
+					
+					
+					
+//					ZAliasedName oldColumnName = new ZAliasedName(
+//							operandConstantValue, ZAliasedName.FORM_COLUMN);
+//					if(operandConstantValue.startsWith(oldName + ".") == matchCondition) {
+//						//be careful here when passing sql server column names that have 4 elements 
+//						//(db.schema.table.column)
+//						String newColumnName = newName + "." + oldColumnName.getColumn();
+//						//newOperandConstant = new ZConstant(newColumnName, operandConstant.getType());
+//						newOperandConstant = Utility.constructDatabaseColumn(newColumnName);
+//					} else if(operandConstantValue.equalsIgnoreCase(oldName)) {
+//						newOperandConstant = Utility.constructDatabaseColumn(newName);
+//					} else {
+//						newOperandConstant = operandConstant;
+//					}
+					
 				} else {
 					newOperandConstant = operandConstant;					
 				}
@@ -360,6 +388,10 @@ public class Utility {
 
 	}
 
+	public static ZConstant constructDatabaseColumn(String schema, String table, String column) {
+		return Utility.constructDatabaseColumn(schema + "." + table + "." + column);
+	}
+
 	public static String readFileAsString(String filePath) throws IOException{
 		byte[] buffer = new byte[(int) new File(filePath).length()];
 		BufferedInputStream f = null;
@@ -430,12 +462,42 @@ public class Utility {
 		return result;
 	}
 
+	public static String removeStrangeChars(String someString) {
+		someString = someString.replaceAll("Ñ", "N");
+		someString = someString.replaceAll("ñ", "n");
+		someString = someString.replaceAll("á", "a");
+		someString = someString.replaceAll("Á", "A");
+		someString = someString.replaceAll("ª", "a");
+		someString = someString.replaceAll("ã", "a");
+		someString = someString.replaceAll("Ã", "A");
+		
+		someString = someString.replaceAll("é", "e");
+		someString = someString.replaceAll("É", "E");
+		someString = someString.replaceAll("ë", "e");
+		someString = someString.replaceAll("Ë", "E");
+		someString = someString.replaceAll("í", "i");
+		someString = someString.replaceAll("Í", "I");
+		someString = someString.replaceAll("ï", "i");
+		someString = someString.replaceAll("Ï", "I");
+		someString = someString.replaceAll("ó", "o");
+		someString = someString.replaceAll("Ó", "O");
+		someString = someString.replaceAll("ö", "o");
+		someString = someString.replaceAll("Ö", "O");
+		someString = someString.replaceAll("ú", "u");
+		someString = someString.replaceAll("Ú", "U");
+		someString = someString.replaceAll("ü", "u");
+		someString = someString.replaceAll("Ü", "U");
+		
+		return someString;
+	}
+	
 	private static String preEncoding(String uri) {
 		uri = uri.replaceAll("\\(", "_");
 		uri = uri.replaceAll("\\)", "_");
 		uri = uri.replaceAll("\\[", "_");
 		uri = uri.replaceAll("\\]", "_");
 		//			uri = uri.replaceAll("\\.", "_");
+		
 		uri = uri.replaceAll("\n", " ");
 		uri = uri.replaceAll("\\n", " ");
 		uri = uri.replaceAll("\t", " ");
@@ -445,6 +507,12 @@ public class Utility {
 		uri = uri.replaceAll("\\\\", "%5C");
 		uri = uri.replaceAll("\\b\\s{2,}\\b", " ");
 
+		
+
+		uri = Utility.removeStrangeChars(uri);
+		
+		
+		
 		return uri;
 
 	}
@@ -452,13 +520,16 @@ public class Utility {
 	private static String postEncoding(String uri) {
 		uri = uri.replaceAll(",", "%2C");
 		uri = uri.replaceAll("&", "%26");
+		//uri = uri.replaceAll("&", "and");
 		uri = uri.replaceAll("'", "%27");
 		uri = uri.replaceAll(" ", "%20");
 		uri = uri.replaceAll("_{2,}+", "_");
-
 		uri = uri.replaceAll("%23", "#");
-		uri = uri.replaceAll("&", "and");
-
+		
+		uri = uri.replaceAll("%20", "_");
+		
+		//uri = uri.toLowerCase();
+		
 		return uri;
 	}
 
@@ -471,6 +542,10 @@ public class Utility {
 			uri = new URI(null, uri, null).toASCIIString();
 
 			uri = Utility.postEncoding(uri);
+			
+			if(uri.equals("http://edu.linkeddata.es/investigacionUPM/resource/DateTimeDescription///")) {
+				logger.debug("uri");
+			}
 		} catch(Exception e) {
 			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
 			throw e;
@@ -576,6 +651,25 @@ public class Utility {
 
 		return result.toString();
 	}
+	
+	//Creates a quad
+	public static String createQuad(String subject, String predicate, String object, String graph)
+	{
+		StringBuffer result = new StringBuffer();
+		result.append(subject);
+		result.append(" ");
+		result.append(predicate);
+		result.append(" ");
+		result.append(object);
+		if(graph != null) {
+			result.append(" ");
+			result.append(graph);
+		}
+		result.append(" .\n");
+
+
+		return result.toString();
+	}
 
 	//Create Literal
 	public static String createLiteral(String value)
@@ -626,11 +720,16 @@ public class Utility {
 	//Create URIREF from URI
 	public static String createURIref(String uri)
 	{
-		StringBuffer result = new StringBuffer();
-		result.append("<");
-		result.append(uri);
-		result.append(">");
-		return result.toString();
+		if(uri == null) {
+			return null;
+		} else {
+			StringBuffer result = new StringBuffer();
+			result.append("<");
+			result.append(uri);
+			result.append(">");
+			return result.toString();			
+		}
+
 	}
 
 	//Create blank node from id
@@ -662,19 +761,38 @@ public class Utility {
 	public static String getValueWithoutAlias(ZSelectItem selectItem) {
 		String result;
 
+		String selectItemString = selectItem.toString();
 		String alias = selectItem.getAlias();
-		selectItem.setAlias("");
-		result = selectItem.toString();
-
-		if(alias != null) {
+		if(alias == null) {
+			result = selectItemString;
+		} else {
+			selectItem.setAlias("");
+			//result = selectItemString.substring(0, selectItemString.length() - alias.length());
+			result = selectItem.toString();
 			selectItem.setAlias(alias);
 		}
+		
+//		selectItem.setAlias("");
+//		result = selectItem.toString();
+//
+//		
+//		if(alias != null) {
+//			selectItem.setAlias(alias);
+//		} else {
+//			if(selectItem.isExpression()) {
+//				ZExp selectItemExpression = selectItem.getExpression();
+//				selectItem = new R2OSelectItem();
+//				selectItem.setExpression(selectItemExpression);
+//			} else {
+//				selectItem = new R2OSelectItem(result);
+//			}
+//		}
 
 		return result.trim();
 	}
 
-	public static Collection<R2OSelectItem> getSelectItemByColumnName(
-			String columnName, Collection<R2OSelectItem> selectItems) {
+	public static Collection<SQLSelectItem> getSelectItemByColumnName(
+			String columnName, Collection<SQLSelectItem> selectItems) {
 		return null;
 	}
 

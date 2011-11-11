@@ -12,12 +12,12 @@ import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZUtils;
 import es.upm.fi.dia.oeg.obdi.Utility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
@@ -45,10 +45,10 @@ public class R2OConceptMappingUnfolder {
 
 
 
-	public R2OQuery unfoldConceptMapping() throws Exception {
+	public SQLQuery unfoldConceptMapping() throws Exception {
 		logger.debug("Unfolding concept mapping : " + conceptMapping.getConceptName());
 
-		R2OQuery cmQuery = new R2OQuery();
+		SQLQuery cmQuery = new SQLQuery();
 		//ZUtils.addCustomFunction("concat", 2);
 		cmQuery.addFrom(new Vector<String>());
 		cmQuery.addSelect(new Vector<ZSelectItem>());
@@ -160,7 +160,7 @@ public class R2OConceptMappingUnfolder {
 			}			
 		}
 
-		//logger.info("cmQuery2 = " + cmQuery);
+		logger.debug("cmQuery = " + cmQuery);
 		return cmQuery;
 
 	}

@@ -14,60 +14,70 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2SQLTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2ORelationMappingUnfolder;
 
 public class BetaGenerator1 extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(BetaGenerator1.class);
 
-	public BetaGenerator1(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
+	public BetaGenerator1(Map<Node, Collection<AbstractConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 	}
 
 
 	@Override
-	ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
+	protected ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
 		Node subject = tp.getSubject();
-		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
-		R2OConceptMapping cm = cms.iterator().next();
+		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
 		return this.calculateBetaCM(tp, pos, cm);
 	}
 
 
 	@Override
-	R2OSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm)
+	public SQLSelectItem calculateBetaCM(Triple tp, POS pos, AbstractConceptMapping cm)
 	throws Exception {
 		Node subject = tp.getSubject();
 		Node object = tp.getObject();
 		String predicateURI = tp.getPredicate().getURI();;
-		R2OSelectItem selectItem = null;
+		SQLSelectItem selectItem = null;
 
 
 		if(pos == POS.sub) {
-			String cmURIAlias = cm.generateURIAlias();
-			selectItem = new R2OSelectItem(cmURIAlias);
+			String cmURIAlias = ((R2OConceptMapping) cm).generateURIAlias();
+			//selectItem = new R2OSelectItem(cmURIAlias);
+			
+			ZConstant cmURIAliasConstant = new ZConstant(cmURIAlias, ZConstant.COLUMNNAME);
+			selectItem = new SQLSelectItem();
+			selectItem.setExpression(cmURIAliasConstant);
+
+			
+			
 		} else if(pos == POS.pre) {
 			ZConstant predicateURIConstant = new ZConstant(predicateURI, ZConstant.STRING);
-			selectItem = new R2OSelectItem();
+			selectItem = new SQLSelectItem();
 			selectItem.setExpression(predicateURIConstant);
 		} else if(pos == POS.obj) {
 			if(RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-				ZConstant conceptNameConstant = new ZConstant(cm.getConceptName(), ZConstant.STRING);
-				selectItem = new R2OSelectItem();
+				ZConstant conceptNameConstant = new ZConstant(cm.getConceptName()
+						, ZConstant.STRING);
+				selectItem = new SQLSelectItem();
 				selectItem.setExpression(conceptNameConstant);
 			} else {
-				List<R2OPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
+				List<R2OPropertyMapping> pms = ((R2OConceptMapping) cm).getPropertyMappings(predicateURI);
 				if(pms != null) {
 					for(R2OPropertyMapping pm : pms) {
 						if(pm instanceof R2OAttributeMapping) {
@@ -99,17 +109,17 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 									String selectorAfterTranformAlias = selector.generateAfterTransformAlias();
 									//selectItem = new R2OSelectItem(selectorAfterTranformAlias);
 									if(object.isVariable()) {
-										selectItem = new R2OSelectItem(selectorAfterTranformAlias);
+										selectItem = new SQLSelectItem(selectorAfterTranformAlias);
 									} else if(object.isLiteral()) {
-										selectItem = new R2OSelectItem();
+										selectItem = new SQLSelectItem();
 										ZExp exp = new ZConstant(selectorAfterTranformAlias, ZConstant.STRING);
 										selectItem.setExpression(exp);
 									} else if(object.isURI()) {
-										selectItem = new R2OSelectItem();
+										selectItem = new SQLSelectItem();
 										ZExp exp = new ZConstant(selectorAfterTranformAlias, ZConstant.STRING);
 										selectItem.setExpression(exp);
 									} else {
-										selectItem =  new R2OSelectItem(selectorAfterTranformAlias);
+										selectItem =  new SQLSelectItem(selectorAfterTranformAlias);
 									}
 									
 								}
@@ -146,15 +156,15 @@ public class BetaGenerator1 extends AbstractBetaGenerator {
 								String rangeURIAlias = rm.generateRangeURIAlias();
 								//selectItem = new R2OSelectItem(rangeURIAlias);
 								if(object.isVariable()) {
-									selectItem = new R2OSelectItem(rangeURIAlias);
+									selectItem = new SQLSelectItem(rangeURIAlias);
 								} else if(object.isLiteral()) {
-									selectItem = new R2OSelectItem();
+									selectItem = new SQLSelectItem();
 									ZExp exp = new ZConstant(rangeURIAlias, ZConstant.STRING);
 									selectItem.setExpression(exp);
 								} else if(object.isURI()) {
-									selectItem = new R2OSelectItem(rangeURIAlias);
+									selectItem = new SQLSelectItem(rangeURIAlias);
 								} else {
-									selectItem =  new R2OSelectItem(rangeURIAlias);
+									selectItem =  new SQLSelectItem(rangeURIAlias);
 								}
 							} catch(Exception e) {
 								String newErrorMessage = e.getMessage() + " while processing relation mapping " + pm.getName();

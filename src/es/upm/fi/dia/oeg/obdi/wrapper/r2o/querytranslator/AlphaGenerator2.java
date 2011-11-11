@@ -14,6 +14,8 @@ import Zql.ZSelectItem;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
@@ -24,17 +26,17 @@ public class AlphaGenerator2 extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(AlphaGenerator2.class);
 
 
-	public AlphaGenerator2(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
+	public AlphaGenerator2(Map<Node, Collection<AbstractConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 	}
 
 	@Override
-	ZQuery calculateAlpha(Triple tp) throws Exception {
+	protected ZQuery calculateAlpha(Triple tp) throws Exception {
 		Node subject = tp.getSubject();
 
-		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
-		R2OConceptMapping cm = cms.iterator().next();
+		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
 		R2ODatabaseTable databaseTable = cm.getHasTable();
 		ZQuery query = new ZQuery();
 
@@ -65,19 +67,19 @@ public class AlphaGenerator2 extends AbstractAlphaGenerator {
 	}
 
 	@Override
-	ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception {
+	protected ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception {
+	public R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
+	public R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
 			throws Exception {
 		// TODO Auto-generated method stub
 		return null;

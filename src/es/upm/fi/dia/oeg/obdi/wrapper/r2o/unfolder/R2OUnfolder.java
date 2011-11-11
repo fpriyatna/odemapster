@@ -8,15 +8,15 @@ import org.apache.log4j.Logger;
 
 import Zql.ZQuery;
 import Zql.ZUtils;
-import es.upm.fi.dia.oeg.obdi.ILogicalQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.ILogicalQuery;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 
 
@@ -26,7 +26,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 	private static Logger logger = Logger.getLogger(R2OUnfolder.class);
 
 	private R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	private R2OConfigurationProperties configurationProperties;
+	private ConfigurationProperties configurationProperties;
 
 	public R2OUnfolder(R2OMappingDocument r2oMappingDocument) {
 
@@ -35,7 +35,7 @@ public class R2OUnfolder extends AbstractUnfolder {
 
 	public R2OUnfolder(R2OMappingDocument r2oMappingDocument
 			, R2OPrimitiveOperationsProperties primitiveOperationsProperties
-			, R2OConfigurationProperties configurationProperties) {
+			, ConfigurationProperties configurationProperties) {
 		this(r2oMappingDocument);
 		this.primitiveOperationsProperties = primitiveOperationsProperties;
 		this.configurationProperties = configurationProperties;
@@ -213,13 +213,13 @@ public class R2OUnfolder extends AbstractUnfolder {
 
 	@Override
 	public Set<String> unfold(Set<ILogicalQuery> logicalQueries,
-			IMappingDocument mapping) throws Exception {
+			AbstractMappingDocument mapping) throws Exception {
 
 		throw new Exception("Not implemented yet!");
 	}
 
 	@Override
-	protected String unfold(IMappingDocument mapping) throws Exception {
+	protected Set<String> unfold(AbstractMappingDocument mapping) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -12,9 +12,9 @@ import org.w3c.dom.NodeList;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;

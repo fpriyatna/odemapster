@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper;
+package es.upm.fi.dia.oeg.obdi.core.engine;
 
 public class ParseException extends Exception {
 

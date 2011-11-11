@@ -2,9 +2,9 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping;
 
 import org.w3c.dom.Element;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants.MappingType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 

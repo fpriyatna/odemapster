@@ -13,6 +13,9 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
@@ -21,26 +24,25 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2SQLTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2ORelationMappingUnfolder;
 
 public class BetaGenerator2 extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(BetaGenerator2.class);
 
-	public BetaGenerator2(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
+	public BetaGenerator2(Map<Node, Collection<AbstractConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 		// TODO Auto-generated constructor stub
 	}	
 
 	@Override
-	ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
+	protected ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
 		Node subject = tp.getSubject();
 		String predicateURI = tp.getPredicate().getURI();
 		ZSelectItem selectItem = null;
 
-		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
-		R2OConceptMapping cm = cms.iterator().next();
+		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
 
 		if(pos == POS.sub) {
 			Collection<ZSelectItem> selectItems = cm.getURIAs().getSelectItems();
@@ -137,7 +139,7 @@ public class BetaGenerator2 extends AbstractBetaGenerator {
 	}
 
 	@Override
-	ZSelectItem calculateBetaCM(Triple tp, POS pos, R2OConceptMapping cm)
+	public ZSelectItem calculateBetaCM(Triple tp, POS pos, AbstractConceptMapping cm)
 			throws Exception {
 		// TODO Auto-generated method stub
 		return null;

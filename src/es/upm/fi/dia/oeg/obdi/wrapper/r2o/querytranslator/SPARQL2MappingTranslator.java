@@ -18,8 +18,8 @@ import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.TypeInferrer;
@@ -42,7 +42,7 @@ public class SPARQL2MappingTranslator {
 
 	private R2OMappingDocument mappingDocument;
 
-	private Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping;
+	private Map<Node, Collection<AbstractConceptMapping>> mapNodeConceptMapping;
 
 
 	public SPARQL2MappingTranslator(R2OMappingDocument mappingDocument) {
@@ -70,7 +70,7 @@ public class SPARQL2MappingTranslator {
 		Op op = Algebra.compile(query) ;
 		Op opQueryPattern = Algebra.compile(query.getQueryPattern());
 		//to get a type of each node,
-		this.mapNodeConceptMapping = new HashMap<Node, Collection<R2OConceptMapping>>();
+		this.mapNodeConceptMapping = new HashMap<Node, Collection<AbstractConceptMapping>>();
 		TranslatorUtility translatorUtility = new TranslatorUtility(mappingDocument);
 		TypeInferrer typeInferrer = new TypeInferrer(this.mappingDocument);
 		this.mapNodeConceptMapping = typeInferrer.infer(opQueryPattern);
@@ -243,8 +243,8 @@ public class SPARQL2MappingTranslator {
 
 	private R2OConceptMapping processSubject(Node subject) throws R2OTranslationException {
 		R2OConceptMapping result = null;
-		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
-		R2OConceptMapping cm = cms.iterator().next();
+		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
 
 		if(subject.isVariable()) {
 			if(this.mapNodeConceptMapping.get(subject) != null) {
@@ -470,7 +470,7 @@ public class SPARQL2MappingTranslator {
 		return rm2;
 	}
 
-	public Map<Node, Collection<R2OConceptMapping>> getMapSubjectMapping() {
+	public Map<Node, Collection<AbstractConceptMapping>> getMapSubjectMapping() {
 		return mapNodeConceptMapping;
 	}
 

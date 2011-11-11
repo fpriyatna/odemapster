@@ -7,8 +7,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractParser;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractParser;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 
 public class R2OParser extends AbstractParser {
@@ -16,7 +16,7 @@ public class R2OParser extends AbstractParser {
 	
 	
 	@Override
-	public IMappingDocument parse(Object mappingResource) throws Exception {
+	public AbstractMappingDocument parse(Object mappingResource) throws Exception {
 		long startParsingR2OFile = System.currentTimeMillis();
 		
 		String fileAbsolutePath = (String) mappingResource;

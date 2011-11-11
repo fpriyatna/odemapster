@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import Zql.ZQuery;
 import Zql.ZSelectItem;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
@@ -30,7 +30,7 @@ public class R2OPropertyMappingUnfolder {
 	}
 
 
-	public void unfold(R2OQuery cmQuery) 
+	public void unfold(SQLQuery cmQuery) 
 	throws AttributeMappingUnfolderException, RelationMappingUnfolderException 
 	{
 		if(r2oPropertyMapping instanceof R2OAttributeMapping) {

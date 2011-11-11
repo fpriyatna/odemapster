@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 import Zql.ZSelectItem;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.ParseException;
+import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
@@ -80,7 +80,8 @@ public class R2OConditionalExpression extends R2OExpression implements Cloneable
 		result.addAll(conditionSelectItems);
 	} else {
 		for(R2OConditionalExpression condExpr : this.condExprs) {
-			result.addAll(condExpr.getSelectItems());
+			Collection<ZSelectItem> condExprsSelectItems = condExpr.getSelectItems();
+			result.addAll(condExprsSelectItems);
 		}			
 	}
 

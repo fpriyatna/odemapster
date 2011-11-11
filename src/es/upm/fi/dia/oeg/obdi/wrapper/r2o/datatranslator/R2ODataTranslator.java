@@ -1,46 +1,29 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.db.DBConnection;
-import com.hp.hpl.jena.db.IDBConnection;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.QueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
+import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidRestrictionType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.AbstractMaterializer;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer.RDFXMLMaterializer;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OCondition;
@@ -52,7 +35,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSQLRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationRestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.RestrictionValue;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
@@ -60,15 +42,17 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
-public abstract class R2ODataTranslator {
+public class R2ODataTranslator extends AbstractDataTranslator {
 	private static Logger logger = Logger.getLogger(R2ODataTranslator.class);
 	private AbstractMaterializer materializer;
 
-
-	public void processMappingDocument(R2OMappingDocument mappingDocument) throws Exception {
+	@Override
+	public void processMappingDocument(AbstractMappingDocument abstractMappingDocument) throws Exception {
+		R2OMappingDocument mappingDocument = (R2OMappingDocument) abstractMappingDocument;
 		Collection<AbstractConceptMapping> conceptMappings = 
 			mappingDocument.getConceptMappings();
 		for(AbstractConceptMapping conceptMapping : conceptMappings) {
+			ResultSet rs = null;
 			try {
 				//unfold mapped concepts
 				logger.info("Unfolding concept " + conceptMapping.getConceptName());
@@ -77,16 +61,9 @@ public abstract class R2ODataTranslator {
 				String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
 				if(sqlQuery != null) {
 					//evaluate query
-					ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, R2ORunner.configurationProperties.getConn());
-
+					rs = QueryEvaluator.evaluateQuery(sqlQuery, R2ORunner.configurationProperties.getConn());
 					this.processConceptMapping(rs, conceptMapping);
-
-					//cleaning up
-					Utility.closeStatement(rs.getStatement());
-					Utility.closeRecordSet(rs);					
 				}
-
-
 			} catch(SQLException e) {
 				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
 				logger.error(errorMessage);				
@@ -99,7 +76,11 @@ public abstract class R2ODataTranslator {
 				//e.printStackTrace();
 				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
 				logger.error(errorMessage);
-				throw e;
+				//throw e;
+			} finally {
+				//cleaning up
+				Utility.closeStatement(rs.getStatement());
+				Utility.closeRecordSet(rs);					
 			}
 
 		}
@@ -239,7 +220,7 @@ public abstract class R2ODataTranslator {
 		} else {
 			isBlankNodeSubject = true;
 		}
-		this.materializer.materializeRDFTypeTriple(subjectURI, conceptName, isBlankNodeSubject);
+		this.materializer.materializeRDFTypeTriple(subjectURI, conceptName, isBlankNodeSubject, null);
 		
 	}
 
@@ -254,6 +235,9 @@ public abstract class R2ODataTranslator {
 			ResultSet rs, R2OTransformationExpression transformationExpression) throws PostProcessorException, InvalidRestrictionType, SQLException {
 		if(transformationExpression.getOperId().equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_SUBSTRING)) {
 			return this.processSubstringTransformationExpression(rs, transformationExpression);
+		} else if(transformationExpression.getOperId().equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CONCAT)) {
+			String result = this.processConcatTransformationExpression(rs, transformationExpression);
+			return result;
 		} else if(transformationExpression.getOperId().equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CUSTOM_TRANSFORMATION)) {
 			List<Object> arguments = new ArrayList<Object>();
 			String functionName = transformationExpression.getFunctionName();
@@ -271,8 +255,6 @@ public abstract class R2ODataTranslator {
 		}
 	}
 
-	protected abstract Object processCustomFunctionTransformationExpression(List<Object> arguments) 
-	throws PostProcessorException;
 
 	private String processSubstringTransformationExpression(
 			ResultSet rs, R2OTransformationExpression transformationExpression) throws PostProcessorException, InvalidRestrictionType, SQLException {
@@ -284,6 +266,17 @@ public abstract class R2ODataTranslator {
 		return argument0.substring(beginIndex, endIndex);
 	}
 
+	private String processConcatTransformationExpression(
+			ResultSet rs, R2OTransformationExpression transformationExpression) throws PostProcessorException, InvalidRestrictionType, SQLException {
+		String result = "";
+		List<R2OArgumentRestriction> argumentRestrictions = transformationExpression.getArgRestrictions();
+		for(R2OArgumentRestriction ar : argumentRestrictions) {
+			result += this.processRestriction(ar.getRestriction(), rs);
+		}
+
+		return result;
+	}
+	
 	private void processPropertyMappings(R2OConceptMapping r2oConceptMapping, ResultSet rs) throws Exception {
 		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
 		if(propertyMappings != null) {
@@ -357,7 +350,9 @@ public abstract class R2ODataTranslator {
 			}
 		}
 
-		this.materializer.materializeDataPropertyTriple(predicateName, propVal, datatype, lang);
+
+		
+		this.materializer.materializeDataPropertyTriple(predicateName, propVal, datatype, lang, null);
 	}
 
 
@@ -376,7 +371,7 @@ public abstract class R2ODataTranslator {
 					isBlankNodeObject = true;
 				}
 				
-				this.materializer.materializeObjectPropertyTriple(predicateName, rangeURI, isBlankNodeObject);
+				this.materializer.materializeObjectPropertyTriple(predicateName, rangeURI, isBlankNodeObject, null);
 			}			
 		} 
 
@@ -436,7 +431,7 @@ public abstract class R2ODataTranslator {
 								isBlankNodeObject = true;
 							}
 							
-							this.materializer.materializeObjectPropertyTriple(predicateName, propValString, isBlankNodeObject);
+							this.materializer.materializeObjectPropertyTriple(predicateName, propValString, isBlankNodeObject, null);
 							
 
 
@@ -943,6 +938,21 @@ public abstract class R2ODataTranslator {
 	public void setMaterializer(AbstractMaterializer materializer) {
 		this.materializer = materializer;
 	}
+
+	@Override
+	protected Object processCustomFunctionTransformationExpression(
+			Object argument) throws PostProcessorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	protected Object processCustomFunctionTransformationExpression(
+			List<Object> arguments) throws PostProcessorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 
 

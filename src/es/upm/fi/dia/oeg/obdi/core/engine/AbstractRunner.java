@@ -1,15 +1,10 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
+package es.upm.fi.dia.oeg.obdi.core.engine;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,10 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,64 +29,39 @@ import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractParser;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.ModelWriter;
-import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.materializer.NTripleMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.materializer.RDFXMLMaterializer;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2MappingTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidConfigurationPropertiesException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
-public class R2ORunner extends AbstractRunner {
+public abstract class AbstractRunner {
+	private static Logger logger = Logger.getLogger(AbstractRunner.class);
 	
-	public R2ORunner() {
-		this.dataTranslator = new R2ODataTranslator();
-		this.parser = new R2OParser();
-	}
-	
-	private static Logger logger = Logger.getLogger(R2ORunner.class);
-	private static final String PRIMITIVE_OPERATIONS_FILE = "primitiveOperations.cfg";
-	//public static ConfigurationProperties configurationProperties;
-	public static R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	
+	protected AbstractDataTranslator dataTranslator;
+	protected AbstractParser parser;
+	protected AbstractQueryTranslator queryTranslator;
+	public static ConfigurationProperties configurationProperties;
 	
 
+	public AbstractRunner() {}
 
-	private R2OPrimitiveOperationsProperties loadPrimitiveOperationsFile(String primitiveOperationsFile) throws Exception{
-		logger.debug("Loading R2O operations file : " + primitiveOperationsFile);
-		try {
-			R2OPrimitiveOperationsProperties primitiveOperationsProperties = 
-				new R2OPrimitiveOperationsProperties(primitiveOperationsFile);
-			return primitiveOperationsProperties;
-		} catch(Exception e) {
-			logger.error("Error loading primitive operations file : " + PRIMITIVE_OPERATIONS_FILE);
-			throw e;
-		}
+	public AbstractRunner(AbstractDataTranslator dataTranslator,
+			AbstractParser parser, AbstractQueryTranslator queryTranslator) {
+		super();
+		this.dataTranslator = dataTranslator;
+		this.parser = parser;
+		this.queryTranslator = queryTranslator;
 	}
 
-	private void materializeSPARQLSolution(String outputFileName, String sql) {
-		try {
-
-		} catch(Exception e) {
-			e.printStackTrace();
-			logger.error("Error in materializing sparql solution.");
-		}
-		
-	}
-	
-
-	
-	public String run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
+	public String run(String mappingDirectory, String configurationFile)
+			throws Exception {
 		String status = null;
 		
 		ZUtils.addCustomFunction("concat", 2);
@@ -103,40 +71,27 @@ public class R2ORunner extends AbstractRunner {
 		ZUtils.addCustomFunction("abs", 1);
 		ZUtils.addCustomFunction("lower", 1);
 		
-		//loading operations file
-		R2ORunner.primitiveOperationsProperties = 
-			this.loadPrimitiveOperationsFile(PRIMITIVE_OPERATIONS_FILE);
 
-		//Loading R2O configuration file
-		R2ORunner.configurationProperties = 
-			this.loadConfigurationFile(mappingDirectory, r2oConfigurationFile);
+		//Loading configuration file
+		AbstractRunner.configurationProperties = 
+			this.loadConfigurationFile(mappingDirectory, configurationFile);
 
 		//loading ontology file
 		String ontologyFilePath = configurationProperties.getOntologyFilePath();
 		
-		//parsing r2o mapping document
-		R2OParser parser = new R2OParser(); 
-		String r2oMappingDocumentPath = configurationProperties.getR2oFilePath();
-		R2OMappingDocument originalMappingDocument = 
-			(R2OMappingDocument) parser.parse(r2oMappingDocumentPath);
-		
-		//test the parsing result
-		parser.testParseResult(configurationProperties.getR2oFilePath(), originalMappingDocument);
+		//parsing mapping document
+		String mappingDocumentPath = configurationProperties.getR2oFilePath();
+		AbstractMappingDocument originalMappingDocument = 
+			parser.parse(mappingDocumentPath);
 
+		//set output file
 		String outputFileName = configurationProperties.getOutputFilePath();
 
-		
 		//parsing sparql file path
 		String queryFilePath = configurationProperties.getQueryFilePath();
 //		R2OMappingDocument translationResultMappingDocument = null;
-		Collection<R2OMappingDocument> translationResultMappingDocuments = new ArrayList<R2OMappingDocument>();
-		
-		if(queryFilePath == null || queryFilePath.equals("")) {
-//			translationResultMappingDocument = originalMappingDocument;
-			translationResultMappingDocuments.add(originalMappingDocument);
-			
 
-			
+		if(queryFilePath == null || queryFilePath.equals("")) {
 			this.materializeMappingDocuments(outputFileName, originalMappingDocument);
 		} else {
 			//process SPARQL file
@@ -151,7 +106,7 @@ public class R2ORunner extends AbstractRunner {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
 				Collection <String> mappedOntologyElements = 
-					MappingsExtractor.getMappedPredicatesFromR2O(r2oMappingDocumentPath);
+					MappingsExtractor.getMappedPredicatesFromR2O(mappingDocumentPath);
 				String rewritterWrapperMode = RewriterWrapper.fullMode;
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
@@ -168,9 +123,8 @@ public class R2ORunner extends AbstractRunner {
 //				new SPARQL2MappingTranslator(originalMappingDocument);
 			
 			//translate sparql into sql
-			R2OQueryTranslator translator = new R2OQueryTranslator(originalMappingDocument);
-			translator.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());
-			translator.setSubQueryElimination(this.configurationProperties.isSubQueryElimination());
+			this.queryTranslator.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());
+			this.queryTranslator.setSubQueryElimination(this.configurationProperties.isSubQueryElimination());
 			Document xmlDoc = XMLUtility.createNewXMLDocument();
 			Connection conn = this.configurationProperties.getConn();
 
@@ -188,7 +142,8 @@ public class R2ORunner extends AbstractRunner {
 					
 					
 					logger.debug("query(i) = " + query);
-					String sparql2SQLResult = translator.translate(query).toString();
+					String sparql2SQLResult = 
+							this.queryTranslator.translate(query).toString();
 					logger.debug("sparql2sql = \n" + sparql2SQLResult);
 
 					ResultSet rs = Utility.executeQuery(conn, sparql2SQLResult);
@@ -207,7 +162,7 @@ public class R2ORunner extends AbstractRunner {
 						String headString = "head";
 						headElement = xmlDoc.createElement(headString);
 						rootElement.appendChild(headElement);
-						headElements = super.createHeadElementFromColumnNames(rsmd, xmlDoc);
+						headElements = this.createHeadElementFromColumnNames(rsmd, xmlDoc);
 						headElementsString = new ArrayList<String>();
 						for(Element element : headElements) {
 							headElement.appendChild(element);
@@ -256,30 +211,103 @@ public class R2ORunner extends AbstractRunner {
 		logger.info("**********************DONE****************************\n\n");
 		return status;
 
-
 	}
-	
 
-	
-	
+	protected void materializeMappingDocuments(String outputFileName
+			, AbstractMappingDocument translationResultMappingDocument) throws Exception {
+		long start = System.currentTimeMillis();
+		
+		String rdfLanguage = AbstractRunner.configurationProperties.getRdfLanguage();
+		if(rdfLanguage == null) {
+			rdfLanguage = R2OConstants.OUTPUT_FORMAT_RDFXML;
+		}
+		
+		//preparing output file
+	    OutputStream fileOut = new FileOutputStream (outputFileName);
+	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
+	    String jenaModel = configurationProperties.getJenaMode();
+		Model model = Utility.createJenaModel(jenaModel);
 
-	public static void main(String args[]) {
-		try {
-
-			R2ORunner runner = new R2ORunner();
-			String r2oFile = null;
-			if(args == null || args.length == 0) {
-				r2oFile = "r2o.properties";
+		AbstractMaterializer materializer;
+		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
+			materializer = new NTripleMaterializer(out);
+		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
+			materializer = new RDFXMLMaterializer(out, model);
+		} else {
+			materializer = new NTripleMaterializer(out);
+		}
+		this.dataTranslator.setMaterializer(materializer);
+		
+		//materializing model
+		long startGeneratingModel = System.currentTimeMillis();
+		this.dataTranslator.processMappingDocument(translationResultMappingDocument);
+		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
+			if(model == null) {
+				logger.warn("Model was empty!");
 			} else {
-				r2oFile = args[0];
+				ModelWriter.writeModelStream(model, configurationProperties.getOutputFilePath(), configurationProperties.getRdfLanguage());
+				model.close();				
 			}
-			runner.run(null, r2oFile);
+		}
+		long endGeneratingModel = System.currentTimeMillis();
+		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
+		logger.info("Materializing Mapping Document time was "+(durationGeneratingModel)+" s.");
+
+		//cleaning up
+		try {
+			out.flush(); out.close();
+			fileOut.flush(); fileOut.close();
 		} catch(Exception e) {
-			logger.error("Exception occured!");
-			logger.error("Error message = " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			
 		}
 
-
+		Utility.closeConnection(configurationProperties.getConn(), "r2o wrapper");
+		long end = System.currentTimeMillis();
+		long duration = (end-start) / 1000;
+		logger.info("Execution time was "+(duration)+" s.");
 	}
 
+
+
+	protected ConfigurationProperties loadConfigurationFile(
+			String mappingDirectory, String configurationFile) 
+	throws IOException, SQLException, InvalidConfigurationPropertiesException {
+		logger.debug("Active Directory = " + mappingDirectory);
+		logger.debug("Loading configuration file : " + configurationFile);
+		
+		try {
+			ConfigurationProperties configurationProperties = 
+				new ConfigurationProperties(mappingDirectory, configurationFile);
+			return configurationProperties;
+		} catch(FileNotFoundException e) {
+			logger.error("Can't find properties file : " + configurationFile);
+			throw e;
+		}
+	}
+
+	public void setQueryTranslator(AbstractQueryTranslator queryTranslator) {
+		this.queryTranslator = queryTranslator;
+	}
+	
+	protected List<Element> createHeadElementFromColumnNames(ResultSetMetaData rsmd, Document xmlDoc) throws SQLException {
+		List<Element> result = new ArrayList<Element>();
+		
+		for(int i=0; i<rsmd.getColumnCount(); i++) {
+			Element element = xmlDoc.createElement("variable");
+			element.setAttribute("name", rsmd.getColumnLabel(i+1));
+			result.add(element);
+		}
+		
+		return result;
+	}
+
+	public void setDataTranslator(AbstractDataTranslator dataTranslator) {
+		this.dataTranslator = dataTranslator;
+	}
+
+	public void setParser(AbstractParser parser) {
+		this.parser = parser;
+	}
 }

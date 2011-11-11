@@ -32,11 +32,11 @@ import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
@@ -298,16 +298,17 @@ public class TranslatorUtility {
 		return null;
 	}
 
-	static R2OQuery eliminateSubQuery(Collection<ZSelectItem> newSelectItems, R2OQuery query
+	public static SQLQuery eliminateSubQuery(Collection<ZSelectItem> newSelectItems, SQLQuery query
 			, ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions) throws Exception {
 		Map<String, String> mapOldNewAlias = new HashMap<String, String>();
-		R2OQuery result = null;
+		SQLQuery result = null;
 		
-		Collection<R2OQuery> unionQueries = query.getUnionQueries();
+		Collection<SQLQuery> unionQueries = query.getUnionQueries();
 		if(unionQueries == null) {
 			Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
 			Vector<ZSelectItem>	oldSelectItems = query.getSelect();
 			
+			//SELECT *
 			if(newSelectItems.size() == 1 && newSelectItems.iterator().next().toString().equals(("*"))) {
 				selectItems2 = new Vector<ZSelectItem>(query.getSelect());
 				
@@ -355,10 +356,10 @@ public class TranslatorUtility {
 			result = query;
 		} else {
 			query.setUnionQueries(null);
-			R2OQuery query2 = TranslatorUtility.eliminateSubQuery(newSelectItems, query, newWhereCondition, orderByConditions);
+			SQLQuery query2 = TranslatorUtility.eliminateSubQuery(newSelectItems, query, newWhereCondition, orderByConditions);
 			logger.debug("query2 = \n" + query2);
-			for(R2OQuery unionQuery : unionQueries) {
-				R2OQuery unionQuery2 = TranslatorUtility.eliminateSubQuery(newSelectItems, unionQuery, newWhereCondition, orderByConditions);
+			for(SQLQuery unionQuery : unionQueries) {
+				SQLQuery unionQuery2 = TranslatorUtility.eliminateSubQuery(newSelectItems, unionQuery, newWhereCondition, orderByConditions);
 				logger.debug("unionQuery2 = \n" + unionQuery2);
 				query2.addUnionQuery(unionQuery2);
 			}

@@ -14,9 +14,12 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OColumnRestriction;
@@ -27,7 +30,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseView;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationRestriction;
@@ -40,24 +42,24 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OConceptMappingUnfolder;
 public class AlphaGenerator3 extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(AlphaGenerator3.class);
 
-	public AlphaGenerator3(Map<Node, Collection<R2OConceptMapping>> mapNodeConceptMapping,
+	public AlphaGenerator3(Map<Node, Collection<AbstractConceptMapping>> mapNodeConceptMapping,
 			R2OMappingDocument mappingDocument) {
 		super(mapNodeConceptMapping, mappingDocument);
 	}
 
 	@Override
-	ZQuery calculateAlpha(Triple tp) throws Exception {
+	protected ZQuery calculateAlpha(Triple tp) throws Exception {
 		R2OConceptMapping cmStripped = this.calculateAlphaCM(tp);
 		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(
-				cmStripped, this.mappingDocument);
+				cmStripped, (R2OMappingDocument)this.mappingDocument);
 		return cmu.unfoldConceptMapping();
 	}
 
-	R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception {
+	public R2OConceptMapping calculateAlphaCM(Triple tp) throws Exception {
 		Node subject = tp.getSubject();
 		
-		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject); 
-		R2OConceptMapping cm = cms.iterator().next();
+		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(subject); 
+		R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
 		R2OConceptMapping cmStripped = cm.getStripped();
 
 		//mapping selection for corresponding subject value
@@ -75,19 +77,20 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 		}
 
 
-		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped, this.mappingDocument);
-		R2OQuery cmQuery = cmu.unfoldConceptMapping();
+		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped, 
+				(R2OMappingDocument) this.mappingDocument);
+		SQLQuery cmQuery = cmu.unfoldConceptMapping();
 
 		return cmStripped;
 	}
 
 	@Override
-	R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
+	public R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
 	throws Exception {
 		Triple firstTriple = triples.iterator().next();
 		Node subject = firstTriple.getSubject();
-		Collection<R2OConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
-		R2OConceptMapping cm = cms.iterator().next();
+		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(subject);
+		R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
 		R2OConceptMapping cmStripped = cm.getStripped();
 
 		//mapping selection for corresponding subject value
@@ -155,7 +158,8 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 			R2ORelationMapping rm2;
 			if(object.isURI()) {
 				try {
-					rm2 = TranslatorUtility.processObjectPredicateObjectURI(object, rm, this.mappingDocument);
+					rm2 = TranslatorUtility.processObjectPredicateObjectURI(object, rm
+							, (R2OMappingDocument) this.mappingDocument);
 				} catch(Exception e) {
 					rm2 = rm.clone();
 					logger.error("error processing relation mapping with uri object");
@@ -174,7 +178,7 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 				cm.addRelationMapping(rm2);
 				
 				String rangeConceptName = rm.getToConcept();
-				R2OConceptMapping rangeConceptMapping = 
+				R2OConceptMapping rangeConceptMapping = (R2OConceptMapping)
 						this.mappingDocument.getConceptMappingById(rangeConceptName);
 				R2OTransformationExpression rangeUriAs = rangeConceptMapping.getURIAs();
 				if(URIUtility.isWellDefinedURIExpression(rangeUriAs)) {
@@ -214,10 +218,11 @@ public class AlphaGenerator3 extends AbstractAlphaGenerator {
 
 
 	@Override
-	ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception {
+	protected ZQuery calculateAlphaTB(Collection<Triple> triples) throws Exception {
 		R2OConceptMapping cmStripped = this.calculateAlphaCMTB(triples);
-		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped, this.mappingDocument);
-		R2OQuery cmQuery = cmu.unfoldConceptMapping();
+		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped
+				, (R2OMappingDocument) this.mappingDocument);
+		SQLQuery cmQuery = cmu.unfoldConceptMapping();
 		return cmQuery;
 	}
 

@@ -11,14 +11,14 @@ import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OArgumentRestriction;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ORestriction;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpression;
 
 public class R2OTransformationExpressionUnfolder {
@@ -46,13 +46,13 @@ public class R2OTransformationExpressionUnfolder {
 				ZConstant selectConstant = (ZConstant) selectExpression;
 				if(selectConstant.getType() == ZConstant.COLUMNNAME) {
 					String selectConstantValue = selectConstant.getValue();
-					zSelectItem = new R2OSelectItem(selectConstantValue);
+					zSelectItem = new SQLSelectItem(selectConstantValue);
 				} else {
-					zSelectItem = new R2OSelectItem();
+					zSelectItem = new SQLSelectItem();
 					zSelectItem.setExpression(selectConstant);
 				}
 			} else {
-				zSelectItem = new R2OSelectItem();
+				zSelectItem = new SQLSelectItem();
 				zSelectItem.setExpression(selectExpression);
 			}
 			

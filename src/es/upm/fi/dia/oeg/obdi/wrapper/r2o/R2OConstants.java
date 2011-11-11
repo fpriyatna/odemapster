@@ -180,6 +180,7 @@ public class R2OConstants {
 	public static final String OPTIMIZE_TB = "querytranslator.selfjoinelimination";
 	public static final String SUBQUERY_ELIMINATION = "querytranslator.subqueryelimination";
 	
+	public static final String REMOVE_STRANGE_CHARS_FROM_LITERAL = "literal.removestrangechars";
 	
 	public enum MappingType {
 		CONCEPT, ATTRIBUTE, RELATION

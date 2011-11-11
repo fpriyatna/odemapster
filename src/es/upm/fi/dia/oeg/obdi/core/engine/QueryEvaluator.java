@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper;
+package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

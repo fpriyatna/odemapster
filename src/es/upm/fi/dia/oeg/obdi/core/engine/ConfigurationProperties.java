@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
+package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,11 +10,13 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidConfigurationPropertiesException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 
-public class R2OConfigurationProperties extends Properties {
-	private Logger logger = Logger.getLogger(R2OConfigurationProperties.class);
+public class ConfigurationProperties extends Properties {
+	private Logger logger = Logger.getLogger(ConfigurationProperties.class);
 
-	Connection conn;
+	private Connection conn;
 	private String ontologyFilePath;
 	private String r2oFilePath;
 	private String outputFilePath;
@@ -24,12 +26,19 @@ public class R2OConfigurationProperties extends Properties {
 	private String databaseType;
 	private boolean optimizeTB;
 	private boolean subQueryElimination;
+	private boolean literalRemoveStrangeChars;
+	
+	private String databaseDriver; 
+	private String databaseURL;
+	private String databaseName;
+	private String databaseUser;
+	private String databasePassword;
 	
 	public boolean isOptimizeTB() {
 		return optimizeTB;
 	}
 
-	public R2OConfigurationProperties(
+	public ConfigurationProperties(
 			String r2oConfigurationDir, String r2oConfigurationFile) 
 	throws IOException, InvalidConfigurationPropertiesException, SQLException 
 	{
@@ -74,19 +83,19 @@ public class R2OConfigurationProperties extends Properties {
 		this.conn = null;
 		for(int i=0; i<noOfDatabase;i++) {
 			String propertyDatabaseDriver = R2OConstants.DATABASE_DRIVER_PROP_NAME + "[" + i + "]";
-			String databaseDriver = this.getProperty(propertyDatabaseDriver);
+			this.databaseDriver = this.getProperty(propertyDatabaseDriver);
 
 			String propertyDatabaseURL = R2OConstants.DATABASE_URL_PROP_NAME + "[" + i + "]";
-			String databaseURL = this.getProperty(propertyDatabaseURL);
+			this.databaseURL = this.getProperty(propertyDatabaseURL);
 
 			String propertyDatabaseName= R2OConstants.DATABASE_NAME_PROP_NAME + "[" + i + "]";
-			String databaseName = this.getProperty(propertyDatabaseName);
+			this.databaseName = this.getProperty(propertyDatabaseName);
 
 			String propertyDatabaseUser = R2OConstants.DATABASE_USER_PROP_NAME + "[" + i + "]";
-			String databaseUser = this.getProperty(propertyDatabaseUser);
+			this.databaseUser = this.getProperty(propertyDatabaseUser);
 
 			String propertyDatabasePassword = R2OConstants.DATABASE_PWD_PROP_NAME  + "[" + i + "]";
-			String databasePassword = this.getProperty(propertyDatabasePassword);
+			this.databasePassword = this.getProperty(propertyDatabasePassword);
 
 			String propertyDatabaseType = R2OConstants.DATABASE_TYPE_PROP_NAME  + "[" + i + "]";
 			this.databaseType = this.getProperty(propertyDatabaseType);
@@ -152,6 +161,14 @@ public class R2OConfigurationProperties extends Properties {
 		}
 		logger.debug("Subquery elimination = " + this.subQueryElimination);
 
+		String removeStrangeCharsFromLiteral = this.getProperty(R2OConstants.REMOVE_STRANGE_CHARS_FROM_LITERAL);
+		if(removeStrangeCharsFromLiteral != null) {
+			if(removeStrangeCharsFromLiteral.equalsIgnoreCase("yes") || removeStrangeCharsFromLiteral.equalsIgnoreCase("true")) {
+				this.literalRemoveStrangeChars = true;
+			}
+		}
+		logger.debug("Self join elimination = " + this.optimizeTB);
+
 	}
 
 	public Connection getConn() {
@@ -187,5 +204,26 @@ public class R2OConfigurationProperties extends Properties {
 	public boolean isSubQueryElimination() {
 		return subQueryElimination;
 	}
+
+	public boolean isLiteralRemoveStrangeChars() {
+		return literalRemoveStrangeChars;
+	}
+	
+	public Connection openConnection() throws SQLException {
+		try {
+			this.conn = Utility.getLocalConnection(
+					databaseUser, databaseName, databasePassword, 
+					databaseDriver, 
+					databaseURL, "R2ORunner");
+			return this.conn;
+		} catch (SQLException e) {
+			String errorMessage = "Error loading database, error message = " + e.getMessage();
+			logger.error(errorMessage);
+			//e.printStackTrace();
+			throw e;
+		}
+	}
+	
+	
 
 }
