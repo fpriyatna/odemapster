@@ -1,7 +1,6 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2o.materializer;
+package es.upm.fi.dia.oeg.obdi.core.materializer;
 
 import java.io.Writer;
-import java.sql.ResultSet;
 
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -12,8 +11,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 
 
 public class RDFXMLMaterializer extends AbstractMaterializer {
@@ -29,17 +27,10 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 	@Override
 	public
 	void materializeRDFTypeTriple(String subjectURI, String conceptName,
-			boolean isBlankNodeSubject) {
-		Resource subject;
-		if(isBlankNodeSubject) {
-			AnonId anonId = new AnonId(subjectURI);
-			subject = model.createResource(anonId);		
-		} else {
-			subject = model.createResource(subjectURI);
-		}
-		this.currentSubject = subject;
+			boolean isBlankNodeSubject, String graph) {
+		this.currentSubject = (Resource) this.createSubject(isBlankNodeSubject, subjectURI);
 		Resource object = model.getResource(conceptName);
-		Statement statement = model.createStatement(subject, RDF.type, object);
+		Statement statement = model.createStatement(this.currentSubject, RDF.type, object);
 		model.add(statement);
 	}
 
@@ -47,14 +38,21 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 	@Override
 	public void materializeDataPropertyTriple(String predicateName,
 			Object propVal, String datatype,
-			String lang) {
+			String lang, String graph) {
 		Literal literal;
 		
 		if(datatype == null) {
+			String propValString = propVal.toString();
+			if(AbstractRunner.configurationProperties.isLiteralRemoveStrangeChars()) {
+				propValString = Utility.removeStrangeChars(propValString);
+			}
+			
+			
 			if(lang == null) {
-				literal =  model.createTypedLiteral(propVal);
+				literal =  model.createTypedLiteral(propValString);
 			} else {
-				literal =  model.createLiteral(propVal.toString(), lang);
+		
+				literal =  model.createLiteral(propValString, lang);
 			}
 		} else {
 			literal =  model.createTypedLiteral(propVal, datatype);
@@ -66,7 +64,7 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 
 	@Override
 	public void materializeObjectPropertyTriple(String predicateName,
-			String rangeURI, boolean isBlankNodeObject) {
+			String rangeURI, boolean isBlankNodeObject, String graph) {
 		Resource object;
 		Property property = model.createProperty(predicateName);
 
@@ -79,6 +77,18 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 		
 		Statement rdfstmtInstance = model.createStatement(currentSubject,property, object);
 		model.add(rdfstmtInstance);		
+	}
+
+
+	@Override
+	public Resource createSubject(boolean isBlankNode, String subjectURI) {
+		if(isBlankNode) {
+			AnonId anonId = new AnonId(subjectURI);
+			this.currentSubject = model.createResource(anonId);		
+		} else {
+			this.currentSubject = model.createResource(subjectURI);
+		}
+		return this.currentSubject;
 	}
 
 
