@@ -1,0 +1,31 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:j.0="http://mappingpedia.linkeddata.es/ontologies/" > 
+  <rdf:Description rdf:about="http://mappingpedia.linkeddata.es/resource/Student/1">
+    <j.0:hasSport rdf:resource="http://mappingpedia.linkeddata.es/resource/Sport/100"/>
+    <j.0:phone rdf:datatype="http://www.w3.org/2001/XMLSchema#string">777-3426</j.0:phone>
+    <j.0:hasName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Paul</j.0:hasName>
+    <rdf:type rdf:resource="http://mappingpedia.linkeddata.es/ontologies/Student"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://mappingpedia.linkeddata.es/resource/Student/3">
+    <j.0:webPage rdf:datatype="http://www.w3.org/2001/XMLSchema#string">www.george.edu</j.0:webPage>
+    <j.0:hasName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">George</j.0:hasName>
+    <rdf:type rdf:resource="http://mappingpedia.linkeddata.es/ontologies/Student"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://mappingpedia.linkeddata.es/resource/Student/2">
+    <j.0:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">john@acd.edu</j.0:email>
+    <j.0:hasName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">John</j.0:hasName>
+    <rdf:type rdf:resource="http://mappingpedia.linkeddata.es/ontologies/Student"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://mappingpedia.linkeddata.es/resource/Sport/100">
+    <j.0:hasSportName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Tennis</j.0:hasSportName>
+    <rdf:type rdf:resource="http://mappingpedia.linkeddata.es/ontologies/Sport"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://mappingpedia.linkeddata.es/resource/Student/4">
+    <j.0:phone rdf:datatype="http://www.w3.org/2001/XMLSchema#string">888-4537</j.0:phone>
+    <j.0:webPage rdf:datatype="http://www.w3.org/2001/XMLSchema#string">www.starr.edu</j.0:webPage>
+    <j.0:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ringo@acd.edu</j.0:email>
+    <j.0:hasName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ringo</j.0:hasName>
+    <rdf:type rdf:resource="http://mappingpedia.linkeddata.es/ontologies/Student"/>
+  </rdf:Description>
+</rdf:RDF>

@@ -12,11 +12,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IAttributeMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.IMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.AbstractParser;
-import es.upm.fi.dia.oeg.obdi.wrapper.IRelationMapping;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractParser;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
 
 public class ParserExample {
@@ -32,7 +32,7 @@ public class ParserExample {
 			String r2oMappingFile = r2oMappingDirectory + "NOMGEO_boris_r2o.xml";
 			
 			AbstractParser parser = new R2OParser(); 
-			IMappingDocument mappingDocument = parser.parse(r2oMappingFile);
+			AbstractMappingDocument mappingDocument = parser.parse(r2oMappingFile);
 			Collection<AbstractConceptMapping> mappedConcepts = mappingDocument.getConceptMappings();
 			for(AbstractConceptMapping conceptMapping : mappedConcepts) {
 				System.out.println("Mapped concept = " + conceptMapping.getName());
