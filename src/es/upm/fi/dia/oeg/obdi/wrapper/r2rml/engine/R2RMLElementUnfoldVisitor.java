@@ -57,11 +57,11 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	public Collection<SQLQuery> visit(R2RMLMappingDocument mappingDocument) {
 		Collection<SQLQuery> result = new HashSet<SQLQuery>();
 		
-		Collection<R2RMLTriplesMap> triplesMaps = mappingDocument.getTriplesMaps().values();
+		Collection<AbstractConceptMapping> triplesMaps = mappingDocument.getTriplesMaps();
 		if(triplesMaps != null) {
-			for(R2RMLTriplesMap triplesMap : triplesMaps) {
+			for(AbstractConceptMapping triplesMap : triplesMaps) {
 				try {
-					SQLQuery triplesMapUnfolded = (SQLQuery) triplesMap.accept(this);
+					SQLQuery triplesMapUnfolded = (SQLQuery) ((R2RMLTriplesMap) triplesMap).accept(this);
 					result.add(triplesMapUnfolded);
 				} catch(Exception e) {
 					logger.error("error while unfolding triplesMap : " + triplesMap);
@@ -244,24 +244,37 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					
 					
 					Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-					if(joinConditions != null) {
-						for(R2RMLJoinCondition joinCondition : joinConditions) {
-							//String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
-							String childColumnName = joinCondition.getChildColumnName();
-							String[] childColumnNameSplit = childColumnName.split("\\.");
-							if(childColumnNameSplit.length == 1) {
-								childColumnName = logicalTableAlias + "." + childColumnName; 
-							}
-							ZConstant childColumn = new ZConstant(childColumnName, ZConstant.COLUMNNAME);
-
-							 
-							String parentColumnName = joinQueryAlias + "." + joinCondition.getParentColumnName();
-							ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
-							
-							ZExp joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
-							joinQuery.setOnExp(joinConditionExpression);
-						}
+					ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, joinQueryAlias);
+					if(onExpression != null) {
+						joinQuery.setOnExp(onExpression);
 					}
+//					ZExp onExpression = null;
+//					if(joinConditions != null) {
+//						for(R2RMLJoinCondition joinCondition : joinConditions) {
+//							//String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
+//							String childColumnName = joinCondition.getChildColumnName();
+//							SQLSelectItem childSelectItem = new SQLSelectItem(childColumnName);  
+//							String[] childColumnNameSplit = childColumnName.split("\\.");
+//							if(childColumnNameSplit.length == 1) {
+//								childColumnName = logicalTableAlias + "." + childColumnName; 
+//							} 
+//							ZConstant childColumn = new ZConstant(childColumnName, ZConstant.COLUMNNAME);
+//
+//							 
+//							String parentColumnName = joinQueryAlias + "." + joinCondition.getParentColumnName();
+//							ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
+//							
+//							ZExp joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
+//							if(onExpression == null) {
+//								onExpression = joinConditionExpression;
+//							} else {
+//								onExpression = new ZExpression("AND", onExpression, joinConditionExpression);
+//							}
+//						}
+//						joinQuery.setOnExp(onExpression);
+//					}
+					
+					
 					result.addJoinQuery(joinQuery);					
 				}
 

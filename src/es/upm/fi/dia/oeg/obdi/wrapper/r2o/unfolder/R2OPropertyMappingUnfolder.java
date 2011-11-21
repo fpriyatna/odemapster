@@ -5,6 +5,7 @@ import java.util.Collection;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OPrimitiveOperationsProperties;
@@ -15,13 +16,13 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
 
 public class R2OPropertyMappingUnfolder {
 	private R2OConceptMapping parentMapping;
-	private R2OPropertyMapping r2oPropertyMapping;
+	private AbstractPropertyMapping r2oPropertyMapping;
 	private R2OMappingDocument r2oMappingDocument;
 	
 	
 	public R2OPropertyMappingUnfolder(
 			R2OConceptMapping parentMapping,
-			R2OPropertyMapping r2oPropertyMapping,
+			AbstractPropertyMapping r2oPropertyMapping,
 			R2OMappingDocument r2oMappingDocument) {
 		super();
 		this.parentMapping = parentMapping;
@@ -44,7 +45,7 @@ public class R2OPropertyMappingUnfolder {
 			
 			String toConcept = r2oRelationMapping.getToConcept();
 			R2OConceptMapping rangeConceptMapping = 
-				(R2OConceptMapping) this.r2oMappingDocument.getConceptMappingById(toConcept);
+				(R2OConceptMapping) this.r2oMappingDocument.getConceptMappingByMappingId(toConcept);
 			
 			R2ORelationMappingUnfolder r2oRelationMappingUnfolder = new R2ORelationMappingUnfolder(
 					this.parentMapping, (R2ORelationMapping) r2oPropertyMapping, rangeConceptMapping);

@@ -31,6 +31,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
@@ -152,7 +153,7 @@ public class Utility {
 			long start = System.currentTimeMillis();
 			ResultSet result = stmt.executeQuery(query);
 			long end = System.currentTimeMillis();
-			logger.debug("SQL execution time was "+(end-start)+" ms.");
+			logger.info("SQL execution time was "+(end-start)+" ms.");
 
 			return result;
 		} catch(SQLException e) {
@@ -370,13 +371,13 @@ public class Utility {
 	public static ZConstant constructDatabaseColumn(String columnName) {
 		String databaseType = R2ORunner.configurationProperties.getDatabaseType();
 		if(databaseType == null) {
-			databaseType = R2OConstants.DATABASE_MYSQL;
+			databaseType = Constants.DATABASE_MYSQL;
 		}
 
 		ZConstant zColumn;
-		if(databaseType.equalsIgnoreCase(R2OConstants.DATABASE_MONETDB)) {
+		if(databaseType.equalsIgnoreCase(Constants.DATABASE_MONETDB)) {
 			zColumn = new MonetDBColumn(columnName, ZConstant.COLUMNNAME);
-		} else if(databaseType.equalsIgnoreCase(R2OConstants.DATABASE_MYSQL)) {
+		} else if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
 			//			zColumn = new ZConstant("\'" + columnName + "\'", ZConstant.COLUMNNAME);
 			zColumn = new ZConstant(columnName, ZConstant.COLUMNNAME);
 		} else {

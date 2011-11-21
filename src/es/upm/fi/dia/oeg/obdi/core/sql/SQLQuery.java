@@ -38,14 +38,14 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		if(zQuery.getSelect() != null) { this.addSelect(zQuery.getSelect());}
 		if(zQuery.getFrom() != null) { this.addFrom(zQuery.getFrom());}
 		if(zQuery.getWhere() != null) { this.addWhere(zQuery.getWhere());}
-		
+
 		String tableAlias = "";
 		if(this.getFrom().size() == 1) {
-			
-			
+
+
 		}
-		
-		
+
+
 	}
 
 	public SQLQuery() {
@@ -145,6 +145,18 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		}
 	}
 
+	public void addOn(ZExp newOn) {
+		ZExp oldOn = this.onExp;
+		if(newOn != null) {
+			if(this.onExp == null) {
+				super.addWhere(newOn);
+			} else {
+				ZExp combinedWhere = new ZExpression("AND", this.onExp, newOn);
+				this.setOnExp(combinedWhere);
+			}
+		}
+	}
+	
 	public void clearSelectItems() {
 		Collection<ZSelectItem> selectItems = this.getSelect();
 		if(selectItems != null) {
@@ -326,7 +338,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	public String toString() {
 		String result = "";
 
-		
+
 		//print select
 		Vector<ZSelectItem> mainQuerySelectItems = (Vector<ZSelectItem>) this.getSelect();
 		if(this.getSelect() != null && this.getSelect().size() != 0) {
@@ -335,14 +347,14 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		}
 
 		//print from
-		if(this.getFrom() != null && this.getFrom().size()!=0) {
-			String fromSQL = this.printFrom();
-			if(this.joinType != null && (this.getSelect() == null || this.getSelect().size() == 0)) {
-				result += fromSQL + "\n";
-			} else {
-				result += "FROM " + fromSQL + "\n";
-			}
+		String fromSQL = this.printFrom();
+		if(this.joinType != null && (this.getSelect() == null || this.getSelect().size() == 0)) {
+			result += fromSQL + "\n";
+		} else {
+			result += "FROM " + fromSQL + "\n";
 		}
+
+
 
 		//print join queries
 		if(this.joinQueries != null) {
@@ -359,24 +371,24 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		}
 
 
-//		if(this.joinQueries2 != null) {
-//			for(SQLQuery joinQuery : this.joinQueries2) {
-//				String joinQueryString;
-//				if(joinQuery.alias == null) {
-//					joinQueryString = joinQuery.joinType + " JOIN " + joinQuery.toString() + "\n";
-//				} else {
-//					joinQueryString = joinQuery.joinType + " JOIN " + "(" + joinQuery.toString() 
-//							+ ") AS " + joinQuery.alias + "\n";
-//				}
-//				joinQueryString += "ON " + joinQuery.onExp;
-//						
-//				logger.info("joinQueryString = " + joinQueryString);
-//				result += joinQueryString;
-//			}				
-//		}
+		//		if(this.joinQueries2 != null) {
+		//			for(SQLQuery joinQuery : this.joinQueries2) {
+		//				String joinQueryString;
+		//				if(joinQuery.alias == null) {
+		//					joinQueryString = joinQuery.joinType + " JOIN " + joinQuery.toString() + "\n";
+		//				} else {
+		//					joinQueryString = joinQuery.joinType + " JOIN " + "(" + joinQuery.toString() 
+		//							+ ") AS " + joinQuery.alias + "\n";
+		//				}
+		//				joinQueryString += "ON " + joinQuery.onExp;
+		//						
+		//				logger.info("joinQueryString = " + joinQueryString);
+		//				result += joinQueryString;
+		//			}				
+		//		}
 
 
-		
+
 		String whereSQL = null;
 		if(this.getWhere() != null) {
 			whereSQL = this.getWhere().toString();
@@ -391,18 +403,18 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			} else {
 				result = logicalTable + " " + this.alias + "\n";
 			}
-			
+
 		}
 
-		
+
 		if(this.joinType != null) {
 			result = this.joinType + " JOIN " + result;
 		}
-		
+
 		if(this.onExp != null) {
 			result += "ON " + this.onExp + "\n";
 		}
-		
+
 		String unionSQL = "UNION ";
 		if(this.unionQueries != null) {
 			for(SQLQuery unionQuery : this.unionQueries) {

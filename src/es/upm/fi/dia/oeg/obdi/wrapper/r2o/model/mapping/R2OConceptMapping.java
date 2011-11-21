@@ -3,23 +3,19 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
-import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.URIUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseColumn;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
@@ -51,7 +47,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	private String encodeURI;
 	private String isBlankNode;
 	private String materialize;
-	private List<R2OPropertyMapping> describedBy; //describedBy
+	private Collection<AbstractPropertyMapping> describedBy; //describedBy
 	private R2OConditionalExpression appliesIf;//original version
 	private R2OConditionalExpression appliesIfTop;//odemapster 1 version
 	private static Logger logger = Logger.getLogger(R2OConceptMapping.class);
@@ -199,8 +195,8 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 	}
 
-	private List<R2OPropertyMapping> parseDescribedByElement(Element describedByElement) throws ParseException {
-		List<R2OPropertyMapping> result = new ArrayList<R2OPropertyMapping>();
+	private List<AbstractPropertyMapping> parseDescribedByElement(Element describedByElement) throws ParseException {
+		List<AbstractPropertyMapping> result = new ArrayList<AbstractPropertyMapping>();
 
 		Collection<Element> propertyMappingElements = XMLUtility.getChildElements(describedByElement);
 		if(propertyMappingElements != null) {
@@ -293,7 +289,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 		if(describedBy != null) {
 			result.append("<" + R2OConstants.DESCRIBED_BY_TAG + ">");
-			for(R2OPropertyMapping propertyMapping : describedBy) {
+			for(AbstractPropertyMapping propertyMapping : this.describedBy) {
 				result.append("\n" + propertyMapping.toString());
 			}
 			result.append("</" + R2OConstants.DESCRIBED_BY_TAG + ">\n");
@@ -312,19 +308,16 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		}
 	}
 
-	public List<R2OPropertyMapping> getDescribedBy() {
+
+
+	public Collection<AbstractPropertyMapping> getPropertyMappings() {
 		return describedBy;
 	}
 
-
-	public List<R2OPropertyMapping> getPropertyMappings() {
-		return describedBy;
-	}
-
-	public List<R2OPropertyMapping> getPropertyMappings(String propertyURI) {
-		List<R2OPropertyMapping> result = new ArrayList<R2OPropertyMapping>();
+	public Collection<AbstractPropertyMapping> getPropertyMappings(String propertyURI) {
+		List<AbstractPropertyMapping> result = new ArrayList<AbstractPropertyMapping>();
 		if(this.describedBy != null) {
-			for(R2OPropertyMapping propertyMapping : describedBy) {
+			for(AbstractPropertyMapping propertyMapping : this.describedBy) {
 				String propertyName = propertyMapping.getName(); 
 				if(propertyName.equals(propertyURI)) {
 					result.add(propertyMapping);
@@ -333,7 +326,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		}
 		
 		if(result.size() == 0) {
-			logger.warn("property mapping : " + propertyURI + " is not found for concept mapping " + this.getId());
+			//logger.warn("property mapping : " + propertyURI + " is not found for concept mapping " + this.getId());
 		}
 		return result;
 	}
@@ -343,7 +336,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	public List<R2ORelationMapping> getRelationMappings(String propertyURI) {
 		List<R2ORelationMapping> result = new ArrayList<R2ORelationMapping>();
 		
-		for(R2OPropertyMapping propertyMapping : describedBy) {
+		for(AbstractPropertyMapping propertyMapping : this.describedBy) {
 			String propertyName = propertyMapping.getName(); 
 			if(propertyName.equals(propertyURI) && propertyMapping instanceof R2ORelationMapping) {
 				result.add((R2ORelationMapping) propertyMapping);
@@ -352,17 +345,17 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		return result;
 	}
 	
-	public void addPropertyMapping(R2OPropertyMapping pm) {
+	public void addPropertyMapping(AbstractPropertyMapping pm) {
 		if(this.describedBy == null) {
-			this.describedBy = new ArrayList<R2OPropertyMapping>();
+			this.describedBy = new ArrayList<AbstractPropertyMapping>();
 		}
 		
 		this.describedBy.add(pm);
 	}
 	
-	public void addPropertyMappings(Collection<R2OPropertyMapping> pms) {
+	public void addPropertyMappings(Collection<AbstractPropertyMapping> pms) {
 		if(this.describedBy == null) {
-			this.describedBy = new ArrayList<R2OPropertyMapping>();
+			this.describedBy = new ArrayList<AbstractPropertyMapping>();
 		}
 		
 		this.describedBy.addAll(pms);
@@ -370,7 +363,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	
 	public void addAttributeMapping(R2OAttributeMapping am) {
 		if(this.describedBy == null) {
-			this.describedBy = new ArrayList<R2OPropertyMapping>();
+			this.describedBy = new ArrayList<AbstractPropertyMapping>();
 		}
 		
 		this.describedBy.add(am);
@@ -378,7 +371,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 	public void addRelationMapping(R2ORelationMapping rm) {
 		if(this.describedBy == null) {
-			this.describedBy = new ArrayList<R2OPropertyMapping>();
+			this.describedBy = new ArrayList<AbstractPropertyMapping>();
 		}
 
 		this.describedBy.add(rm);
@@ -387,9 +380,9 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	public List<R2OAttributeMapping> getAttributeMappings() {
 		List<R2OAttributeMapping> result = new ArrayList<R2OAttributeMapping>();
 		
-		List<R2OPropertyMapping> propertyMappings = this.getDescribedBy();
+		Collection<AbstractPropertyMapping> propertyMappings = this.getPropertyMappings();
 		if(propertyMappings != null) {
-			for(R2OPropertyMapping propertyMapping : propertyMappings) {
+			for(AbstractPropertyMapping propertyMapping : propertyMappings) {
 				if(propertyMapping instanceof R2OAttributeMapping) {
 					result.add((R2OAttributeMapping) propertyMapping);
 				}
@@ -400,14 +393,14 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		return result;
 	}
 
-	public List<R2ORelationMapping> getRelationMappings() {
-		List<R2ORelationMapping> result = new ArrayList<R2ORelationMapping>();
+	public List<IRelationMapping> getRelationMappings() {
+		List<IRelationMapping> result = new ArrayList<IRelationMapping>();
 		
-		List<R2OPropertyMapping> propertyMappings = this.getDescribedBy();
+		Collection<AbstractPropertyMapping> propertyMappings = this.getPropertyMappings();
 		if(propertyMappings != null) {
-			for(R2OPropertyMapping propertyMapping : propertyMappings) {
-				if(propertyMapping instanceof R2ORelationMapping) {
-					result.add((R2ORelationMapping) propertyMapping);
+			for(AbstractPropertyMapping propertyMapping : propertyMappings) {
+				if(propertyMapping instanceof IRelationMapping) {
+					result.add((IRelationMapping) propertyMapping);
 				}
 			}			
 		}
@@ -440,7 +433,7 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	public List<R2OAttributeMapping> getAttributeMappings(String propertyURI) {
 		List<R2OAttributeMapping> result = new ArrayList<R2OAttributeMapping>();
 		
-		for(R2OPropertyMapping propertyMapping : describedBy) {
+		for(AbstractPropertyMapping propertyMapping : this.describedBy) {
 			String propertyName = propertyMapping.getName(); 
 			if(propertyName.equals(propertyURI) && propertyMapping instanceof R2OAttributeMapping) {
 				result.add((R2OAttributeMapping) propertyMapping);
@@ -473,15 +466,15 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 	}
 
 	
-	public static R2OConceptMapping merge(Collection<R2OConceptMapping> cms) 
+	public static AbstractConceptMapping merge(Collection<AbstractConceptMapping> cms) 
 	throws MergeException {
-		R2OConceptMapping result = null;;
+		AbstractConceptMapping result = null;;
 		
 		if(cms != null && cms.size() > 0) {
 			if(cms.size() == 0) {
 				result = cms.iterator().next();
 			} else {
-				for(R2OConceptMapping cm : cms) {
+				for(AbstractConceptMapping cm : cms) {
 					result = R2OConceptMapping.merge(result, cm);
 				}				
 			}
@@ -490,10 +483,11 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 		return result;
 	}
 	
-	private static R2OConceptMapping merge(R2OConceptMapping cm1, R2OConceptMapping cm2) 
+	private static AbstractConceptMapping merge(AbstractConceptMapping acm1, AbstractConceptMapping acm2) 
 	throws MergeException {
 		R2OConceptMapping result = new R2OConceptMapping();
-		
+		R2OConceptMapping cm1 = (R2OConceptMapping) acm1;
+		R2OConceptMapping cm2 = (R2OConceptMapping) acm2;
 		
 		if(cm1 == null && cm2 == null) {
 			String errorMessage = "Both concept mappings are null!";
@@ -537,13 +531,13 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 			
 			result.describedBy = cm1.describedBy;
 			if(result.describedBy == null) {
-				result.describedBy = new ArrayList<R2OPropertyMapping>();
+				result.describedBy = new ArrayList<AbstractPropertyMapping>();
 			}
 			
 			if(cm2.describedBy != null) {
-				for(R2OPropertyMapping pm : cm2.describedBy) {
+				for(AbstractPropertyMapping pm : cm2.describedBy) {
 					String pmName = pm.getName();
-					List<R2OPropertyMapping> pms = result.getPropertyMappings(pmName);
+					Collection<AbstractPropertyMapping> pms = result.getPropertyMappings(pmName);
 					if(pms == null || pms.size() == 0) {
 						result.describedBy.add(pm);
 					}
@@ -600,6 +594,11 @@ public class R2OConceptMapping extends AbstractConceptMapping implements R2OElem
 
 	public void setAlias(String alias) {
 		this.alias = alias;
+	}
+
+	@Override
+	public boolean hasWellDefinedURIExpression() {
+		return URIUtility.isWellDefinedURIExpression(this.getURIAs());
 	}
 	
 }

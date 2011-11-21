@@ -8,18 +8,14 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.IParseable;
 import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractAttributeMapping;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParserException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OSelector;
 
-public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElement, IAttributeMapping, Cloneable {
+public class R2OAttributeMapping extends R2OPropertyMapping 
+implements R2OElement, IAttributeMapping, Cloneable {
 	private Logger logger = Logger.getLogger(R2OAttributeMapping.class);
 	
 	//	(33) attributemap-def::= attributemap-def name
@@ -364,5 +360,10 @@ public class R2OAttributeMapping extends R2OPropertyMapping implements R2OElemen
 
 	public void setMappedPKColumn(boolean mappedPKColumn) {
 		this.mappedPKColumn = mappedPKColumn;
+	}
+
+	@Override
+	public String getMappedPredicateName() {
+		return this.name;
 	}
 }

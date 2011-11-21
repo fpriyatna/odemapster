@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2ORelationMapping;
@@ -27,7 +28,7 @@ public class R2OJoin implements R2OElement, Cloneable {
 		this.joinType = xmlElement.getAttribute(R2OConstants.JOINS_TYPE_ATTRIBUTE);
 		if(this.joinType == null || this.joinType == "") {
 			this.defaultJoinUsed = true;
-			this.joinType = R2OConstants.JOINS_TYPE_LEFT;
+			this.joinType = Constants.JOINS_TYPE_LEFT;
 			//throw new ParseException("join-type attribute needs to be defined on joins-via element");
 		}
 

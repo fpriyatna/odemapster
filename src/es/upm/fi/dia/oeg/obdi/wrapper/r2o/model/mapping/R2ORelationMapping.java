@@ -11,12 +11,9 @@ import org.w3c.dom.Element;
 
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractRelationMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidRelationMappingException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OConditionalExpression;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2ODatabaseView;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OElement;
@@ -247,6 +244,23 @@ implements R2OElement, IRelationMapping, Cloneable
 		
 		return this.sourceAlias;
 	}
+
+	@Override
+	public String getPropertyMappingID() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRangeClassMapping() {
+		return this.toConcept;
+	}
+
+	@Override
+	public String getMappedPredicateName() {
+		return this.name;
+	}
+
 
 
 }

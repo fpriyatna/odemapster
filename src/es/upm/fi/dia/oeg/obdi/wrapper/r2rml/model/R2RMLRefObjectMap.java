@@ -22,7 +22,7 @@ public class R2RMLRefObjectMap {
 	
 	private String parentTriplesMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
-
+	private R2RMLLogicalTable intermediateLogicalTable;
 	private String alias;
 	
 	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException {
@@ -59,8 +59,11 @@ public class R2RMLRefObjectMap {
 		return triplesMap.getLogicalTable();
 	}
 
+	public String getParentTripleMapName() {
+		return this.parentTriplesMap;
+	}
 	public R2RMLTriplesMap getParentTriplesMap() {
-		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) this.owner.getConceptMappingById(this.parentTriplesMap);
+		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) this.owner.getConceptMappingByMappingId(this.parentTriplesMap);
 		return triplesMap;
 	}
 

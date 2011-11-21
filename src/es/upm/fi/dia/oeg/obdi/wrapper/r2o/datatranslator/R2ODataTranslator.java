@@ -19,6 +19,7 @@ import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidRestrictionType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
@@ -51,37 +52,56 @@ public class R2ODataTranslator extends AbstractDataTranslator {
 		R2OMappingDocument mappingDocument = (R2OMappingDocument) abstractMappingDocument;
 		Collection<AbstractConceptMapping> conceptMappings = 
 			mappingDocument.getConceptMappings();
-		for(AbstractConceptMapping conceptMapping : conceptMappings) {
-			ResultSet rs = null;
-			try {
-				//unfold mapped concepts
-				logger.info("Unfolding concept " + conceptMapping.getConceptName());
-				R2OUnfolder unfolder = 
-					new R2OUnfolder(mappingDocument, R2ORunner.primitiveOperationsProperties, R2ORunner.configurationProperties);
-				String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
-				if(sqlQuery != null) {
-					//evaluate query
-					rs = QueryEvaluator.evaluateQuery(sqlQuery, R2ORunner.configurationProperties.getConn());
-					this.processConceptMapping(rs, conceptMapping);
+		for(AbstractConceptMapping abstractConceptMapping : conceptMappings) {
+			R2OConceptMapping conceptMapping = (R2OConceptMapping) abstractConceptMapping;
+			boolean proceedToUnfolding = true;
+			if(conceptMapping.getMaterialize() == null) {
+				proceedToUnfolding = true;
+			} else {
+				if(conceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_FALSE) ||
+						conceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_NO)) {
+					proceedToUnfolding = false;
+				} else if(conceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_TRUE) ||
+						conceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_FALSE)) { 
+					proceedToUnfolding = true;
 				}
-			} catch(SQLException e) {
-				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
-				logger.error(errorMessage);				
-				throw e;
-			} catch(RelationMappingUnfolderException e) {
-				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
-				logger.error(errorMessage);				
-				throw e;				
-			} catch(Exception e) {
-				//e.printStackTrace();
-				String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
-				logger.error(errorMessage);
-				//throw e;
-			} finally {
-				//cleaning up
-				Utility.closeStatement(rs.getStatement());
-				Utility.closeRecordSet(rs);					
 			}
+			
+			if(proceedToUnfolding) {
+				ResultSet rs = null;
+				try {
+					//unfold mapped concepts
+					logger.info("Unfolding concept " + conceptMapping.getConceptName());
+					R2OUnfolder unfolder = 
+						new R2OUnfolder(mappingDocument, R2ORunner.primitiveOperationsProperties, R2ORunner.configurationProperties);
+					String sqlQuery = unfolder.unfoldConceptMapping(conceptMapping);
+					logger.info(conceptMapping.getName() + " unfolded = \n" + sqlQuery + "\n");
+					if(sqlQuery != null) {
+						//evaluate query
+						rs = QueryEvaluator.evaluateQuery(sqlQuery, R2ORunner.configurationProperties.getConn());
+						this.processConceptMapping(rs, conceptMapping);
+					}
+				} catch(SQLException e) {
+					String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
+					logger.error(errorMessage);				
+					throw e;
+				} catch(RelationMappingUnfolderException e) {
+					String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
+					logger.error(errorMessage);				
+					throw e;				
+				} catch(Exception e) {
+					//e.printStackTrace();
+					String errorMessage = "Error processing " + conceptMapping.getName() + " because " + e.getMessage();
+					logger.error(errorMessage);
+					//throw e;
+				} finally {
+					//cleaning up
+					Utility.closeStatement(rs.getStatement());
+					Utility.closeRecordSet(rs);					
+				}
+			}
+			
+
 
 		}
 	}
@@ -278,9 +298,9 @@ public class R2ODataTranslator extends AbstractDataTranslator {
 	}
 	
 	private void processPropertyMappings(R2OConceptMapping r2oConceptMapping, ResultSet rs) throws Exception {
-		List<R2OPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
+		Collection<AbstractPropertyMapping> propertyMappings = r2oConceptMapping.getPropertyMappings();
 		if(propertyMappings != null) {
-			for(R2OPropertyMapping propertyMapping : propertyMappings) {
+			for(AbstractPropertyMapping propertyMapping : propertyMappings) {
 				if(propertyMapping instanceof R2OAttributeMapping) {
 					try {
 						this.processAttributeMapping(

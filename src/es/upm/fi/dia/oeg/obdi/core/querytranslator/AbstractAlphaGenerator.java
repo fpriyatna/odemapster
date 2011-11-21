@@ -20,8 +20,8 @@ public abstract class AbstractAlphaGenerator {
 		this.mappingDocument = mappingDocument;
 	}
 	
-	protected abstract Object calculateAlpha(Triple tp) throws Exception;
-	protected abstract Object calculateAlphaTB(Collection<Triple> triples) throws Exception;
+	public abstract Object calculateAlpha(Triple tp) throws Exception;
+	public abstract Object calculateAlphaTB(Collection<Triple> triples) throws Exception;
 	public abstract AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception;
 	public abstract AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples) throws Exception;
 

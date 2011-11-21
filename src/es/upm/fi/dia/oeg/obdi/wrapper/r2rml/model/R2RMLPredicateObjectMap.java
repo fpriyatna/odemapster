@@ -6,24 +6,30 @@ import org.coode.owl.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidRefObjectMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapPosition;
 
-public class R2RMLPredicateObjectMap {
+public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements IRelationMapping, IAttributeMapping{
 	private static Logger logger = Logger.getLogger(R2RMLPredicateObjectMap.class);
-	private R2RMLMappingDocument owner;
+	private R2RMLMappingDocument mappingDocument;
 	public enum ObjectMapType {ObjectMap, RefObjectMap};
-	
 	private R2RMLPredicateMap predicateMap;
 	private R2RMLObjectMap objectMap;
 	private R2RMLGraphMap graphMap;
 	private R2RMLRefObjectMap refObjectMap;
 	private ObjectMapType objectMapType;
 	
-	public R2RMLPredicateObjectMap(Resource resource, R2RMLMappingDocument owner) throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
-		this.owner = owner;
+	public R2RMLPredicateObjectMap(Resource resource, R2RMLMappingDocument mappingDocument, R2RMLTriplesMap parent) 
+			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
+		this.mappingDocument = mappingDocument;
+		this.parent = parent;
+		
 		
 		Statement predicateMapStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATEMAP_PROPERTY);
 		if(predicateMapStatement != null) {
@@ -72,7 +78,7 @@ public class R2RMLPredicateObjectMap {
 		Statement refObjectMapStatement = resource.getProperty(R2RMLConstants.R2RML_REFOBJECTMAP_PROPERTY);
 		if(refObjectMapStatement != null) {
 			this.objectMapType = ObjectMapType.RefObjectMap;
-			this.refObjectMap = new R2RMLRefObjectMap((Resource) refObjectMapStatement.getObject(), owner);
+			this.refObjectMap = new R2RMLRefObjectMap((Resource) refObjectMapStatement.getObject(), mappingDocument);
 		}
 
 	}
@@ -96,4 +102,68 @@ public class R2RMLPredicateObjectMap {
 	public ObjectMapType getObjectMapType() {
 		return objectMapType;
 	}
+
+	@Override
+	public String getPropertyMappingID() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getMappedPredicateName() {
+		return this.predicateMap.getOriginalValue();
+	}
+
+	@Override
+	public MappingType getPropertyMappingType() {
+		MappingType result;
+		if(this.objectMap != null) {
+			String objectMapTermType = this.objectMap.getTermType();
+			if(objectMapTermType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+				result = MappingType.ATTRIBUTE;
+			} else {
+				result = MappingType.RELATION;
+			}
+		} else if(this.refObjectMap != null) {
+			result = MappingType.RELATION;
+		} else {
+			result = null;
+		}
+		return result;
+	}
+
+	@Override
+	public String getAttributeName() {
+		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getAttributeName");
+		return null;
+	}
+
+	@Override
+	public String getRelationName() {
+		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getRelationName");
+		return null;
+	}
+
+	@Override
+	public String getRangeClassMapping() {
+		// TODO Auto-generated method stub
+		if(this.refObjectMap != null) {
+			return this.refObjectMap.getParentTripleMapName();
+		} else {
+			return null;
+		}
+		
+	}
+
+	@Override
+	public String toString() {
+		return "R2RMLPredicateObjectMap [predicateMap=" + predicateMap
+				+ ", objectMap=" + objectMap + ", refObjectMap=" + refObjectMap
+				+ ", objectMapType=" + objectMapType + "]";
+	}
+
+	
+	
 }

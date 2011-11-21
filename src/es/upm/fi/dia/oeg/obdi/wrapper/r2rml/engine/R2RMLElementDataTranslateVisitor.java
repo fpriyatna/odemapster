@@ -30,6 +30,7 @@ import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.materializer.NTripleMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.materializer.RDFXMLMaterializer;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -97,11 +98,11 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				materializer = new NTripleMaterializer(out);
 			}
 
-			Collection<R2RMLTriplesMap> triplesMaps = mappingDocument.getTriplesMaps().values();
+			Collection<AbstractConceptMapping> triplesMaps = mappingDocument.getTriplesMaps();
 			if(triplesMaps != null) {
-				for(R2RMLTriplesMap triplesMap : triplesMaps) {
+				for(AbstractConceptMapping triplesMap : triplesMaps) {
 					try {
-						triplesMap.accept(this);
+						((R2RMLTriplesMap)triplesMap).accept(this);
 					} catch(Exception e) {
 						logger.error("error while translating data of triplesMap : " + triplesMap);
 						logger.error("error message = " + e.getMessage());

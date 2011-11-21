@@ -188,7 +188,7 @@ public class ConfigurationProperties extends Properties {
 
 	public String getDatabaseType() {
 		if(this.databaseType == null) {
-			this.databaseType = R2OConstants.DATABASE_MYSQL;
+			this.databaseType = Constants.DATABASE_MYSQL;
 		}
 		return databaseType;
 	}

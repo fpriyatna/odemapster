@@ -34,6 +34,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
@@ -70,66 +71,7 @@ public class TranslatorUtility {
 	}
 
 
-	public static Collection<Node> terms(Op op) {
-		Collection<Node> result = new HashSet<Node>();
 
-		if(op instanceof OpBGP) {
-			OpBGP bgp = (OpBGP) op;
-			result = TranslatorUtility.terms(bgp);
-		} else if(op instanceof OpLeftJoin ) {
-			OpLeftJoin leftJoin = (OpLeftJoin) op;
-			result.addAll(terms(leftJoin.getLeft()));
-			result.addAll(terms(leftJoin.getRight()));
-		} else if(op instanceof OpJoin ) {
-			OpJoin opJoin = (OpJoin) op;
-			result.addAll(terms(opJoin.getLeft()));
-			result.addAll(terms(opJoin.getRight()));			
-		} else if(op instanceof OpFilter) {
-			OpFilter filter = (OpFilter) op;
-			result.addAll(terms(filter.getSubOp()));
-		} else if(op instanceof OpUnion) {
-			OpUnion opUnion = (OpUnion) op;
-			result.addAll(terms(opUnion.getLeft()));
-			result.addAll(terms(opUnion.getRight()));
-		}
-
-		return result;
-	}
-
-	public static Collection<Node> terms(OpBGP bgp) {
-		List<Triple> triples = bgp.getPattern().getList();
-		return TranslatorUtility.terms(triples);
-	}
-
-	public static Collection<Node> terms(Collection<Triple> triples) {
-		Collection<Node> result = new HashSet<Node>();
-
-		for(Triple tp : triples) {
-			result.addAll(TranslatorUtility.terms(tp));
-		}
-
-		return result;
-	}
-
-	public static Set<Node> terms(Triple tp) {
-		Set<Node> result = new HashSet<Node>();
-		Node subject = tp.getSubject();
-		if(subject.isURI() || subject.isBlank() || subject.isLiteral() || subject.isVariable()) {
-			result.add(subject);
-		}
-
-		Node predicate = tp.getPredicate();
-		if(predicate.isURI() || predicate.isBlank() || predicate.isLiteral() || predicate.isVariable()) {
-			result.add(predicate);
-		}
-
-		Node object = tp.getObject();
-		if(object.isURI() || object.isBlank() || object.isLiteral() || object.isVariable()) {
-			result.add(object);
-		}
-
-		return result;
-	}
 
 
 	public static ZSelectItem generateCoalesceSelectItem(ZSelectItem selectItem1, ZSelectItem selectItem2, String alias) {
@@ -168,66 +110,21 @@ public class TranslatorUtility {
 		return result;
 	}
 
-	public static boolean isTriplePattern(OpBGP op) {
-		int triplesSize = ((OpBGP) op).getPattern().getList().size();
-		if(triplesSize == 1) {
-			return true;
-		} 
-		return false;
-	}
 
-	public static boolean isTripleBlock(List<Triple> triples) {
-		if(triples.size() <= 1) {
-			return false;
-		} else {
-			String prevSubject = triples.get(0).getSubject().toString();
-			String currSubject;
-			for(int i=1; i<triples.size(); i++) {
-				currSubject = triples.get(i).getSubject().toString();
-				if(!prevSubject.equals(currSubject)) {
-					return false;
-				} else {
-					prevSubject = triples.get(i).getSubject().toString();;
-				}
-			}
-			return true;
-		}
 
-	}
 
-	public static boolean isTripleBlock(OpBGP bgp) {
-		List<Triple> triples = bgp.getPattern().getList();
-		return TranslatorUtility.isTripleBlock(triples);
-	}
 
-	public static boolean isTripleBlock(Op op) {
-		if(op instanceof OpBGP) {
-			OpBGP bgp = (OpBGP) op;
-			return TranslatorUtility.isTripleBlock(bgp);
-		} else {
-			return false;
-		}
-	}
 
-	public static int getFirstTBEndIndex(List<Triple> triples) {
-		int result = 1;
-		for(int i=0; i<triples.size(); i++) {
-			List<Triple> sublist = triples.subList(0, i);
-			if(TranslatorUtility.isTripleBlock(sublist)) {
-				result = i;
-			}
-		}
 
-		return result;
-	}
+
 
 	public static R2ORelationMapping processObjectPredicateObjectURI(
 			Node object , R2ORelationMapping rm, R2OMappingDocument md) 
-					throws R2OTranslationException
+					throws QueryTranslationException
 					{
 		String toConcept = rm.getToConcept();
 		R2OConceptMapping rangeConceptMapping = 
-				(R2OConceptMapping) md.getConceptMappingById(toConcept);
+				(R2OConceptMapping) md.getConceptMappingByMappingId(toConcept);
 
 		R2OTransformationExpression rangeUriAs = rangeConceptMapping.getURIAs();
 		String objectURI = object.getURI();
@@ -286,90 +183,7 @@ public class TranslatorUtility {
 		return cm.getId() + R2OConstants.KEY_SUFFIX + node.hashCode();
 	}
 
-	private static ZSelectItem getSelectItemByAlias(String alias, Collection<ZSelectItem> selectItems, String prefix) {
-		if(selectItems != null) {
-			for(ZSelectItem selectItem : selectItems) {
-				String selectItemAlias = selectItem.getAlias();
-				if(alias.equals(selectItemAlias) || alias.equals(prefix + "." + selectItemAlias)) {
-					return selectItem;
-				}
-			}
-		}
-		return null;
-	}
-
-	public static SQLQuery eliminateSubQuery(Collection<ZSelectItem> newSelectItems, SQLQuery query
-			, ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions) throws Exception {
-		Map<String, String> mapOldNewAlias = new HashMap<String, String>();
-		SQLQuery result = null;
-		
-		Collection<SQLQuery> unionQueries = query.getUnionQueries();
-		if(unionQueries == null) {
-			Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
-			Vector<ZSelectItem>	oldSelectItems = query.getSelect();
-			
-			//SELECT *
-			if(newSelectItems.size() == 1 && newSelectItems.iterator().next().toString().equals(("*"))) {
-				selectItems2 = new Vector<ZSelectItem>(query.getSelect());
-				
-				for(ZSelectItem selectItem : oldSelectItems) {
-					String selectItemWithoutAlias = Utility.getValueWithoutAlias(selectItem);
-					String selectItemAlias = selectItem.getAlias();
-					newWhereCondition = Utility.renameColumns(newWhereCondition, selectItemAlias, selectItemWithoutAlias, true); 
-				}
-			} else {
-				String queryAlias = query.generateAlias();
-				
-				
-				for(ZSelectItem newSelectItem : newSelectItems) {
-					String newSelectItemAlias = newSelectItem.getAlias();
-					String newSelectItemValue = Utility.getValueWithoutAlias(newSelectItem);
-					
-//					String newSelectItemValue2 = queryAlias + "." + newSelectItemValue;
-//					newSelectItem = new ZSelectItem(newSelectItemValue2);
-//					newSelectItem.setAlias(newSelectItemAlias);
-//							
-					ZSelectItem oldSelectItem = TranslatorUtility.getSelectItemByAlias(newSelectItemValue, oldSelectItems, queryAlias);
-					
-					if(oldSelectItem == null) {
-						selectItems2.add(newSelectItem);
-					} else {
-						String oldSelectItemAlias = oldSelectItem.getAlias();
-						
-						mapOldNewAlias.put(oldSelectItemAlias, newSelectItemAlias);
-						
-						String oldSelectItemValue = Utility.getValueWithoutAlias(oldSelectItem);
-						oldSelectItem.setAlias(newSelectItemAlias);
-						selectItems2.add(oldSelectItem);
-						if(newWhereCondition != null) {
-							newWhereCondition = Utility.renameColumns(newWhereCondition, newSelectItemValue, oldSelectItemValue, true);
-						}
-					}
-				}
-				query.setSelectItems(selectItems2);
-				
-
-			}
-
-			query.addWhere(newWhereCondition);
-
-			result = query;
-		} else {
-			query.setUnionQueries(null);
-			SQLQuery query2 = TranslatorUtility.eliminateSubQuery(newSelectItems, query, newWhereCondition, orderByConditions);
-			logger.debug("query2 = \n" + query2);
-			for(SQLQuery unionQuery : unionQueries) {
-				SQLQuery unionQuery2 = TranslatorUtility.eliminateSubQuery(newSelectItems, unionQuery, newWhereCondition, orderByConditions);
-				logger.debug("unionQuery2 = \n" + unionQuery2);
-				query2.addUnionQuery(unionQuery2);
-			}
-			
-			result = query2;
-		}
 
 
-		
-		return result;
 
-	}
 }

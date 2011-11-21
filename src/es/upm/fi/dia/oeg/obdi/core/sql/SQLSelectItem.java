@@ -3,6 +3,8 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.Collection;
 import java.util.HashSet;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
@@ -108,17 +110,17 @@ public class SQLSelectItem extends ZSelectItem {
 		String thisInString = super.toString();
 		String databaseType;
 		try {
-			databaseType = R2ORunner.configurationProperties.getDatabaseType();
+			databaseType = AbstractRunner.configurationProperties.getDatabaseType();
 		} catch(Exception e) {
-			databaseType = R2OConstants.DATABASE_MYSQL;
+			databaseType = Constants.DATABASE_MYSQL;
 		}		
 		
 		if(databaseType == null) {
-			databaseType = R2OConstants.DATABASE_MYSQL;
+			databaseType = Constants.DATABASE_MYSQL;
 		}
 		
 		boolean isExpression = this.isExpression();
-		if(R2OConstants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
+		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
 			
 			
 			if(this.isExpression()) {
@@ -154,7 +156,13 @@ public class SQLSelectItem extends ZSelectItem {
 				
 			}
 
+
 			//result = super.toString();
+		}
+		
+		String alias = this.getAlias();
+		if(alias != null && !alias.equals("")) {
+			result += " AS " + alias;
 		}
 		
 		return result;

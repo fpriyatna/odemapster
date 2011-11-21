@@ -1,7 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidTriplesMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
 
 public abstract class R2RMLTermMap {
@@ -26,7 +24,8 @@ public abstract class R2RMLTermMap {
 	
 	private String constantValue;
 	private String columnName;
-	private String stringTemplate;
+
+
 	private String termType;
 	private String languageTag;
 	public String getLanguageTag() {
@@ -36,6 +35,11 @@ public abstract class R2RMLTermMap {
 
 	private String datatype;
 	private String template;
+	public String getTemplate() {
+		return template;
+	}
+
+
 	private String inverseExpression;
 	private TermMapValueType termMapType;
 	private TermMapPosition termMapPosition;

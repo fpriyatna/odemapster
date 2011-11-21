@@ -240,7 +240,6 @@ public class R2OUnfolder extends AbstractUnfolder {
 					r2oConceptMapping.getMaterialize().equalsIgnoreCase(R2OConstants.STRING_FALSE)) { 
 				proceedToUnfolding = true;
 			}
-			
 		}
 		
 		String conceptMappingUnfoldingSQL = null;

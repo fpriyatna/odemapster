@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OParser;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
@@ -21,11 +22,17 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderExcept
 
 public class ODEMapsterTest {
 	private static Logger logger = Logger.getLogger(ODEMapsterTest.class);
-//	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
+	private static AbstractDataTranslator dataTranslator;
+	
+public static void setDataTranslator(AbstractDataTranslator dataTranslator) {
+		ODEMapsterTest.dataTranslator = dataTranslator;
+	}
+
+	//	private static String MAPPING_DIRECTORY = "/home/fpriyatna/Dropbox/bsbm/bsbm-r2o-mapping/";
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
 	private static String MAPPING_DIRECTORY_WINDOWS = "C:/Users/Freddy/Dropbox/oeg/odemapster2/mappings/";
 	private static String MAPPING_DIRECTORY_LINUX = "/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/";
-	
+	private static String MAPPING_DIRECTORY_MAC = "/Users/freddy_priyatna/Dropbox/oeg/odemapster2/mappings/";
 	
 	public static void main(String args[]) throws Exception {
 		ODEMapsterTest test = new ODEMapsterTest();
@@ -84,7 +91,9 @@ public class ODEMapsterTest {
 		if(osName.startsWith("Linux")) {
 			return MAPPING_DIRECTORY_LINUX;
 		} else if(osName.startsWith("Windows")) {
-			return MAPPING_DIRECTORY_WINDOWS;
+			return MAPPING_DIRECTORY_WINDOWS; 
+		} else if (osName.equalsIgnoreCase("Mac OS X")) {
+			return MAPPING_DIRECTORY_MAC;
 		} else {
 			return null;
 		}
@@ -319,10 +328,12 @@ public class ODEMapsterTest {
 		}
 		try {
 			long startMemory = Runtime.getRuntime().freeMemory();
-			
+			if(ODEMapsterTest.dataTranslator == null) {
+				ODEMapsterTest.dataTranslator = new R2ODataTranslator();
+			}
 			//R2ODataTranslator postProcessor = new R2ODefaultDataTranslator();
 			//R2ODataTranslator postProcessor = new R2OFreddyPostProcessor();
-			R2ORunner runner = new R2ORunner();
+			R2ORunner runner = new R2ORunner(ODEMapsterTest.dataTranslator);
 			
 			
 			String status = runner.run(mappingDirectory, r2oConfigurationFile);

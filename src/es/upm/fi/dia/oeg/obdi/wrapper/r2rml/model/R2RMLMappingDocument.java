@@ -2,11 +2,10 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Vector;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -19,13 +18,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import es.upm.fi.dia.oeg.obdi.core.engine.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
-import es.upm.fi.dia.oeg.obdi.core.model.IConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.model.IPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants.MappingType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
@@ -34,13 +29,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidTriplesMapExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
-	private Collection<String> prefixes;
-	private Map<String, R2RMLTriplesMap> triplesMaps;
-	private Map<String, R2RMLObjectMap> objectMaps;
-	public Map<String, R2RMLObjectMap> getObjectMaps() {
-		return objectMaps;
-	}
+	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
 
+	private Collection<String> prefixes;
+	//private Collection<AbstractConceptMapping> triplesMaps;
 	private String mappingDocumentPath;
 	
 
@@ -76,12 +68,13 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		//parsing TriplesMap resources
 		ResIterator triplesMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
 		if(triplesMapResources != null) {
-			this.triplesMaps = new HashMap<String, R2RMLTriplesMap>();
+			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
 				Resource triplesMapResource = triplesMapResources.nextResource();
 				String triplesMapKey = triplesMapResource.getNameSpace() + triplesMapResource.getLocalName();
 				R2RMLTriplesMap tm = new R2RMLTriplesMap(triplesMapResource, this);
-				this.triplesMaps.put(triplesMapKey, tm);
+				tm.setId(triplesMapKey);
+				this.classMappings.add(tm);
 			}
 		}
 		
@@ -112,12 +105,12 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 
 		ResIterator triplesMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
 		if(triplesMapResources != null) {
-			this.triplesMaps = new HashMap<String, R2RMLTriplesMap>();
+			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
 				Resource triplesMapResource = triplesMapResources.nextResource();
 				String triplesMapKey = triplesMapResource.getNameSpace() + triplesMapResource.getLocalName();
 				R2RMLTriplesMap tm = new R2RMLTriplesMap(triplesMapResource, this);
-				this.triplesMaps.put(triplesMapKey, tm);
+				this.classMappings.add(tm);
 			}
 
 		}
@@ -131,8 +124,8 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		return mappingDocumentPath;
 	}
 
-	public Map<String, R2RMLTriplesMap> getTriplesMaps() {
-		return triplesMaps;
+	public Collection<AbstractConceptMapping> getTriplesMaps() {
+		return classMappings;
 	}
 
 	@Override
@@ -153,116 +146,110 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		return null;
 	}
 
-	@Override
-	public Collection<AbstractConceptMapping> getConceptMappings() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	@Override
-	public Collection<AbstractConceptMapping> getConceptMappingsByName(
+	public Collection<AbstractConceptMapping> getConceptMappingsByConceptName(
 			String conceptURI) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<AbstractConceptMapping> result = null;
+		
+		if(this.classMappings != null && this.classMappings.size() > 0) {
+			result = new Vector<AbstractConceptMapping>();
+			for(AbstractConceptMapping triplesMap : this.classMappings) {
+				R2RMLSubjectMap subjectMap = ((R2RMLTriplesMap)triplesMap).getSubjectMap();
+				Collection<String> classURIs = subjectMap.getClassURIs();
+				if(classURIs != null && classURIs.contains(conceptURI)) {
+					result.add(triplesMap);
+				}
+			}
+		}
+		return result;
 	}
 
-	@Override
-	public AbstractConceptMapping getConceptMappingById(String triplesMapID) {
-		return this.triplesMaps.get(triplesMapID);
-	}
+
 
 	@Override
 	public List<String> getMappedProperties() {
+		logger.warn("TODO: Implement getMappedProperties()");
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public Collection<IPropertyMapping> getPropertyMappings() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public Collection<AbstractPropertyMapping> getPropertyMappingsByPropertyURI(
-			String propertyURI) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public Collection<IPropertyMapping> getPropertyMappings(String domain,
-			String range) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public AbstractPropertyMapping getPropertyMappingByPropertyMappingID(
-			String propertyMappingID) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
+
+
+
 
 	@Override
 	public List<String> getMappedAttributes() {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getMappedAttributes()");
 		return null;
 	}
 
 	@Override
 	public Collection<IAttributeMapping> getAttributeMappings() {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getAttributeMappings()");
 		return null;
 	}
 
 	@Override
-	public Collection<IAttributeMapping> getAttributeMappings(String domain,
-			String range) {
+	public Collection<IAttributeMapping> getAttributeMappings(String domain,String range) {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getAttributeMappings(String domain,String range)");
 		return null;
 	}
 
 	@Override
 	public List<String> getMappedRelations() {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getMappedRelations()");
 		return null;
 	}
 
 	@Override
 	public Collection<IRelationMapping> getRelationMappings() {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getRelationMappings()");
 		return null;
 	}
 
 	@Override
-	public Collection<IRelationMapping> getRelationMappings(String domain,
-			String range) {
+	public Collection<IRelationMapping> getRelationMappings(String domain,String range) {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getRelationMappings(String domain,String range)");
 		return null;
 	}
 
 	@Override
 	public String getMappedConceptURI(String conceptMappingID) {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getMappedConceptURI(String conceptMappingID)");
 		return null;
 	}
+
+
 
 	@Override
-	public String getMappedPropertyURI(String propertyMappingID) {
+	public MappingType getPropertyMappingType(String propertyMappingID) {
 		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getMappingType(String propertyMappingID)");
 		return null;
 	}
 
-	@Override
-	public MappingType getMappingType(String propertyMappingID) {
-		// TODO Auto-generated method stub
-		return null;
+	public void setTriplesMaps(Collection<AbstractConceptMapping> triplesMaps) {
+		this.classMappings = triplesMaps;
 	}
 
-	public void setTriplesMaps(Map<String, R2RMLTriplesMap> triplesMaps) {
-		this.triplesMaps = triplesMaps;
-	}
+
+
+
+
+
 
 
 

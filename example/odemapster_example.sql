@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.9
+-- version 3.4.5
 -- http://www.phpmyadmin.net
 --
--- Servidor: localhost
--- Tiempo de generación: 04-10-2011 a las 11:02:49
--- Versión del servidor: 5.5.8
--- Versión de PHP: 5.3.5
+-- Host: localhost
+-- Generation Time: Nov 18, 2011 at 12:05 
+-- Server version: 5.5.16
+-- PHP Version: 5.3.8
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -16,35 +17,35 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Base de datos: `odemapster_example`
+-- Database: `odemapster_example`
 --
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `sport`
+-- Table structure for table `Sport`
 --
 
-CREATE TABLE IF NOT EXISTS `sport` (
+CREATE TABLE IF NOT EXISTS `Sport` (
   `ID` int(11) NOT NULL DEFAULT '0',
   `Name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Volcar la base de datos para la tabla `sport`
+-- Dumping data for table `Sport`
 --
 
-INSERT INTO `sport` (`ID`, `Name`) VALUES
+INSERT INTO `Sport` (`ID`, `Name`) VALUES
 (100, 'Tennis');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `student`
+-- Table structure for table `Student`
 --
 
-CREATE TABLE IF NOT EXISTS `student` (
+CREATE TABLE IF NOT EXISTS `Student` (
   `ID` int(11) NOT NULL DEFAULT '0',
   `Name` varchar(50) DEFAULT NULL,
   `Sport` int(11) DEFAULT NULL,
@@ -57,21 +58,25 @@ CREATE TABLE IF NOT EXISTS `student` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Volcar la base de datos para la tabla `student`
+-- Dumping data for table `Student`
 --
 
-INSERT INTO `student` (`ID`, `Name`, `Sport`, `status`, `webPage`, `phone`, `email`) VALUES
+INSERT INTO `Student` (`ID`, `Name`, `Sport`, `status`, `webPage`, `phone`, `email`) VALUES
 (1, 'Paul', 100, 'active', NULL, '777-3426', NULL),
 (2, 'John', NULL, 'active', NULL, NULL, 'john@acd.edu'),
 (3, 'George', NULL, 'active', 'www.george.edu', NULL, NULL),
 (4, 'Ringo', NULL, 'active', 'www.starr.edu', '888-4537', 'ringo@acd.edu');
 
 --
--- Filtros para las tablas descargadas (dump)
+-- Constraints for dumped tables
 --
 
 --
--- Filtros para la tabla `student`
+-- Constraints for table `Student`
 --
-ALTER TABLE `student`
-  ADD CONSTRAINT `student_ibfk_1` FOREIGN KEY (`Sport`) REFERENCES `sport` (`ID`);
+ALTER TABLE `Student`
+  ADD CONSTRAINT `Student_ibfk_1` FOREIGN KEY (`Sport`) REFERENCES `Sport` (`ID`);
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

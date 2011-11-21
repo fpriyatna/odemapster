@@ -342,7 +342,15 @@ public class R2RMLTC {
 		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
 		this.run(configurationFile, mappingDocumentFile, testName);
 	}
-	
+
+	@Test
+	public void testR2RMLTC0011c() throws Exception {
+		String testName = "R2RMLTC0011c";
+		String configurationFile = testName + ".r2rml.properties";
+		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
+		this.run(configurationFile, mappingDocumentFile, testName);
+	}
+
 	@Test
 	public void testR2RMLTC0012a() throws Exception {
 		String testName = "R2RMLTC0012a";
@@ -478,4 +486,6 @@ public class R2RMLTC {
 		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
 		this.run(configurationFile, mappingDocumentFile, testName);
 	}
+	
+
 }

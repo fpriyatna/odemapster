@@ -14,6 +14,7 @@ import Zql.ZUtils;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
@@ -26,7 +27,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.element.R2OTransformationExpress
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OPropertyMapping;
 
-public class R2OConceptMappingUnfolder {
+public class R2OConceptMappingUnfolder  {
 	private static Logger logger = Logger.getLogger(R2OConceptMappingUnfolder.class);
 	private R2OConceptMapping conceptMapping;
 	private R2OMappingDocument r2oMappingDocument;
@@ -151,9 +152,9 @@ public class R2OConceptMappingUnfolder {
 			}
 		}
 
-		List<R2OPropertyMapping> propertyMappings = conceptMapping.getPropertyMappings();
+		Collection<AbstractPropertyMapping> propertyMappings = conceptMapping.getPropertyMappings();
 		if(propertyMappings != null) {
-			for(R2OPropertyMapping propertyMappping : propertyMappings) {
+			for(AbstractPropertyMapping propertyMappping : propertyMappings) {
 				R2OPropertyMappingUnfolder r2oPropertyMappingUnfolder = new R2OPropertyMappingUnfolder(
 						this.conceptMapping, propertyMappping, r2oMappingDocument);
 				r2oPropertyMappingUnfolder.unfold(cmQuery);

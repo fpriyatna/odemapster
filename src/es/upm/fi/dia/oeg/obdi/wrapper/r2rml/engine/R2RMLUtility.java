@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
@@ -23,6 +24,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapValueType;
 
 import Zql.ZConstant;
+import Zql.ZExp;
+import Zql.ZExpression;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZStatement;
@@ -189,4 +192,34 @@ public class R2RMLUtility {
 		return result;
 		
 	}
+	
+	public static ZExp generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions, String parentTableAlias, String joinQueryAlias) {
+		ZExp onExpression = null;
+		if(joinConditions != null) {
+			for(R2RMLJoinCondition joinCondition : joinConditions) {
+				//String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
+				String childColumnName = joinCondition.getChildColumnName();
+				SQLSelectItem childSelectItem = new SQLSelectItem(childColumnName);  
+				String[] childColumnNameSplit = childColumnName.split("\\.");
+				if(childColumnNameSplit.length == 1) {
+					childColumnName = parentTableAlias + "." + childColumnName; 
+				} 
+				ZConstant childColumn = new ZConstant(childColumnName, ZConstant.COLUMNNAME);
+
+				 
+				String parentColumnName = joinQueryAlias + "." + joinCondition.getParentColumnName();
+				ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
+				
+				ZExp joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
+				if(onExpression == null) {
+					onExpression = joinConditionExpression;
+				} else {
+					onExpression = new ZExpression("AND", onExpression, joinConditionExpression);
+				}
+			}
+		}
+		
+		return onExpression;
+	}
+	
 }

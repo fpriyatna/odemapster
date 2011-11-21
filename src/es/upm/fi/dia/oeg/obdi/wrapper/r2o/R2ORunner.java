@@ -55,25 +55,38 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 public class R2ORunner extends AbstractRunner {
-	
+	private Query sparqQuery = null;
+
+	public void setSparqQuery(Query sparqQuery) {
+		this.sparqQuery = sparqQuery;
+	}
+
+	public void setSparqQuery(String sparqQuery) {
+		this.sparqQuery = QueryFactory.create(sparqQuery);
+	}
+
 	public R2ORunner() {
 		this.dataTranslator = new R2ODataTranslator();
 		this.parser = new R2OParser();
 	}
-	
+
+	public R2ORunner(AbstractDataTranslator dataTranslator) {
+		this.dataTranslator = dataTranslator;
+	}
+
 	private static Logger logger = Logger.getLogger(R2ORunner.class);
 	private static final String PRIMITIVE_OPERATIONS_FILE = "primitiveOperations.cfg";
 	//public static ConfigurationProperties configurationProperties;
 	public static R2OPrimitiveOperationsProperties primitiveOperationsProperties;
-	
-	
+
+
 
 
 	private R2OPrimitiveOperationsProperties loadPrimitiveOperationsFile(String primitiveOperationsFile) throws Exception{
 		logger.debug("Loading R2O operations file : " + primitiveOperationsFile);
 		try {
 			R2OPrimitiveOperationsProperties primitiveOperationsProperties = 
-				new R2OPrimitiveOperationsProperties(primitiveOperationsFile);
+					new R2OPrimitiveOperationsProperties(primitiveOperationsFile);
 			return primitiveOperationsProperties;
 		} catch(Exception e) {
 			logger.error("Error loading primitive operations file : " + PRIMITIVE_OPERATIONS_FILE);
@@ -88,85 +101,87 @@ public class R2ORunner extends AbstractRunner {
 			e.printStackTrace();
 			logger.error("Error in materializing sparql solution.");
 		}
-		
-	}
-	
 
-	
+	}
+
+
+
 	public String run(String mappingDirectory, String r2oConfigurationFile) throws Exception {
 		String status = null;
-		
+
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("substring", 3);
 		ZUtils.addCustomFunction("convert", 2);
 		ZUtils.addCustomFunction("coalesce", 2);
 		ZUtils.addCustomFunction("abs", 1);
 		ZUtils.addCustomFunction("lower", 1);
-		
+		ZUtils.addCustomFunction("length", 1);
+
 		//loading operations file
 		R2ORunner.primitiveOperationsProperties = 
-			this.loadPrimitiveOperationsFile(PRIMITIVE_OPERATIONS_FILE);
+				this.loadPrimitiveOperationsFile(PRIMITIVE_OPERATIONS_FILE);
 
 		//Loading R2O configuration file
 		R2ORunner.configurationProperties = 
-			this.loadConfigurationFile(mappingDirectory, r2oConfigurationFile);
+				this.loadConfigurationFile(mappingDirectory, r2oConfigurationFile);
 
 		//loading ontology file
 		String ontologyFilePath = configurationProperties.getOntologyFilePath();
-		
+
 		//parsing r2o mapping document
 		R2OParser parser = new R2OParser(); 
 		String r2oMappingDocumentPath = configurationProperties.getR2oFilePath();
 		R2OMappingDocument originalMappingDocument = 
-			(R2OMappingDocument) parser.parse(r2oMappingDocumentPath);
-		
+				(R2OMappingDocument) parser.parse(r2oMappingDocumentPath);
+
 		//test the parsing result
 		parser.testParseResult(configurationProperties.getR2oFilePath(), originalMappingDocument);
 
 		String outputFileName = configurationProperties.getOutputFilePath();
 
-		
+
 		//parsing sparql file path
 		String queryFilePath = configurationProperties.getQueryFilePath();
-//		R2OMappingDocument translationResultMappingDocument = null;
+		//		R2OMappingDocument translationResultMappingDocument = null;
 		Collection<R2OMappingDocument> translationResultMappingDocuments = new ArrayList<R2OMappingDocument>();
-		
-		if(queryFilePath == null || queryFilePath.equals("")) {
-//			translationResultMappingDocument = originalMappingDocument;
-			translationResultMappingDocuments.add(originalMappingDocument);
-			
 
-			
+		if(this.sparqQuery == null) {
+			//process SPARQL file
+			if(queryFilePath != null && !queryFilePath.equals("") ) {
+				logger.info("Parsing query file : " + queryFilePath);
+				this.sparqQuery = QueryFactory.read(queryFilePath);
+			}
+		}
+
+		if(this.sparqQuery == null) {
+			//			translationResultMappingDocument = originalMappingDocument;
+			translationResultMappingDocuments.add(originalMappingDocument);
 			this.materializeMappingDocuments(outputFileName, originalMappingDocument);
 		} else {
-			//process SPARQL file
-			logger.info("Parsing query file : " + queryFilePath);
-			Query originalQuery = QueryFactory.read(queryFilePath);
-			
 			//rewrite the SPARQL query if necessary
 			List<Query> queries = new ArrayList<Query>();
 			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
-				queries.add(originalQuery);
+				queries.add(sparqQuery);
 			} else {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
 				Collection <String> mappedOntologyElements = 
-					MappingsExtractor.getMappedPredicatesFromR2O(r2oMappingDocumentPath);
+						MappingsExtractor.getMappedPredicatesFromR2O(r2oMappingDocumentPath);
 				String rewritterWrapperMode = RewriterWrapper.fullMode;
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
-				queries = RewriterWrapper.rewrite(originalQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
-				
-				
+				queries = RewriterWrapper.rewrite(sparqQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
+
+
 				logger.debug("No of rewriting query result = " + queries.size());
 				logger.debug("queries = " + queries);
 			}			
-			
-			
+
+
 			//translate sparql into mappings
-//			SPARQL2MappingTranslator translator = 
-//				new SPARQL2MappingTranslator(originalMappingDocument);
-			
+			//			SPARQL2MappingTranslator translator = 
+			//				new SPARQL2MappingTranslator(originalMappingDocument);
+
 			//translate sparql into sql
 			R2OQueryTranslator translator = new R2OQueryTranslator(originalMappingDocument);
 			translator.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());
@@ -179,14 +194,14 @@ public class R2ORunner extends AbstractRunner {
 			Element resultsElement = null;
 			List<Element> headElements = null;
 			List<String> headElementsString = null;
-			
 
-			
+
+
 			for(Query query : queries) {
-//				translationResultMappingDocument = translator.processQuery(query);
+				//				translationResultMappingDocument = translator.processQuery(query);
 				try {
-					
-					
+
+
 					logger.debug("query(i) = " + query);
 					String sparql2SQLResult = translator.translate(query).toString();
 					logger.debug("sparql2sql = \n" + sparql2SQLResult);
@@ -222,7 +237,7 @@ public class R2ORunner extends AbstractRunner {
 						rootElement.appendChild(resultsElement);						
 					}
 
-					
+
 					String resultString = "result";
 					String bindingString = "binding";
 					int i=0;
@@ -252,16 +267,16 @@ public class R2ORunner extends AbstractRunner {
 			XMLUtility.saveXMLDocument(xmlDoc, outputFileName);
 			//logger.debug("translationResult = " + translationResultMappingDocument);			 
 		}
-		
+
 		logger.info("**********************DONE****************************\n\n");
 		return status;
 
 
 	}
-	
 
-	
-	
+
+
+
 
 	public static void main(String args[]) {
 		try {

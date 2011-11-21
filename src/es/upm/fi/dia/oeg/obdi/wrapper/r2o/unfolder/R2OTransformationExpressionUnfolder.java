@@ -12,6 +12,7 @@ import Zql.ZExpression;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidTransfomationExperessionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
@@ -90,7 +91,7 @@ public class R2OTransformationExpressionUnfolder {
 				new R2ORestrictionUnfolder(restriction); 
 			return r2oRestrictionUnfolder.unfoldRestriction();				
 		} if(operator.equalsIgnoreCase(R2OConstants.TRANSFORMATION_OPERATOR_CONCAT)) {
-			if(databaseType.equalsIgnoreCase(R2OConstants.DATABASE_SQLSERVER)) {
+			if(databaseType.equalsIgnoreCase(Constants.DATABASE_SQLSERVER)) {
 				ZExpression selectExpression = new ZExpression("+");
 				for(R2OArgumentRestriction argumentRestriction : argumentRestrictions) {
 					R2ORestriction restriction = argumentRestriction.getRestriction();
