@@ -6,18 +6,15 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
-import Zql.ZExp;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
@@ -39,7 +36,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public SQLSelectItem calculateBetaCMObject(String predicateURI,
+	public SQLSelectItem calculateBetaObject(String predicateURI,
 			AbstractConceptMapping cm, Node object)
 			throws QueryTranslationException {
 		SQLSelectItem selectItem = null;
@@ -91,16 +88,14 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 			
 			
 		}
-		// TODO Auto-generated method stub
-		logger.warn("Implement calculateBetaCMObject!");
-		logger.info("calculateBetaCMObject = " + selectItem);
+		logger.debug("calculateBetaCMObject = " + selectItem);
 		return selectItem;
 	}
 
 
 
 	@Override
-	public ZSelectItem calculateBetaCMSubject(AbstractConceptMapping cm) {
+	public ZSelectItem calculateBetaSubject(AbstractConceptMapping cm) {
 		ZSelectItem selectItem = null;
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
@@ -115,7 +110,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 			selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);
 		}
 		
-		logger.info("calculateBetaCMSubject = " + selectItem);
+		logger.debug("calculateBetaCMSubject = " + selectItem);
 		return selectItem;
 	}
 

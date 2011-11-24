@@ -21,7 +21,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapValueType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapType;
 
 import Zql.ZConstant;
 import Zql.ZExp;
@@ -147,14 +147,14 @@ public class R2RMLUtility {
 	public static Collection<ZSelectItem> getDatabaseColumns(R2RMLTermMap termMap) {
 		Collection<ZSelectItem> result = new HashSet<ZSelectItem>();
 
-		if(termMap.getTermMapType() == TermMapValueType.CONSTANT) {
+		if(termMap.getTermMapType() == TermMapType.CONSTANT) {
 			ZSelectItem selectItem = new ZSelectItem();
 			selectItem.setExpression(new ZConstant(termMap.getOriginalValue(), ZConstant.UNKNOWN));
 			result.add(selectItem);
-		} else if(termMap.getTermMapType() == TermMapValueType.COLUMN) {
+		} else if(termMap.getTermMapType() == TermMapType.COLUMN) {
 			ZSelectItem selectItem = new ZSelectItem(termMap.getOriginalValue());
 			result.add(selectItem);
-		} else if(termMap.getTermMapType() == TermMapValueType.TEMPLATE) {
+		} else if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
 			String template = termMap.getOriginalValue();
 			Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
 			if(attributes != null) {

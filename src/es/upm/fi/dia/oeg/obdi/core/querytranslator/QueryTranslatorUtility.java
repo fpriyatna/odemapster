@@ -23,10 +23,10 @@ import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.TranslatorUtility;
 
 
 public class QueryTranslatorUtility {
@@ -172,49 +172,53 @@ public class QueryTranslatorUtility {
 		return null;
 	}
 	
-	public static Collection<Node> terms(Op op) {
+	public static Collection<Node> terms(Op op, boolean ignoreRDFTypeStatement) {
 		Collection<Node> result = new HashSet<Node>();
 
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
-			result = QueryTranslatorUtility.terms(bgp);
+			result = QueryTranslatorUtility.terms(bgp, ignoreRDFTypeStatement);
 		} else if(op instanceof OpLeftJoin ) {
 			OpLeftJoin leftJoin = (OpLeftJoin) op;
-			result.addAll(terms(leftJoin.getLeft()));
-			result.addAll(terms(leftJoin.getRight()));
+			result.addAll(terms(leftJoin.getLeft(), ignoreRDFTypeStatement));
+			result.addAll(terms(leftJoin.getRight(), ignoreRDFTypeStatement));
 		} else if(op instanceof OpJoin ) {
 			OpJoin opJoin = (OpJoin) op;
-			result.addAll(terms(opJoin.getLeft()));
-			result.addAll(terms(opJoin.getRight()));			
+			result.addAll(terms(opJoin.getLeft(), ignoreRDFTypeStatement));
+			result.addAll(terms(opJoin.getRight(), ignoreRDFTypeStatement));			
 		} else if(op instanceof OpFilter) {
 			OpFilter filter = (OpFilter) op;
-			result.addAll(terms(filter.getSubOp()));
+			result.addAll(terms(filter.getSubOp(), ignoreRDFTypeStatement));
 		} else if(op instanceof OpUnion) {
 			OpUnion opUnion = (OpUnion) op;
-			result.addAll(terms(opUnion.getLeft()));
-			result.addAll(terms(opUnion.getRight()));
+			result.addAll(terms(opUnion.getLeft(), ignoreRDFTypeStatement));
+			result.addAll(terms(opUnion.getRight(), ignoreRDFTypeStatement));
 		}
 
 		return result;
 	}
 
-	public static Collection<Node> terms(OpBGP bgp) {
+	public static Collection<Node> terms(OpBGP bgp, boolean ignoreRDFTypeStatement) {
 		List<Triple> triples = bgp.getPattern().getList();
-		return QueryTranslatorUtility.terms(triples);
+		return QueryTranslatorUtility.terms(triples, ignoreRDFTypeStatement);
 	}
 
-	public static Collection<Node> terms(Collection<Triple> triples) {
+	public static Collection<Node> terms(Collection<Triple> triples, boolean ignoreRDFTypeStatement) {
 		Collection<Node> result = new HashSet<Node>();
 
 		for(Triple tp : triples) {
-			result.addAll(QueryTranslatorUtility.terms(tp));
+			result.addAll(QueryTranslatorUtility.terms(tp, ignoreRDFTypeStatement));
 		}
 
 		return result;
 	}
 
-	public static Set<Node> terms(Triple tp) {
+	public static Set<Node> terms(Triple tp, boolean ignoreRDFTypeStatement) {
 		Set<Node> result = new HashSet<Node>();
+		if(RDF.type.getURI().equals(tp.getPredicate().getURI())) {
+			return result;
+		}
+
 		Node subject = tp.getSubject();
 		if(subject.isURI() || subject.isBlank() || subject.isLiteral() || subject.isVariable()) {
 			result.add(subject);

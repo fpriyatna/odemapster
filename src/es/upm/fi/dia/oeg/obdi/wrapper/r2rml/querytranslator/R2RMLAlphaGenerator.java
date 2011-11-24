@@ -2,20 +2,25 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZExp;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OBetaGenerator;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
@@ -32,45 +37,33 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	}
 
 	@Override
-	public SQLLogicalTable calculateAlpha(Triple tp) throws Exception {
-		SQLLogicalTable sqlLogicalTable = null;
+	public Collection calculateAlpha(Triple tp) throws Exception {
+		Collection result = new Vector();
+		
+		//alpha subject
 		Node tpSubject = tp.getSubject();
-		Node tpPredicate = tp.getPredicate();
-		String predicateURI =tpPredicate.getURI();
 		Collection<AbstractConceptMapping> cms = super.mapNodeConceptMapping.get(tpSubject);
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
-		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
+		SQLLogicalTable alphaSubject = this.calculateAlphaSubject(tpSubject, cm);
+		result.add(alphaSubject);
 		
-		R2RMLLogicalTable logicalTable = cm.getLogicalTable();
-		sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
-		String logicalTableAlias = sqlLogicalTable.generateAlias();
-		logicalTable.setAlias(logicalTableAlias);
-		sqlLogicalTable.setAlias(logicalTableAlias);
-		
-//		if(pms == null) {
-//			R2RMLLogicalTable logicalTable = cm.getLogicalTable();
-//			sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
-//			String logicalTableAlias = sqlLogicalTable.generateAlias();
-//			logicalTable.setAlias(logicalTableAlias);
-//			sqlLogicalTable.setAlias(logicalTableAlias);
-//		} else {
-//			if(pms.size() > 1) {
-//				logger.warn("Multiple mappings defined for property : " + predicateURI);
-//			} 
-//			R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
-//			R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
-//			if(refObjectMap == null) {
-//				R2RMLLogicalTable logicalTable = cm.getLogicalTable();
-//				sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
-//				String logicalTableAlias = sqlLogicalTable.generateAlias();
-//				logicalTable.setAlias(logicalTableAlias);
-//				sqlLogicalTable.setAlias(logicalTableAlias);
-//			} else {
-//				
-//			}
-//		}
-		
-		return sqlLogicalTable;
+
+		//alpha predicate object
+		Node tpPredicate = tp.getPredicate();
+		Node tpObject = tp.getObject();
+		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(tpPredicate.getURI());
+		if(pms != null && pms.size() > 0) {
+			R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
+			
+			R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+			if(refObjectMap != null) { 
+				SQLQuery alphaPredicateObject = this.calculateAlphaPredicateObject(pm, tpObject, cm);
+				result.add(alphaPredicateObject);
+			}
+		}
+
+		logger.debug("calculateAlpha = " + result);
+		return result;
 		
 
 	}
@@ -78,21 +71,98 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	@Override
 	public  Object calculateAlphaTB(Collection<Triple> triples)
 			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Collection result = new Vector();
+		
+		Triple firstTriple = triples.iterator().next();
+		Node tpSubject = firstTriple.getSubject();
+		Collection<AbstractConceptMapping> cms = super.mapNodeConceptMapping.get(tpSubject);
+		R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
+		SQLLogicalTable alphaSubject = this.calculateAlphaSubject(tpSubject, cm);
+		result.add(alphaSubject);
+		
+		
+		//mapping projection of corresponding predicates
+		for(Triple tp : triples) {
+			Node tpPredicate = tp.getPredicate();
+			String tpPredicateURI = tpPredicate.getURI();
+			boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
+			if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
+				//do nothing
+			} else {
+				Node tpObject = tp.getObject();
+				Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(tpPredicateURI);
+				if(pms != null) {
+					R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
+					logger.debug("pm = " + pm);
+					R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+					if(refObjectMap != null) { 
+						SQLQuery alphaPredicateObject = 
+								this.calculateAlphaPredicateObject(pm, tpObject, cm);
+						result.add(alphaPredicateObject);
+					}
+				}				
+			}
+			
+
+		}
+
+		logger.debug("alphaTB = " + result);
+		return result;
+	}
+
+//	@Override
+//	public AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	@Override
+//	public AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
+//			throws Exception {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+	@Override
+	protected SQLLogicalTable calculateAlphaSubject(Node subject,
+			AbstractConceptMapping abstractConceptMapping) {
+		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
+		R2RMLLogicalTable logicalTable = cm.getLogicalTable();
+		SQLLogicalTable sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
+		String logicalTableAlias = sqlLogicalTable.generateAlias();
+		logicalTable.setAlias(logicalTableAlias);
+		sqlLogicalTable.setAlias(logicalTableAlias);
+		cm.setAlias(logicalTableAlias);
+		return sqlLogicalTable;
 	}
 
 	@Override
-	public AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	protected SQLQuery calculateAlphaPredicateObject(
+			AbstractPropertyMapping abstractPropertyMapping,
+			Node tpObject, AbstractConceptMapping abstractConceptMapping) {
+		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
+		String tripleMapAlias = cm.getAlias();
+		SQLQuery joinQuery = null;
+		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
+		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+		if(refObjectMap != null) { 
+			joinQuery = new SQLQuery();
+			joinQuery.setJoinType("INNER");
+			String joinQueryAlias = joinQuery.generateAlias();
+			joinQuery.setAlias(joinQueryAlias);
+			refObjectMap.setAlias(joinQueryAlias);
+			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
+			SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
+			joinQuery.addLogicalTable(sqlParentLogicalTable);
 
-	@Override
-	public AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
+			ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, tripleMapAlias, joinQueryAlias);
+			if(onExpression != null) {
+				joinQuery.setOnExp(onExpression);
+			}
+		}
+
+		return joinQuery;
 	}
 
 }

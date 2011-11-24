@@ -41,7 +41,7 @@ public class R2OBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public SQLSelectItem calculateBetaCMSubject(AbstractConceptMapping cm) {
+	public SQLSelectItem calculateBetaSubject(AbstractConceptMapping cm) {
 		String cmURIAlias = ((R2OConceptMapping) cm).generateURIAlias();
 		ZConstant cmURIAliasConstant = new ZConstant(cmURIAlias, ZConstant.COLUMNNAME);
 		SQLSelectItem selectItem = new SQLSelectItem();
@@ -52,7 +52,7 @@ public class R2OBetaGenerator extends AbstractBetaGenerator {
 
 	
 	@Override
-	public SQLSelectItem calculateBetaCMObject(String predicateURI, AbstractConceptMapping cm, Node object) 
+	public SQLSelectItem calculateBetaObject(String predicateURI, AbstractConceptMapping cm, Node object) 
 			throws QueryTranslationException {
 		SQLSelectItem selectItem = null;
 		

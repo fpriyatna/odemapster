@@ -111,7 +111,7 @@ public class BSBMMySqlTest {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
+		
 	public void testBSBMQuery07Mysql() throws Exception {
 		String testcaseName = "bsbm07";
 		String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS() + testcaseName + "/";
@@ -119,7 +119,7 @@ public class BSBMMySqlTest {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 
-	@Test	
+		
 	public void testBSBMQuery07TBMysql() throws Exception {
 		String testcaseName = "bsbm07";
 		String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS() + testcaseName + "/";
@@ -135,7 +135,6 @@ public class BSBMMySqlTest {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
 	public void testBSBMQuery08Mysql() throws Exception {
 		String testcaseName = "bsbm08";
 		String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS() + testcaseName + "/";
@@ -151,7 +150,6 @@ public class BSBMMySqlTest {
 		ODEMapsterTest.testProcess(r2oConfigurationFile, mappingDirectory);
 	}
 	
-	@Test	
 	public void testBSBMQuery10Mysql() throws Exception {
 		String testcaseName = "bsbm10";
 		String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS() + testcaseName + "/";

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sparql>
     <head>
-        <variable name="a"/>
-        <variable name="e"/>
         <variable name="w"/>
+        <variable name="e"/>
+        <variable name="a"/>
     </head>
     <results>
         <result>
-            <binding name="a">http://mappingpedia.linkeddata.es/resource/Student/2</binding>
-            <binding name="e">john@acd.edu</binding>
             <binding name="w"/>
+            <binding name="e">john@acd.edu</binding>
+            <binding name="a">http://mappingpedia.linkeddata.es/resource/Student/2</binding>
         </result>
         <result>
-            <binding name="a">http://mappingpedia.linkeddata.es/resource/Student/4</binding>
-            <binding name="e">ringo@acd.edu</binding>
             <binding name="w">www.starr.edu</binding>
+            <binding name="e">ringo@acd.edu</binding>
+            <binding name="a">http://mappingpedia.linkeddata.es/resource/Student/4</binding>
         </result>
     </results>
 </sparql>

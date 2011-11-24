@@ -48,7 +48,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapValueType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
@@ -302,7 +302,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				String language = null;
 				language = objectMap.getLanguageTag();
 				
-				if(objectMap.getTermMapType() == TermMapValueType.COLUMN) {
+				if(objectMap.getTermMapType() == TermMapType.COLUMN) {
 					if(datatype == null) {
 						String columnName = objectMap.getColumnName();
 						SQLSelectItem selectItem = new SQLSelectItem(columnName);

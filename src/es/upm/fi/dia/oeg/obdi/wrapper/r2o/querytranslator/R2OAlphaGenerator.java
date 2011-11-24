@@ -66,7 +66,7 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 		R2OConceptMapping cmStripped = cm.getStripped();
 
 		//mapping selection for corresponding subject value
-		cmStripped = this.calculateAlphaSubject(subject, cmStripped);
+		cmStripped = (R2OConceptMapping) this.calculateAlphaSubject(subject, cmStripped);
 		
 		//mapping projection of the predicate
 		Node predicate = tp.getPredicate();
@@ -74,7 +74,7 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 
 		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicate.getURI());
 		for(AbstractPropertyMapping pm : pms) {
-			cmStripped = this.calculateAlphaPredicateObject(pm, object, cmStripped);
+			cmStripped = (R2OConceptMapping) this.calculateAlphaPredicateObject(pm, object, cmStripped);
 		}
 
 		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped, 
@@ -84,7 +84,6 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 		return cmStripped;
 	}
 
-	@Override
 	public R2OConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
 	throws Exception {
 		Triple firstTriple = triples.iterator().next();
@@ -94,7 +93,7 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 		R2OConceptMapping cmStripped = cm.getStripped();
 
 		//mapping selection for corresponding subject value
-		cmStripped = this.calculateAlphaSubject(subject, cmStripped);
+		cmStripped = (R2OConceptMapping) this.calculateAlphaSubject(subject, cmStripped);
 
 		//mapping projection of corresponding predicates
 		for(Triple tp : triples) {
@@ -111,7 +110,8 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 		return cmStripped;
 	}
 
-	private R2OConceptMapping calculateAlphaSubject(Node subject, R2OConceptMapping cm) {
+	protected R2OConceptMapping calculateAlphaSubject(Node subject, AbstractConceptMapping abstractConceptMapping) {
+		R2OConceptMapping cm = (R2OConceptMapping) abstractConceptMapping;
 		R2OTransformationExpression cmURIAs = cm.getURIAs();
 		
 		//mapping selection for corresponding uri subject
@@ -141,8 +141,9 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 		return cm;
 	}
 
-	private R2OConceptMapping calculateAlphaPredicateObject(AbstractPropertyMapping pm
-			, Node object, R2OConceptMapping cm) {
+	protected R2OConceptMapping calculateAlphaPredicateObject(AbstractPropertyMapping pm
+			, Node object, AbstractConceptMapping abstractConceptMapping) {
+		R2OConceptMapping cm = (R2OConceptMapping) abstractConceptMapping; 
 		if(pm instanceof R2OAttributeMapping) {
 			R2OAttributeMapping am = (R2OAttributeMapping) pm;
 			cm.addAttributeMapping(am.clone());

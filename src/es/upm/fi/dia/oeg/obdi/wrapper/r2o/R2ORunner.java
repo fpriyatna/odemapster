@@ -1,28 +1,14 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -30,29 +16,15 @@ import Zql.ZUtils;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.rdf.model.Model;
 
 import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractParser;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.ModelWriter;
-import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
-import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
-import es.upm.fi.dia.oeg.obdi.core.materializer.NTripleMaterializer;
-import es.upm.fi.dia.oeg.obdi.core.materializer.RDFXMLMaterializer;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.SPARQL2MappingTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OUnfolder;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.RelationMappingUnfolderException;
 
 public class R2ORunner extends AbstractRunner {
 	private Query sparqQuery = null;

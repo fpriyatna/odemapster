@@ -23,7 +23,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidTriplesMapExcepti
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap.ObjectMapType;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapValueType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLTriplesMap extends AbstractConceptMapping 
 implements R2RMLElement, IConceptMapping {
@@ -194,59 +194,42 @@ implements R2RMLElement, IConceptMapping {
 		return result;
 	}
 
-	public String getPKColumn() {
-		TermMapValueType termMapValueType = this.subjectMap.getTermMapType();
-		
-		if(termMapValueType == TermMapValueType.COLUMN) {
-			return this.subjectMap.getColumnName();
-		} else if(termMapValueType == TermMapValueType.TEMPLATE) {
-			String stringTemplate = this.subjectMap.getTemplate();
-			Collection<String> attributes = 
-					R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
-
-			return attributes.iterator().next();
-		} else {
-			return null;
-		}
-	}
-
-	public String getPKValue(String uri) {
-		String result = null;
-		
-		TermMapValueType termMapValueType = this.subjectMap.getTermMapType();
-		
-		if(termMapValueType == TermMapValueType.TEMPLATE) {
-			String stringTemplate = this.subjectMap.getTemplate();
-			int beginIndex = stringTemplate.indexOf("{");
-			int endIndex = stringTemplate.indexOf("}");
-			
-			result = uri.substring(beginIndex);
-			//result = uri.substring(beginIndex -1 , uri.length());
-		}
-
-		return result;
-	}
+//	public String getPKColumn() {
+//		TermMapValueType termMapValueType = this.subjectMap.getTermMapType();
+//		
+//		if(termMapValueType == TermMapValueType.COLUMN) {
+//			return this.subjectMap.getColumnName();
+//		} else if(termMapValueType == TermMapValueType.TEMPLATE) {
+//			String stringTemplate = this.subjectMap.getTemplate();
+//			Collection<String> attributes = 
+//					R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
+//
+//			return attributes.iterator().next();
+//		} else {
+//			return null;
+//		}
+//	}
+//
+//	public String getPKValue(String uri) {
+//		String result = null;
+//		
+//		TermMapValueType termMapValueType = this.subjectMap.getTermMapType();
+//		
+//		if(termMapValueType == TermMapValueType.TEMPLATE) {
+//			String stringTemplate = this.subjectMap.getTemplate();
+//			int beginIndex = stringTemplate.indexOf("{");
+//			int endIndex = stringTemplate.indexOf("}");
+//			
+//			result = uri.substring(beginIndex);
+//			//result = uri.substring(beginIndex -1 , uri.length());
+//		}
+//
+//		return result;
+//	}
 	
 	@Override
 	public boolean hasWellDefinedURIExpression() {
-		boolean result = false;
-
-		String columnName = this.subjectMap.getColumnName();
-		if(columnName != null) {
-			result = true;
-		} else {
-			String stringTemplate = this.subjectMap.getTemplate();
-			if(stringTemplate != null) {
-				Collection<String> attributes = 
-						R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
-				if(attributes != null && attributes.size() == 1) {
-					result = true;
-				}
-			} else {
-				result = false;
-			}
-		}
-
+		boolean result = this.subjectMap.hasWellDefinedURIExpression();
 		return result;
 	}
 

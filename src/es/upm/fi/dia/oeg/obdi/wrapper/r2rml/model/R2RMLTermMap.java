@@ -19,7 +19,7 @@ public abstract class R2RMLTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);
 	
 	//public enum TermType {IRI, BLANK_NODE, LITERAL};
-	public enum TermMapValueType {CONSTANT, COLUMN, TEMPLATE};
+	public enum TermMapType {CONSTANT, COLUMN, TEMPLATE};
 	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH};
 	
 	private String constantValue;
@@ -41,14 +41,14 @@ public abstract class R2RMLTermMap {
 
 
 	private String inverseExpression;
-	private TermMapValueType termMapType;
+	private TermMapType termMapType;
 	private TermMapPosition termMapPosition;
 	
 	private String alias;
 	
 	R2RMLTermMap(TermMapPosition termMapPosition, String constantValue) {
 		this.termMapPosition = termMapPosition;
-		this.termMapType = TermMapValueType.CONSTANT;
+		this.termMapType = TermMapType.CONSTANT;
 		this.constantValue = constantValue;
 		this.termType = this.determineTermType();
 	}
@@ -59,17 +59,17 @@ public abstract class R2RMLTermMap {
 		
 		Statement constantStatement = resource.getProperty(R2RMLConstants.R2RML_CONSTANT_PROPERTY);
 		if(constantStatement != null) {
-			this.termMapType = TermMapValueType.CONSTANT;
+			this.termMapType = TermMapType.CONSTANT;
 			this.constantValue = constantStatement.getObject().toString();
 		} else {
 			Statement columnStatement = resource.getProperty(R2RMLConstants.R2RML_COLUMN_PROPERTY);
 			if(columnStatement != null) {
-				this.termMapType = TermMapValueType.COLUMN;
+				this.termMapType = TermMapType.COLUMN;
 				this.columnName = columnStatement.getObject().toString();
 			} else {
 				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);
 				if(templateStatement != null) {
-					this.termMapType = TermMapValueType.TEMPLATE;
+					this.termMapType = TermMapType.TEMPLATE;
 					this.template = templateStatement.getObject().toString();
 				} else {
 					String termMapType;
@@ -115,11 +115,11 @@ public abstract class R2RMLTermMap {
 
 	
 	public String getOriginalValue() {
-		if(this.termMapType == TermMapValueType.CONSTANT) {
+		if(this.termMapType == TermMapType.CONSTANT) {
 			return this.constantValue;
-		} else if(this.termMapType == TermMapValueType.COLUMN) {
+		} else if(this.termMapType == TermMapType.COLUMN) {
 			return this.columnName;
-		} else if(this.termMapType == TermMapValueType.TEMPLATE) {
+		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			return this.template;
 		} else {
 			return null;
@@ -139,7 +139,7 @@ public abstract class R2RMLTermMap {
 		String originalValue = this.getOriginalValue();
 
 
-		if(termMapType == TermMapValueType.COLUMN) {
+		if(termMapType == TermMapType.COLUMN) {
 
 			if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
 				String[] originalValueSplit = originalValue.split("\\.");
@@ -148,9 +148,9 @@ public abstract class R2RMLTermMap {
 			}
 
 			result = rs.getString(originalValue);
-		} else if(termMapType == TermMapValueType.CONSTANT) {
+		} else if(termMapType == TermMapType.CONSTANT) {
 			result = originalValue;
-		} else if(termMapType == TermMapValueType.TEMPLATE) {
+		} else if(termMapType == TermMapType.TEMPLATE) {
 			Collection<String> attributes = 
 					R2RMLUtility.getAttributesFromStringTemplate(originalValue);
 			Map<String,String> replacements = new HashMap<String, String>();
@@ -187,9 +187,9 @@ public abstract class R2RMLTermMap {
 	public Collection<String> getDatabaseColumnsString() {
 		Collection<String> result = new HashSet<String>();
 		
-		if(this.termMapType == TermMapValueType.COLUMN) {
+		if(this.termMapType == TermMapType.COLUMN) {
 			result.add(this.getOriginalValue());
-		} else if(this.termMapType == TermMapValueType.TEMPLATE) {
+		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			String template = this.getOriginalValue();
 			Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
 			if(attributes != null) {
@@ -207,11 +207,11 @@ public abstract class R2RMLTermMap {
 	@Override
 	public String toString() {
 		String result = "";
-		if(this.termMapType == TermMapValueType.CONSTANT) {
+		if(this.termMapType == TermMapType.CONSTANT) {
 			result = "Constant";
-		} else if(this.termMapType == TermMapValueType.COLUMN) {
+		} else if(this.termMapType == TermMapType.COLUMN) {
 			result = "Column";
-		} else if(this.termMapType == TermMapValueType.TEMPLATE) {
+		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			result = "Template";
 		}
 		
@@ -220,7 +220,7 @@ public abstract class R2RMLTermMap {
 		return result;
 	}
 
-	public TermMapValueType getTermMapType() {
+	public TermMapType getTermMapType() {
 		return termMapType;
 	}
 
@@ -254,7 +254,7 @@ public abstract class R2RMLTermMap {
 	}
 	
 	private String determineTermType() {
-		if(this.termMapPosition == TermMapPosition.OBJECT && this.termMapType == TermMapValueType.COLUMN) {
+		if(this.termMapPosition == TermMapPosition.OBJECT && this.termMapType == TermMapType.COLUMN) {
 			return R2RMLConstants.R2RML_LITERAL_URI;
 		} else {
 			return R2RMLConstants.R2RML_IRI_URI;
@@ -269,5 +269,60 @@ public abstract class R2RMLTermMap {
 
 	public void setAlias(String alias) {
 		this.alias = alias;
+	}
+	
+	public String getTemplateColumn() {
+		TermMapType termMapValueType = this.getTermMapType();
+		
+		if(termMapValueType == TermMapType.COLUMN) {
+			return this.getColumnName();
+		} else if(termMapValueType == TermMapType.TEMPLATE) {
+			String stringTemplate = this.getTemplate();
+			Collection<String> attributes = 
+					R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
+
+			return attributes.iterator().next();
+		} else {
+			return null;
+		}
+	}
+
+	public String getTemplateValue(String uri) {
+		String result = null;
+		
+		TermMapType termMapValueType = this.getTermMapType();
+		
+		if(termMapValueType == TermMapType.TEMPLATE) {
+			String stringTemplate = this.getTemplate();
+			int beginIndex = stringTemplate.indexOf("{");
+			int endIndex = stringTemplate.indexOf("}");
+			
+			result = uri.substring(beginIndex);
+			//result = uri.substring(beginIndex -1 , uri.length());
+		}
+
+		return result;
+	}
+	
+	public boolean hasWellDefinedURIExpression() {
+		boolean result = false;
+
+		String columnName = this.getColumnName();
+		if(columnName != null) {
+			result = true;
+		} else {
+			String stringTemplate = this.getTemplate();
+			if(stringTemplate != null) {
+				Collection<String> attributes = 
+						R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
+				if(attributes != null && attributes.size() == 1) {
+					result = true;
+				}
+			} else {
+				result = false;
+			}
+		}
+
+		return result;
 	}
 }

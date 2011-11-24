@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -54,14 +55,9 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.unfolder.R2OConceptMappingUnfolder;
 
 public class R2OQueryTranslator extends AbstractQueryTranslator {
-	
-
 	private static Logger logger = Logger.getLogger(R2OQueryTranslator.class);
-	//private R2OMappingDocument mappingDocument;
-	
-	
 	private Map<Triple, R2OConceptMapping> mapTripleCM = new HashMap<Triple, R2OConceptMapping>();
-
+	protected Map<Node, String> mapNodeKey = new HashMap<Node, String>();
 	
 	public R2OQueryTranslator(AbstractMappingDocument mappingDocument) {
 		super(mappingDocument);
@@ -69,224 +65,42 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 	}
 
 	@Override
-	protected ZExpression genCondSQLPredicateObject(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception {
-		R2OConceptMapping cm = this.mapTripleCM.get(tp);
-		return this.genCondSQLPredicateObject(tp, betaGenerator, cm);
-	}
-	
-
-	@Override
-	protected ZExpression genCondSQLSubject(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception {
-		AbstractConceptMapping cm = this.mapTripleCM.get(tp);
-		return this.genCondSQLSubject(tp, betaGenerator, cm);
-	}
-	
-
-	
-	private ZExpression genCondSQLTB(Collection<Triple> tripleBlock, AbstractBetaGenerator betaGenerator) throws Exception {
-		
-		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
-		Collection<ZExpression> exps = new HashSet<ZExpression>();
-
-		ZExpression condSubject = this.genCondSQLSubject(tripleBlock.iterator().next(), betaGenerator);
-		if(condSubject != null) {
-			exps.add(condSubject);
-		}
-		for(Triple tp : tripleBlock) {
-			ZExpression cond = this.genCondSQLPredicateObject(tp, betaGenerator);
-			if(cond != null) {
-				exps.add(cond);
-			}
-			result = new ZExpression("AND", result, cond);
-		}
-
-		ZExpression result2;
-		if(exps.size() == 0) {
-			result2 = null;
-		} else if(exps.size() == 1) {
-			result2 = exps.iterator().next();
-		} else {
-			result2 = new ZExpression("AND");
-			for(ZExp exp : exps) {
-				result2.addOperand(exp);
-			}
-		}
-		logger.debug("genCondSQLTB = " + result2);
-		return result2;
-
-	}
-	
-	@Override
-	protected Collection<ZSelectItem> genPRSQL(
-			Triple tp, AbstractBetaGenerator betaGenerator, NameGenerator nameGenerator)
-			throws Exception {
-		R2OConceptMapping cmSubject = this.mapTripleCM.get(tp);
-		return this.genPRSQL(tp, betaGenerator, nameGenerator, cmSubject);
-	}
-	
-
-	
-
-
-	@Override
-	protected Collection<ZSelectItem> genPRSQLObject(Node object, Triple tp,
-			AbstractBetaGenerator betaGenerator,
-			AbstractConceptMapping cmSubject) throws Exception {
-		
-		Collection<ZSelectItem> selectItems = super.genPRSQLObject(object, tp, betaGenerator, cmSubject);
-		ZSelectItem selectItem = selectItems.iterator().next();
-		
-		Collection<AbstractConceptMapping> cmObjects = this.mapInferredTypes.get(object);
-		if(cmObjects != null) {
-			AbstractConceptMapping cmObject = cmObjects.iterator().next();
-			if(cmObject != null) {
-				
-				if(cmSubject.hasWellDefinedURIExpression()) {
-					String selectItemColumn2 = selectItem.getExpression() + R2OConstants.KEY_SUFFIX;
-					String selectItemAlias2 = selectItem.getAlias() + R2OConstants.KEY_SUFFIX;
-					ZSelectItem selectItem2 = new SQLSelectItem(selectItemColumn2);
-					selectItem2.setAlias(selectItemAlias2);
-					selectItems.add(selectItem2);
-					this.mapNodeKey.put(object, selectItemAlias2);
-				} 
-			}			
-		} 
-		
-		return selectItems;
-	}
-
-
-
-
-	@Override
-	protected ZSelectItem genPRSQLPredicate(Node predicate, Triple tp,
-			AbstractBetaGenerator betaGenerator,
-			AbstractConceptMapping cmSubject) throws Exception {
-		ZSelectItem selectItem = betaGenerator.calculateBetaCM(tp, POS.pre, cmSubject);
-		selectItem.setAlias(nameGenerator.generateName(tp, predicate));
-		return selectItem;
-	}
-	
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-	@Override
-	protected Collection<ZSelectItem> genPRSQLSubject(Node subject, Triple tp,
-			AbstractBetaGenerator betaGenerator,
-			AbstractConceptMapping cmSubject) throws Exception {
-		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
-		
-		R2OTransformationExpression cmSubjectURIAs = ((R2OConceptMapping)cmSubject).getURIAs();
-		ZSelectItem selectItemSubject = betaGenerator.calculateBetaCM(tp, POS.sub, cmSubject);
-		String selectItemSubjectAlias = nameGenerator.generateName(tp, subject); 
-		selectItemSubject.setAlias(selectItemSubjectAlias);
-		selectItems.add(selectItemSubject); //line 21
-		if(URIUtility.isWellDefinedURIExpression(cmSubjectURIAs)) {
-			R2OColumnRestriction pkColumnRestriction = (R2OColumnRestriction) cmSubjectURIAs.getLastRestriction();
-			R2ODatabaseColumn pkColumn = pkColumnRestriction.getDatabaseColumn();
-			//ZSelectItem selectItemSubjectPK = new R2OSelectItem(pkColumn.getFullColumnName());
-			ZSelectItem selectItemSubjectPK = new SQLSelectItem(((R2OConceptMapping)cmSubject).generatePKColumnAlias());
-			String selectItemSubjectPKAlias = selectItemSubjectAlias + R2OConstants.KEY_SUFFIX;
-			selectItemSubjectPK.setAlias(selectItemSubjectPKAlias);
-			selectItems.add(selectItemSubjectPK);
-			this.mapNodeKey.put(subject, selectItemSubjectPKAlias);
-		} 
-
-		return selectItems;
-	}
-	
-
-	
-	private Collection<ZSelectItem> genPRSQLTB(
-			Collection<Triple> tripleBlock, AbstractBetaGenerator betaGenerator, NameGenerator nameGenerator)
-			throws Exception {
-		Collection<ZSelectItem> prList = new HashSet<ZSelectItem>();
-		Triple firstTriple = tripleBlock.iterator().next();
-		Node subject = firstTriple.getSubject();
-		R2OConceptMapping cmSubject = this.mapTripleCM.get(firstTriple);
-
-		Collection<ZSelectItem> selectItemsSubjects = this.genPRSQLSubject(
-				subject, firstTriple, betaGenerator, cmSubject);
-		prList.addAll(selectItemsSubjects);
-
-		
-		for(Triple tp : tripleBlock) {
-			Node predicate = tp.getPredicate();
-			Node object = tp.getObject();
-
-			if(predicate != subject) {
-				ZSelectItem selectItemPredicate = this.genPRSQLPredicate(predicate, tp, betaGenerator, cmSubject);
-				prList.add(selectItemPredicate);
-				
-			}
-
-			if(object != subject && object != predicate) {
-				Collection<ZSelectItem> selectItemsObject = this.genPRSQLObject(object, tp, betaGenerator, cmSubject);
-				prList.addAll(selectItemsObject);
-				
-			}
-		}
-
-		Collection<ZSelectItem> prList2 = new Vector<ZSelectItem>(prList);
-
-		return prList2;
-	}
-	
-	@Override
-	protected ZExp transConstant(NodeValue nodeValue) {
+	protected ZExp transIRI(Node node) {
 		ZExp result = null;
-
-		Node node = nodeValue.getNode();
-		if(nodeValue.isLiteral()) {
-			if(nodeValue.isNumber()) {
-				result = new ZConstant(node.getLiteralValue().toString(), ZConstant.NUMBER);	
-			} else {
-				result = new ZConstant(node.getLiteralValue().toString(), ZConstant.STRING);
-			}
-		} else if(nodeValue.isIRI()) {
-			Collection<AbstractConceptMapping> cms = this.mapInferredTypes.get(node);
-			if(cms != null) {
-				R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
-				if(cm != null) {
-					R2OTransformationExpression uriAs = cm.getURIAs();
-					if(URIUtility.isWellDefinedURIExpression(uriAs)) {
-						int index = URIUtility.getIRILengthWithoutPK(uriAs);
-						String pk = node.getURI().substring(index);
-						
-						R2OColumnRestriction lastRestriction = URIUtility.getLastRestriction(uriAs);
-						String dataType = lastRestriction.getDatabaseColumn().getDataType();
-						if(R2OConstants.DATATYPE_DOUBLE.equals(dataType) ||
-								R2OConstants.DATATYPE_INTEGER.equals(dataType) ||
-								R2OConstants.DATATYPE_NUMBER.equals(dataType)) {
-							result = new ZConstant(pk, ZConstant.NUMBER);
-						} else {
-							result = new ZConstant(pk, ZConstant.STRING);
-						}
+		
+		Collection<AbstractConceptMapping> cms = this.mapInferredTypes.get(node);
+		if(cms != null) {
+			R2OConceptMapping cm = (R2OConceptMapping) cms.iterator().next();
+			if(cm != null) {
+				R2OTransformationExpression uriAs = cm.getURIAs();
+				if(URIUtility.isWellDefinedURIExpression(uriAs)) {
+					int index = URIUtility.getIRILengthWithoutPK(uriAs);
+					String pk = node.getURI().substring(index);
+					
+					R2OColumnRestriction lastRestriction = URIUtility.getLastRestriction(uriAs);
+					String dataType = lastRestriction.getDatabaseColumn().getDataType();
+					if(R2OConstants.DATATYPE_DOUBLE.equals(dataType) ||
+							R2OConstants.DATATYPE_INTEGER.equals(dataType) ||
+							R2OConstants.DATATYPE_NUMBER.equals(dataType)) {
+						result = new ZConstant(pk, ZConstant.NUMBER);
 					} else {
-						result = new ZConstant(node.getLocalName(), ZConstant.COLUMNNAME);
+						result = new ZConstant(pk, ZConstant.STRING);
 					}
 				} else {
 					result = new ZConstant(node.getLocalName(), ZConstant.COLUMNNAME);
-				}					
+				}
 			} else {
 				result = new ZConstant(node.getLocalName(), ZConstant.COLUMNNAME);
-			}
-
+			}					
+		} else {
+			result = new ZConstant(node.getLocalName(), ZConstant.COLUMNNAME);
 		}
+		
 		return result;
 	}
+	
+	
+
 
 	@Override
 	public SQLQuery translate(Query sparqlQuery) throws Exception  {
@@ -304,7 +118,8 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 		AbstractBetaGenerator betaGenerator = 
 			new R2OBetaGenerator(mapInferredTypes, this.mappingDocument);
 		this.betaGenerator = betaGenerator;
-		
+		this.prSQLGenerator = new R2OPRSQLGenerator(mapInferredTypes, mapTripleCM, mapNodeKey);
+		this.condSQLGenerator = new R2OCondSQLGenerator(betaGenerator, mapInferredTypes, mapTripleCM);
 		SQLQuery sparql2SQLQuery =  this.trans(opSparqlQuery);
 		logger.debug("translate = \n" + sparql2SQLQuery);
 		return sparql2SQLQuery;
@@ -325,129 +140,15 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 	}
 
 
-	@Override
-	protected SQLQuery transProject(Op opQuery) throws Exception {
-		
-
-		long sliceLength = -1;
-		boolean isDistinct = false;
-		Vector<ZOrderBy> orderByConditions = null;
-
-		OpSlice opSlice = null;
-		OpDistinct opDistinct = null;
-		OpProject opProject = null;
-		OpOrder opOrder = null;
-		Op graphPatternOp = null;
-		
-		
-		//slice
-		//distinct
-		//project
-		//order
-		if(opQuery instanceof OpSlice) {
-			opSlice = (OpSlice) opQuery;
-			sliceLength = opSlice.getLength();
-			Op opSliceSubOp = opSlice.getSubOp();
-			if(opSliceSubOp instanceof OpProject) {
-				opProject = (OpProject) opSliceSubOp;
-			} else if(opSliceSubOp instanceof OpDistinct) {
-				opDistinct = (OpDistinct) opSliceSubOp;
-				Op opDistinctSubOp = opDistinct.getSubOp();
-				if (opDistinctSubOp instanceof OpProject) {
-					opProject = (OpProject) opDistinctSubOp;
-				}
-			}
-		} else if(opQuery instanceof OpDistinct) {
-			opDistinct = (OpDistinct) opQuery;
-			Op opDistinctSubOp = opDistinct.getSubOp();
-			if (opDistinctSubOp instanceof OpProject) {
-				opProject = (OpProject) opDistinctSubOp;
-			}				
-		} else if (opQuery instanceof OpProject) {
-			opProject = (OpProject) opQuery;
-		} 
-		
-
-		if(opDistinct != null) {
-			isDistinct = true;
-		}
-		
-		if(opProject != null) {
-			Op opProjectSubOp = opProject.getSubOp();
-			if(opProjectSubOp instanceof OpOrder) {
-				opOrder = (OpOrder) opProjectSubOp;
-				graphPatternOp = opOrder.getSubOp();
-			} else {
-				graphPatternOp = opProject.getSubOp();
-			}
-		}
-		
-		SQLQuery gpSQL = this.trans(graphPatternOp);
-		String gpSQLAlias = gpSQL.generateAlias();
-		logger.debug("gpSQL result = " + gpSQL.toString());
-
-		if(opOrder != null) {
-			orderByConditions = new Vector<ZOrderBy>();
-			for(SortCondition sortCondition : opOrder.getConditions()) {
-				int sortConditionDirection = sortCondition.getDirection();
-				Expr sortConditionExpr = sortCondition.getExpression();
-				Var sortConditionVar = sortConditionExpr.asVar();
-				//ZExp zExp = this.transExpr(graphPatternOp, sortConditionExpr);
-				ZExp zExp = new ZConstant(sortConditionVar.getName(), ZConstant.COLUMNNAME);
-				ZOrderBy zOrderBy = new ZOrderBy(zExp);
-				if(sortConditionDirection == Query.ORDER_DEFAULT) {
-					zOrderBy.setAscOrder(true);
-				} else if(sortConditionDirection == Query.ORDER_ASCENDING) {
-					zOrderBy.setAscOrder(true);
-				} if(sortConditionDirection == Query.ORDER_DESCENDING) {
-					zOrderBy.setAscOrder(false);
-				} else {
-					zOrderBy.setAscOrder(true);
-				}
-				orderByConditions.add(zOrderBy);
-			}
-		}
-		
-		Collection<ZSelectItem> newSelectItems = new HashSet<ZSelectItem>();
-		List<Var> selectVars = opProject.getVars();
-		for(Var selectVar : selectVars) {
-			String nameSelectVar = nameGenerator.generateName(null, selectVar);
-//			ZSelectItem selectItem = new ZSelectItem(gpSQLAlias + "." + nameSelectVar);
-			ZSelectItem selectItem = new ZSelectItem(nameSelectVar);
-			selectItem.setAlias(selectVar.getName());
-			newSelectItems.add(selectItem);
-		}
-
-
-		SQLQuery sparql2sqlResult = new SQLQuery();
-		if(this.subQueryElimination) {
-			sparql2sqlResult = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, gpSQL, null, orderByConditions);
-			
-			if(orderByConditions != null) {
-				sparql2sqlResult.addOrderBy(orderByConditions);
-			}
-			
-		} else {
-			//SQLFromItem fromItem = new SQLFromItem(gpSQL.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem fromItem = new SQLFromItem(gpSQL.toString(), LogicalTableType.SQLQUERY);
-			fromItem.setAlias(gpSQLAlias);
-			sparql2sqlResult.setSelectItems(newSelectItems);
-			sparql2sqlResult.addOrderBy(orderByConditions);
-			sparql2sqlResult.addFrom(fromItem);
-		}
-		
-		sparql2sqlResult.setSlice(sliceLength);
-		sparql2sqlResult.setDistinct(isDistinct);
-		return sparql2sqlResult;
-
-	}
+	
 
 
 	@Override
-	protected SQLQuery transTB(List<Triple> triples) throws Exception {
+	protected SQLQuery transTB(Collection<Triple> triples) throws Exception {
 		SQLQuery tbQuery = new SQLQuery();
 
-		R2OConceptMapping cm = (R2OConceptMapping) alphaGenerator.calculateAlphaCMTB(triples);
+		R2OAlphaGenerator r2oAlphaGenerator = (R2OAlphaGenerator) alphaGenerator;
+		R2OConceptMapping cm = r2oAlphaGenerator.calculateAlphaCMTB(triples);
 		for(Triple tp : triples) {
 			this.mapTripleCM.put(tp, cm);
 		}
@@ -455,11 +156,11 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 		SQLQuery alphaTB = cmu.unfoldConceptMapping();
 		logger.debug("alphaTB = \n" + alphaTB);
 
-		Vector<ZSelectItem> prSQLList = (Vector<ZSelectItem>) this.genPRSQLTB(
+		Vector<ZSelectItem> prSQLList = (Vector<ZSelectItem>) this.prSQLGenerator.genPRSQLTB(
 				triples, betaGenerator, nameGenerator);
 		logger.debug("genPRSQLTB = \n" + prSQLList);
 
-		ZExpression condSQL2 = this.genCondSQLTB(triples, betaGenerator);
+		ZExpression condSQL2 = this.condSQLGenerator.genCondSQLTB(triples);
 		logger.debug("genCondSQLTB = " + condSQL2);
 
 		if(this.subQueryElimination) {
@@ -490,28 +191,18 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 		tpQuery.addFrom(new Vector<ZFromItem>());
 
 		try {
-			R2OConceptMapping cm = (R2OConceptMapping) alphaGenerator.calculateAlphaCM(tp);
+			R2OAlphaGenerator r2oAlphaGenerator = (R2OAlphaGenerator) alphaGenerator;
+			R2OConceptMapping cm = r2oAlphaGenerator.calculateAlphaCM(tp);
 			this.mapTripleCM.put(tp, cm);
 			R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cm, (R2OMappingDocument) this.mappingDocument);
 			SQLQuery alpha = cmu.unfoldConceptMapping();
 			logger.debug("alpha(tp) = \n" + alpha);
 
-//			ZExpression condSQLSubject = this.genCondSQLSubject(tp, betaGenerator);
-//			ZExpression condSQL = this.genCondSQLPredicateObject(tp, betaGenerator);
-//			ZExpression condSQL2 = null;
-//			if(condSQLSubject == null && condSQL==null) {
-//				condSQL2 = null;
-//			} else if(condSQLSubject != null && condSQL==null) {
-//				condSQL2 = condSQLSubject;
-//			} else if(condSQLSubject == null && condSQL!=null) {
-//				condSQL2 = condSQL;
-//			} else {
-//				condSQL2 = new ZExpression("AND", condSQLSubject, condSQL);
-//			}
 
-			ZExpression condSQL = this.genCondSQL(tp);
+
+			ZExpression condSQL = this.condSQLGenerator.genCondSQL(tp);
 			
-			Vector<ZSelectItem> prSQLList = (Vector<ZSelectItem>) genPRSQL(tp, betaGenerator, nameGenerator);
+			Vector<ZSelectItem> prSQLList = (Vector<ZSelectItem>) this.prSQLGenerator.genPRSQL(tp, betaGenerator, nameGenerator);
 			logger.debug("genPRSQL(tp,beta,name) = \n" + prSQLList);
 			
 			if(this.subQueryElimination) {
@@ -568,6 +259,44 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 
 
 		ZExp result = new ZConstant(colName, ZConstant.COLUMNNAME); 
+		return result;
+	}
+
+
+	@Override
+	protected String generateTermCName(Node termC) {
+		String termCName = null;
+		Collection<AbstractConceptMapping> cmTermCs = this.mapInferredTypes.get(termC);
+		if(cmTermCs != null) {
+			AbstractConceptMapping cmTermC = cmTermCs.iterator().next();
+			if(cmTermC != null && cmTermC.hasWellDefinedURIExpression()) {
+				//termCName = pkColumnAlias;
+				termCName = this.mapNodeKey.get(termC);
+			} else {
+				termCName = nameGenerator.generateName(null, termC);
+			}
+		} else {
+			termCName = nameGenerator.generateName(null, termC);
+		}
+		
+		return termCName;
+	}
+	
+	@Override
+	protected Collection<ZSelectItem> generateSelectItems(Collection<Node> nodes, String prefix) {
+		Collection<ZSelectItem> result = super.generateSelectItems(nodes, prefix);
+
+		for(Node node : nodes) {
+			String nodeKey = this.mapNodeKey.get(node);
+			if(nodeKey != null) {
+				if(prefix != null) {
+					nodeKey = prefix + nodeKey;
+				}
+				ZSelectItem selectItem2 = new SQLSelectItem(nodeKey);
+				result.add(selectItem2);
+			}
+		}
+
 		return result;
 	}
 }
