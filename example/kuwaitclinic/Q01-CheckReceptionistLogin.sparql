@@ -1,0 +1,15 @@
+PREFIX qqq-inst: <http://www.q8onto.org/healthcareOntology/resource/>
+PREFIX qqq: <http://www.q8onto.org/healthcareOntology.owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?person ?userID ?userPwd ?userPrimaryType
+WHERE {
+	?person a <http://www.q8onto.org/healthcareOntology.owl#Person> .
+	?person qqq:userID ?userID .
+	?person qqq:userPwd ?userPwd .
+	?person qqq:userPrimaryType ?userPrimaryType .
+	FILTER ( ?userID = 1 ) .
+	FILTER ( ?userPwd = "hc1mco" ) .
+	FILTER ( ?userPrimaryType = "admin" ) .
+}

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
@@ -132,9 +133,27 @@ public abstract class R2RMLTermMap {
 	}
 
 
+	public String getResultSetValue(ResultSet rs, String columnName)  {
+		String result = null;
+		
+		try {
+			if(this.datatype == null) {
+				result = rs.getString(columnName);
+			} else if(this.datatype.equals(XSDDatatype.XSDdateTime.getURI())) {
+				result = rs.getDate(columnName).toString();
+			} else {
+				result = rs.getString(columnName);
+			}			
+		} catch(Exception e) {
+			logger.error("error occured when translating result!");
+		}
+
+		return result;
+	}
+	
 	public String getUnfoldedValue(ResultSet rs, String logicalTableAlias
 			, Map<String, Integer> mapDBDatatype) 
-			throws SQLException {
+			 {
 		String result = null;
 		String originalValue = this.getOriginalValue();
 
@@ -146,8 +165,7 @@ public abstract class R2RMLTermMap {
 				String columnName = originalValueSplit[originalValueSplit.length - 1];
 				originalValue = logicalTableAlias + "." + columnName;
 			}
-
-			result = rs.getString(originalValue);
+			result = this.getResultSetValue(rs, originalValue);
 		} else if(termMapType == TermMapType.CONSTANT) {
 			result = originalValue;
 		} else if(termMapType == TermMapType.TEMPLATE) {
@@ -168,7 +186,7 @@ public abstract class R2RMLTermMap {
 				} else {
 					databaseColumn = attribute;
 				}
-				databaseValue = rs.getString(databaseColumn);
+				databaseValue = this.getResultSetValue(rs, databaseColumn);
 				
 				
 				if(databaseValue == null) {
