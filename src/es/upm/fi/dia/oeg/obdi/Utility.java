@@ -691,7 +691,7 @@ public class Utility {
 		result.append("\"");
 		result.append(value);
 		result.append("\"^^");
-		result.append(datatypeURI);
+		result.append("<" + datatypeURI + ">");
 		return result.toString();
 	}
 
