@@ -20,6 +20,7 @@ import Zql.ZSelectItem;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
@@ -575,7 +576,6 @@ public abstract class AbstractQueryTranslator {
 	
 	public abstract SQLQuery translate(Query sparqlQuery) throws Exception;
 	
-	public abstract SQLQuery translate(String queryFilePath) throws Exception;
 
 
 
@@ -785,5 +785,25 @@ public abstract class AbstractQueryTranslator {
 
 
 	protected abstract ZExp transIRI(Node node);
+
+
+	public SQLQuery translateFromFile(String queryFilePath) throws Exception {
+		//process SPARQL file
+		logger.info("Parsing query file : " + queryFilePath);
+		Query sparqlQuery = QueryFactory.read(queryFilePath);
+		logger.debug("sparqlQuery = " + sparqlQuery);
+		
+		return this.translate(sparqlQuery);
+	}
+
+
+	public SQLQuery translateFromString(String queryString) throws Exception {
+		//process SPARQL string
+		logger.info("Parsing query string : " + queryString);
+		Query sparqlQuery = QueryFactory.create(queryString);
+		logger.debug("sparqlQuery = " + sparqlQuery);
+		
+		return this.translate(sparqlQuery);
+	}
 
 }

@@ -45,7 +45,7 @@ public class R2RMLBSBM250K {
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(false);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translate(queryFilePath);
+			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
@@ -62,7 +62,7 @@ public class R2RMLBSBM250K {
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translate(queryFilePath);
+			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {

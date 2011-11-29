@@ -133,7 +133,7 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 
 
 	@Override
-	public SQLQuery translate(String queryFilePath) throws Exception {
+	public SQLQuery translateFromFile(String queryFilePath) throws Exception {
 		// TODO Auto-generated method stub
 		logger.warn("Implement this!");
 		return null;

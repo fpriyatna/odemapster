@@ -70,19 +70,6 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		return result;
 	}
 
-	@Override
-	public SQLQuery translate(String queryFilePath) throws Exception {
-		
-		
-		//process SPARQL file
-		logger.info("Parsing query file : " + queryFilePath);
-		Query sparqlQuery = QueryFactory.read(queryFilePath);
-		logger.debug("sparqlQuery = " + sparqlQuery);
-		
-		
-		
-		return this.translate(sparqlQuery);
-	}
 
 
 
