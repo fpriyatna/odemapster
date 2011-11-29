@@ -145,7 +145,7 @@ public abstract class R2RMLTermMap {
 				result = rs.getString(columnName);
 			}			
 		} catch(Exception e) {
-			logger.error("error occured when translating result!");
+			logger.error("error occured when translating result, check your database values for " + columnName);
 		}
 
 		return result;
