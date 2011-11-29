@@ -44,6 +44,7 @@ import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeFunctions;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
@@ -775,9 +776,13 @@ public abstract class AbstractQueryTranslator {
 	protected ZExp transConstant(NodeValue nodeValue) {
 		ZExp result = null;
 
-		if(nodeValue.isLiteral()) {
+		boolean isLiteral = nodeValue.isLiteral();
+		//boolean isIRI = nodeValue.isIRI();
+		boolean isIRI = nodeValue.getNode().isURI();
+		
+		if(isLiteral) {
 			result = this.transLiteral(nodeValue);
-		} else if(nodeValue.isIRI()) {
+		} else if(isIRI) {
 			result = this.transIRI(nodeValue.getNode());
 		}
 		return result;

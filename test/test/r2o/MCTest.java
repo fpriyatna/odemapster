@@ -24,7 +24,7 @@ public class MCTest {
 	@Test
 	public void testMcsuarez03() throws Exception {
 		String dir = ODEMapsterTest.getMappingDirectoryByOS() + "mcsuarez03/";
-		String r2oConfigurationFile = "Person(mysql).r2o.properties";
+		String r2oConfigurationFile = "mcsuarez03.r2o.properties";
 		ODEMapsterTest.setDataTranslator(new R2OFreddyPostProcessor());
 		ODEMapsterTest.testProcess(r2oConfigurationFile, dir);
 	}

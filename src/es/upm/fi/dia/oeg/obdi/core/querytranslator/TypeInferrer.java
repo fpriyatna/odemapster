@@ -247,10 +247,18 @@ public class TypeInferrer {
 
 	private Node asNode(Expr arg0) {
 		Node arg0Node = null;
+		
+		//boolean isIRI = arg0.getConstant().isIRI();
+		
+		
 		if(arg0.isVariable()) {
 			arg0Node = arg0.asVar().asNode();
-		} else if(arg0.isConstant() && arg0.getConstant().isIRI()) {
-			arg0Node = arg0.getConstant().asNode();
+		} else if(arg0.isConstant()) {
+			boolean isIRI = arg0.getConstant().getNode().isURI();
+			if(isIRI) {
+				arg0Node = arg0.getConstant().asNode();
+			}
+			
 		}
 
 		return arg0Node;

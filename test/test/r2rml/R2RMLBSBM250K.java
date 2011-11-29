@@ -73,7 +73,6 @@ public class R2RMLBSBM250K {
 		}
 	}
 	
-	@Test
 	public void testBSBM() throws Exception {
 		String testName = "bsbm";
 		String configurationFile = testName + ".r2rml.properties";
