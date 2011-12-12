@@ -54,43 +54,81 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		ZExpression result2 = null;
 		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
 		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
-		if(refObjectMap == null) {
-			R2RMLObjectMap objectMap = pm.getObjectMap();
-			TermMapType termMapType = objectMap.getTermMapType();
-
-			if(tpObject.isLiteral()) {
-				Object objectLiteralValue = tpObject.getLiteral().getValue();
-				String columnName = objectMap.getColumnName();
-				if(columnName != null) {
-					ZConstant columnConstant = new ZConstant(logicalTableAlias + "." + columnName,  ZConstant.COLUMNNAME);
-					ZConstant objectLiteral = new ZConstant(objectLiteralValue.toString(), ZConstant.STRING);
-					result2 = new ZExpression("=", columnConstant, objectLiteral);
-				}
-			} else if(tpObject.isURI()) {
+		R2RMLObjectMap objectMap = pm.getObjectMap();
+		
+		if(tpObject.isLiteral()) {
+			Object objectLiteralValue = tpObject.getLiteral().getValue();
+			String columnName = objectMap.getColumnName();
+			if(columnName != null) {
+				ZConstant columnConstant = new ZConstant(logicalTableAlias + "." + columnName,  ZConstant.COLUMNNAME);
+				ZConstant objectLiteral = new ZConstant(objectLiteralValue.toString(), ZConstant.STRING);
+				result2 = new ZExpression("=", columnConstant, objectLiteral);
+			}
+			
+		} else if(tpObject.isURI()) {
+			if(refObjectMap == null) {
 				String uri = tpObject.getURI();
+				TermMapType termMapType = objectMap.getTermMapType();
 				if(termMapType == TermMapType.TEMPLATE) {
 					result2 = this.generateCondForWellDefinedURI(objectMap, uri, logicalTableAlias);
 				}
+			} else {
+				String refObjectMapAlias = refObjectMap.getAlias();
+				Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
+				ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);
 
-			}
-		} else {//refObjectMap != null
-			String refObjectMapAlias = refObjectMap.getAlias();
-			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-			ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);
-
-			ZExp uriCondition = null;
-			if(tpObject.isURI()) {
-				R2RMLTriplesMap parentTriplesMap = refObjectMap.getParentTriplesMap();
-				boolean hasWellDefinedURI = parentTriplesMap.hasWellDefinedURIExpression();
-				logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
-				if(hasWellDefinedURI) {
-					uriCondition = this.generateCondForWellDefinedURI(parentTriplesMap, tpObject.getURI(), refObjectMapAlias);
+				ZExp uriCondition = null;
+				if(tpObject.isURI()) {
+					R2RMLTriplesMap parentTriplesMap = refObjectMap.getParentTriplesMap();
+					boolean hasWellDefinedURI = parentTriplesMap.hasWellDefinedURIExpression();
+					logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
+					if(hasWellDefinedURI) {
+						uriCondition = this.generateCondForWellDefinedURI(parentTriplesMap, tpObject.getURI(), refObjectMapAlias);
+					}
 				}
+
+				result2 = (ZExpression) QueryTranslatorUtility.combineExpressions(onExpression, uriCondition);
 			}
-
-			result2 = (ZExpression) QueryTranslatorUtility.combineExpressions(onExpression, uriCondition);
-
+			
 		}
+		
+//		if(refObjectMap == null) {
+//			
+//			TermMapType termMapType = objectMap.getTermMapType();
+//
+//			if(tpObject.isLiteral()) {
+//				Object objectLiteralValue = tpObject.getLiteral().getValue();
+//				String columnName = objectMap.getColumnName();
+//				if(columnName != null) {
+//					ZConstant columnConstant = new ZConstant(logicalTableAlias + "." + columnName,  ZConstant.COLUMNNAME);
+//					ZConstant objectLiteral = new ZConstant(objectLiteralValue.toString(), ZConstant.STRING);
+//					result2 = new ZExpression("=", columnConstant, objectLiteral);
+//				}
+//			} else if(tpObject.isURI()) {
+//				String uri = tpObject.getURI();
+//				if(termMapType == TermMapType.TEMPLATE) {
+//					result2 = this.generateCondForWellDefinedURI(objectMap, uri, logicalTableAlias);
+//				}
+//
+//			}
+//		} else {//refObjectMap != null
+//			String refObjectMapAlias = refObjectMap.getAlias();
+//			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
+//			ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);
+//
+//			ZExp uriCondition = null;
+//			if(tpObject.isURI()) {
+//				R2RMLTriplesMap parentTriplesMap = refObjectMap.getParentTriplesMap();
+//				boolean hasWellDefinedURI = parentTriplesMap.hasWellDefinedURIExpression();
+//				logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
+//				if(hasWellDefinedURI) {
+//					uriCondition = this.generateCondForWellDefinedURI(parentTriplesMap, tpObject.getURI(), refObjectMapAlias);
+//				}
+//			}
+//
+//			result2 = (ZExpression) QueryTranslatorUtility.combineExpressions(onExpression, uriCondition);
+//
+//		}
 
 
 

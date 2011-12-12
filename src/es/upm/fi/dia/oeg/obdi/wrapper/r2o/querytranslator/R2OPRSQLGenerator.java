@@ -94,6 +94,7 @@ public class R2OPRSQLGenerator extends AbstractPRSQLGenerator {
 		String selectItemSubjectAlias = nameGenerator.generateName(tp, subject); 
 		selectItemSubject.setAlias(selectItemSubjectAlias);
 		selectItems.add(selectItemSubject); //line 21
+		
 		if(URIUtility.isWellDefinedURIExpression(cmSubjectURIAs)) {
 			R2OColumnRestriction pkColumnRestriction = (R2OColumnRestriction) cmSubjectURIAs.getLastRestriction();
 			R2ODatabaseColumn pkColumn = pkColumnRestriction.getDatabaseColumn();

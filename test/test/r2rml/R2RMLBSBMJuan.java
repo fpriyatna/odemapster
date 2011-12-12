@@ -13,11 +13,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator
 
 import test.r2o.ODEMapsterTest;
 
-public class R2RMLBSBM250K {
-	private static Logger logger = Logger.getLogger(R2RMLBSBM250K.class);
+public class R2RMLBSBMJuan {
+	private static Logger logger = Logger.getLogger(R2RMLBSBMJuan.class);
 	
 	private String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS();
-	private String configurationDirectory = mappingDirectory + "r2rml/r2rml-bsbm250k/";
+	private String configurationDirectory = mappingDirectory + "r2rml/r2rml-bsbm-juan/";
 	private String mappingDocumentFile = configurationDirectory + "bsbm.ttl";
 	static {
 		PropertyConfigurator.configure("log4j.properties");
@@ -90,6 +90,7 @@ public class R2RMLBSBM250K {
 		}
 	}
 	
+	@Test
 	public void testBSBM() throws Exception {
 		String testName = "bsbm";
 		String configurationFile = testName + ".r2rml.properties";
@@ -130,13 +131,13 @@ public class R2RMLBSBM250K {
 		String testName = "bsbm02";
 		this.runTB(testName);
 	}
-	
+
 	@Test
 	public void testBSBM02ReorderedTB() throws Exception {
 		String testName = "bsbm02";
 		this.runReorderedTB(testName);
 	}
-	
+
 	@Test
 	public void testBSBM03() throws Exception {
 		String testName = "bsbm03";
@@ -202,13 +203,13 @@ public class R2RMLBSBM250K {
 		String testName = "bsbm07";
 		this.runTB(testName);
 	}
-	
+
 	@Test
 	public void testBSBM07ReorderedTB() throws Exception {
 		String testName = "bsbm07";
 		this.runReorderedTB(testName);
 	}
-
+	
 	@Test
 	public void testBSBM08() throws Exception {
 		String testName = "bsbm08";
