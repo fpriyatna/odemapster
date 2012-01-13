@@ -31,6 +31,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
@@ -369,7 +370,12 @@ public class Utility {
 
 
 	public static ZConstant constructDatabaseColumn(String columnName) {
-		String databaseType = R2ORunner.configurationProperties.getDatabaseType();
+		String databaseType = null;
+
+		ConfigurationProperties configurationProperties = R2ORunner.configurationProperties;
+		if(configurationProperties != null) {
+			databaseType = configurationProperties.getDatabaseType();
+		}
 		if(databaseType == null) {
 			databaseType = Constants.DATABASE_MYSQL;
 		}

@@ -77,6 +77,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	protected SQLQuery transTB(Collection<Triple> triples) throws Exception {
 		SQLQuery result = new SQLQuery();
 		
+		//AlphaTB
 		Vector alphaTables = (Vector) this.alphaGenerator.calculateAlphaTB(triples);
 		SQLLogicalTable logicalTable = (SQLLogicalTable) alphaTables.get(0);
 		result.addLogicalTable(logicalTable);//alpha subject
@@ -87,12 +88,12 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			}
 		}
 
-		//PRSQL
+		//PRSQLTB
 		Collection<ZSelectItem> selectItems = 
 				this.prSQLGenerator.genPRSQLTB(triples, betaGenerator, nameGenerator);
 		result.setSelectItems(selectItems);
 
-		//CondSQL
+		//CondSQLTB
 		ZExpression condSQL = this.condSQLGenerator.genCondSQLTB(triples);
 		if(condSQL != null) {
 			result.addWhere(condSQL);
