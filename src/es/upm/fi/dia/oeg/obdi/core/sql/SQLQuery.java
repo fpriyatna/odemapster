@@ -266,19 +266,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			for(ZFromItem mainQueryFromItem : mainQueryFromItems) {
 				if(mainQueryFromItem instanceof SQLFromItem) {
 					fromSQL += mainQueryFromItem.toString() + ", ";
-
-					//					String alias = mainQueryFromItem.getAlias();
-					//					if(alias != null) {
-					//						mainQueryFromItem.setAlias("");
-					//						fromSQL += "(" + mainQueryFromItem + ") " + alias + ", ";
-					//						mainQueryFromItem.setAlias(alias);
-					//					} else {
-					//						fromSQL += mainQueryFromItem + ", ";
-					//					}
 				} else {
-					//fromSQL += mainQueryFromItem.getTable();
-					//fromSQL += mainQueryFromItem.toString();
-
 					if(mainQueryFromItem.getSchema() != null) {
 						fromSQL += mainQueryFromItem.getSchema() + ".";
 					}
@@ -293,8 +281,6 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 					String mainQueryFromItemAlias = mainQueryFromItem.getAlias();
 					if(mainQueryFromItemAlias != null && mainQueryFromItemAlias.length() > 0) {
-						//fromSQL += " AS " + mainQueryFromItem.getAlias() + ", ";
-
 						fromSQL += " " + mainQueryFromItem.getAlias() + ", ";
 					} else {
 						fromSQL += ", ";
@@ -308,7 +294,12 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 		if(this.logicalTables != null) {
 			for(SQLLogicalTable logicalTable : this.logicalTables) {
-				fromSQL += logicalTable.toString() + ", ";
+				String logicalTableAlias = logicalTable.getAlias();
+				if(logicalTableAlias == null) {
+					fromSQL += logicalTable.toString() + ", ";
+				} else {
+					fromSQL += "(" + logicalTable.toString() + ") " + logicalTableAlias + ", ";
+				}
 			}
 			//remove the last coma and space
 			fromSQL = fromSQL.substring(0, fromSQL.length() - 2);

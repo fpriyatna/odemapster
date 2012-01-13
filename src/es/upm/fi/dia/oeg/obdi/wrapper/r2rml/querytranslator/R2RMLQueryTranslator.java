@@ -154,7 +154,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			throw new QueryTranslationException(e.getMessage(), e);
 		}
 
-		//logger.info("transTP = " + result);
+		logger.info("transTP = " + result);
 		return result;
 	}
 
