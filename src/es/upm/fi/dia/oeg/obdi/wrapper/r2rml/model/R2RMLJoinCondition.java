@@ -5,14 +5,21 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
 
 public class R2RMLJoinCondition {
 	private static Logger logger = Logger.getLogger(R2RMLJoinCondition.class);
 	
 	private String childColumnName;
 	private String parentColumnName;
+	
+	
+	public R2RMLJoinCondition(String childColumnName, String parentColumnName) {
+		super();
+		this.childColumnName = childColumnName;
+		this.parentColumnName = parentColumnName;
+	}
 	
 	public R2RMLJoinCondition(Resource resource) throws R2RMLJoinConditionException {
 		Statement childStatement = resource.getProperty(R2RMLConstants.R2RML_CHILD_PROPERTY);
@@ -32,6 +39,7 @@ public class R2RMLJoinCondition {
 			logger.error(errorMessage);
 			throw new R2RMLJoinConditionException(errorMessage);
 		}
+		
 	}
 
 	@Override

@@ -8,16 +8,17 @@ import org.junit.Test;
 
 import test.r2o.ODEMapsterTest;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 
 
 public class R2RMLTC {
 	private static Logger logger = Logger.getLogger(R2RMLTC.class);
-	
 	private String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS();
-	private String configurationDirectory = mappingDirectory + "r2rml/R2RMLTC/";
-
+	private String configurationDirectory = mappingDirectory + "r2rml-mappings/R2RMLTC/";
 	static {
 		PropertyConfigurator.configure("log4j.properties");
 	}
@@ -41,9 +42,12 @@ public class R2RMLTC {
 
 	public void run(String configurationFile, String mappingDocumentFile, String testName) {
 		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
+			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
+					configurationDirectory, configurationFile);
 			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile));
+					, configurationFile, unfolder));
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();

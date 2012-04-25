@@ -13,12 +13,14 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
@@ -73,21 +75,28 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 					result2 = this.generateCondForWellDefinedURI(objectMap, uri, logicalTableAlias);
 				}
 			} else {
-				String refObjectMapAlias = refObjectMap.getAlias();
+				//String refObjectMapAlias = refObjectMap.getAlias();
+				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
+				
 				Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
 				ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);
 
 				ZExp uriCondition = null;
 				if(tpObject.isURI()) {
-					R2RMLTriplesMap parentTriplesMap = refObjectMap.getParentTriplesMap();
-					boolean hasWellDefinedURI = parentTriplesMap.hasWellDefinedURIExpression();
+					R2RMLTriplesMap parentTriplesMap = 
+							refObjectMap.getParentTriplesMap();
+					boolean hasWellDefinedURI = 
+							parentTriplesMap.hasWellDefinedURIExpression();
 					logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
 					if(hasWellDefinedURI) {
-						uriCondition = this.generateCondForWellDefinedURI(parentTriplesMap, tpObject.getURI(), refObjectMapAlias);
+						uriCondition = this.generateCondForWellDefinedURI(
+								parentTriplesMap, tpObject.getURI(),
+								refObjectMapAlias);
 					}
 				}
 
-				result2 = (ZExpression) QueryTranslatorUtility.combineExpressions(onExpression, uriCondition);
+				result2 = (ZExpression) QueryTranslatorUtility.combineExpressions(
+						onExpression, uriCondition);
 			}
 			
 		}
@@ -133,7 +142,8 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 
 
-		result = (ZExpression) QueryTranslatorUtility.combineExpressions(result1, result2);
+		result = (ZExpression) QueryTranslatorUtility.combineExpressions(
+				result1, result2);
 		return result;
 	}
 
@@ -171,7 +181,11 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		if(hasWellDefinedURI) {
 			String pkColumnString = triplesMap.getSubjectMap().getTemplateColumn();
 			String pkValue = triplesMap.getSubjectMap().getTemplateValue(uri);
-			ZConstant pkColumnConstant = new ZConstant(alias + "." + pkColumnString, ZConstant.COLUMNNAME);
+			String dbType = AbstractRunner.configurationProperties.getDatabaseType();
+			SQLSelectItem pkColumnSelectItem = SQLSelectItem.createSQLItem(
+					dbType, alias + "." + pkColumnString);
+			ZConstant pkColumnConstant = new ZConstant(
+					pkColumnSelectItem.toString(), ZConstant.COLUMNNAME);
 			ZConstant pkValueConstant = new ZConstant(pkValue, ZConstant.UNKNOWN);
 			result = new ZExpression("=", pkColumnConstant, pkValueConstant);
 		}

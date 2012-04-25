@@ -27,6 +27,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
+import es.upm.fi.dia.oeg.obdi.DBUtility;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
@@ -44,11 +45,20 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OQueryTranslator;
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
 	
-	protected AbstractDataTranslator dataTranslator;
+	public static ConfigurationProperties getConfigurationProperties() {
+		return configurationProperties;
+	}
+	public static Connection getConnection() {
+		return AbstractRunner.configurationProperties.getConn();
+	}
 	protected AbstractParser parser;
+	protected AbstractDataTranslator dataTranslator;
+
 	protected AbstractQueryTranslator queryTranslator;
-	public static ConfigurationProperties configurationProperties;
+
+	protected Query sparqQuery = null;
 	
+	public static ConfigurationProperties configurationProperties;
 
 	public AbstractRunner() {}
 
@@ -58,6 +68,103 @@ public abstract class AbstractRunner {
 		this.dataTranslator = dataTranslator;
 		this.parser = parser;
 		this.queryTranslator = queryTranslator;
+	}
+
+	protected List<Element> createHeadElementFromColumnNames(ResultSetMetaData rsmd, Document xmlDoc) throws SQLException {
+		List<Element> result = new ArrayList<Element>();
+		
+		for(int i=0; i<rsmd.getColumnCount(); i++) {
+			Element element = xmlDoc.createElement("variable");
+			element.setAttribute("name", rsmd.getColumnLabel(i+1));
+			result.add(element);
+		}
+		
+		return result;
+	}
+
+	public AbstractDataTranslator getDataTranslator() {
+		return dataTranslator;
+	}
+
+
+
+	public AbstractQueryTranslator getQueryTranslator() {
+		return queryTranslator;
+	}
+
+	protected ConfigurationProperties loadConfigurationFile(
+			String mappingDirectory, String configurationFile) 
+	throws IOException, SQLException, InvalidConfigurationPropertiesException {
+		logger.debug("Active Directory = " + mappingDirectory);
+		logger.debug("Loading configuration file : " + configurationFile);
+		
+		try {
+			ConfigurationProperties configurationProperties = 
+				new ConfigurationProperties(mappingDirectory, configurationFile);
+			return configurationProperties;
+		} catch(FileNotFoundException e) {
+			logger.error("Can't find properties file : " + configurationFile);
+			throw e;
+		}
+	}
+	
+	protected void materializeMappingDocuments(String outputFileName
+			, AbstractMappingDocument translationResultMappingDocument) throws Exception {
+		long start = System.currentTimeMillis();
+		
+		String rdfLanguage = AbstractRunner.configurationProperties.getRdfLanguage();
+		if(rdfLanguage == null) {
+			rdfLanguage = R2OConstants.OUTPUT_FORMAT_RDFXML;
+		}
+		
+		//preparing output file
+	    OutputStream fileOut = new FileOutputStream (outputFileName);
+	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
+	    String jenaModel = configurationProperties.getJenaMode();
+		Model model = Utility.createJenaModel(jenaModel);
+
+		AbstractMaterializer materializer;
+		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
+			materializer = new NTripleMaterializer(outputFileName);
+		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
+			materializer = new RDFXMLMaterializer(outputFileName, model);
+		} else {
+			materializer = new NTripleMaterializer(outputFileName);
+		}
+		this.dataTranslator.setMaterializer(materializer);
+		
+		//materializing model
+		long startGeneratingModel = System.currentTimeMillis();
+		this.dataTranslator.translateData(translationResultMappingDocument);
+		this.dataTranslator.materializer.materialize();
+		
+//		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
+//			if(model == null) {
+//				logger.warn("Model was empty!");
+//			} else {
+//				ModelWriter.writeModelStream(model, configurationProperties.getOutputFilePath(), configurationProperties.getRdfLanguage());
+//				model.close();				
+//			}
+//		}
+		
+		long endGeneratingModel = System.currentTimeMillis();
+		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
+		logger.info("Materializing Mapping Document time was "+(durationGeneratingModel)+" s.");
+
+		//cleaning up
+		try {
+			out.flush(); out.close();
+			fileOut.flush(); fileOut.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			
+		}
+
+		DBUtility.closeConnection(configurationProperties.getConn(), "r2o wrapper");
+		long end = System.currentTimeMillis();
+		long duration = (end-start) / 1000;
+		logger.info("Execution time was "+(duration)+" s.");
 	}
 
 	public String run(String mappingDirectory, String configurationFile)
@@ -80,7 +187,7 @@ public abstract class AbstractRunner {
 		String ontologyFilePath = configurationProperties.getOntologyFilePath();
 		
 		//parsing mapping document
-		String mappingDocumentPath = configurationProperties.getR2oFilePath();
+		String mappingDocumentPath = configurationProperties.getMappingDocumentFilePath();
 		AbstractMappingDocument originalMappingDocument = 
 			parser.parse(mappingDocumentPath);
 
@@ -91,17 +198,22 @@ public abstract class AbstractRunner {
 		String queryFilePath = configurationProperties.getQueryFilePath();
 //		R2OMappingDocument translationResultMappingDocument = null;
 
-		if(queryFilePath == null || queryFilePath.equals("")) {
+
+		if(this.sparqQuery == null) {
+			//process SPARQL file
+			if(queryFilePath != null && !queryFilePath.equals("") ) {
+				logger.info("Parsing query file : " + queryFilePath);
+				this.sparqQuery = QueryFactory.read(queryFilePath);
+			}
+		}
+		
+		if(this.sparqQuery == null) {
 			this.materializeMappingDocuments(outputFileName, originalMappingDocument);
 		} else {
-			//process SPARQL file
-			logger.info("Parsing query file : " + queryFilePath);
-			Query originalQuery = QueryFactory.read(queryFilePath);
-			
 			//rewrite the SPARQL query if necessary
 			List<Query> queries = new ArrayList<Query>();
 			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
-				queries.add(originalQuery);
+				queries.add(this.sparqQuery);
 			} else {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
@@ -110,7 +222,7 @@ public abstract class AbstractRunner {
 				String rewritterWrapperMode = RewriterWrapper.fullMode;
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
-				queries = RewriterWrapper.rewrite(originalQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
+				queries = RewriterWrapper.rewrite(this.sparqQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
 				
 				
 				logger.debug("No of rewriting query result = " + queries.size());
@@ -146,7 +258,7 @@ public abstract class AbstractRunner {
 							this.queryTranslator.translate(query).toString();
 					logger.debug("sparql2sql = \n" + sparql2SQLResult);
 
-					ResultSet rs = Utility.executeQuery(conn, sparql2SQLResult);
+					ResultSet rs = DBUtility.executeQuery(conn, sparql2SQLResult);
 					ResultSetMetaData rsmd = rs.getMetaData();
 
 
@@ -213,101 +325,23 @@ public abstract class AbstractRunner {
 
 	}
 
-	protected void materializeMappingDocuments(String outputFileName
-			, AbstractMappingDocument translationResultMappingDocument) throws Exception {
-		long start = System.currentTimeMillis();
-		
-		String rdfLanguage = AbstractRunner.configurationProperties.getRdfLanguage();
-		if(rdfLanguage == null) {
-			rdfLanguage = R2OConstants.OUTPUT_FORMAT_RDFXML;
-		}
-		
-		//preparing output file
-	    OutputStream fileOut = new FileOutputStream (outputFileName);
-	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
-	    String jenaModel = configurationProperties.getJenaMode();
-		Model model = Utility.createJenaModel(jenaModel);
-
-		AbstractMaterializer materializer;
-		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-			materializer = new NTripleMaterializer(out);
-		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
-			materializer = new RDFXMLMaterializer(out, model);
-		} else {
-			materializer = new NTripleMaterializer(out);
-		}
-		this.dataTranslator.setMaterializer(materializer);
-		
-		//materializing model
-		long startGeneratingModel = System.currentTimeMillis();
-		this.dataTranslator.processMappingDocument(translationResultMappingDocument);
-		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
-			if(model == null) {
-				logger.warn("Model was empty!");
-			} else {
-				ModelWriter.writeModelStream(model, configurationProperties.getOutputFilePath(), configurationProperties.getRdfLanguage());
-				model.close();				
-			}
-		}
-		long endGeneratingModel = System.currentTimeMillis();
-		long durationGeneratingModel = (endGeneratingModel-startGeneratingModel) / 1000;
-		logger.info("Materializing Mapping Document time was "+(durationGeneratingModel)+" s.");
-
-		//cleaning up
-		try {
-			out.flush(); out.close();
-			fileOut.flush(); fileOut.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-		} finally {
-			
-		}
-
-		Utility.closeConnection(configurationProperties.getConn(), "r2o wrapper");
-		long end = System.currentTimeMillis();
-		long duration = (end-start) / 1000;
-		logger.info("Execution time was "+(duration)+" s.");
-	}
-
-
-
-	protected ConfigurationProperties loadConfigurationFile(
-			String mappingDirectory, String configurationFile) 
-	throws IOException, SQLException, InvalidConfigurationPropertiesException {
-		logger.debug("Active Directory = " + mappingDirectory);
-		logger.debug("Loading configuration file : " + configurationFile);
-		
-		try {
-			ConfigurationProperties configurationProperties = 
-				new ConfigurationProperties(mappingDirectory, configurationFile);
-			return configurationProperties;
-		} catch(FileNotFoundException e) {
-			logger.error("Can't find properties file : " + configurationFile);
-			throw e;
-		}
-	}
-
-	public void setQueryTranslator(AbstractQueryTranslator queryTranslator) {
-		this.queryTranslator = queryTranslator;
-	}
-	
-	protected List<Element> createHeadElementFromColumnNames(ResultSetMetaData rsmd, Document xmlDoc) throws SQLException {
-		List<Element> result = new ArrayList<Element>();
-		
-		for(int i=0; i<rsmd.getColumnCount(); i++) {
-			Element element = xmlDoc.createElement("variable");
-			element.setAttribute("name", rsmd.getColumnLabel(i+1));
-			result.add(element);
-		}
-		
-		return result;
-	}
-
 	public void setDataTranslator(AbstractDataTranslator dataTranslator) {
 		this.dataTranslator = dataTranslator;
 	}
 
 	public void setParser(AbstractParser parser) {
 		this.parser = parser;
+	}
+
+	public void setQueryTranslator(AbstractQueryTranslator queryTranslator) {
+		this.queryTranslator = queryTranslator;
+	}
+
+	public void setSparqQuery(Query sparqQuery) {
+		this.sparqQuery = sparqQuery;
+	}
+	
+	public void setSparqQuery(String sparqQuery) {
+		this.sparqQuery = QueryFactory.create(sparqQuery);
 	}
 }

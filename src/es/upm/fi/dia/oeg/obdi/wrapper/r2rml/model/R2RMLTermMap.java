@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,10 +14,13 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
 
-public abstract class R2RMLTermMap {
+public abstract class R2RMLTermMap implements R2RMLElement {
 	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);
 	
 	//public enum TermType {IRI, BLANK_NODE, LITERAL};
@@ -25,7 +29,6 @@ public abstract class R2RMLTermMap {
 	
 	private String constantValue;
 	private String columnName;
-
 
 	private String termType;
 	private String languageTag;
@@ -127,48 +130,32 @@ public abstract class R2RMLTermMap {
 		}
 	}
 	
-	public String getUnfoldedValue(ResultSet rs, Map<String, Integer> mapDBDatatype) throws SQLException {
-		//return this.getUnfoldedValue(rs, this.alias);
-		return this.getUnfoldedValue(rs, null, mapDBDatatype);
-	}
+//	public String getUnfoldedValue(ResultSet rs, Map<String, Integer> mapDBDatatype) throws SQLException {
+//		//return this.getUnfoldedValue(rs, this.alias);
+//		return this.getUnfoldedValue(rs, null, mapDBDatatype);
+//	}
 
 
-	public String getResultSetValue(ResultSet rs, String columnName)  {
-		String result = null;
-		
-		try {
-			if(this.datatype == null) {
-				result = rs.getString(columnName);
-			} else if(this.datatype.equals(XSDDatatype.XSDdateTime.getURI())) {
-				result = rs.getDate(columnName).toString();
-			} else {
-				result = rs.getString(columnName);
-			}			
-		} catch(Exception e) {
-			logger.error("error occured when translating result, check your database values for " + columnName);
-		}
 
-		return result;
-	}
 	
 	public String getUnfoldedValue(ResultSet rs, String logicalTableAlias
-			, Map<String, Integer> mapDBDatatype) 
-			 {
+			, ResultSetMetaData rsmd) {
+		
 		String result = null;
 		String originalValue = this.getOriginalValue();
 
 
-		if(termMapType == TermMapType.COLUMN) {
+		if(this.termMapType == TermMapType.COLUMN) {
 
 			if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
 				String[] originalValueSplit = originalValue.split("\\.");
 				String columnName = originalValueSplit[originalValueSplit.length - 1];
 				originalValue = logicalTableAlias + "." + columnName;
 			}
-			result = this.getResultSetValue(rs, originalValue);
-		} else if(termMapType == TermMapType.CONSTANT) {
+			result = this.getResultSetValue(rs, originalValue, rsmd);
+		} else if(this.termMapType == TermMapType.CONSTANT) {
 			result = originalValue;
-		} else if(termMapType == TermMapType.TEMPLATE) {
+		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			Collection<String> attributes = 
 					R2RMLUtility.getAttributesFromStringTemplate(originalValue);
 			Map<String,String> replacements = new HashMap<String, String>();
@@ -186,17 +173,23 @@ public abstract class R2RMLTermMap {
 				} else {
 					databaseColumn = attribute;
 				}
-				databaseValue = this.getResultSetValue(rs, databaseColumn);
+				databaseValue = this.getResultSetValue(rs, databaseColumn, rsmd);
 				
 				
-				if(databaseValue == null) {
-					replacements.put(attribute, "");
-				} else {
+				if(databaseValue != null) {
 					replacements.put(attribute, databaseValue);
+					result = R2RMLUtility.replaceTokens(originalValue, replacements);
 				}
 				
+//				if(databaseValue == null) {
+//					result = null;
+//				} else {
+//					replacements.put(attribute, databaseValue);
+//					result = R2RMLUtility.replaceTokens(originalValue, replacements);
+//				}
+				
 			}
-			result = R2RMLUtility.replaceTokens(originalValue, replacements);
+			
 		}	
 		
 		return result;
@@ -343,4 +336,40 @@ public abstract class R2RMLTermMap {
 
 		return result;
 	}
+	
+	public String getResultSetValue(ResultSet rs, String columnName
+			, ResultSetMetaData rsmd)  {
+		String result = null;
+		
+		try {
+			String dbType = AbstractRunner.getConfigurationProperties().getDatabaseType();
+			//SQLSelectItem selectItem = new SQLSelectItem(columnName);
+			SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName);
+			columnName = selectItem.getColumn();
+			if(columnName.startsWith("")) {columnName.substring(1);}
+			if(columnName.endsWith("")) {columnName.subSequence(0, columnName.length()-1);}
+			if(selectItem.getTable() != null) {
+				//columnName = selectItem.getTable() + "." + columnName;
+			}
+			
+			if(this.getDatatype() == null) {
+				result = rs.getString(columnName);
+			} else if(this.getDatatype().equals(XSDDatatype.XSDdateTime.getURI())) {
+				result = rs.getDate(columnName).toString();
+			} else {
+				result = rs.getString(columnName);
+			}			
+		} catch(Exception e) {
+			logger.error("error occured when translating result, check your database values for " + columnName);
+			logger.error("error message = " + e.getMessage());
+		}
+
+		return result;
+	}
+	
+	@Override
+	public Object accept(R2RMLElementVisitor visitor) throws Exception {
+		Object result = visitor.visit(this);
+		return result;
+	}	
 }

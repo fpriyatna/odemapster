@@ -10,9 +10,9 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidRefObjectMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObjectMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapPosition;
 
 public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements IRelationMapping, IAttributeMapping{
@@ -30,7 +30,6 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		this.mappingDocument = mappingDocument;
 		this.parent = parent;
 		
-		
 		Statement predicateMapStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATEMAP_PROPERTY);
 		if(predicateMapStatement != null) {
 			Resource predicateMapResource = (Resource) predicateMapStatement.getObject();
@@ -43,26 +42,33 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 			this.predicateMap = new R2RMLPredicateMap(constantValueObject);
 		}
 		
-		Statement objectMapStatement = resource.getProperty(R2RMLConstants.R2RML_OBJECTMAP_PROPERTY);
+		Statement objectMapStatement = resource.getProperty(
+				R2RMLConstants.R2RML_OBJECTMAP_PROPERTY);
 		if(objectMapStatement != null) {
-			Resource objectMapResource = (Resource) objectMapStatement.getObject();
-			this.objectMap = new R2RMLObjectMap(objectMapResource);
-			
-//			String objectMapResourceURI = objectMapResource.getURI();
-//			if(objectMapResource.isURIResource() && objectMapResourceURI != null) {
-//				this.objectMap = owner.getObjectMaps().get(objectMapResourceURI);
-//			} else {
-//				this.objectMap = new R2RMLObjectMap(objectMapResource);
-//			}
-			
+			Resource objectMapStatementObject = (Resource) objectMapStatement.getObject();
+			if(R2RMLRefObjectMap.isRefObjectMap(objectMapStatementObject)) {
+				this.objectMapType = ObjectMapType.RefObjectMap;
+				this.refObjectMap = new R2RMLRefObjectMap(objectMapStatementObject, mappingDocument);				
+			} else {
+				this.objectMapType = ObjectMapType.ObjectMap;
+				this.objectMap = new R2RMLObjectMap(objectMapStatementObject);
+			}
 		}
 
-		Statement objectStatement = resource.getProperty(R2RMLConstants.R2RML_OBJECT_PROPERTY);
+		Statement objectStatement = resource.getProperty(
+				R2RMLConstants.R2RML_OBJECT_PROPERTY);
 		if(objectStatement != null) {
 			this.objectMapType = ObjectMapType.ObjectMap;
 			String constantValueObject = objectStatement.getObject().toString();
 			this.objectMap = new R2RMLObjectMap(constantValueObject);
 		}
+
+//		Statement refObjectMapStatement = resource.getProperty(
+//				R2RMLConstants.R2RML_REFOBJECTMAP_PROPERTY);
+//		if(refObjectMapStatement != null) {
+//			this.objectMapType = ObjectMapType.RefObjectMap;
+//			this.refObjectMap = new R2RMLRefObjectMap((Resource) refObjectMapStatement.getObject(), mappingDocument);
+//		}
 
 		Statement graphMapStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPHMAP_PROPERTY);
 		if(graphMapStatement != null) {
@@ -71,15 +77,13 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		
 		Statement graphStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPH_PROPERTY);
 		if(graphStatement != null) {
-			String constantValueObject = graphStatement.getObject().toString();
-			this.graphMap = new R2RMLGraphMap(constantValueObject);
+			String graphStatementObjectValue = graphStatement.getObject().toString();
+			if(!R2RMLConstants.R2RML_DEFAULT_GRAPH_URI.equals(graphStatementObjectValue)) {
+				this.graphMap = new R2RMLGraphMap(graphStatementObjectValue);
+			}
+			
 		}
 		
-		Statement refObjectMapStatement = resource.getProperty(R2RMLConstants.R2RML_REFOBJECTMAP_PROPERTY);
-		if(refObjectMapStatement != null) {
-			this.objectMapType = ObjectMapType.RefObjectMap;
-			this.refObjectMap = new R2RMLRefObjectMap((Resource) refObjectMapStatement.getObject(), mappingDocument);
-		}
 
 	}
 

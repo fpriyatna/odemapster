@@ -52,10 +52,13 @@ public class R2OBetaGenerator extends AbstractBetaGenerator {
 
 	
 	@Override
-	public SQLSelectItem calculateBetaObject(String predicateURI, AbstractConceptMapping cm, Node object) 
+	public SQLSelectItem calculateBetaObject(
+			AbstractConceptMapping cm, Triple tp) 
 			throws QueryTranslationException {
 		SQLSelectItem selectItem = null;
-		
+		Node object = tp.getObject();
+		String predicateURI = tp.getPredicate().getURI();
+
 		if(RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
 			ZConstant conceptNameConstant = new ZConstant(cm.getConceptName()
 					, ZConstant.STRING);

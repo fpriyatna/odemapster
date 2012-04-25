@@ -8,10 +8,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OMappingDocument;
 
 public abstract class AbstractDataTranslator {
-
+	protected AbstractMaterializer materializer;
+	
 	protected abstract Object processCustomFunctionTransformationExpression(Object argument) 
-	throws PostProcessorException;
+			throws PostProcessorException;
 	public abstract void setMaterializer(AbstractMaterializer materializer);
-	public abstract void processMappingDocument(AbstractMappingDocument mappingDocument) throws Exception;
+	public abstract void translateData(AbstractMappingDocument mappingDocument) throws Exception;
 	
 }

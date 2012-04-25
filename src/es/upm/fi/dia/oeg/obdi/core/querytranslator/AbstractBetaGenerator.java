@@ -30,32 +30,36 @@ public abstract class AbstractBetaGenerator {
 		this.mappingDocument = mappingDocument;
 	}
 
-	public ZSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
+	public SQLSelectItem calculateBeta(Triple tp, POS pos) throws Exception {
 		Node tpSubject = tp.getSubject();
-		Collection<AbstractConceptMapping> cms = this.mapNodeConceptMapping.get(tpSubject);
+		Collection<AbstractConceptMapping> cms = 
+				this.mapNodeConceptMapping.get(tpSubject);
 		AbstractConceptMapping cm = cms.iterator().next();
-		return this.calculateBeta(tp, pos, cm);
+		SQLSelectItem beta = this.calculateBeta(tp, pos, cm);
+		return beta;
 	}
 	
-	public ZSelectItem calculateBeta(Triple tp, POS pos, AbstractConceptMapping cm)
+	private SQLSelectItem calculateBeta(Triple tp, POS pos
+			, AbstractConceptMapping cm)
 	throws Exception {
 		String predicateURI = tp.getPredicate().getURI();;
-		ZSelectItem selectItem = null;
+		SQLSelectItem selectItem = null;
 
 		if(pos == POS.sub) {
 			selectItem = this.calculateBetaSubject(cm);
 		} else if(pos == POS.pre) {
 			selectItem = this.calculateBetaPredicate(predicateURI, cm);
 		} else if(pos == POS.obj) {
-			selectItem = this.calculateBetaObject(predicateURI, cm, tp.getObject());
+			selectItem = this.calculateBetaObject(cm, tp);
 		}
 		
 		logger.debug("beta " + pos + " = " + selectItem);
 		return selectItem;
 	}
 
-	public abstract SQLSelectItem calculateBetaObject(String predicateURI,
-			AbstractConceptMapping cm, Node object) throws QueryTranslationException;
+	public abstract SQLSelectItem calculateBetaObject(
+			AbstractConceptMapping cm, Triple triple)
+	throws QueryTranslationException;
 
 	public SQLSelectItem calculateBetaPredicate(String predicateURI, AbstractConceptMapping cm) {
 		ZConstant predicateURIConstant = new ZConstant(predicateURI, ZConstant.STRING);
@@ -65,6 +69,6 @@ public abstract class AbstractBetaGenerator {
 		return selectItem;
 	}
 	
-	public abstract ZSelectItem calculateBetaSubject(AbstractConceptMapping cm);
+	public abstract SQLSelectItem calculateBetaSubject(AbstractConceptMapping cm);
 
 }

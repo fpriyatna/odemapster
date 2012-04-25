@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
@@ -31,9 +32,10 @@ public class R2RMLBSBMJuan {
 //		R2RMLElementDataTranslateVisitor dataTranslator = 
 //				new R2RMLElementDataTranslateVisitor(configurationDirectory, configurationFile); 
 //		md.accept(dataTranslator);
-		
+		R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
+				configurationDirectory, configurationFile);
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
-		R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md);
+		R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
 		queryTranslator.setOptimizeTripleBlock(false);
 		queryTranslator.setIgnoreRDFTypeStatement(true);
 		return queryTranslator;
@@ -97,8 +99,10 @@ public class R2RMLBSBMJuan {
 		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
 		try {
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
+			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
+					configurationDirectory, configurationFile);
 			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile));
+					, configurationFile, unfolder));
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();

@@ -9,6 +9,7 @@ import Zql.ZConstant;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -17,7 +18,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
@@ -36,9 +37,12 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public SQLSelectItem calculateBetaObject(String predicateURI,
-			AbstractConceptMapping cm, Node object)
+	public SQLSelectItem calculateBetaObject(
+			AbstractConceptMapping cm, Triple triple)
 			throws QueryTranslationException {
+		Node object = triple.getObject();
+		String predicateURI = triple.getPredicate().getURI();
+		
 		SQLSelectItem selectItem = null;
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
@@ -70,7 +74,9 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 						selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);
 					} else {
 						databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
-						String refObjectMapAlias = refObjectMap.getAlias(); 
+						//String refObjectMapAlias = refObjectMap.getAlias(); 
+						String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
+						
 						if(databaseColumnsString != null) {
 							if(databaseColumnsString.size() > 1) {
 								logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
@@ -95,8 +101,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public ZSelectItem calculateBetaSubject(AbstractConceptMapping cm) {
-		ZSelectItem selectItem = null;
+	public SQLSelectItem calculateBetaSubject(AbstractConceptMapping cm) {
+		SQLSelectItem selectItem = null;
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		String logicalTableAlias = triplesMap.getLogicalTable().getAlias();

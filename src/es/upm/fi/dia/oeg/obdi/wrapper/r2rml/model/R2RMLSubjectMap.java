@@ -9,7 +9,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
 
 public class R2RMLSubjectMap extends R2RMLTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLSubjectMap.class);
@@ -25,6 +25,9 @@ public class R2RMLSubjectMap extends R2RMLTermMap {
 	public R2RMLSubjectMap(Resource resource) throws R2RMLInvalidTermMapException {
 		super(resource, TermMapPosition.SUBJECT);
 
+		if(this.getTermType() != null && this.getTermType().equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+			throw new R2RMLInvalidTermMapException("Literal is not permitted in the subject!");
+		}
 		
 		StmtIterator classStatements = resource.listProperties(R2RMLConstants.R2RML_CLASS_PROPERTY);
 		if(classStatements != null) {
@@ -43,9 +46,12 @@ public class R2RMLSubjectMap extends R2RMLTermMap {
 
 		Statement graphStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPH_PROPERTY);
 		if(graphStatement != null) {
-			String constantValueObject = graphStatement.getObject().toString();
-			this.graphMap = new R2RMLGraphMap(constantValueObject);
-			logger.debug("this.graphMap = " + this.graphMap);
+			String graphStatementObjectValue = graphStatement.getObject().toString();
+			if(!R2RMLConstants.R2RML_DEFAULT_GRAPH_URI.equals(graphStatementObjectValue)) {
+				this.graphMap = new R2RMLGraphMap(graphStatementObjectValue);
+				logger.debug("this.graphMap = " + this.graphMap);				
+			}
+
 		}
 
 	}

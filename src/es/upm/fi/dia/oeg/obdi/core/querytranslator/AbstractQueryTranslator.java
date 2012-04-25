@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,6 +47,8 @@ import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeFunctions;
 
+import es.upm.fi.dia.oeg.obdi.DBUtility;
+import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -66,9 +69,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.TranslatorUtility;
 
 public abstract class AbstractQueryTranslator {
 	public enum POS {sub, pre, obj}
+	
 
 	private static Logger logger = Logger.getLogger(AbstractQueryTranslator.class);
-	
+	protected String queryFilePath;
+	protected boolean optimizeTripleBlock = false;
+	protected boolean subQueryElimination = false;
+	protected boolean subqueryAsView = false;
+	protected boolean ignoreRDFTypeStatement = true;
 	protected Map<Op, Collection<Node>> mapTermsC = new HashMap<Op, Collection<Node>>();
 	protected Map<Op, String> mapTransGP1Alias = new HashMap<Op, String>();
 	protected Map<Node, Collection<AbstractConceptMapping>> mapInferredTypes;
@@ -76,11 +84,8 @@ public abstract class AbstractQueryTranslator {
 	protected AbstractAlphaGenerator alphaGenerator;
 	protected AbstractBetaGenerator betaGenerator;
 	protected NameGenerator nameGenerator;
-	protected boolean optimizeTripleBlock = false;
-	protected boolean subQueryElimination = false;
 	protected AbstractPRSQLGenerator prSQLGenerator;
 	protected AbstractCondSQLGenerator condSQLGenerator;
-	protected boolean ignoreRDFTypeStatement = false;
 	
 	public AbstractQueryTranslator(AbstractMappingDocument mappingDocument) {
 		super();
@@ -89,17 +94,6 @@ public abstract class AbstractQueryTranslator {
 	}
 
 
-	protected Collection<ZSelectItem> generateSelectItems(Collection<Node> nodes, String prefix) {
-		Collection<ZSelectItem> result = new LinkedHashSet<ZSelectItem>();
-
-		for(Node node : nodes) {
-			ZSelectItem selectItem = this.generateSelectItem(node, prefix);
-			result.add(selectItem);
-		}
-
-		return result;
-	}
-	
 	private ZSelectItem generateSelectItem(Node node, String prefix) {
 		if(prefix == null) {
 			prefix = "";
@@ -138,121 +132,49 @@ public abstract class AbstractQueryTranslator {
 		return selectItem;
 	}
 	
+	protected Collection<ZSelectItem> generateSelectItems(Collection<Node> nodes, String prefix) {
+		Collection<ZSelectItem> result = new LinkedHashSet<ZSelectItem>();
+
+		for(Node node : nodes) {
+			ZSelectItem selectItem = this.generateSelectItem(node, prefix);
+			result.add(selectItem);
+		}
+
+		return result;
+	}
+
+	protected abstract String generateTermCName(Node termC);
+
+	public String getQueryFilePath() {
+		return queryFilePath;
+	}
+
+	public boolean isIgnoreRDFTypeStatement() {
+		return ignoreRDFTypeStatement;
+	}
 	
-
-
-
-
-
-
-
-
+	public boolean isSubqueryAsView() {
+		return subqueryAsView;
+	}
+	
+	public void setIgnoreRDFTypeStatement(boolean ignoreRDFTypeStatement) {
+		this.ignoreRDFTypeStatement = ignoreRDFTypeStatement;
+	}
+	
 	public void setOptimizeTripleBlock(boolean optimizeTripleBlock) {
 		this.optimizeTripleBlock = optimizeTripleBlock;
 	}
-
-
-
+	
+	public void setQueryFilePath(String queryFilePath) {
+		this.queryFilePath = queryFilePath;
+	}
+	
+	public void setSubqueryAsView(boolean subqueryAsView) {
+		this.subqueryAsView = subqueryAsView;
+	}
+	
 	public void setSubQueryElimination(boolean subQueryElimination) {
 		this.subQueryElimination = subQueryElimination;
-	}
-
-	protected SQLQuery trans(OpSlice opSlice) throws Exception {
-		long sliceLength = opSlice.getLength();
-		Op opSliceSubOp = opSlice.getSubOp();
-		SQLQuery sqlQuery = this.trans(opSliceSubOp);
-		sqlQuery.setSlice(sliceLength);
-		
-		//logger.debug("trans slice = \n" + sqlQuery + "\n");
-		return sqlQuery;
-	}
-	
-	protected SQLQuery trans(OpDistinct opDistinct) throws Exception {
-		Op opDistinctSubOp = opDistinct.getSubOp(); 
-		SQLQuery sqlQuery = this.trans(opDistinctSubOp);
-		sqlQuery.setDistinct(true);
-		//logger.info("transDistinct = \n" + sqlQuery + "\n");
-		return sqlQuery;
-	}
-	
-	protected SQLQuery trans(OpBGP bgp) throws Exception {
-		SQLQuery result = null;
-
-		if(QueryTranslatorUtility.isTriplePattern(bgp)) { //triple pattern
-			Triple tp = bgp.getPattern().getList().get(0);
-			result = this.transTP(tp);
-		} else { //bgp pattern
-			List<Triple> triples = bgp.getPattern().getList();
-
-			boolean isTB;
-			if(this.optimizeTripleBlock) {
-				isTB = QueryTranslatorUtility.isTripleBlock(triples);
-				logger.debug("isTB = " + isTB);
-			} else {
-				isTB = false;
-			}
-
-			if(isTB) {
-				result = this.transTB(triples);
-			} else {
-				int separationIndex = 1;
-				if(this.optimizeTripleBlock) {
-					separationIndex = QueryTranslatorUtility.getFirstTBEndIndex(triples);
-				}
-				List<Triple> gp1TripleList = triples.subList(0, separationIndex);
-				OpBGP gp1 = new OpBGP(BasicPattern.wrap(gp1TripleList));
-				List<Triple> gp2TripleList = triples.subList(separationIndex, triples.size());
-				OpBGP gp2 = new OpBGP(BasicPattern.wrap(gp2TripleList));
-
-				// result = this.transJoin(gp1, gp2, alphaGenerator, betaGenerator, R2OConstants.JOINS_TYPE_INNER);					
-				result = this.transInnerJoin(bgp, gp1, gp2);
-			}
-		}
-		
-		return result;
-	}
-	
-	protected SQLQuery trans(OpJoin opJoin)  throws Exception {
-		SQLQuery result = null;
-		Op opLeft = opJoin.getLeft();
-		Op opRight = opJoin.getRight();
-		//result = this.transJoin(opLeft, opRight, alphaGenerator, betaGenerator, R2OConstants.JOINS_TYPE_INNER);
-		result = this.transInnerJoin(opJoin, opLeft, opRight);
-		
-		return result;
-	}
-	
-	protected SQLQuery trans(OpLeftJoin opLeftJoin) throws Exception {
-		SQLQuery result = null;
-		Op opLeft = opLeftJoin.getLeft();
-		Op opRight = opLeftJoin.getRight();
-		if(opLeftJoin.getExprs() == null) {
-			// result = this.transJoin(opLeft, opRight, alphaGenerator, betaGenerator, R2OConstants.JOINS_TYPE_LEFT);				
-			result = this.transLeftJoin(opLeftJoin, opLeft, opRight);
-		} else {
-			//				logger.debug("op instanceof OpFilter");
-			ExprList exprList = opLeftJoin.getExprs();
-			Expr exprNull = null;
-			Op opLeftJoin2 = OpLeftJoin.create(opLeft, opRight, exprNull);
-			result = this.transFilter(opLeftJoin2, exprList);
-		}
-		return result;
-	}
-	
-	protected SQLQuery trans(OpUnion opUnion) throws Exception {
-		SQLQuery result = null;
-		Op opLeft = opUnion.getLeft();
-		Op opRight = opUnion.getRight();
-		result = this.transUNION(opLeft, opRight);
-		return result;
-	}
-	
-	protected SQLQuery trans(OpFilter opFilter) throws Exception {
-		SQLQuery result = null;
-		Op opFilterSubOp = opFilter.getSubOp();
-		ExprList exprList = opFilter.getExprs();
-		result = this.transFilter(opFilterSubOp, exprList);
-		return result;
 	}
 	
 	protected SQLQuery trans(Op op) throws Exception {
@@ -297,6 +219,220 @@ public abstract class AbstractQueryTranslator {
 	}
 
 
+	protected SQLQuery trans(OpBGP bgp) throws Exception {
+		SQLQuery result = null;
+
+		if(QueryTranslatorUtility.isTriplePattern(bgp)) { //triple pattern
+			Triple tp = bgp.getPattern().getList().get(0);
+			result = this.transTP(tp);
+		} else { //bgp pattern
+			List<Triple> triples = bgp.getPattern().getList();
+
+			boolean isTB;
+			if(this.optimizeTripleBlock) {
+				isTB = QueryTranslatorUtility.isTripleBlock(triples);
+				logger.debug("isTB = " + isTB);
+			} else {
+				isTB = false;
+			}
+
+			if(isTB) {
+				result = this.transTB(triples);
+			} else {
+				int separationIndex = 1;
+				if(this.optimizeTripleBlock) {
+					separationIndex = QueryTranslatorUtility.getFirstTBEndIndex(triples);
+				}
+				List<Triple> gp1TripleList = triples.subList(0, separationIndex);
+				OpBGP gp1 = new OpBGP(BasicPattern.wrap(gp1TripleList));
+				List<Triple> gp2TripleList = triples.subList(separationIndex, triples.size());
+				OpBGP gp2 = new OpBGP(BasicPattern.wrap(gp2TripleList));
+
+				// result = this.transJoin(gp1, gp2, alphaGenerator, betaGenerator, R2OConstants.JOINS_TYPE_INNER);					
+				result = this.transInnerJoin(bgp, gp1, gp2);
+			}
+		}
+		
+		return result;
+	}
+
+	protected SQLQuery trans(OpDistinct opDistinct) throws Exception {
+		Op opDistinctSubOp = opDistinct.getSubOp(); 
+		SQLQuery sqlQuery = this.trans(opDistinctSubOp);
+		sqlQuery.setDistinct(true);
+		//logger.info("transDistinct = \n" + sqlQuery + "\n");
+		return sqlQuery;
+	}
+
+	protected SQLQuery trans(OpFilter opFilter) throws Exception {
+		SQLQuery result = null;
+		Op opFilterSubOp = opFilter.getSubOp();
+		ExprList exprList = opFilter.getExprs();
+		result = this.transFilter(opFilterSubOp, exprList);
+		return result;
+	}
+			
+	protected SQLQuery trans(OpJoin opJoin)  throws Exception {
+		SQLQuery result = null;
+		Op opLeft = opJoin.getLeft();
+		Op opRight = opJoin.getRight();
+		//result = this.transJoin(opLeft, opRight, alphaGenerator, betaGenerator, R2OConstants.JOINS_TYPE_INNER);
+		result = this.transInnerJoin(opJoin, opLeft, opRight);
+		
+		return result;
+	}
+
+	protected SQLQuery trans(OpLeftJoin opLeftJoin) throws Exception {
+		SQLQuery result = null;
+		Op opLeft = opLeftJoin.getLeft();
+		Op opRight = opLeftJoin.getRight();
+		if(opLeftJoin.getExprs() == null) {
+			// result = this.transJoin(opLeft, opRight, alphaGenerator, betaGenerator, R2OConstants.JOINS_TYPE_LEFT);				
+			result = this.transLeftJoin(opLeftJoin, opLeft, opRight);
+		} else {
+			//				logger.debug("op instanceof OpFilter");
+			ExprList exprList = opLeftJoin.getExprs();
+			Expr exprNull = null;
+			Op opLeftJoin2 = OpLeftJoin.create(opLeft, opRight, exprNull);
+			result = this.transFilter(opLeftJoin2, exprList);
+		}
+		return result;
+	}
+	
+	protected SQLQuery trans(OpOrder opOrder) throws Exception {
+		Vector<ZOrderBy> orderByConditions = new Vector<ZOrderBy>();
+		for(SortCondition sortCondition : opOrder.getConditions()) {
+			int sortConditionDirection = sortCondition.getDirection();
+			Expr sortConditionExpr = sortCondition.getExpression();
+			Var sortConditionVar = sortConditionExpr.asVar();
+			
+			String nameSortConditionVar = nameGenerator.generateName(null, sortConditionVar);
+
+			//ZExp zExp = this.transExpr(graphPatternOp, sortConditionExpr);
+			//ZExp zExp = new ZConstant(sortConditionVar.getName(), ZConstant.COLUMNNAME);
+			
+			ZExp zExp;
+			if(this.subQueryElimination) {
+				zExp = new ZConstant(sortConditionVar.getName(), ZConstant.COLUMNNAME);
+			} else {
+				zExp = new ZConstant(nameSortConditionVar, ZConstant.COLUMNNAME);
+			}
+			
+			ZOrderBy zOrderBy = new ZOrderBy(zExp);
+			if(sortConditionDirection == Query.ORDER_DEFAULT) {
+				zOrderBy.setAscOrder(true);
+			} else if(sortConditionDirection == Query.ORDER_ASCENDING) {
+				zOrderBy.setAscOrder(true);
+			} if(sortConditionDirection == Query.ORDER_DESCENDING) {
+				zOrderBy.setAscOrder(false);
+			} else {
+				zOrderBy.setAscOrder(true);
+			}
+			orderByConditions.add(zOrderBy);
+		}
+		
+		Op opOrderSubOp = opOrder.getSubOp();
+		SQLQuery sqlQuery = this.trans(opOrderSubOp); 
+		sqlQuery.addOrderBy(orderByConditions);
+		
+		logger.debug("trans orderBy = \n" + sqlQuery + "\n");
+		return sqlQuery;
+	}
+	
+	protected SQLQuery trans(OpProject opProject) throws Exception {
+		Op graphPatternOp = opProject.getSubOp();
+		SQLQuery gpSQL = this.trans(graphPatternOp);
+		String gpSQLAlias = gpSQL.generateAlias();
+		logger.debug("gpSQL result = " + gpSQL.toString());
+		
+		Collection<ZSelectItem> newSelectItems = new HashSet<ZSelectItem>();
+		List<Var> selectVars = opProject.getVars();
+		for(Var selectVar : selectVars) {
+			String nameSelectVar = nameGenerator.generateName(null, selectVar);
+//			ZSelectItem selectItem = new ZSelectItem(gpSQLAlias + "." + nameSelectVar);
+			ZSelectItem selectItem = new ZSelectItem(nameSelectVar);
+			selectItem.setAlias(selectVar.getName());
+			newSelectItems.add(selectItem);
+		}
+
+
+		SQLQuery result = new SQLQuery();
+		SQLFromItem fromItem;
+		if(this.subqueryAsView) {
+			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			
+			String subQueryViewName = "sqp" + Math.abs(opProject.hashCode());
+			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
+			logger.info(dropViewSQL);
+			boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+			
+			String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + gpSQL;
+			logger.info(createViewSQL);
+			boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+			
+			fromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE);
+		} else {
+			fromItem = new SQLFromItem(gpSQL.toString(), LogicalTableType.SQLQUERY);
+		}
+		
+		Vector<ZOrderBy> orderByConditions = gpSQL.getOrderBy();
+		if(this.subQueryElimination) {
+			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, gpSQL, null, orderByConditions);
+		} else {
+			fromItem.setAlias(gpSQLAlias);
+			result.setSelectItems(newSelectItems);
+			result.addFrom(fromItem);
+		}
+		
+		logger.debug("trans project = \n" + result + "\n");
+		return result;
+
+	}
+	
+	protected SQLQuery trans(OpSlice opSlice) throws Exception {
+		long sliceLength = opSlice.getLength();
+		Op opSliceSubOp = opSlice.getSubOp();
+		SQLQuery sqlQuery = this.trans(opSliceSubOp);
+		sqlQuery.setSlice(sliceLength);
+		
+		//logger.debug("trans slice = \n" + sqlQuery + "\n");
+		return sqlQuery;
+	}
+	
+
+
+
+
+	protected SQLQuery trans(OpUnion opUnion) throws Exception {
+		SQLQuery result = null;
+		Op opLeft = opUnion.getLeft();
+		Op opRight = opUnion.getRight();
+		result = this.transUnion(opLeft, opRight);
+		return result;
+	}
+
+
+
+	//protected abstract SQLQuery transJoin(Op opParent, Op gp1, Op gp2, String joinType) throws Exception;
+	//protected abstract SQLQuery transFilter(Op gp, ExprList exprList) throws Exception;
+	//protected abstract SQLQuery transUNION(Op gp1, Op gp2) throws Exception;
+	//protected abstract SQLQuery transProject(Op opQuery) throws Exception;
+
+	protected ZExp transConstant(NodeValue nodeValue) {
+		ZExp result = null;
+
+		boolean isLiteral = nodeValue.isLiteral();
+		//boolean isIRI = nodeValue.isIRI();
+		boolean isIRI = nodeValue.getNode().isURI();
+		
+		if(isLiteral) {
+			result = this.transLiteral(nodeValue);
+		} else if(isIRI) {
+			result = this.transIRI(nodeValue.getNode());
+		}
+		return result;
+	}
+
 	protected ZExp transExpr(Op op, Expr expr) {
 		ZExp result = null;
 
@@ -316,7 +452,7 @@ public abstract class AbstractQueryTranslator {
 
 		return result;
 	}
-
+	
 	private Collection<ZExp> transExpr(Op op, ExprList exprList) {
 		Collection<ZExp> result = new HashSet<ZExp>();
 		List<Expr> exprs = exprList.getList();
@@ -326,18 +462,34 @@ public abstract class AbstractQueryTranslator {
 		}
 		return result;
 	}
-
-
-
+	
 	protected SQLQuery transFilter(Op gp, ExprList exprList)
 			throws Exception  {
 		SQLQuery result;
-
-		SQLQuery transGP = this.trans(gp);
-		String transGPAlias = transGP.generateAlias();
-		//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
-		SQLFromItem fromItem = new SQLFromItem(transGP.toString(), LogicalTableType.SQLQUERY);
-		fromItem.setAlias(transGPAlias);
+		SQLFromItem resultFrom;
+		
+		SQLQuery transGPSQL = this.trans(gp);
+		String transGPSQLAlias = transGPSQL.generateAlias();
+		
+		
+		if(this.subqueryAsView) {
+			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			
+			String subQueryViewName = "sqf" + Math.abs(gp.hashCode());
+			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
+			logger.info(dropViewSQL);
+			boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+			
+			String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + transGPSQL;
+			logger.info(createViewSQL);
+			boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+			
+			resultFrom = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE);
+		} else {
+			//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
+			resultFrom = new SQLFromItem(transGPSQL.toString(), LogicalTableType.SQLQUERY);
+		}
+		resultFrom.setAlias(transGPSQLAlias);
 
 		String transGP1Alias = this.mapTransGP1Alias.get(gp);
 		Collection<ZExp> transExprs;
@@ -365,11 +517,11 @@ public abstract class AbstractQueryTranslator {
 		newSelectItems.add(newSelectItem);
 
 		if(this.subQueryElimination) {
-			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, transGP, newWhere, null);
+			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, transGPSQL, newWhere, null);
 		} else {
 			result = new SQLQuery();
 			result.setSelectItems(newSelectItems);
-			result.addFrom(fromItem);
+			result.addFrom(resultFrom);
 			if(transExprs.size() > 0) {
 				if(transExprs.size() == 1) {
 					ZExp zExp = transExprs.iterator().next();
@@ -386,7 +538,8 @@ public abstract class AbstractQueryTranslator {
 
 		return result;
 	}
-			
+
+
 	private ZExp transFunction(Op op, ExprFunction exprFunction) {
 		ZExp result = null;
 
@@ -437,11 +590,12 @@ public abstract class AbstractQueryTranslator {
 		return result;
 	}
 
+
 	private SQLQuery transInnerJoin(Op opParent, Op gp1, Op gp2) throws Exception {
 		return this.transJoin(opParent, gp1, gp2, Constants.JOINS_TYPE_INNER);
 	}
-	
-	protected abstract String generateTermCName(Node termC);
+
+	protected abstract ZExp transIRI(Node node);
 	
 	protected SQLQuery transJoin(Op opParent, Op gp1, Op gp2, String joinType)
 			throws Exception  {
@@ -449,14 +603,14 @@ public abstract class AbstractQueryTranslator {
 		logger.debug("gp1 = " + gp1);
 		logger.debug("gp2 = " + gp2);
 
-		SQLQuery transGP1 = this.trans(gp1);
-		SQLQuery transGP2 = this.trans(gp2);
-		if(transGP1 == null && transGP2 == null) {
+		SQLQuery transGP1SQL = this.trans(gp1);
+		SQLQuery transGP2SQL = this.trans(gp2);
+		if(transGP1SQL == null && transGP2SQL == null) {
 			return null;
-		} else if(transGP1 != null && transGP2 == null) {
-			return transGP1;
-		} else if(transGP1 == null && transGP2 != null) {
-			return transGP2;
+		} else if(transGP1SQL != null && transGP2SQL == null) {
+			return transGP1SQL;
+		} else if(transGP1SQL == null && transGP2SQL != null) {
+			return transGP2SQL;
 		} else {
 			SQLQuery transJoin = new SQLQuery();
 			Collection<ZSelectItem> selectItems = new HashSet<ZSelectItem>();
@@ -466,25 +620,59 @@ public abstract class AbstractQueryTranslator {
 			Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
 			logger.debug("termsGP2 = " + termsGP2);
 
-			String transGP1Alias = transGP1.generateAlias();
+			String transGP1Alias = transGP1SQL.generateAlias();
 			this.mapTransGP1Alias.put(opParent, transGP1Alias);
 			//SQLFromItem transGP1FromItem = new SQLFromItem(transGP1.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem transGP1FromItem = new SQLFromItem(transGP1.toString(), LogicalTableType.SQLQUERY);
+			SQLFromItem transGP1FromItem;
+			if(this.subqueryAsView) {
+				Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+				
+				String subQueryViewName = "sql" + Math.abs(gp1.hashCode());
+				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
+				logger.info(dropViewSQL);
+				boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+				
+				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + transGP1SQL;
+				logger.info(createViewSQL);
+				boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+				
+				transGP1FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE);
+			} else {
+				//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
+				transGP1FromItem = new SQLFromItem(transGP1SQL.toString(), LogicalTableType.SQLQUERY);
+			}
 			transGP1FromItem.setAlias(transGP1Alias);
 			transJoin.addFrom(transGP1FromItem);
 
 			
-			String transGP2Alias = transGP2.generateAlias();
+			String transGP2Alias = transGP2SQL.generateAlias();
 			//SQLFromItem transGP2FromItem = new SQLFromItem(transGP2.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem transGP2FromItem = new SQLFromItem(transGP2.toString(), LogicalTableType.SQLQUERY);
+			SQLFromItem transGP2FromItem;
+			if(this.subqueryAsView) {
+				Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+				
+				String subQueryViewName = "sqr" + Math.abs(gp2.hashCode());
+				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
+				logger.info(dropViewSQL);
+				boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+				
+				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + transGP2SQL;
+				logger.info(createViewSQL);
+				boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+				
+				transGP2FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE);
+			} else {
+				//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
+				transGP2FromItem = new SQLFromItem(transGP2SQL.toString(), LogicalTableType.SQLQUERY);
+			}
 			transGP2FromItem.setAlias(transGP2Alias);
 
 			SQLJoinQuery joinQuery = new SQLJoinQuery();
 			joinQuery.setJoinType(joinType);
 			joinQuery.setJoinSource(transGP2FromItem);
 
-			logger.debug("transGP1 = \n" + transGP1);
-			logger.debug("transGP2 = \n" + transGP2);
+			logger.debug("transGP1 = \n" + transGP1SQL);
+			logger.debug("transGP2 = \n" + transGP2SQL);
 
 			Set<Node> termsA = new HashSet<Node>(termsGP1);termsA.removeAll(termsGP2);
 			logger.debug("termsA = " + termsA);
@@ -574,11 +762,36 @@ public abstract class AbstractQueryTranslator {
 		}
 
 	}
-	
+
 	public abstract SQLQuery translate(Query sparqlQuery) throws Exception;
-	
+
+	public SQLQuery translateFromFile() throws Exception {
+		//process SPARQL file
+		logger.info("Parsing query file : " + this.queryFilePath);
+		Query sparqlQuery = QueryFactory.read(this.queryFilePath);
+		logger.debug("sparqlQuery = " + sparqlQuery);
+		
+		return this.translate(sparqlQuery);
+	}
+
+	public SQLQuery translateFromFile(String queryFilePath) throws Exception {
+		//process SPARQL file
+		logger.info("Parsing query file : " + queryFilePath);
+		Query sparqlQuery = QueryFactory.read(queryFilePath);
+		logger.debug("sparqlQuery = " + sparqlQuery);
+		
+		return this.translate(sparqlQuery);
+	}
 
 
+	public SQLQuery translateFromString(String queryString) throws Exception {
+		//process SPARQL string
+		logger.info("Parsing query string : " + queryString);
+		Query sparqlQuery = QueryFactory.create(queryString);
+		logger.debug("sparqlQuery = " + sparqlQuery);
+		
+		return this.translate(sparqlQuery);
+	}
 
 
 	protected SQLQuery transLeftJoin(Op opParent, Op gp1, Op gp2) throws Exception {
@@ -586,17 +799,25 @@ public abstract class AbstractQueryTranslator {
 	}
 
 
+	protected ZExp transLiteral(NodeValue nodeValue) {
+		ZExp result = null;
+		Node node = nodeValue.getNode();
+		if(nodeValue.isNumber()) {
+			result = new ZConstant(node.getLiteralValue().toString(), ZConstant.NUMBER);	
+		} else {
+			result = new ZConstant(node.getLiteralValue().toString(), ZConstant.STRING);
+		}
+		return result;
+	}
 
-	//protected abstract SQLQuery transJoin(Op opParent, Op gp1, Op gp2, String joinType) throws Exception;
-	//protected abstract SQLQuery transFilter(Op gp, ExprList exprList) throws Exception;
-	//protected abstract SQLQuery transUNION(Op gp1, Op gp2) throws Exception;
-	//protected abstract SQLQuery transProject(Op opQuery) throws Exception;
 
-	protected abstract SQLQuery transTB(Collection<Triple> triples) throws Exception;
+	protected abstract SQLQuery transTB(List<Triple> triples) throws Exception;
+
 
 	protected abstract SQLQuery transTP(Triple tp) throws QueryTranslationException;
-	
-	protected SQLQuery transUNION(Op gp1, Op gp2)
+
+
+	protected SQLQuery transUnion(Op gp1, Op gp2)
 			throws Exception  {
 		Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
 		Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
@@ -615,14 +836,50 @@ public abstract class AbstractQueryTranslator {
 		SQLQuery transGP1 = this.trans(gp1);
 		String transGP1Alias = transGP1.generateAlias() + "R1";;
 		//SQLFromItem transGP1FromItem = new SQLFromItem(transGP1.toString(), SQLFromItem.FORM_QUERY);
-		SQLFromItem transGP1FromItem = new SQLFromItem(transGP1.toString(), LogicalTableType.SQLQUERY);
+		SQLFromItem transGP1FromItem;
+		String subQueryGP1ViewName = "sql" + Math.abs(gp1.hashCode());
+		if(this.subqueryAsView) {
+			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			
+			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryGP1ViewName;
+			logger.info(dropViewSQL);
+			boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+
+			String createViewSQL = "CREATE VIEW " + subQueryGP1ViewName + " AS " + transGP1;
+			logger.info(createViewSQL);
+			boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+			
+			transGP1FromItem = new SQLFromItem(subQueryGP1ViewName, LogicalTableType.TABLE);
+		} else {
+			//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
+			transGP1FromItem = new SQLFromItem(transGP1.toString(), LogicalTableType.SQLQUERY);
+		}
+		
+		
 		transGP1FromItem.setAlias(transGP1Alias);
 		query1.addFrom(transGP1FromItem);
 
 		SQLQuery transGP2 = this.trans(gp2);
 		String transGP2Alias = transGP2.generateAlias() + "R2";
 		//SQLFromItem transGP2FromItem = new SQLFromItem(transGP2.toString(), SQLFromItem.FORM_QUERY);
-		SQLFromItem transGP2FromItem = new SQLFromItem(transGP2.toString(), LogicalTableType.SQLQUERY);
+		SQLFromItem transGP2FromItem;
+		String subQueryGP2ViewName = "sqr" + Math.abs(gp2.hashCode());
+		if(this.subqueryAsView) {
+			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			
+			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryGP2ViewName;
+			logger.info(dropViewSQL);
+			boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+			
+			String createViewSQL = "CREATE VIEW " + subQueryGP2ViewName + " AS " + transGP2;
+			logger.info(createViewSQL);
+			boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+			
+			transGP2FromItem = new SQLFromItem(subQueryGP2ViewName, LogicalTableType.TABLE);
+		} else {
+			//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
+			transGP2FromItem = new SQLFromItem(transGP2.toString(), LogicalTableType.SQLQUERY);
+		}
 		transGP2FromItem.setAlias(transGP2Alias);
 
 		SQLJoinQuery joinQuery1 = new SQLJoinQuery();
@@ -649,14 +906,24 @@ public abstract class AbstractQueryTranslator {
 		SQLQuery transR3 = this.trans(gp2);
 		String transR3Alias = transR3.generateAlias() + "R3";;
 		//SQLFromItem transR3FromItem = new SQLFromItem(transR3.toString(), SQLFromItem.FORM_QUERY);
-		SQLFromItem transR3FromItem = new SQLFromItem(transR3.toString(), LogicalTableType.SQLQUERY);
+		SQLFromItem transR3FromItem;
+		if(this.subqueryAsView) {
+			transR3FromItem = new SQLFromItem(subQueryGP2ViewName, LogicalTableType.TABLE);
+		} else {
+			transR3FromItem = new SQLFromItem(transR3.toString(), LogicalTableType.SQLQUERY);
+		}
 		transR3FromItem.setAlias(transR3Alias);
 		query2.addFrom(transR3FromItem);
 
 		SQLQuery transR4 = this.trans(gp1);
 		String transR4Alias = transR4.generateAlias() + "R4";
 		//SQLFromItem transR4FromItem = new SQLFromItem(transR4.toString(), SQLFromItem.FORM_QUERY);
-		SQLFromItem transR4FromItem = new SQLFromItem(transR4.toString(), LogicalTableType.SQLQUERY);
+		SQLFromItem transR4FromItem;
+		if(this.subqueryAsView) {
+			transR4FromItem = new SQLFromItem(subQueryGP1ViewName, LogicalTableType.TABLE);
+		} else {
+			transR4FromItem = new SQLFromItem(transR4.toString(), LogicalTableType.SQLQUERY);
+		}
 		transR4FromItem.setAlias(transR4Alias);
 
 		SQLJoinQuery joinQuery2 = new SQLJoinQuery();
@@ -682,133 +949,8 @@ public abstract class AbstractQueryTranslator {
 		return result;
 
 	}
-	
+
+
 	protected abstract ZExp transVar(Op op, Var var);
-
-
-	public boolean isIgnoreRDFTypeStatement() {
-		return ignoreRDFTypeStatement;
-	}
-
-
-	public void setIgnoreRDFTypeStatement(boolean ignoreRDFTypeStatement) {
-		this.ignoreRDFTypeStatement = ignoreRDFTypeStatement;
-	}
-
-	protected SQLQuery trans(OpOrder opOrder) throws Exception {
-		Vector<ZOrderBy> orderByConditions = new Vector<ZOrderBy>();
-		for(SortCondition sortCondition : opOrder.getConditions()) {
-			int sortConditionDirection = sortCondition.getDirection();
-			Expr sortConditionExpr = sortCondition.getExpression();
-			Var sortConditionVar = sortConditionExpr.asVar();
-			
-			String nameSortConditionVar = nameGenerator.generateName(null, sortConditionVar);
-
-			//ZExp zExp = this.transExpr(graphPatternOp, sortConditionExpr);
-			//ZExp zExp = new ZConstant(sortConditionVar.getName(), ZConstant.COLUMNNAME);
-			ZExp zExp = new ZConstant(nameSortConditionVar, ZConstant.COLUMNNAME);
-			
-			ZOrderBy zOrderBy = new ZOrderBy(zExp);
-			if(sortConditionDirection == Query.ORDER_DEFAULT) {
-				zOrderBy.setAscOrder(true);
-			} else if(sortConditionDirection == Query.ORDER_ASCENDING) {
-				zOrderBy.setAscOrder(true);
-			} if(sortConditionDirection == Query.ORDER_DESCENDING) {
-				zOrderBy.setAscOrder(false);
-			} else {
-				zOrderBy.setAscOrder(true);
-			}
-			orderByConditions.add(zOrderBy);
-		}
-		
-		Op opOrderSubOp = opOrder.getSubOp();
-		SQLQuery sqlQuery = this.trans(opOrderSubOp); 
-		sqlQuery.addOrderBy(orderByConditions);
-		
-		//logger.info("trans orderBy = \n" + sqlQuery + "\n");
-		return sqlQuery;
-	}
-	
-	protected SQLQuery trans(OpProject opProject) throws Exception {
-		Op graphPatternOp = opProject.getSubOp();
-		SQLQuery gpSQL = this.trans(graphPatternOp);
-		String gpSQLAlias = gpSQL.generateAlias();
-		logger.debug("gpSQL result = " + gpSQL.toString());
-		
-		Collection<ZSelectItem> newSelectItems = new HashSet<ZSelectItem>();
-		List<Var> selectVars = opProject.getVars();
-		for(Var selectVar : selectVars) {
-			String nameSelectVar = nameGenerator.generateName(null, selectVar);
-//			ZSelectItem selectItem = new ZSelectItem(gpSQLAlias + "." + nameSelectVar);
-			ZSelectItem selectItem = new ZSelectItem(nameSelectVar);
-			selectItem.setAlias(selectVar.getName());
-			newSelectItems.add(selectItem);
-		}
-
-
-		SQLQuery result = new SQLQuery();
-		Vector<ZOrderBy> orderByConditions = gpSQL.getOrderBy();
-		if(this.subQueryElimination) {
-			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, gpSQL, null, orderByConditions);
-		} else {
-			SQLFromItem fromItem = new SQLFromItem(gpSQL.toString(), LogicalTableType.SQLQUERY);
-			fromItem.setAlias(gpSQLAlias);
-			result.setSelectItems(newSelectItems);
-			result.addFrom(fromItem);
-		}
-		
-		//logger.info("trans project = \n" + result + "\n");
-		return result;
-
-	}
-	
-	protected ZExp transLiteral(NodeValue nodeValue) {
-		ZExp result = null;
-		Node node = nodeValue.getNode();
-		if(nodeValue.isNumber()) {
-			result = new ZConstant(node.getLiteralValue().toString(), ZConstant.NUMBER);	
-		} else {
-			result = new ZConstant(node.getLiteralValue().toString(), ZConstant.STRING);
-		}
-		return result;
-	}
-
-	protected ZExp transConstant(NodeValue nodeValue) {
-		ZExp result = null;
-
-		boolean isLiteral = nodeValue.isLiteral();
-		//boolean isIRI = nodeValue.isIRI();
-		boolean isIRI = nodeValue.getNode().isURI();
-		
-		if(isLiteral) {
-			result = this.transLiteral(nodeValue);
-		} else if(isIRI) {
-			result = this.transIRI(nodeValue.getNode());
-		}
-		return result;
-	}
-
-
-	protected abstract ZExp transIRI(Node node);
-
-
-	public SQLQuery translateFromFile(String queryFilePath) throws Exception {
-		//process SPARQL file
-		logger.info("Parsing query file : " + queryFilePath);
-		Query sparqlQuery = QueryFactory.read(queryFilePath);
-		logger.debug("sparqlQuery = " + sparqlQuery);
-		
-		return this.translate(sparqlQuery);
-	}
-
-
-	public SQLQuery translateFromString(String queryString) throws Exception {
-		//process SPARQL string
-		logger.info("Parsing query string : " + queryString);
-		Query sparqlQuery = QueryFactory.create(queryString);
-		logger.debug("sparqlQuery = " + sparqlQuery);
-		
-		return this.translate(sparqlQuery);
-	}
 
 }

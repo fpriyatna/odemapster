@@ -17,6 +17,7 @@ import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZFromItem;
+import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
@@ -35,10 +36,12 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	private boolean distinct = false;
 
 	public SQLQuery(ZQuery zQuery) {
+		
 		if(zQuery.getSelect() != null) { this.addSelect(zQuery.getSelect());}
 		if(zQuery.getFrom() != null) { this.addFrom(zQuery.getFrom());}
 		if(zQuery.getWhere() != null) { this.addWhere(zQuery.getWhere());}
-
+		if(zQuery.getGroupBy() != null) {this.addGroupBy(zQuery.getGroupBy());}
+		
 		String tableAlias = "";
 		if(this.getFrom().size() == 1) {
 
@@ -254,6 +257,8 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			}
 			//remove the last coma and space
 			selectSQL = selectSQL.substring(0, selectSQL.length() - 2);
+		} else {
+			selectSQL += " * ";
 		}
 
 		return selectSQL;
@@ -298,7 +303,11 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 				if(logicalTableAlias == null) {
 					fromSQL += logicalTable.toString() + ", ";
 				} else {
-					fromSQL += "(" + logicalTable.toString() + ") " + logicalTableAlias + ", ";
+					if (logicalTable instanceof SQLFromItem) {
+						fromSQL += logicalTable.toString() + ", ";
+					} else {
+						fromSQL += "(" + logicalTable.toString() + ") " + logicalTableAlias + ", ";
+					}
 				}
 			}
 			//remove the last coma and space
@@ -331,11 +340,8 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 
 		//print select
-		Vector<ZSelectItem> mainQuerySelectItems = (Vector<ZSelectItem>) this.getSelect();
-		if(this.getSelect() != null && this.getSelect().size() != 0) {
-			String selectSQL = this.printSelect();
-			result += selectSQL + "\n";
-		}
+		String selectSQL = this.printSelect();
+		result += selectSQL + "\n";
 
 		//print from
 		String fromSQL = this.printFrom();
@@ -419,6 +425,11 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			result += this.printOrderBy() + "\n";
 		}
 
+		ZGroupBy groupBy = this.getGroupBy();
+		if(groupBy != null) {
+			result += groupBy + "\n";
+		}
+		
 		if(this.slice != -1) {
 			result += "LIMIT " + this.slice;
 		}

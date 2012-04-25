@@ -144,7 +144,7 @@ public class R2OQueryTranslator extends AbstractQueryTranslator {
 
 
 	@Override
-	protected SQLQuery transTB(Collection<Triple> triples) throws Exception {
+	protected SQLQuery transTB(List<Triple> triples) throws Exception {
 		SQLQuery tbQuery = new SQLQuery();
 
 		R2OAlphaGenerator r2oAlphaGenerator = (R2OAlphaGenerator) alphaGenerator;

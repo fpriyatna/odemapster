@@ -1,6 +1,9 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -28,17 +31,21 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.TypeInferrer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Logger logger = Logger.getLogger(R2RMLQueryTranslator.class);
+	private R2RMLElementUnfoldVisitor unfolder;
 	
-	public R2RMLQueryTranslator(AbstractMappingDocument mappingDocument) {
+	static Map<Triple, String> mapTripleAlias= new HashMap<Triple, String>();
+	
+	
+	public R2RMLQueryTranslator(AbstractMappingDocument mappingDocument
+			, R2RMLElementUnfoldVisitor unfolder) {
 		super(mappingDocument);
+		this.unfolder = unfolder;
 	}
-
-
-
 
 
 	@Override
@@ -51,8 +58,8 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		
 		TypeInferrer typeInferrer = new TypeInferrer(super.mappingDocument);
 		super.mapInferredTypes = typeInferrer.infer(opQueryPattern);
-		this.alphaGenerator = 
-				new R2RMLAlphaGenerator(mapInferredTypes, this.mappingDocument);
+		this.alphaGenerator = new R2RMLAlphaGenerator(
+				mapInferredTypes, this.mappingDocument, this.unfolder);
 		this.alphaGenerator.setIgnoreRDFTypeStatement(this.ignoreRDFTypeStatement);
 		this.betaGenerator = new R2RMLBetaGenerator(mapInferredTypes, mappingDocument);
 		this.prSQLGenerator = new R2RMLPRSQLGenerator(this.mapInferredTypes);
@@ -74,7 +81,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 
 	@Override
-	protected SQLQuery transTB(Collection<Triple> triples) throws Exception {
+	protected SQLQuery transTB(List<Triple> triples) throws Exception {
 		SQLQuery result = new SQLQuery();
 		
 		//AlphaTB
@@ -123,10 +130,12 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 					//alpha
 					Vector alphaTables = (Vector) this.alphaGenerator.calculateAlpha(tp);
 					SQLLogicalTable logicalTable = (SQLLogicalTable) alphaTables.get(0);
-					result.addLogicalTable(logicalTable);//alpha subject
+					logger.debug("alpha logicalTable = " + logicalTable);
+					result.addLogicalTable(logicalTable);//alpha from subject
 					if(alphaTables.size() > 1) {
 						for(int i=1; i<alphaTables.size(); i++) {
 							SQLQuery joinQuery = (SQLQuery) alphaTables.get(i);
+							logger.debug("alpha joinQuery = " + joinQuery);
 							result.addJoinQuery(joinQuery);//alpha predicate object
 						}
 					}
@@ -137,6 +146,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 					//CondSQL
 					ZExpression condSQL = this.condSQLGenerator.genCondSQL(tp);
+					logger.debug("condSQL = " + condSQL);
 					if(condSQL != null) {
 						result.addWhere(condSQL);
 					}
@@ -154,7 +164,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			throw new QueryTranslationException(e.getMessage(), e);
 		}
 
-		logger.info("transTP = " + result);
+		logger.debug("transTP = " + result);
 		return result;
 	}
 

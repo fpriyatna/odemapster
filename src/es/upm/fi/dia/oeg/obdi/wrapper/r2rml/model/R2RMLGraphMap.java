@@ -2,7 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
 
 public class R2RMLGraphMap extends R2RMLTermMap {
 

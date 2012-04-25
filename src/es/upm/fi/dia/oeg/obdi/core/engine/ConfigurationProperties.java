@@ -18,7 +18,7 @@ public class ConfigurationProperties extends Properties {
 
 	private Connection conn;
 	private String ontologyFilePath;
-	private String r2oFilePath;
+	private String mappingDocumentFilePath;
 	private String outputFilePath;
 	private String queryFilePath;
 	private String rdfLanguage;
@@ -69,8 +69,8 @@ public class ConfigurationProperties extends Properties {
 		return outputFilePath;
 	}
 
-	public String getR2oFilePath() {
-		return r2oFilePath;
+	public String getMappingDocumentFilePath() {
+		return mappingDocumentFilePath;
 	}
 
 	private void readConfigurationFile(String r2oConfigurationDir) throws InvalidConfigurationPropertiesException, SQLException {
@@ -113,14 +113,14 @@ public class ConfigurationProperties extends Properties {
 			}
 		}
 
-		this.r2oFilePath = this.getProperty(R2OConstants.R2OFILE_PROP_NAME);
+		this.mappingDocumentFilePath = this.getProperty(R2OConstants.MAPPINGDOCUMENT_FILE_PATH);
 		this.ontologyFilePath = this.getProperty(R2OConstants.ONTOFILE_PROP_NAME);
 		this.outputFilePath = this.getProperty(R2OConstants.OUTPUTFILE_PROP_NAME);
 		this.queryFilePath = this.getProperty(R2OConstants.QUERYFILE_PROP_NAME);
 		
 
 		if(r2oConfigurationDir != null) {
-			this.r2oFilePath = r2oConfigurationDir + r2oFilePath;
+			this.mappingDocumentFilePath = r2oConfigurationDir + mappingDocumentFilePath;
 			this.outputFilePath = r2oConfigurationDir + outputFilePath;
 			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
 				this.queryFilePath = r2oConfigurationDir + queryFilePath;

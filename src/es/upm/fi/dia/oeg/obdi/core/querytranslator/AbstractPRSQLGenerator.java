@@ -68,7 +68,7 @@ public abstract class AbstractPRSQLGenerator {
 			AbstractConceptMapping cmSubject, NameGenerator nameGenerator) throws Exception {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
 
-		ZSelectItem selectItem = betaGenerator.calculateBeta(tp, POS.obj, cmSubject);
+		ZSelectItem selectItem = betaGenerator.calculateBeta(tp, POS.obj);
 		String selectItemAlias = nameGenerator.generateName(tp, object);
 		if(selectItemAlias != null) {
 			selectItem.setAlias(selectItemAlias);
@@ -82,7 +82,7 @@ public abstract class AbstractPRSQLGenerator {
 	protected ZSelectItem genPRSQLPredicate(Node predicate, Triple tp,
 			AbstractBetaGenerator betaGenerator,
 			AbstractConceptMapping cmSubject, NameGenerator nameGenerator) throws Exception {
-		ZSelectItem selectItem = betaGenerator.calculateBeta(tp, POS.pre, cmSubject);
+		ZSelectItem selectItem = betaGenerator.calculateBeta(tp, POS.pre);
 		selectItem.setAlias(nameGenerator.generateName(tp, predicate));
 		logger.debug("genPRSQLPredicate = " + selectItem);
 		return selectItem;

@@ -74,7 +74,8 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 
 		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicate.getURI());
 		for(AbstractPropertyMapping pm : pms) {
-			cmStripped = (R2OConceptMapping) this.calculateAlphaPredicateObject(pm, object, cmStripped);
+			cmStripped = (R2OConceptMapping) this.calculateAlphaPredicateObject(
+					pm, tp, cmStripped);
 		}
 
 		R2OConceptMappingUnfolder cmu = new R2OConceptMappingUnfolder(cmStripped, 
@@ -101,7 +102,7 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 			Node object = tp.getObject();
 			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicate.getURI());
 			for(AbstractPropertyMapping pm : pms) {
-				this.calculateAlphaPredicateObject(pm, object, cmStripped);
+				this.calculateAlphaPredicateObject(pm, tp, cmStripped);
 				//cmStripped.addPropertyMapping(pm.clone());
 				//				cmStripped.addPropertyMapping(pm);
 			}
@@ -142,8 +143,10 @@ public class R2OAlphaGenerator extends AbstractAlphaGenerator {
 	}
 
 	protected R2OConceptMapping calculateAlphaPredicateObject(AbstractPropertyMapping pm
-			, Node object, AbstractConceptMapping abstractConceptMapping) {
-		R2OConceptMapping cm = (R2OConceptMapping) abstractConceptMapping; 
+			, Triple tp, AbstractConceptMapping abstractConceptMapping) {
+		R2OConceptMapping cm = (R2OConceptMapping) abstractConceptMapping;
+		Node object = tp.getObject();
+		
 		if(pm instanceof R2OAttributeMapping) {
 			R2OAttributeMapping am = (R2OAttributeMapping) pm;
 			cm.addAttributeMapping(am.clone());

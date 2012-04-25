@@ -77,7 +77,7 @@ public class R2OPRSQLGenerator extends AbstractPRSQLGenerator {
 	protected ZSelectItem genPRSQLPredicate(Node predicate, Triple tp,
 			AbstractBetaGenerator betaGenerator,
 			AbstractConceptMapping cmSubject, NameGenerator nameGenerator) throws Exception {
-		ZSelectItem selectItem = betaGenerator.calculateBeta(tp, POS.pre, cmSubject);
+		ZSelectItem selectItem = betaGenerator.calculateBeta(tp, POS.pre);
 		selectItem.setAlias(nameGenerator.generateName(tp, predicate));
 		return selectItem;
 	}
@@ -90,7 +90,7 @@ public class R2OPRSQLGenerator extends AbstractPRSQLGenerator {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
 		
 		R2OTransformationExpression cmSubjectURIAs = ((R2OConceptMapping)cmSubject).getURIAs();
-		ZSelectItem selectItemSubject = betaGenerator.calculateBeta(tp, POS.sub, cmSubject);
+		ZSelectItem selectItemSubject = betaGenerator.calculateBeta(tp, POS.sub);
 		String selectItemSubjectAlias = nameGenerator.generateName(tp, subject); 
 		selectItemSubject.setAlias(selectItemSubjectAlias);
 		selectItems.add(selectItemSubject); //line 21

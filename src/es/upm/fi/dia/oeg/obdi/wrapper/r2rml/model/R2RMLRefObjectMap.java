@@ -12,9 +12,9 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidRefObjectMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObjectMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
 
 public class R2RMLRefObjectMap {
 	private R2RMLMappingDocument owner;
@@ -25,7 +25,27 @@ public class R2RMLRefObjectMap {
 	private R2RMLLogicalTable intermediateLogicalTable;
 	private String alias;
 	
-	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException {
+	public static boolean isRefObjectMap(Resource resource) {
+
+		boolean hasParentTriplesMap = false;
+		Statement parentTriplesMapStatement = resource.getProperty(
+				R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
+		if(parentTriplesMapStatement != null)  {
+			hasParentTriplesMap = true;
+		}
+
+//		boolean hasJoinCondition = false;
+//		StmtIterator joinConditionsStatements = resource.listProperties(R2RMLConstants.R2RML_JOINCONDITION_PROPERTY);
+//		if(joinConditionsStatements != null && joinConditionsStatements.hasNext()) {
+//			hasJoinCondition = true;
+//		}
+		
+		return hasParentTriplesMap;
+		
+	}
+	
+	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) 
+			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException {
 		this.owner = owner;
 		
 		Statement parentTriplesMapStatement = resource.getProperty(R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
@@ -33,9 +53,9 @@ public class R2RMLRefObjectMap {
 			this.parentTriplesMap = parentTriplesMapStatement.getObject().toString();
 		}
 		
+		this.joinConditions = new HashSet<R2RMLJoinCondition>();
 		StmtIterator joinConditionsStatements = resource.listProperties(R2RMLConstants.R2RML_JOINCONDITION_PROPERTY);
-		if(joinConditionsStatements != null) {
-			this.joinConditions = new HashSet<R2RMLJoinCondition>();
+		if(joinConditionsStatements != null && joinConditionsStatements.hasNext()) {
 			while(joinConditionsStatements.hasNext()) {
 				Statement joinConditionStatement = joinConditionsStatements.nextStatement();
 				Resource joinConditionResource = (Resource) joinConditionStatement.getObject();
@@ -43,9 +63,13 @@ public class R2RMLRefObjectMap {
 				this.joinConditions.add(joinCondition);
 			}
 		} else {
-			String errorMessage = "Missing child column in join condition!";
-			logger.error(errorMessage);
-			throw new R2RMLInvalidRefObjectMapException(errorMessage);			
+//			R2RMLJoinCondition joinCondition = new R2RMLJoinCondition(
+//					"1", "1");
+//			this.joinConditions.add(joinCondition);
+			
+			String errorMessage = "No join conditions defined!";
+			logger.warn(errorMessage);
+//			throw new R2RMLInvalidRefObjectMapException(errorMessage);			
 		}
 	}
 

@@ -19,6 +19,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 
 import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
+import es.upm.fi.dia.oeg.obdi.DBUtility;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
@@ -27,15 +28,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OQueryTranslator;
 
 public class R2ORunner extends AbstractRunner {
-	private Query sparqQuery = null;
 
-	public void setSparqQuery(Query sparqQuery) {
-		this.sparqQuery = sparqQuery;
-	}
-
-	public void setSparqQuery(String sparqQuery) {
-		this.sparqQuery = QueryFactory.create(sparqQuery);
-	}
 
 	public R2ORunner() {
 		this.dataTranslator = new R2ODataTranslator();
@@ -102,12 +95,12 @@ public class R2ORunner extends AbstractRunner {
 
 		//parsing r2o mapping document
 		R2OParser parser = new R2OParser(); 
-		String r2oMappingDocumentPath = configurationProperties.getR2oFilePath();
+		String r2oMappingDocumentPath = configurationProperties.getMappingDocumentFilePath();
 		R2OMappingDocument originalMappingDocument = 
 				(R2OMappingDocument) parser.parse(r2oMappingDocumentPath);
 
 		//test the parsing result
-		parser.testParseResult(configurationProperties.getR2oFilePath(), originalMappingDocument);
+		parser.testParseResult(configurationProperties.getMappingDocumentFilePath(), originalMappingDocument);
 
 		String outputFileName = configurationProperties.getOutputFilePath();
 
@@ -178,7 +171,7 @@ public class R2ORunner extends AbstractRunner {
 					String sparql2SQLResult = translator.translate(query).toString();
 					logger.debug("sparql2sql = \n" + sparql2SQLResult);
 
-					ResultSet rs = Utility.executeQuery(conn, sparql2SQLResult);
+					ResultSet rs = DBUtility.executeQuery(conn, sparql2SQLResult);
 					ResultSetMetaData rsmd = rs.getMetaData();
 
 

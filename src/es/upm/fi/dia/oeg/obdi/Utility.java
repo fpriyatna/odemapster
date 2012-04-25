@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import com.hp.hpl.jena.db.DBConnection;
 import com.hp.hpl.jena.db.IDBConnection;
@@ -127,45 +128,11 @@ public class Utility {
 
 	}
 
-	public static ResultSet executeQuery(Connection conn, String query) throws SQLException {
-		//		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-		//				ResultSet.CONCUR_READ_ONLY);
-
-		//		Statement st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-		//		ResultSet.CONCUR_READ_ONLY);
-
-		//st.setFetchSize(1000);
-		//		Statement st = conn.createStatement();
-		//		st.setFetchSize(1000);
-
-		Statement stmt = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-				java.sql.ResultSet.CONCUR_READ_ONLY);
-		
-		try  {
-			stmt.setQueryTimeout(60);
-			stmt.setFetchSize(Integer.MIN_VALUE);
-		} catch(Exception e) {
-			logger.debug("Can't set fetch size!");
-		}
-
-		logger.debug("Executing query = \n" + query);
-
-		try {
-			long start = System.currentTimeMillis();
-			ResultSet result = stmt.executeQuery(query);
-			long end = System.currentTimeMillis();
-			logger.info("SQL execution time was "+(end-start)+" ms.");
-
-			return result;
-		} catch(SQLException e) {
-			//e.printStackTrace();
-			logger.error("Error executing query, error message = "+ e.getMessage());
-			throw e;
-		}
 
 
 
-	}
+	
+
 
 	public static Connection getLocalConnection(
 			String username, String databaseName, String password, String driverString, String url, String requester) 
@@ -184,43 +151,14 @@ public class Utility {
 			return DriverManager.getConnection(url, prop);
 
 		} catch (Exception e) {
-			logger.info("Error opening database connection : " + e.getMessage());
-			e.printStackTrace();
+			logger.error("Error opening database connection : " + e.getMessage());
+			//e.printStackTrace();
 
 			throw new SQLException(e.getMessage(), e);
 		}		
 	}
 
-	public static void closeConnection(Connection conn, String requester) {
-		try {
-			if(conn != null) {
-				conn.close();
-				logger.info("Closing db connection.");
-			}
-		} catch(Exception e) {
-			logger.error("Error closing connection! Error message = " + e.getMessage());
-		}
-	}
 
-	public static void closeRecordSet(ResultSet rs) {
-		try {
-			if(rs != null) {
-				rs.close();
-			}
-		} catch(Exception e) {
-			logger.error("Error closing result set! Error message = " + e.getMessage());
-		}
-	}
-
-	public static void closeStatement(Statement stmt) {
-		try {
-			if(stmt != null) {
-				stmt.close();
-			}
-		} catch(Exception e) {
-			logger.error("Error closing statement! Error message = " + e.getMessage());
-		}
-	}
 
 
 	public static boolean inArray(String[] delegableOperations, String operationId) {
@@ -259,7 +197,8 @@ public class Utility {
 				if(operandConstant.getType() == ZConstant.COLUMNNAME) {
 					String operandConstantValue = operandConstant.getValue();
 					operandConstantValue = operandConstantValue.replaceAll("\'", "");
-					SQLSelectItem oldSelectItem = new SQLSelectItem(operandConstantValue);
+					SQLSelectItem oldSelectItem = 
+							new SQLSelectItem(operandConstantValue);
 					if(oldSelectItem.getSchema() == null && oldSelectItem.getTable() == null) {
 						if(operandConstantValue.equalsIgnoreCase(oldName) == matchCondition) {
 							newOperandConstant = Utility.constructDatabaseColumn(newName);
@@ -529,11 +468,11 @@ public class Utility {
 		uri = uri.replaceAll("&", "%26");
 		//uri = uri.replaceAll("&", "and");
 		uri = uri.replaceAll("'", "%27");
-		uri = uri.replaceAll(" ", "%20");
+		//uri = uri.replaceAll(" ", "%20");
 		uri = uri.replaceAll("_{2,}+", "_");
 		uri = uri.replaceAll("%23", "#");
 		
-		uri = uri.replaceAll("%20", "_");
+		//uri = uri.replaceAll("%20", "_");
 		
 		//uri = uri.toLowerCase();
 		
@@ -831,5 +770,7 @@ public class Utility {
        {  
           return false;  
        }  
-    }  
+    }
+    
+
 }

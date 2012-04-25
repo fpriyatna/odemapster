@@ -15,13 +15,12 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElement;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidRefObjectMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLInvalidTriplesMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLJoinConditionException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObjectMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidTriplesMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap.ObjectMapType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapType;
 
@@ -46,7 +45,8 @@ implements R2RMLElement, IConceptMapping {
 		if(logicalTableStatement != null) {
 			RDFNode logicalTableStatementObject = logicalTableStatement.getObject();
 			Resource logicalTableStatementObjectResource = (Resource) logicalTableStatementObject;
-			this.logicalTable = R2RMLLogicalTable.parse(logicalTableStatementObjectResource);
+			this.logicalTable = R2RMLLogicalTable.parse(
+					logicalTableStatementObjectResource);
 		} else {
 			String errorMessage = "Missing rr:logicalTable";
 			logger.error("Missing rr:logicalTable");

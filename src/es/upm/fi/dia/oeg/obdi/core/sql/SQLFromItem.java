@@ -3,7 +3,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.Random;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 
 import Zql.ZAliasedName;
 import Zql.ZFromItem;
@@ -45,7 +45,7 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 			this.setAlias("");
 			if(this.form == LogicalTableType.TABLE) {
 				String tableName = super.toString();
-				tableName = R2RMLUtility.replaceNameWithSpaceChars(tableName);
+				//tableName = R2RMLUtility.replaceNameWithSpaceChars(tableName);
 				result = tableName + " " + alias;
 			} else {
 				result = "(" + super.toString() + ") " + alias;
@@ -54,7 +54,7 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 			this.setAlias(alias);
 		} else {
 			String tableName = super.toString();
-			tableName = R2RMLUtility.replaceNameWithSpaceChars(tableName);
+			//tableName = R2RMLUtility.replaceNameWithSpaceChars(tableName);
 			result = tableName;
 		}		
 		

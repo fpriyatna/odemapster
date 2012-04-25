@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine;
 
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,7 +9,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import Zql.ParseException;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
@@ -16,9 +16,8 @@ import Zql.ZFromItem;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZUtils;
-import Zql.ZqlParser;
-
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
@@ -27,8 +26,8 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.datatranslator.R2ODataTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.TranslatorUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidConfigurationPropertiesException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
@@ -39,12 +38,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
+	private ConfigurationProperties properties;
 	
-	public R2RMLElementUnfoldVisitor() {
+	private R2RMLElementUnfoldVisitor() {
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("substring", 3);
 		ZUtils.addCustomFunction("convert", 2);
@@ -52,6 +53,32 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		ZUtils.addCustomFunction("abs", 1);
 		ZUtils.addCustomFunction("lower", 1);
 	}
+
+	public R2RMLElementUnfoldVisitor(String configurationDirectory, String configurationFile) {
+		ZUtils.addCustomFunction("concat", 2);
+		ZUtils.addCustomFunction("substring", 3);
+		ZUtils.addCustomFunction("convert", 2);
+		ZUtils.addCustomFunction("coalesce", 2);
+		ZUtils.addCustomFunction("abs", 1);
+		ZUtils.addCustomFunction("lower", 1);
+
+		try {
+			this.properties = new ConfigurationProperties(configurationDirectory, configurationFile);
+		} catch (IOException e) {
+			logger.error("IO error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+		} catch (InvalidConfigurationPropertiesException e) {
+			logger.error("invalid configuration error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			logger.error("Database error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			//e.printStackTrace();
+		}
+	}
+
 	
 	@Override
 	public Collection<SQLQuery> visit(R2RMLMappingDocument mappingDocument) {
@@ -158,6 +185,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	@Override
 	public SQLQuery visit(R2RMLTriplesMap triplesMap) {
 		logger.info("unfolding triplesMap : " + triplesMap);
+		String dbType = this.properties.getDatabaseType();
 		
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		SQLQuery result = new SQLQuery();
@@ -217,108 +245,40 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					SQLLogicalTable sqlParentLogicalTable = 
 							(SQLLogicalTable) parentLogicalTable.accept(this);
 					joinQuery.addLogicalTable(sqlParentLogicalTable);
-//					String parentLogicalTableAlias = sqlParentLogicalTable.generateAlias();
-//					sqlParentLogicalTable.setAlias(parentLogicalTableAlias);
-					
-//					if(parentLogicalTable.getLogicalTableType() == LogicalTableType.SQLQUERY) {
-//						parentLogicalTableAlias = sqlParentLogicalTable.generateAlias();
-//						sqlParentLogicalTable.setAlias(parentLogicalTableAlias);
-//					} else {
-//						parentLogicalTableAlias = joinQuery.generateAlias();
-//					}
 					
 					Collection<String> refObjectMapColumnsString = 
 							refObjectMap.getParentDatabaseColumnsString();
 					if(refObjectMapColumnsString != null ) {
 						for(String refObjectMapColumnString : refObjectMapColumnsString) {
-							//SQLSelectItem selectItem = new SQLSelectItem(joinQueryAlias + "." + refObjectMapColumnString);
-							SQLSelectItem selectItem = new SQLSelectItem(refObjectMapColumnString);
+							SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, refObjectMapColumnString);
+							
 							String selectItemColumn = selectItem.getColumn();
 							String selectItem2Name = joinQueryAlias + "." + selectItemColumn;
-							SQLSelectItem selectItem2 = new SQLSelectItem(selectItem2Name);
+							SQLSelectItem selectItem2 = SQLSelectItem.createSQLItem(dbType, selectItem2Name);
+							
 							String selectItemAlias = joinQueryAlias + "_" + refObjectMapColumnString;
-							//selectItem2.setAlias(selectItemAlias);
 							resultSelectItems.add(selectItem2);
 						}
 					}
 					
 					
-					Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-					ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, joinQueryAlias);
-					if(onExpression != null) {
-						joinQuery.setOnExp(onExpression);
+					ZExp onExpression;
+					Collection<R2RMLJoinCondition> joinConditions = 
+							refObjectMap.getJoinConditions();
+					if(joinConditions != null && joinConditions.size() > 0) {
+						onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, joinQueryAlias);
+					} else {
+						ZConstant constantOne = new ZConstant("1", ZConstant.NUMBER);
+						onExpression = new ZExpression("=", constantOne, constantOne);
 					}
-//					ZExp onExpression = null;
-//					if(joinConditions != null) {
-//						for(R2RMLJoinCondition joinCondition : joinConditions) {
-//							//String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
-//							String childColumnName = joinCondition.getChildColumnName();
-//							SQLSelectItem childSelectItem = new SQLSelectItem(childColumnName);  
-//							String[] childColumnNameSplit = childColumnName.split("\\.");
-//							if(childColumnNameSplit.length == 1) {
-//								childColumnName = logicalTableAlias + "." + childColumnName; 
-//							} 
-//							ZConstant childColumn = new ZConstant(childColumnName, ZConstant.COLUMNNAME);
-//
-//							 
-//							String parentColumnName = joinQueryAlias + "." + joinCondition.getParentColumnName();
-//							ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
-//							
-//							ZExp joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
-//							if(onExpression == null) {
-//								onExpression = joinConditionExpression;
-//							} else {
-//								onExpression = new ZExpression("AND", onExpression, joinConditionExpression);
-//							}
-//						}
-//						joinQuery.setOnExp(onExpression);
-//					}
-					
-					
+					joinQuery.setOnExp(onExpression);
 					result.addJoinQuery(joinQuery);					
 				}
 
 			}
 		}
 		
-//		Collection<R2RMLRefObjectMap> refObjectMaps = triplesMap.getRefObjectMaps();
-//		if(refObjectMaps != null) {
-//			for(R2RMLRefObjectMap refObjectMap : refObjectMaps) {
-//				R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
-//				SQLLogicalTable sqlParentLogicalTable = (SQLLogicalTable) parentLogicalTable.accept(this);
-//				String parentLogicalTableAlias = sqlParentLogicalTable.generateAlias();
-//				sqlParentLogicalTable.setAlias(parentLogicalTableAlias);
-//				
-//				Collection<String> refObjectMapColumnsString = refObjectMap.getParentDatabaseColumnsString();
-//				if(refObjectMapColumnsString != null) {
-//					for(String refObjectMapColumnString : refObjectMapColumnsString) {
-//						ZSelectItem selectItem = new ZSelectItem(parentLogicalTableAlias + "." + refObjectMapColumnString);
-//						result.addSelect(selectItem);
-//					}
-//				}
-//				
-//				SQLQuery joinQuery = new SQLQuery();
-//				joinQuery.setJoinType("LEFT");
-//				joinQuery.addLogicalTable(sqlParentLogicalTable);
-//				
-//				Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-//				if(joinConditions != null) {
-//					for(R2RMLJoinCondition joinCondition : joinConditions) {
-//						String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
-//						ZConstant childColumn = new ZConstant(childColumnName, ZConstant.COLUMNNAME);
-//						
-//						String parentColumnName = joinCondition.getParentColumnName();
-//						ZConstant parentColumn = new ZConstant(parentLogicalTableAlias + "." + parentColumnName, ZConstant.COLUMNNAME);
-//						
-//						ZExp joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
-//						joinQuery.setOnExp(joinConditionExpression);
-//					}
-//				}
-//				logger.debug("joinQuery = " + joinQuery);
-//				result.addJoinQuery(joinQuery);
-//			}
-//			
-//		}
+
 	
 		if(resultSelectItems != null) {
 			for(ZSelectItem selectItem : resultSelectItems) {
@@ -384,6 +344,12 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 			result.add(query.toString());
 		}
 		return result;
+	}
+
+	@Override
+	public Object visit(R2RMLTermMap r2rmlTermMap) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -122,7 +122,7 @@ public class R2OConstants {
 
 	
 	
-	public static final String R2OFILE_PROP_NAME = "r2o.file.path";
+	public static final String MAPPINGDOCUMENT_FILE_PATH = "mappingdocument.file.path";
 	public static final String QUERYFILE_PROP_NAME = "query.file.path";
 	public static final String ONTOFILE_PROP_NAME = "onto.file.path";
 	public static final String ONTOURL_PROP_NAME = "onto.url.path";

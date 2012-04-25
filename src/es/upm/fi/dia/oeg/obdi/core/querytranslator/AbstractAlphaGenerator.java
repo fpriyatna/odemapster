@@ -23,9 +23,11 @@ public abstract class AbstractAlphaGenerator {
 	}
 	
 	public abstract Object calculateAlpha(Triple tp) throws Exception;
-	protected abstract Object calculateAlphaSubject(Node subject, AbstractConceptMapping abstractConceptMapping);
-	protected abstract Object calculateAlphaPredicateObject(AbstractPropertyMapping pm
-			, Node object, AbstractConceptMapping abstractConceptMapping);
+	protected abstract Object calculateAlphaPredicateObject(
+			AbstractPropertyMapping pm, Triple triple
+			, AbstractConceptMapping abstractConceptMapping);
+	protected abstract Object calculateAlphaSubject(
+			Node subject, AbstractConceptMapping abstractConceptMapping);
 	public abstract Object calculateAlphaTB(Collection<Triple> triples) throws Exception;
 //	public abstract AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception;
 //	public abstract AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples) throws Exception;

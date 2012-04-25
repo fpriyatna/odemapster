@@ -36,12 +36,12 @@ public class D2RQTest {
         "de.fuberlin.wiwiss.d2rq").setLevel(
                 org.apache.log4j.Level.ALL);
 		D2RQTest test = new D2RQTest();
-		test.testStudentSport();
+		test.testPSSA();
 		
-		ModelD2RQ bsbm_model_mysql = new ModelD2RQ(test.mappingFile);
+		ModelD2RQ d2rqModel = new ModelD2RQ(test.mappingFile);
 		Query q = QueryFactory.create(test.queryFile); 
 		long start = System.currentTimeMillis();
-		ResultSet rs = QueryExecutionFactory.create(q, bsbm_model_mysql).execSelect();
+		ResultSet rs = QueryExecutionFactory.create(q, d2rqModel).execSelect();
 		int rowNumber = rs.getRowNumber();
 		
 		long end = System.currentTimeMillis();
@@ -62,7 +62,10 @@ public class D2RQTest {
 	}
 	
 	public void testPSSA() throws Exception {
-		this.mappingFile = "C:/Users/Freddy/Dropbox/oeg/pssa/mapping.n3";
-		this.queryFile = Utility.readFileAsString("C:/Users/Freddy/Dropbox/oeg/pssa/SSA SPARQL Queries/query1.rq");
+		//this.mappingFile = "C:/Users/Freddy/Dropbox/oeg/pssa/mapping.n3";
+		//this.queryFile = Utility.readFileAsString("C:/Users/Freddy/Dropbox/oeg/pssa/SSA SPARQL Queries/query1.rq");
+		this.mappingFile = "/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/d2r-mappings/d2r-pssa/pssa-mapping.ttl";
+		this.queryFile = Utility.readFileAsString("/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/d2r-mappings/d2r-pssa/query6.rq");
+		
 	}
 }

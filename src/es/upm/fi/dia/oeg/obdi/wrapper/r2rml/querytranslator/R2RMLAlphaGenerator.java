@@ -18,8 +18,8 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
@@ -28,12 +28,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLAlphaGenerator.class);
+	private R2RMLElementUnfoldVisitor unfolder;
 	
 	public R2RMLAlphaGenerator(
 			Map<Node, Collection<AbstractConceptMapping>> mapNodeConceptMapping,
-			AbstractMappingDocument mappingDocument) {
+			AbstractMappingDocument mappingDocument
+			, R2RMLElementUnfoldVisitor unfolder) {
 		super(mapNodeConceptMapping, mappingDocument);
-		// TODO Auto-generated constructor stub
+		this.unfolder = unfolder;
 	}
 
 	@Override
@@ -57,7 +59,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			
 			R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 			if(refObjectMap != null) { 
-				SQLQuery alphaPredicateObject = this.calculateAlphaPredicateObject(pm, tpObject, cm);
+				SQLQuery alphaPredicateObject = 
+						this.calculateAlphaPredicateObject(pm, tp, cm);
 				result.add(alphaPredicateObject);
 			}
 		}
@@ -97,7 +100,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 					R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 					if(refObjectMap != null) { 
 						SQLQuery alphaPredicateObject = 
-								this.calculateAlphaPredicateObject(pm, tpObject, cm);
+								this.calculateAlphaPredicateObject(pm, tp, cm);
 						result.add(alphaPredicateObject);
 					}
 				}				
@@ -128,7 +131,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			AbstractConceptMapping abstractConceptMapping) {
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
 		R2RMLLogicalTable logicalTable = cm.getLogicalTable();
-		SQLLogicalTable sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
+		//SQLLogicalTable sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
+		SQLLogicalTable sqlLogicalTable = this.unfolder.visit(logicalTable);;
 		String logicalTableAlias = sqlLogicalTable.generateAlias();
 		logicalTable.setAlias(logicalTableAlias);
 		sqlLogicalTable.setAlias(logicalTableAlias);
@@ -139,7 +143,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	@Override
 	protected SQLQuery calculateAlphaPredicateObject(
 			AbstractPropertyMapping abstractPropertyMapping,
-			Node tpObject, AbstractConceptMapping abstractConceptMapping) {
+			Triple triple, AbstractConceptMapping abstractConceptMapping) {
+		Node tpObject = triple.getObject();
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
 		String tripleMapAlias = cm.getAlias();
 		SQLQuery joinQuery = null;
@@ -150,9 +155,13 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			joinQuery.setJoinType("INNER");
 			String joinQueryAlias = joinQuery.generateAlias();
 			joinQuery.setAlias(joinQueryAlias);
-			refObjectMap.setAlias(joinQueryAlias);
+			
+			//refObjectMap.setAlias(joinQueryAlias);
+			R2RMLQueryTranslator.mapTripleAlias.put(triple, joinQueryAlias);
+			
 			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
-			SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
+			//SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
+			SQLLogicalTable sqlParentLogicalTable = this.unfolder.visit(parentLogicalTable);
 			joinQuery.addLogicalTable(sqlParentLogicalTable);
 
 			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();

@@ -1,6 +1,12 @@
 package es.upm.fi.dia.oeg.obdi.core.materializer;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
+
+import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -12,17 +18,18 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 
 
 public class RDFXMLMaterializer extends AbstractMaterializer {
+	private static Logger logger = Logger.getLogger(RDFXMLMaterializer.class);
 	private Model model;
 	private Resource currentSubject;
 	
-	public RDFXMLMaterializer(Writer out, Model model) {
-		super(out);
+	public RDFXMLMaterializer(String outputFileName, Model model) throws IOException {
+		super.outputFileName = outputFileName;
 		this.model = model;
 	}
-
 
 	@Override
 	public
@@ -89,6 +96,27 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 			this.currentSubject = model.createResource(subjectURI);
 		}
 		return this.currentSubject;
+	}
+
+
+	@Override
+	public void materialize() throws IOException {
+		try {
+			if(model != null) {
+				logger.debug("Size of model = " + model.size());
+				logger.info("Writing model to " + outputFileName + " ......");
+				long startWritingModel = System.currentTimeMillis();
+				FileOutputStream fos = new FileOutputStream(outputFileName);
+				model.write(fos, R2OConstants.OUTPUT_FORMAT_RDFXML);
+				fos.flush();fos.close();
+				long endWritingModel = System.currentTimeMillis();
+				long durationWritingModel = (endWritingModel-startWritingModel) / 1000;
+				logger.info("Writing model time was "+(durationWritingModel)+" s.");				
+			}
+		} catch(FileNotFoundException fnfe) {
+			logger.error("File " + outputFileName + " can not be found!");
+			throw fnfe;			
+		} 	
 	}
 
 

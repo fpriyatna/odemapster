@@ -246,7 +246,7 @@ public class QueryTranslatorUtility {
 		}
 		
 		return new ZExpression("AND", exp1, exp2);
-		
-		
 	}
+	
+
 }

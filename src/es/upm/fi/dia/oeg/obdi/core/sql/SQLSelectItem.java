@@ -7,25 +7,36 @@ import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZSelectItem;
 
 public class SQLSelectItem extends ZSelectItem {
+	private String dbType;
 	private String schema;
 	private String table;
 	private String column;
+	
+	public static SQLSelectItem createSQLItem(String dbType) {
+		SQLSelectItem selectItem = new SQLSelectItem();
+		selectItem.dbType = dbType;
+		return selectItem;
+	}
 	
 	public SQLSelectItem() {
 		super();
 	}
 
 	
+	public static SQLSelectItem createSQLItem(String dbType, String inputColumnName) {
+		SQLSelectItem selectItem = new SQLSelectItem(inputColumnName);
+		selectItem.dbType = dbType;
+		return selectItem;
+	}
+
 	public SQLSelectItem(String arg0) {
 		super(arg0);
-		
-		
 		
 		String[] splitColumns = arg0.split("\\.");
 		if(splitColumns.length == 1) {//nr
@@ -53,12 +64,8 @@ public class SQLSelectItem extends ZSelectItem {
 			
 			String columnName = R2RMLUtility.replaceNameWithSpaceChars(splitColumns[3]);
 			this.column = splitColumns[3];
-
 		}
-		
-		
 	}
-
 
 	@Override
 	public void setExpression(ZExp arg0) {
@@ -68,12 +75,10 @@ public class SQLSelectItem extends ZSelectItem {
 		this.column = super.getColumn();
 	}
 
-
 	@Override
 	public int hashCode() {
 		return super.toString().hashCode();
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -102,7 +107,6 @@ public class SQLSelectItem extends ZSelectItem {
 		return true;
 	}
 
-
 	@Override
 	public String toString() {
 		String result;
@@ -121,42 +125,40 @@ public class SQLSelectItem extends ZSelectItem {
 		
 		boolean isExpression = this.isExpression();
 		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
-			
+			String table = "\"" + this.getTable() + "\"";
+			String column = "\"" + this.getColumn() + "\"";
 			
 			if(this.isExpression()) {
 				result = this.getExpression().toString();
 			} else {
 				if(this.getTable() == null) {
-					result = this.getColumn();
+					result = column;
 				} else {
-					String table = "\"" + this.getTable() + "\"";
-					String column = "\"" + this.getColumn() + "\"";
 					result = table + "." + column;
 				}
 				//result = super.toString();
-				
 			}
-
 		} else {
 			if(this.isExpression()) {
 				result = this.getExpression().toString(); 
 			} else {
 				result = "";
 				if(this.schema != null) {
-					result += R2RMLUtility.replaceNameWithSpaceChars(this.schema) + ".";
+					//result += R2RMLUtility.replaceNameWithSpaceChars(this.schema) + ".";
+					result += this.schema + ".";
 				}
 				if(this.table != null) {
-					result += R2RMLUtility.replaceNameWithSpaceChars(this.table) + ".";
+//					result += R2RMLUtility.replaceNameWithSpaceChars(this.table) + ".";
+					result += this.table + ".";
 				}
 				if(this.column != null) {
-					result += R2RMLUtility.replaceNameWithSpaceChars(this.column) + ".";
+					//result += R2RMLUtility.replaceNameWithSpaceChars(this.column) + ".";
+					result += this.column + ".";
 				}
 				//remove the last dot and space
 				result = result.substring(0, result.length() - 1);
 				
 			}
-
-
 			//result = super.toString();
 		}
 		
@@ -166,15 +168,30 @@ public class SQLSelectItem extends ZSelectItem {
 		}
 		
 		return result;
-		
 	}
 
 
 	@Override
 	public String getColumn() {
-		return this.column;
+		if(this.column.startsWith("\"") && this.column.endsWith("\"")) {
+			return this.column.substring(1, this.column.length()-1);
+		} else {
+			return this.column;
+		}
+		
 	}
 
+	public String columnToString() {
+		String result;
+		
+		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(this.dbType)) {
+			result = "\"" + this.getColumn() + "\"";
+		} else {
+			result = this.column;
+		}
+		
+		return result;
+	}
 
 	@Override
 	public String getSchema() {

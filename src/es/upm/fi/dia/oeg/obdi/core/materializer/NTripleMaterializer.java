@@ -1,5 +1,9 @@
 package es.upm.fi.dia.oeg.obdi.core.materializer;
 
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.apache.log4j.Logger;
@@ -13,11 +17,19 @@ import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 public class NTripleMaterializer extends AbstractMaterializer {
 	private String currentSubject;
 	private static Logger logger = Logger.getLogger(NTripleMaterializer.class);
-
-	public NTripleMaterializer(Writer out) {
-		super(out);
+	private Writer writer;
+	
+	public NTripleMaterializer(String outputFileName) throws IOException {
+		this.outputFileName = outputFileName;
+		//this.writer = new OutputStreamWriter (new FileOutputStream (outputFileName), "UTF-8");
 	}
 
+	private void write(String triple) throws Exception {
+		if(this.writer == null) {
+			this.writer = new OutputStreamWriter (new FileOutputStream (outputFileName), "UTF-8");
+		}
+		writer.append(triple);
+	}
 
 	@Override
 	public
@@ -33,7 +45,8 @@ public class NTripleMaterializer extends AbstractMaterializer {
 					, Utility.createURIref(graph)
 					); 
 		try {
-			out.append(triple);
+			//writer.append(triple);
+			this.write(triple);
 		} catch(Exception e) {
 			logger.error("unable to serialize triple : " + triple + " because " + e.getMessage());
 		}
@@ -69,7 +82,8 @@ public class NTripleMaterializer extends AbstractMaterializer {
 
 		String tripleString = Utility.createQuad(this.currentSubject, triplePredicate, literalString, Utility.createURIref(graph)); 
 		try {
-			out.append(tripleString);
+			//writer.append(tripleString);
+			this.write(tripleString);
 		} catch(Exception e) {
 			logger.error("unable to serialize triple : " + tripleString + " because " + e.getMessage());
 		}
@@ -94,7 +108,8 @@ public class NTripleMaterializer extends AbstractMaterializer {
 					, Utility.createURIref(predicateName)
 					, objectString, Utility.createURIref(graph)); 
 		try {
-			out.append(triple);
+			//writer.append(triple);
+			this.write(triple);
 		} catch(Exception e) {
 			logger.error("unable to serialize triple : " + triple);
 		}
@@ -110,6 +125,18 @@ public class NTripleMaterializer extends AbstractMaterializer {
 			this.currentSubject = Utility.createURIref(subjectURI);
 		}
 		return this.currentSubject;
+	}
+
+
+	@Override
+	public void materialize() throws IOException {
+		//nothing to do, the triples were added during the data translation process
+		if(this.writer != null) {
+			this.writer.flush();
+			this.writer.close();
+		}
+		
+		
 	}
 	
 	
