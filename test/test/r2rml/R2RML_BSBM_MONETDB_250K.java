@@ -2,23 +2,33 @@ package test.r2rml;
 
 import static org.junit.Assert.*;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
+import es.upm.fi.dia.oeg.obdi.Utility;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
 import test.r2o.ODEMapsterTest;
 
-public class R2RMLBSBM250K {
-	private static Logger logger = Logger.getLogger(R2RMLBSBM250K.class);
+public class R2RML_BSBM_MONETDB_250K {
+	private static Logger logger = Logger.getLogger(R2RML_BSBM_MONETDB_250K.class);
 	
 	private String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS();
-	private String configurationDirectory = mappingDirectory + "r2rml/r2rml-bsbm250k/";
-	private String mappingDocumentFile = configurationDirectory + "bsbm.ttl";
+	private String configurationDirectory = mappingDirectory + "r2rml-mappings/mysql-pssa/";
+	private String mappingDocumentFile = configurationDirectory + "pssa.ttl";
 	static {
 		PropertyConfigurator.configure("log4j.properties");
 	}
@@ -31,22 +41,31 @@ public class R2RMLBSBM250K {
 //		R2RMLElementDataTranslateVisitor dataTranslator = 
 //				new R2RMLElementDataTranslateVisitor(configurationDirectory, configurationFile); 
 //		md.accept(dataTranslator);
-		
+		R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
+				configurationDirectory, configurationFile);
+
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
-		R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md);
+		R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
 		queryTranslator.setOptimizeTripleBlock(false);
 		queryTranslator.setIgnoreRDFTypeStatement(true);
 		return queryTranslator;
 	}
 	
 	public void run(String testName) {
+		String configurationFile = testName + ".r2rml.properties";
+		
 		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			
 			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(false);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
 			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
-			logger.info("query = \n" + query + "\n");
+			logger.info("final query = \n" + query + "\n");
+			//Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			//ResultSet rs = Utility.executeQuery(conn, query.toString());
+			
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -57,13 +76,19 @@ public class R2RMLBSBM250K {
 	}
 	
 	public void runTB(String testName) {
+		String configurationFile = testName + ".r2rml.properties";
 		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			
 			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
 			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
-			logger.info("query = \n" + query + "\n");
+			logger.info("final query = \n" + query + "\n");
+			//Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			//ResultSet rs = Utility.executeQuery(conn, query.toString());
+
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -74,7 +99,10 @@ public class R2RMLBSBM250K {
 	}
 
 	public void runReorderedTB(String testName) {
+		String configurationFile = testName + ".r2rml.properties";
 		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			
 			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
@@ -90,14 +118,16 @@ public class R2RMLBSBM250K {
 		}
 	}
 	
-	public void testBSBM() throws Exception {
+	@Test
+	public void testBSBMBatch() throws Exception {
 		String testName = "bsbm";
 		String configurationFile = testName + ".r2rml.properties";
 		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
+
 		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile));
+			md.accept((R2RMLElementDataTranslateVisitor) runner.getDataTranslator());
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -219,6 +249,12 @@ public class R2RMLBSBM250K {
 	public void testBSBM08TB() throws Exception {
 		String testName = "bsbm08";
 		this.runTB(testName);
+	}
+
+	@Test
+	public void testBSBM08ReorderedTB() throws Exception {
+		String testName = "bsbm08";
+		this.runReorderedTB(testName);
 	}
 
 	@Test
