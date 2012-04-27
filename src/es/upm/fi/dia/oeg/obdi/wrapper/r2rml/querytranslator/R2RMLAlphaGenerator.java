@@ -72,6 +72,69 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	}
 
 	@Override
+	protected SQLQuery calculateAlphaPredicateObject(
+			AbstractPropertyMapping abstractPropertyMapping,
+			Triple triple, AbstractConceptMapping abstractConceptMapping) {
+		Node tpObject = triple.getObject();
+		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
+		//String tripleMapAlias = cm.getAlias();
+		String tripleMapAlias = cm.getLogicalTable().getAlias();
+		
+		SQLQuery joinQuery = null;
+		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
+		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+		if(refObjectMap != null) { 
+			joinQuery = new SQLQuery();
+			joinQuery.setJoinType("INNER");
+			String joinQueryAlias = joinQuery.generateAlias();
+			joinQuery.setAlias(joinQueryAlias);
+			
+			//refObjectMap.setAlias(joinQueryAlias);
+			R2RMLQueryTranslator.mapTripleAlias.put(triple, joinQueryAlias);
+			
+			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
+			//SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
+			SQLLogicalTable sqlParentLogicalTable = this.unfolder.visit(parentLogicalTable);
+			joinQuery.addLogicalTable(sqlParentLogicalTable);
+
+			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
+			ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, tripleMapAlias, joinQueryAlias);
+			if(onExpression != null) {
+				joinQuery.setOnExp(onExpression);
+			}
+		}
+
+		return joinQuery;
+	}
+
+//	@Override
+//	public AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	@Override
+//	public AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
+//			throws Exception {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+	@Override
+	protected SQLLogicalTable calculateAlphaSubject(Node subject,
+			AbstractConceptMapping abstractConceptMapping) {
+		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
+		R2RMLLogicalTable r2rmlLogicalTable = cm.getLogicalTable();
+		//SQLLogicalTable sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
+		SQLLogicalTable sqlLogicalTable = this.unfolder.visit(r2rmlLogicalTable);;
+		String logicalTableAlias = sqlLogicalTable.generateAlias();
+		r2rmlLogicalTable.setAlias(logicalTableAlias);
+		sqlLogicalTable.setAlias(logicalTableAlias);
+//		cm.setAlias(logicalTableAlias);
+		return sqlLogicalTable;
+	}
+
+	@Override
 	public  Object calculateAlphaTB(Collection<Triple> triples)
 			throws Exception {
 		Collection result = new Vector();
@@ -111,67 +174,6 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 
 		logger.debug("alphaTB = " + result);
 		return result;
-	}
-
-//	@Override
-//	public AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples)
-//			throws Exception {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-	@Override
-	protected SQLLogicalTable calculateAlphaSubject(Node subject,
-			AbstractConceptMapping abstractConceptMapping) {
-		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
-		R2RMLLogicalTable logicalTable = cm.getLogicalTable();
-		//SQLLogicalTable sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);;
-		SQLLogicalTable sqlLogicalTable = this.unfolder.visit(logicalTable);;
-		String logicalTableAlias = sqlLogicalTable.generateAlias();
-		logicalTable.setAlias(logicalTableAlias);
-		sqlLogicalTable.setAlias(logicalTableAlias);
-		cm.setAlias(logicalTableAlias);
-		return sqlLogicalTable;
-	}
-
-	@Override
-	protected SQLQuery calculateAlphaPredicateObject(
-			AbstractPropertyMapping abstractPropertyMapping,
-			Triple triple, AbstractConceptMapping abstractConceptMapping) {
-		Node tpObject = triple.getObject();
-		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
-		String tripleMapAlias = cm.getAlias();
-		SQLQuery joinQuery = null;
-		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
-		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
-		if(refObjectMap != null) { 
-			joinQuery = new SQLQuery();
-			joinQuery.setJoinType("INNER");
-			String joinQueryAlias = joinQuery.generateAlias();
-			joinQuery.setAlias(joinQueryAlias);
-			
-			//refObjectMap.setAlias(joinQueryAlias);
-			R2RMLQueryTranslator.mapTripleAlias.put(triple, joinQueryAlias);
-			
-			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
-			//SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
-			SQLLogicalTable sqlParentLogicalTable = this.unfolder.visit(parentLogicalTable);
-			joinQuery.addLogicalTable(sqlParentLogicalTable);
-
-			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-			ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, tripleMapAlias, joinQueryAlias);
-			if(onExpression != null) {
-				joinQuery.setOnExp(onExpression);
-			}
-		}
-
-		return joinQuery;
 	}
 
 }

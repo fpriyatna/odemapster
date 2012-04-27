@@ -112,7 +112,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 			logicalTableUnfolded.setAlias(logicalTableAlias);
 			result.addFrom(logicalTableUnfolded);
 					
-			subjectMap.setAlias(logicalTableAlias);
+			//subjectMap.setAlias(logicalTableAlias);
 			Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 			if(subjectMapColumnsString != null) {
 				for(String subjectMapColumnString : subjectMapColumnsString) {
@@ -197,7 +197,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		
 		//unfold subjectMap
 		result = this.unfoldSubjectMap(logicalTable, subjectMap, result, resultSelectItems);
-		logicalTableAlias = subjectMap.getAlias();
+		//logicalTableAlias = subjectMap.getAlias();
+		logicalTableAlias = triplesMap.getLogicalTable().getAlias();
 
 		Collection<R2RMLPredicateObjectMap> predicateObjectMaps = 
 				triplesMap.getPredicateObjectMaps();
@@ -218,7 +219,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				//unfold objectMap
 				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
 				if(objectMap != null) {
-					objectMap.setAlias(logicalTableAlias);
+					//objectMap.setAlias(logicalTableAlias);
 					Collection<String> objectMapColumnsString = objectMap.getDatabaseColumnsString();
 					if(objectMapColumnsString != null && logicalTable instanceof R2RMLTable) {
 						for(String objectMapColumnString : objectMapColumnsString) {

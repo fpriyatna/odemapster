@@ -149,7 +149,10 @@ public class Utility {
 			Class.forName(driverString);
 			logger.debug("Opening database connection.");
 			return DriverManager.getConnection(url, prop);
-
+		} catch(ClassNotFoundException e) {
+			String errorMessage = "Error opening database connection, class not found : " + e.getMessage();
+			logger.error(errorMessage);
+			throw new SQLException(e.getMessage(), e);
 		} catch (Exception e) {
 			logger.error("Error opening database connection : " + e.getMessage());
 			//e.printStackTrace();

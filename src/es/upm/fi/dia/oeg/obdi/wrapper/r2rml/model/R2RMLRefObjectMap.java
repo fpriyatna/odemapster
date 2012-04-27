@@ -17,14 +17,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObje
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
 
 public class R2RMLRefObjectMap {
-	private R2RMLMappingDocument owner;
-	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
-	
-	private String parentTriplesMap;
-	private Collection<R2RMLJoinCondition> joinConditions;
-	private R2RMLLogicalTable intermediateLogicalTable;
-	private String alias;
-	
 	public static boolean isRefObjectMap(Resource resource) {
 
 		boolean hasParentTriplesMap = false;
@@ -43,6 +35,14 @@ public class R2RMLRefObjectMap {
 		return hasParentTriplesMap;
 		
 	}
+	private R2RMLMappingDocument owner;
+	
+	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
+	private String parentTriplesMap;
+	private Collection<R2RMLJoinCondition> joinConditions;
+	private R2RMLLogicalTable intermediateLogicalTable;
+	
+	private String alias;
 	
 	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException {
@@ -73,22 +73,8 @@ public class R2RMLRefObjectMap {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return this.parentTriplesMap;
-	}
-
-	public R2RMLLogicalTable getParentLogicalTable() {
-		R2RMLTriplesMap triplesMap = this.getParentTriplesMap();
-		return triplesMap.getLogicalTable();
-	}
-
-	public String getParentTripleMapName() {
-		return this.parentTriplesMap;
-	}
-	public R2RMLTriplesMap getParentTriplesMap() {
-		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) this.owner.getConceptMappingByMappingId(this.parentTriplesMap);
-		return triplesMap;
+	public String getAlias() {
+		return alias;
 	}
 
 	public Collection<R2RMLJoinCondition> getJoinConditions() {
@@ -102,13 +88,27 @@ public class R2RMLRefObjectMap {
 		result.addAll(parentSubjectMap.getDatabaseColumnsString());
 		return result;
 	}
+	public R2RMLLogicalTable getParentLogicalTable() {
+		R2RMLTriplesMap triplesMap = this.getParentTriplesMap();
+		return triplesMap.getLogicalTable();
+	}
 
-	public String getAlias() {
-		return alias;
+	public String getParentTripleMapName() {
+		return this.parentTriplesMap;
+	}
+
+	public R2RMLTriplesMap getParentTriplesMap() {
+		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) this.owner.getConceptMappingByMappingId(this.parentTriplesMap);
+		return triplesMap;
 	}
 
 	public void setAlias(String alias) {
 		this.alias = alias;
+	}
+
+	@Override
+	public String toString() {
+		return this.parentTriplesMap;
 	}
 
 }

@@ -33,7 +33,7 @@ implements R2RMLElement, IConceptMapping {
 	private R2RMLLogicalTable logicalTable;
 	private R2RMLSubjectMap subjectMap;
 	private Collection<R2RMLPredicateObjectMap> predicateObjectMaps;
-	private String alias;
+//	private String alias;
 	
 	public R2RMLTriplesMap(Resource triplesMap, R2RMLMappingDocument owner) throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		this.mappingDocument = owner;
@@ -237,13 +237,13 @@ implements R2RMLElement, IConceptMapping {
 		this.logicalTable = logicalTable;
 	}
 
-	public String getAlias() {
-		return alias;
-	}
-
-	public void setAlias(String alias) {
-		this.alias = alias;
-	}
+//	public String getAlias() {
+//		return alias;
+//	}
+//
+//	public void setAlias(String alias) {
+//		this.alias = alias;
+//	}
 
 
 }

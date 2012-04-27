@@ -49,6 +49,35 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 
 	@Override
+	protected String generateTermCName(Node termC) {
+		String termCName = nameGenerator.generateName(null, termC);
+		return termCName;
+	}
+
+
+
+
+	@Override
+	protected ZExp transIRI(Node node) {
+		ZExp result = null;
+
+		Collection<AbstractConceptMapping> cms = super.mapInferredTypes.get(node);
+		R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
+
+		boolean hasWellDefinedURI = cm.hasWellDefinedURIExpression();
+		logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
+		if(hasWellDefinedURI) {
+			String pkValue = cm.getSubjectMap().getTemplateValue(node.getURI());
+			result = new ZConstant(pkValue, ZConstant.UNKNOWN);
+		}
+
+		return result;
+	}
+
+
+
+
+	@Override
 	public SQLQuery translate(Query sparqlQuery) throws Exception {
 		
 		
@@ -76,9 +105,6 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		//logger.info("trans query = \n" + result + "\n");
 		return result;
 	}
-
-
-
 
 	@Override
 	protected SQLQuery transTB(List<Triple> triples) throws Exception {
@@ -109,8 +135,6 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		logger.debug("transTB = " + result);
 		return result;
 	}
-
-
 
 
 	@Override
@@ -160,6 +184,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			}
 
 		} catch (Exception e) {
+			//e.printStackTrace();
 			logger.error("Error in transTP : " + tp);
 			throw new QueryTranslationException(e.getMessage(), e);
 		}
@@ -168,39 +193,15 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		return result;
 	}
 
+
+
+
+
 	@Override
 	protected ZExp transVar(Op op, Var var) {
 		String nameVar = nameGenerator.generateName(null, var);
 		ZExp zExp = new ZConstant(nameVar, ZConstant.COLUMNNAME);
 		return zExp;
-	}
-
-
-	@Override
-	protected String generateTermCName(Node termC) {
-		String termCName = nameGenerator.generateName(null, termC);
-		return termCName;
-	}
-
-
-
-
-
-	@Override
-	protected ZExp transIRI(Node node) {
-		ZExp result = null;
-
-		Collection<AbstractConceptMapping> cms = super.mapInferredTypes.get(node);
-		R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
-
-		boolean hasWellDefinedURI = cm.hasWellDefinedURIExpression();
-		logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
-		if(hasWellDefinedURI) {
-			String pkValue = cm.getSubjectMap().getTemplateValue(node.getURI());
-			result = new ZConstant(pkValue, ZConstant.UNKNOWN);
-		}
-
-		return result;
 	}
 
 

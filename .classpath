@@ -4,7 +4,6 @@
 	<classpathentry excluding="**/.svn/*" kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/jdom.jar"/>
-	<classpathentry kind="lib" path="lib/monetdb-1.16-jdbc.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.10-bin.jar"/>
 	<classpathentry kind="lib" path="lib/ojdbc5.jar"/>
 	<classpathentry kind="lib" path="lib/ssj.jar"/>
@@ -18,7 +17,6 @@
 	<classpathentry kind="lib" path="lib/d2r-lib/concurrent.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/d2r-server-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/d2rq-0.7.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/icu4j_3_4.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/iri.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/jena.jar"/>
@@ -26,15 +24,9 @@
 	<classpathentry kind="lib" path="lib/d2r-lib/jetty-util-6.1.10.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/joseki.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/json.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/junit-4.5.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/log4j-1.2.12.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/postgresql-8.2dev-503.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/servlet-api-2.5-6.1.10.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/slf4j-api-1.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/slf4j-log4j12-1.5.6.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/velocity-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/d2r-lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/d2r-lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/rqr4r2o.jar"/>
 	<classpathentry kind="lib" path="lib/owlapi-bin.jar"/>
@@ -42,11 +34,9 @@
 	<classpathentry kind="lib" path="lib/sqljdbc4.jar"/>
 	<classpathentry kind="lib" path="lib/ST-4.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-3.3-complete.jar"/>
-	<classpathentry kind="lib" path="lib/jena/arq-2.8.8-tests.jar"/>
 	<classpathentry kind="lib" path="lib/jena/arq-2.8.8.jar"/>
 	<classpathentry kind="lib" path="lib/jena/icu4j-3.4.4.jar"/>
 	<classpathentry kind="lib" path="lib/jena/iri-0.8.jar"/>
-	<classpathentry kind="lib" path="lib/jena/jena-2.6.4-tests.jar"/>
 	<classpathentry kind="lib" path="lib/jena/jena-2.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/jena/junit-4.5.jar"/>
 	<classpathentry kind="lib" path="lib/jena/log4j-1.2.14.jar"/>
@@ -57,5 +47,6 @@
 	<classpathentry kind="lib" path="lib/jena/wstx-asl-3.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/jena/xercesImpl-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/monetdb-jdbc-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/DBF_JDBC40.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -112,7 +112,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 					} catch(Exception e) {
 						logger.error("error while translating data of triplesMap : " + triplesMap);
 						logger.error("error message = " + e.getMessage());
-						//e.printStackTrace();
+						e.printStackTrace();
 						throw new R2RMLTranslateException(e.getMessage(), e);
 					}
 				}
@@ -179,7 +179,9 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 			R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 			String subjectGraphName = null;
 			if(subjectMap != null) {
-				String logicalTableAlias = subjectMap.getAlias();
+				//String logicalTableAlias = subjectMap.getAlias();
+				String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
+				
 				String subjectValue = subjectMap.getUnfoldedValue(
 						rs, logicalTableAlias, rsmd);
 				if(subjectValue != null && R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(
@@ -193,7 +195,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				this.materializer.createSubject(subjectMap.isBlankNode(), subjectValue);
 				R2RMLGraphMap subjectGraph = subjectMap.getGraphMap();
 				if(subjectGraph != null) {
-					String subjectGraphAlias = subjectGraph.getAlias();
+					//String subjectGraphAlias = subjectGraph.getAlias();
 					subjectGraphName = subjectGraph.getUnfoldedValue(rs, null, rsmd);
 					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(subjectGraph.getTermType())) {
 						try {
@@ -240,7 +242,9 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				//translate object map
 				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
 				if(objectMap != null) {
-					String alias = objectMap.getAlias();
+					//String alias = objectMap.getAlias();
+					String alias = triplesMap.getLogicalTable().getAlias();
+					
 					String objectMapUnfoldedValue = 
 							objectMap.getUnfoldedValue(rs, alias, rsmd);
 					this.translateObjectMap(objectMap, rs, mapXMLDatatype

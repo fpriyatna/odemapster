@@ -50,12 +50,12 @@ public class ConfigurationProperties extends Properties {
 		try {
 			this.load(new FileInputStream(absoluteR2OConfigurationFile));
 		} catch (FileNotFoundException e) {
-			String errorMessage = "R2O configuration file " + absoluteR2OConfigurationFile + " is not found!";
+			String errorMessage = "Configuration file " + absoluteR2OConfigurationFile + " is not found!";
 			logger.error(errorMessage);
 			e.printStackTrace();
 			throw e;
 		} catch (IOException e) {
-			String errorMessage = "Error reading R2O configuration file " + absoluteR2OConfigurationFile;
+			String errorMessage = "Error reading configuration file " + absoluteR2OConfigurationFile;
 			logger.error(errorMessage);
 			e.printStackTrace();
 			throw e;

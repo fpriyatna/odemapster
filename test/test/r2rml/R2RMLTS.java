@@ -16,7 +16,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 import test.r2o.ODEMapsterTest;
 
 public class R2RMLTS {
-	private static Logger logger = Logger.getLogger(R2RMLTC.class);
+	private static Logger logger = Logger.getLogger(R2RMLTS.class);
 	private String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS();
 	
 	static {

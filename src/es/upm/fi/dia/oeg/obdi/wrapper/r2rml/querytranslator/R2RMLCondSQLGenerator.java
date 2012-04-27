@@ -49,7 +49,8 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 		Collection<AbstractConceptMapping> cms = super.mapInferredTypes.get(tpSubject);
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
-		String logicalTableAlias = cm.getAlias();
+//		String logicalTableAlias = cm.getAlias();
+		String logicalTableAlias = cm.getLogicalTable().getAlias();
 		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(tp.getPredicate().getURI());
 		Node tpObject = tp.getObject();
 
@@ -158,7 +159,8 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		if(tpSubject.isURI()) {
 			Collection<AbstractConceptMapping> cms = super.mapInferredTypes.get(tpSubject);
 			R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
-			String logicalTableAlias = cm.getAlias();
+//			String logicalTableAlias = cm.getAlias();
+			String logicalTableAlias = cm.getLogicalTable().getAlias();
 
 			boolean hasWellDefinedURI = cm.hasWellDefinedURIExpression();
 			logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
@@ -171,27 +173,6 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		ZExpression result = (ZExpression) QueryTranslatorUtility.combineExpressions(result1, result2);
 		return result;
 
-	}
-
-	protected ZExp generateCondForWellDefinedURI(R2RMLTriplesMap triplesMap, String uri, String alias) {
-		ZExp result = null;
-
-		boolean hasWellDefinedURI = triplesMap.hasWellDefinedURIExpression();
-		logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
-		if(hasWellDefinedURI) {
-			String pkColumnString = triplesMap.getSubjectMap().getTemplateColumn();
-			String pkValue = triplesMap.getSubjectMap().getTemplateValue(uri);
-			String dbType = AbstractRunner.configurationProperties.getDatabaseType();
-			SQLSelectItem pkColumnSelectItem = SQLSelectItem.createSQLItem(
-					dbType, alias + "." + pkColumnString);
-			ZConstant pkColumnConstant = new ZConstant(
-					pkColumnSelectItem.toString(), ZConstant.COLUMNNAME);
-			ZConstant pkValueConstant = new ZConstant(pkValue, ZConstant.UNKNOWN);
-			result = new ZExpression("=", pkColumnConstant, pkValueConstant);
-		}
-
-		logger.debug("generateCondForWellDefinedURI = " + result);
-		return result;
 	}
 
 	protected ZExpression generateCondForWellDefinedURI(R2RMLTermMap termMap, String uri, String alias) {
@@ -208,6 +189,27 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 				pkValueConstant = new ZConstant(pkValue, ZConstant.STRING);
 			}
 			
+			result = new ZExpression("=", pkColumnConstant, pkValueConstant);
+		}
+
+		logger.debug("generateCondForWellDefinedURI = " + result);
+		return result;
+	}
+
+	protected ZExp generateCondForWellDefinedURI(R2RMLTriplesMap triplesMap, String uri, String alias) {
+		ZExp result = null;
+
+		boolean hasWellDefinedURI = triplesMap.hasWellDefinedURIExpression();
+		logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
+		if(hasWellDefinedURI) {
+			String pkColumnString = triplesMap.getSubjectMap().getTemplateColumn();
+			String pkValue = triplesMap.getSubjectMap().getTemplateValue(uri);
+			String dbType = AbstractRunner.configurationProperties.getDatabaseType();
+			SQLSelectItem pkColumnSelectItem = SQLSelectItem.createSQLItem(
+					dbType, alias + "." + pkColumnString);
+			ZConstant pkColumnConstant = new ZConstant(
+					pkColumnSelectItem.toString(), ZConstant.COLUMNNAME);
+			ZConstant pkValueConstant = new ZConstant(pkValue, ZConstant.UNKNOWN);
 			result = new ZExpression("=", pkColumnConstant, pkValueConstant);
 		}
 

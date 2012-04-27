@@ -76,12 +76,13 @@ public class R2RML_BSBM_MYSQL_250K {
 			
 			logger.info("query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			
 			logger.info("------" + testName + " SQL DONE------\n\n");
 		} catch(Exception e) {
@@ -113,12 +114,14 @@ public class R2RML_BSBM_MYSQL_250K {
 			scriprunner.runScript(new BufferedReader(new FileReader(queryFilePath)));
 
 					
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
+			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			
 			logger.info("------" + testName + " SQL DONE------\n\n");
 		} catch(Exception e) {
@@ -139,12 +142,15 @@ public class R2RML_BSBM_MYSQL_250K {
 			
 			logger.info("query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+			
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
+			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			
 			logger.info("------" + testName + " SQL DONE------\n\n");
 		} catch(Exception e) {
@@ -175,12 +181,15 @@ public class R2RML_BSBM_MYSQL_250K {
 			SQLQuery query = queryTranslator.translateFromFile();
 			logger.info("sql query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConnection();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+			
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
+			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			logger.info("------" + testName + " Chebotko DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -210,12 +219,15 @@ public class R2RML_BSBM_MYSQL_250K {
 			SQLQuery query = queryTranslator.translateFromFile();
 			logger.info("query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConnection();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+			
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
+			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			logger.info("------" + testName + " Chebotko View DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -245,11 +257,13 @@ public class R2RML_BSBM_MYSQL_250K {
 			SQLQuery query = queryTranslator.translateFromFile();
 			logger.info("query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConnection();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			logger.info("------" + testName + " Freddy DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -279,11 +293,14 @@ public class R2RML_BSBM_MYSQL_250K {
 			SQLQuery query = queryTranslator.translateFromFile();
 			logger.info("query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConnection();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+
+//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+//			int noOfRows = DBUtility.getRowCount(rs);
+//			logger.info("noOfRows = " + noOfRows);
+
+			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
-			int noOfRows = DBUtility.getRowCount(rs);
-			logger.info("noOfRows = " + noOfRows);
 			logger.info("------" + testName + " Freddy View DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -324,6 +341,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		String configurationFile = testName + ".r2rml.properties";
 		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
 		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
 			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
 					configurationDirectory, configurationFile);

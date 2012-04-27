@@ -16,9 +16,9 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionE
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapPosition;
 
 public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements IRelationMapping, IAttributeMapping{
+	public enum ObjectMapType {ObjectMap, RefObjectMap}
 	private static Logger logger = Logger.getLogger(R2RMLPredicateObjectMap.class);
-	private R2RMLMappingDocument mappingDocument;
-	public enum ObjectMapType {ObjectMap, RefObjectMap};
+	private R2RMLMappingDocument mappingDocument;;
 	private R2RMLPredicateMap predicateMap;
 	private R2RMLObjectMap objectMap;
 	private R2RMLGraphMap graphMap;
@@ -87,35 +87,38 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 
 	}
 
-	public R2RMLPredicateMap getPredicateMap() {
-		return predicateMap;
-	}
-
-	public R2RMLObjectMap getObjectMap() {
-		return objectMap;
+	@Override
+	public String getAttributeName() {
+		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getAttributeName");
+		return null;
 	}
 
 	public R2RMLGraphMap getGraphMap() {
 		return graphMap;
 	}
 
-	public R2RMLRefObjectMap getRefObjectMap() {
-		return refObjectMap;
+	@Override
+	public String getMappedPredicateName() {
+		return this.predicateMap.getOriginalValue();
+	}
+
+	public R2RMLObjectMap getObjectMap() {
+		return objectMap;
 	}
 
 	public ObjectMapType getObjectMapType() {
 		return objectMapType;
 	}
 
+	public R2RMLPredicateMap getPredicateMap() {
+		return predicateMap;
+	}
+
 	@Override
 	public String getPropertyMappingID() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public String getMappedPredicateName() {
-		return this.predicateMap.getOriginalValue();
 	}
 
 	@Override
@@ -137,20 +140,6 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 	}
 
 	@Override
-	public String getAttributeName() {
-		// TODO Auto-generated method stub
-		logger.warn("TODO: Implement getAttributeName");
-		return null;
-	}
-
-	@Override
-	public String getRelationName() {
-		// TODO Auto-generated method stub
-		logger.warn("TODO: Implement getRelationName");
-		return null;
-	}
-
-	@Override
 	public String getRangeClassMapping() {
 		// TODO Auto-generated method stub
 		if(this.refObjectMap != null) {
@@ -159,6 +148,17 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 			return null;
 		}
 		
+	}
+
+	public R2RMLRefObjectMap getRefObjectMap() {
+		return refObjectMap;
+	}
+
+	@Override
+	public String getRelationName() {
+		// TODO Auto-generated method stub
+		logger.warn("TODO: Implement getRelationName");
+		return null;
 	}
 
 	@Override
