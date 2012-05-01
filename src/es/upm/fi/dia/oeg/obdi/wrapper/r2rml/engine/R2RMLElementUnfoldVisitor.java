@@ -3,7 +3,9 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -44,7 +46,12 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
 	private ConfigurationProperties properties;
+	private Map<R2RMLRefObjectMap, String> mapRefObjectMapAlias = new HashMap<R2RMLRefObjectMap, String>();
 	
+	public Map<R2RMLRefObjectMap, String> getMapRefObjectMapAlias() {
+		return mapRefObjectMapAlias;
+	}
+
 	private R2RMLElementUnfoldVisitor() {
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("substring", 3);
@@ -55,12 +62,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	}
 
 	public R2RMLElementUnfoldVisitor(String configurationDirectory, String configurationFile) {
-		ZUtils.addCustomFunction("concat", 2);
-		ZUtils.addCustomFunction("substring", 3);
-		ZUtils.addCustomFunction("convert", 2);
-		ZUtils.addCustomFunction("coalesce", 2);
-		ZUtils.addCustomFunction("abs", 1);
-		ZUtils.addCustomFunction("lower", 1);
+		this();
 
 		try {
 			this.properties = new ConfigurationProperties(configurationDirectory, configurationFile);
@@ -176,6 +178,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 //			logicalTableAlias = R2RMLSQLQuery.generateAlias();
 //			result = (ZQuery) logicalTable.accept(this);
 		}
+		logicalTable.setAlias(logicalTableAlias);
 		
 		return result;
 	}
@@ -240,7 +243,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					String joinQueryAlias = joinQuery.generateAlias();
 					joinQuery.setAlias(joinQueryAlias);
 					refObjectMap.setAlias(joinQueryAlias);
-					
+					mapRefObjectMapAlias.put(refObjectMap, joinQueryAlias);
 
 					R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
 					SQLLogicalTable sqlParentLogicalTable = 

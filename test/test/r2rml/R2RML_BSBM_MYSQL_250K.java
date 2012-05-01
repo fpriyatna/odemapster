@@ -336,6 +336,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		}
 	}
 	
+	@Test
 	public void testBSBM() throws Exception {
 		String testName = "bsbm";
 		String configurationFile = testName + ".r2rml.properties";

@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
@@ -186,7 +188,7 @@ public class R2RMLUtility {
 	
 	public static SQLSelectItem toSelectItem(String columnName, String tableAlias) {
 		String dbType = AbstractRunner.getConfigurationProperties().getDatabaseType();
-		
+
 		SQLSelectItem result = null;
 		String columnNameSplit[] = columnName.split("\\.");
 		if(columnNameSplit.length == 1) {
@@ -204,6 +206,7 @@ public class R2RMLUtility {
 	public static ZExp generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions, String parentTableAlias, String joinQueryAlias) {
 		ZExp onExpression = null;
 		String dbType = AbstractRunner.getConfigurationProperties().getDatabaseType();
+
 		
 		if(joinConditions != null) {
 			for(R2RMLJoinCondition joinCondition : joinConditions) {

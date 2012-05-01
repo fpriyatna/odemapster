@@ -38,6 +38,8 @@ public class ConfigurationProperties extends Properties {
 		return optimizeTB;
 	}
 
+	public ConfigurationProperties() {}
+	
 	public ConfigurationProperties(
 			String r2oConfigurationDir, String r2oConfigurationFile) 
 	throws IOException, InvalidConfigurationPropertiesException, SQLException 
@@ -187,7 +189,7 @@ public class ConfigurationProperties extends Properties {
 	}
 
 	public String getDatabaseType() {
-		if(this.databaseType == null) {
+		if(this == null || this.databaseType == null) {
 			this.databaseType = Constants.DATABASE_MYSQL;
 		}
 		return databaseType;

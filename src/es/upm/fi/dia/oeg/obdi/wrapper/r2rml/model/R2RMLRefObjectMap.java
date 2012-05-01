@@ -18,31 +18,22 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionE
 
 public class R2RMLRefObjectMap {
 	public static boolean isRefObjectMap(Resource resource) {
-
 		boolean hasParentTriplesMap = false;
 		Statement parentTriplesMapStatement = resource.getProperty(
 				R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
 		if(parentTriplesMapStatement != null)  {
 			hasParentTriplesMap = true;
 		}
-
-//		boolean hasJoinCondition = false;
-//		StmtIterator joinConditionsStatements = resource.listProperties(R2RMLConstants.R2RML_JOINCONDITION_PROPERTY);
-//		if(joinConditionsStatements != null && joinConditionsStatements.hasNext()) {
-//			hasJoinCondition = true;
-//		}
-		
 		return hasParentTriplesMap;
-		
 	}
 	private R2RMLMappingDocument owner;
-	
 	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
 	private String parentTriplesMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
-	private R2RMLLogicalTable intermediateLogicalTable;
+
 	
 	private String alias;
+	
 	
 	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException {

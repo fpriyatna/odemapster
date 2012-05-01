@@ -86,7 +86,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		
 		Statement termTypeStatement = resource.getProperty(R2RMLConstants.R2RML_TERMTYPE_PROPERTY);
 		if(termTypeStatement == null) {
-			this.termType = this.determineTermType();
+			this.termType = this.getDefaultTermType();
 		} else {
 			this.termType = termTypeStatement.getObject().toString();
 		}
@@ -107,7 +107,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		this.termMapPosition = termMapPosition;
 		this.termMapType = TermMapType.CONSTANT;
 		this.constantValue = constantValue;
-		this.termType = this.determineTermType();
+		this.termType = this.getDefaultTermType();
 	}
 	
 	@Override
@@ -117,7 +117,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 	}
 	
 	
-	private String determineTermType() {
+	private String getDefaultTermType() {
 		if(this.termMapPosition == TermMapPosition.OBJECT && this.termMapType == TermMapType.COLUMN) {
 			return R2RMLConstants.R2RML_LITERAL_URI;
 		} else {
@@ -206,6 +206,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 				result = rs.getString(columnName);
 			}			
 		} catch(Exception e) {
+			//e.printStackTrace();
 			logger.error("error occured when translating result, check your database values for " + columnName);
 			logger.error("error message = " + e.getMessage());
 		}

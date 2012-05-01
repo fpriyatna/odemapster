@@ -46,6 +46,9 @@ public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
 	
 	public static ConfigurationProperties getConfigurationProperties() {
+		if(configurationProperties == null) {
+			configurationProperties = new ConfigurationProperties();
+		}
 		return configurationProperties;
 	}
 	public static Connection getConnection() {

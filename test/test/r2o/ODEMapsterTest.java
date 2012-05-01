@@ -32,7 +32,7 @@ public static void setDataTranslator(AbstractDataTranslator dataTranslator) {
 //	private static String MAPPING_DIRECTORY = "C:/Users/fpriyatna/My Dropbox/bsbm/bsbm-r2o-mapping/";
 	private static String MAPPING_DIRECTORY_WINDOWS = "C:/Users/Freddy/Dropbox/oeg/odemapster2/mappings/";
 	private static String MAPPING_DIRECTORY_LINUX = "/home/fpriyatna/Dropbox/oeg/odemapster2/mappings/";
-	private static String MAPPING_DIRECTORY_MAC = "/Users/freddy_priyatna/Dropbox/oeg/odemapster2/mappings/";
+	private static String MAPPING_DIRECTORY_MAC = "/Users/freddypriyatna/Dropbox/oeg/odemapster2/mappings/";
 	
 	public static void main(String args[]) throws Exception {
 		ODEMapsterTest test = new ODEMapsterTest();

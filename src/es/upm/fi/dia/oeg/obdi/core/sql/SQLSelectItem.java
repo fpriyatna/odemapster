@@ -112,13 +112,7 @@ public class SQLSelectItem extends ZSelectItem {
 		String result;
 		
 		String thisInString = super.toString();
-		String databaseType;
-		try {
-			databaseType = AbstractRunner.configurationProperties.getDatabaseType();
-		} catch(Exception e) {
-			databaseType = Constants.DATABASE_MYSQL;
-		}		
-		
+		String databaseType = AbstractRunner.configurationProperties.getDatabaseType();
 		if(databaseType == null) {
 			databaseType = Constants.DATABASE_MYSQL;
 		}

@@ -17,12 +17,14 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 
 public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
+	private static Logger logger = Logger.getLogger(R2RMLPRSQLGenerator.class);
+	
 	public R2RMLPRSQLGenerator(
 			Map<Node, Collection<AbstractConceptMapping>> mapInferredTypes) {
 		super(mapInferredTypes);
 	}
 
-	private static Logger logger = Logger.getLogger(R2RMLPRSQLGenerator.class);
+	
 	
 	
 	@Override
