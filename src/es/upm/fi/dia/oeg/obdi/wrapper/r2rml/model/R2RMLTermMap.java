@@ -84,12 +84,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		
 		
 		
-		Statement termTypeStatement = resource.getProperty(R2RMLConstants.R2RML_TERMTYPE_PROPERTY);
-		if(termTypeStatement == null) {
-			this.termType = this.getDefaultTermType();
-		} else {
-			this.termType = termTypeStatement.getObject().toString();
-		}
+
 		
 		Statement datatypeStatement = resource.getProperty(R2RMLConstants.R2RML_DATATYPE_PROPERTY);
 		if(datatypeStatement != null) {
@@ -101,6 +96,12 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 			this.languageTag = languageStatement.getObject().toString();
 		}
 		
+		Statement termTypeStatement = resource.getProperty(R2RMLConstants.R2RML_TERMTYPE_PROPERTY);
+		if(termTypeStatement == null) {
+			this.termType = this.getDefaultTermType();
+		} else {
+			this.termType = termTypeStatement.getObject().toString();
+		}
 	}
 	
 	R2RMLTermMap(TermMapPosition termMapPosition, String constantValue) {
@@ -118,11 +119,24 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 	
 	
 	private String getDefaultTermType() {
-		if(this.termMapPosition == TermMapPosition.OBJECT && this.termMapType == TermMapType.COLUMN) {
-			return R2RMLConstants.R2RML_LITERAL_URI;
+//		if(this.termMapPosition == TermMapPosition.OBJECT && this.termMapType == TermMapType.COLUMN) {
+//			return R2RMLConstants.R2RML_LITERAL_URI;
+//		} else {
+//			return R2RMLConstants.R2RML_IRI_URI;
+//		}
+		String result;
+		
+		if(this instanceof R2RMLObjectMap) {
+			if(this.termMapType == TermMapType.COLUMN || this.languageTag != null || this.datatype != null) {
+				result = R2RMLConstants.R2RML_LITERAL_URI;
+			} else { 
+				result = R2RMLConstants.R2RML_IRI_URI;
+			}
 		} else {
-			return R2RMLConstants.R2RML_IRI_URI;
-		}		
+			result = R2RMLConstants.R2RML_IRI_URI; 
+		}
+		
+		return result;
 	}
 	
 

@@ -26,13 +26,12 @@ public class R2RMLRefObjectMap {
 		}
 		return hasParentTriplesMap;
 	}
+
 	private R2RMLMappingDocument owner;
 	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
 	private String parentTriplesMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
-
-	
-	private String alias;
+	//private String alias;
 	
 	
 	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) 
@@ -64,9 +63,9 @@ public class R2RMLRefObjectMap {
 		}
 	}
 
-	public String getAlias() {
-		return alias;
-	}
+//	public String getAlias() {
+//		return alias;
+//	}
 
 	public Collection<R2RMLJoinCondition> getJoinConditions() {
 		return joinConditions;
@@ -93,9 +92,9 @@ public class R2RMLRefObjectMap {
 		return triplesMap;
 	}
 
-	public void setAlias(String alias) {
-		this.alias = alias;
-	}
+//	public void setAlias(String alias) {
+//		this.alias = alias;
+//	}
 
 	@Override
 	public String toString() {

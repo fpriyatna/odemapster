@@ -56,7 +56,6 @@ public abstract class AbstractRunner {
 	}
 	protected AbstractParser parser;
 	protected AbstractDataTranslator dataTranslator;
-
 	protected AbstractQueryTranslator queryTranslator;
 
 	protected Query sparqQuery = null;

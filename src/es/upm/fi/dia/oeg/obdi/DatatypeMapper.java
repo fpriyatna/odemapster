@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine;
+package es.upm.fi.dia.oeg.obdi;
 
 import java.sql.Types;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
-public class R2RMLDatatypeMapper {
+public class DatatypeMapper {
 	
 	private static Map<Integer, String> mapDatatype = new HashMap<Integer, String>();
 			
@@ -25,6 +25,6 @@ public class R2RMLDatatypeMapper {
 	}
 	
 	public static String getMappedType(int sqlType) {
-		return R2RMLDatatypeMapper.mapDatatype.get(new Integer(sqlType));
+		return DatatypeMapper.mapDatatype.get(new Integer(sqlType));
 	}
 }

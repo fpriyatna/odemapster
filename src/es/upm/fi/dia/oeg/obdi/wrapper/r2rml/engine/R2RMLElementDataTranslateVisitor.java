@@ -65,13 +65,19 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 	//private Connection conn;
 	//private String outputFileName;
 
-	public R2RMLElementDataTranslateVisitor() {	}
 
 	public R2RMLElementDataTranslateVisitor(String configurationDirectory
 			, String configurationFile, R2RMLElementUnfoldVisitor unfolder) {
 		try {
 			this.properties = new ConfigurationProperties(configurationDirectory, configurationFile);
 			this.unfolder = unfolder;
+			
+			String outputFileName = properties.getOutputFilePath();
+			String rdfLanguage = properties.getRdfLanguage();
+			String jenaMode = properties.getJenaMode();
+			this.materializer = AbstractMaterializer.create(
+					rdfLanguage, outputFileName, jenaMode);
+
 		} catch (IOException e) {
 			logger.error("IO error while loading configuration file : " + configurationFile);
 			logger.error("error message = " + e.getMessage());
@@ -105,8 +111,21 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 	@Override
 	public void translateData(AbstractMappingDocument mappingDocument)
 			throws Exception {
-		this.visit((R2RMLMappingDocument) mappingDocument);
-		
+		Collection<AbstractConceptMapping> triplesMaps = 
+				mappingDocument.getConceptMappings();
+		if(triplesMaps != null) {
+			for(AbstractConceptMapping triplesMap : triplesMaps) {
+				try {
+					((R2RMLTriplesMap)triplesMap).accept(this);
+				} catch(Exception e) {
+					logger.error("error while translating data of triplesMap : " + triplesMap);
+					logger.error("error message = " + e.getMessage());
+					e.printStackTrace();
+					throw new R2RMLTranslateException(e.getMessage(), e);
+				}
+			}
+		}
+		this.materializer.materialize();
 	}
 
 
@@ -218,49 +237,10 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 
 	@Override
 	public Object visit(R2RMLMappingDocument mappingDocument) throws R2RMLTranslateException {
-		String outputFileName = properties.getOutputFilePath();
-		String rdfLanguage = properties.getRdfLanguage();
-
 		try {
-			if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-				materializer = new NTripleMaterializer(outputFileName);
-			} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
-				String jenaMode = properties.getJenaMode();
-				Model model = Utility.createJenaModel(jenaMode);
-				materializer = new RDFXMLMaterializer(outputFileName, model);
-			} else {
-				materializer = new NTripleMaterializer(outputFileName);
-			}
-
-			Collection<AbstractConceptMapping> triplesMaps = 
-					mappingDocument.getTriplesMaps();
-			if(triplesMaps != null) {
-				for(AbstractConceptMapping triplesMap : triplesMaps) {
-					try {
-						((R2RMLTriplesMap)triplesMap).accept(this);
-					} catch(Exception e) {
-						logger.error("error while translating data of triplesMap : " + triplesMap);
-						logger.error("error message = " + e.getMessage());
-						e.printStackTrace();
-						throw new R2RMLTranslateException(e.getMessage(), e);
-					}
-				}
-			}
-			this.materializer.materialize();
-		} catch (FileNotFoundException fnfe) {
-			logger.error("File not found : " + outputFileName);
-			logger.error("error message = " + fnfe.getMessage());
-			//fnfe.printStackTrace();
-			throw new R2RMLTranslateException(fnfe.getMessage());
-		} catch (IOException e) {
-			logger.error("IO error while loading file : " + outputFileName);
-			logger.error("error message = " + e.getMessage());
-			//e.printStackTrace();
-			throw new R2RMLTranslateException(e.getMessage());
+			this.translateData(mappingDocument);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			logger.error("error during data translation process : " + e.getMessage());
-			//e.printStackTrace();
 			throw new R2RMLTranslateException(e.getMessage());
 		}
 
@@ -285,6 +265,8 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 		return null;
 	}
 
+
+	
 	@Override
 	public Object visit(R2RMLTriplesMap triplesMap) throws Exception {
 //		String sqlQuery = triplesMap.accept(
@@ -324,6 +306,19 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 			R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 			String subjectGraphName = null;
 			if(subjectMap != null) {
+				R2RMLGraphMap subjectGraph = subjectMap.getGraphMap();
+				if(subjectGraph != null) {
+					//String subjectGraphAlias = subjectGraph.getAlias();
+					subjectGraphName = subjectGraph.getUnfoldedValue(rs, null, rsmd);
+					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(subjectGraph.getTermType())) {
+						try {
+							subjectGraphName = Utility.encodeURI(subjectGraphName);
+						} catch(Exception e) {
+							logger.warn("Error encoding subject graph value : " + subjectGraphName);
+						}					
+					}
+				}
+				
 				//String logicalTableAlias = subjectMap.getAlias();
 				String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
 				
@@ -338,18 +333,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 					}
 				}
 				this.materializer.createSubject(subjectMap.isBlankNode(), subjectValue);
-				R2RMLGraphMap subjectGraph = subjectMap.getGraphMap();
-				if(subjectGraph != null) {
-					//String subjectGraphAlias = subjectGraph.getAlias();
-					subjectGraphName = subjectGraph.getUnfoldedValue(rs, null, rsmd);
-					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(subjectGraph.getTermType())) {
-						try {
-							subjectGraphName = Utility.encodeURI(subjectGraphName);
-						} catch(Exception e) {
-							logger.warn("Error encoding subject graph value : " + subjectGraphName);
-						}					
-					}
-				}
+
 
 				//rdf:type
 				Collection<String> classURIs = subjectMap.getClassURIs();
@@ -403,14 +387,14 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				//translate refobject map
 				R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap();
 				if(refObjectMap != null) {
-					String joinQueryAlias = refObjectMap.getAlias();
+//					String joinQueryAlias = refObjectMap.getAlias();
 					String joinQueryAlias2 = this.unfolder.getMapRefObjectMapAlias().get(refObjectMap);
 					
 					R2RMLSubjectMap parentSubjectMap = 
 							refObjectMap.getParentTriplesMap().getSubjectMap();
 					//String parentSubjectValue = parentSubjectMap.getUnfoldedValue(rs, refObjectMap.getAlias());
 					String parentSubjectValue = parentSubjectMap.getUnfoldedValue(
-							rs, joinQueryAlias, rsmd);
+							rs, joinQueryAlias2, rsmd);
 
 					if(parentSubjectValue != null) {
 						this.translateObjectMap(parentSubjectMap, rs, mapXMLDatatype, subjectGraphName

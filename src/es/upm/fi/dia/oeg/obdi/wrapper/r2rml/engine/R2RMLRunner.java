@@ -20,7 +20,7 @@ public class R2RMLRunner extends AbstractRunner {
 	
 	public R2RMLRunner(String configurationDirectory, String configurationFile) 
 			throws Exception {
-		this.dataTranslator = new R2RMLElementDataTranslateVisitor();
+		//this.dataTranslator = new R2RMLElementDataTranslateVisitor();
 		this.parser = new R2RMLParser();
 		
 		try {

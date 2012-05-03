@@ -50,13 +50,14 @@ public abstract class AbstractMappingDocument implements IParseable {
 	}
 
 	public Collection<AbstractConceptMapping> getConceptMappings() {
-		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
-		if(this.classMappings != null) {
-			for(AbstractConceptMapping conceptmapDef : this.classMappings) {
-				result.add(conceptmapDef);
-			}
-		}
-		return result;
+//		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
+//		if(this.classMappings != null) {
+//			for(AbstractConceptMapping conceptmapDef : this.classMappings) {
+//				result.add(conceptmapDef);
+//			}
+//		}
+//		return result;
+		return this.classMappings;
 	}
 
 	public Collection<IRelationMapping> getRelationMappingsByPropertyAndRange(

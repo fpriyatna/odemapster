@@ -86,7 +86,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	public Collection<SQLQuery> visit(R2RMLMappingDocument mappingDocument) {
 		Collection<SQLQuery> result = new HashSet<SQLQuery>();
 		
-		Collection<AbstractConceptMapping> triplesMaps = mappingDocument.getTriplesMaps();
+		Collection<AbstractConceptMapping> triplesMaps = mappingDocument.getConceptMappings();
 		if(triplesMaps != null) {
 			for(AbstractConceptMapping triplesMap : triplesMaps) {
 				try {
@@ -242,8 +242,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					joinQuery.setJoinType("LEFT");
 					String joinQueryAlias = joinQuery.generateAlias();
 					joinQuery.setAlias(joinQueryAlias);
-					refObjectMap.setAlias(joinQueryAlias);
-					mapRefObjectMapAlias.put(refObjectMap, joinQueryAlias);
+					//refObjectMap.setAlias(joinQueryAlias);
+					this.mapRefObjectMapAlias.put(refObjectMap, joinQueryAlias);
 
 					R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
 					SQLLogicalTable sqlParentLogicalTable = 
