@@ -245,7 +245,6 @@ public class R2ORunner extends AbstractRunner {
 
 	public static void main(String args[]) {
 		try {
-
 			R2ORunner runner = new R2ORunner();
 			String r2oFile = null;
 			if(args == null || args.length == 0) {
@@ -258,8 +257,6 @@ public class R2ORunner extends AbstractRunner {
 			logger.error("Exception occured!");
 			logger.error("Error message = " + e.getMessage());
 		}
-
-
 	}
 
 }

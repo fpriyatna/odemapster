@@ -162,6 +162,7 @@ public class R2OConstants {
 	public static final String OUTPUT_FORMAT_RDFXML = "RDF/XML";
 	public static final String OUTPUT_FORMAT_RDFXML_ABBREV = "RDF/XML-ABBREV";
 	public static final String OUTPUT_FORMAT_NTRIPLE = "N-TRIPLE";
+	public static final String OUTPUT_FORMAT_NQUAD= "N-QUAD";
 	public static final String OUTPUT_FORMAT_TURTLE = "TURTLE";
 	public static final String OUTPUT_FORMAT_N3 = "N3";
 	

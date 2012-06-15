@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -248,5 +249,25 @@ public class QueryTranslatorUtility {
 		return new ZExpression("AND", exp1, exp2);
 	}
 	
-
+	public static Collection<Node> getSubjects(Collection<Triple> triples) {
+		Collection<Node> result = new ArrayList<Node>();
+		if(triples != null) {
+			for(Triple triple : triples) {
+				result.add(triple.getSubject());
+			}
+		}
+		
+		return result;
+	}
+	
+	public static Collection<Node> getObjects(Collection<Triple> triples) {
+		Collection<Node> result = new ArrayList<Node>();
+		if(triples != null) {
+			for(Triple triple : triples) {
+				result.add(triple.getObject());
+			}
+		}
+		
+		return result;
+	}
 }

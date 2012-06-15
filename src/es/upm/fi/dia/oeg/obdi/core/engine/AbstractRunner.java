@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -57,20 +58,20 @@ public abstract class AbstractRunner {
 	protected AbstractParser parser;
 	protected AbstractDataTranslator dataTranslator;
 	protected AbstractQueryTranslator queryTranslator;
-
+	private AbstractMappingDocument originalMappingDocument;
 	protected Query sparqQuery = null;
 	
 	public static ConfigurationProperties configurationProperties;
 
-	public AbstractRunner() {}
-
-	public AbstractRunner(AbstractDataTranslator dataTranslator,
-			AbstractParser parser, AbstractQueryTranslator queryTranslator) {
-		super();
-		this.dataTranslator = dataTranslator;
-		this.parser = parser;
-		this.queryTranslator = queryTranslator;
-	}
+//	public AbstractRunner() {}
+//
+////	public AbstractRunner(AbstractDataTranslator dataTranslator,
+////			AbstractParser parser, AbstractQueryTranslator queryTranslator) {
+////		super();
+////		this.dataTranslator = dataTranslator;
+////		this.parser = parser;
+////		this.queryTranslator = queryTranslator;
+////	}
 
 	protected List<Element> createHeadElementFromColumnNames(ResultSetMetaData rsmd, Document xmlDoc) throws SQLException {
 		List<Element> result = new ArrayList<Element>();
@@ -120,18 +121,13 @@ public abstract class AbstractRunner {
 		}
 		
 		//preparing output file
-	    OutputStream fileOut = new FileOutputStream (outputFileName);
-	    Writer out = new OutputStreamWriter (fileOut, "UTF-8");
-	    String jenaModel = configurationProperties.getJenaMode();
-		Model model = Utility.createJenaModel(jenaModel);
-
-		AbstractMaterializer materializer;
-		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-			materializer = new NTripleMaterializer(outputFileName);
-		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
-			materializer = new RDFXMLMaterializer(outputFileName, model);
-		} else {
-			materializer = new NTripleMaterializer(outputFileName);
+	    //OutputStream fileOut = new FileOutputStream (outputFileName);
+	    //Writer out = new OutputStreamWriter (fileOut, "UTF-8");
+	    String jenaMode = configurationProperties.getJenaMode();
+		AbstractMaterializer materializer = AbstractMaterializer.create(rdfLanguage, outputFileName, jenaMode);
+		Map<String, String> mappingDocumentPrefixMap = this.originalMappingDocument.getMappingDocumentPrefixMap(); 
+		if(mappingDocumentPrefixMap != null) {
+			materializer.setModelPrefixMap(mappingDocumentPrefixMap);
 		}
 		this.dataTranslator.setMaterializer(materializer);
 		
@@ -155,8 +151,8 @@ public abstract class AbstractRunner {
 
 		//cleaning up
 		try {
-			out.flush(); out.close();
-			fileOut.flush(); fileOut.close();
+			//out.flush(); out.close();
+			//fileOut.flush(); fileOut.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -169,10 +165,9 @@ public abstract class AbstractRunner {
 		logger.info("Execution time was "+(duration)+" s.");
 	}
 
-	public String run(String mappingDirectory, String configurationFile)
+	public String run()
 			throws Exception {
 		String status = null;
-		
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("substring", 3);
 		ZUtils.addCustomFunction("convert", 2);
@@ -182,16 +177,15 @@ public abstract class AbstractRunner {
 		
 
 		//Loading configuration file
-		AbstractRunner.configurationProperties = 
-			this.loadConfigurationFile(mappingDirectory, configurationFile);
+//		AbstractRunner.configurationProperties = 
+//			this.loadConfigurationFile(mappingDirectory, configurationFile);
 
 		//loading ontology file
 		String ontologyFilePath = configurationProperties.getOntologyFilePath();
 		
 		//parsing mapping document
 		String mappingDocumentPath = configurationProperties.getMappingDocumentFilePath();
-		AbstractMappingDocument originalMappingDocument = 
-			parser.parse(mappingDocumentPath);
+		originalMappingDocument = parser.parse(mappingDocumentPath);
 
 		//set output file
 		String outputFileName = configurationProperties.getOutputFilePath();
@@ -231,10 +225,6 @@ public abstract class AbstractRunner {
 				logger.debug("queries = " + queries);
 			}			
 			
-			
-			//translate sparql into mappings
-//			SPARQL2MappingTranslator translator = 
-//				new SPARQL2MappingTranslator(originalMappingDocument);
 			
 			//translate sparql into sql
 			this.queryTranslator.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());

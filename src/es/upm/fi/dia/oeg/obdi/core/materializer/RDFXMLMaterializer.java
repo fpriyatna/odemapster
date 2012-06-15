@@ -23,12 +23,13 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 
 public class RDFXMLMaterializer extends AbstractMaterializer {
 	private static Logger logger = Logger.getLogger(RDFXMLMaterializer.class);
-	private Model model;
+	
 	private Resource currentSubject;
 	
-	public RDFXMLMaterializer(String outputFileName, Model model) throws IOException {
+	public RDFXMLMaterializer(String outputFileName, Model model, String rdfLanguage) throws IOException {
 		super.outputFileName = outputFileName;
 		this.model = model;
+		this.rdfLanguage = rdfLanguage;
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 				logger.info("Writing model to " + outputFileName + " ......");
 				long startWritingModel = System.currentTimeMillis();
 				FileOutputStream fos = new FileOutputStream(outputFileName);
-				model.write(fos, R2OConstants.OUTPUT_FORMAT_RDFXML);
+				model.write(fos, this.rdfLanguage);
 				fos.flush();fos.close();
 				long endWritingModel = System.currentTimeMillis();
 				long durationWritingModel = (endWritingModel-startWritingModel) / 1000;

@@ -33,8 +33,11 @@ import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
 import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
+import com.hp.hpl.jena.sparql.algebra.optimize.Optimize;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderLib;
+import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.sparql.expr.E_Bound;
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalNot;
@@ -59,13 +62,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
-/*
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.R2OTranslationException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.querytranslator.TranslatorUtility;
- */
+
 
 public abstract class AbstractQueryTranslator {
 	public enum POS {sub, pre, obj}
@@ -91,6 +88,7 @@ public abstract class AbstractQueryTranslator {
 		super();
 		this.mappingDocument = mappingDocument;
 		this.nameGenerator = new NameGenerator();
+		Optimize.setFactory(new QueryRewritterFactory());
 	}
 
 
@@ -226,8 +224,15 @@ public abstract class AbstractQueryTranslator {
 			Triple tp = bgp.getPattern().getList().get(0);
 			result = this.transTP(tp);
 		} else { //bgp pattern
-			List<Triple> triples = bgp.getPattern().getList();
-
+			BasicPattern basicPattern = bgp.getPattern();
+			
+//			logger.debug("basicPattern = " + basicPattern);
+//			ReorderTransformation reorderTransformation = new ReorderSubject();
+//			BasicPattern basicPattern2 = reorderTransformation.reorder(basicPattern);
+//			logger.debug("basicPattern1 = " + basicPattern2);
+			
+			List<Triple> triples = basicPattern.getList();
+			logger.debug("triples = " + triples);
 			boolean isTB;
 			if(this.optimizeTripleBlock) {
 				isTB = QueryTranslatorUtility.isTripleBlock(triples);
@@ -613,12 +618,8 @@ public abstract class AbstractQueryTranslator {
 			return transGP2SQL;
 		} else {
 			SQLQuery transJoin = new SQLQuery();
-			Collection<ZSelectItem> selectItems = new HashSet<ZSelectItem>();
+			
 
-			Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
-			logger.debug("termsGP1 = " + termsGP1);
-			Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
-			logger.debug("termsGP2 = " + termsGP2);
 
 			String transGP1Alias = transGP1SQL.generateAlias();
 			this.mapTransGP1Alias.put(opParent, transGP1Alias);
@@ -674,6 +675,10 @@ public abstract class AbstractQueryTranslator {
 			logger.debug("transGP1 = \n" + transGP1SQL);
 			logger.debug("transGP2 = \n" + transGP2SQL);
 
+			Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
+			logger.debug("termsGP1 = " + termsGP1);
+			Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
+			logger.debug("termsGP2 = " + termsGP2);
 			Set<Node> termsA = new HashSet<Node>(termsGP1);termsA.removeAll(termsGP2);
 			logger.debug("termsA = " + termsA);
 			Set<Node> termsB = new HashSet<Node>(termsGP2);termsB.removeAll(termsGP1);
@@ -681,6 +686,7 @@ public abstract class AbstractQueryTranslator {
 			Set<Node> termsC = new HashSet<Node>(termsGP1);termsC.retainAll(termsGP2);
 			this.mapTermsC.put(opParent, termsC);
 			logger.debug("termsC = " + termsC);
+			Collection<ZSelectItem> selectItems = new HashSet<ZSelectItem>();
 			Collection<ZSelectItem> selectItemsA = this.generateSelectItems(termsA, null);
 			logger.debug("selectItemsA = " + selectItemsA);
 			selectItems.addAll(selectItemsA);

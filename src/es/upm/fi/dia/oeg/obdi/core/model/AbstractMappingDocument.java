@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.w3c.dom.Element;
@@ -16,6 +17,17 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.model.mapping.R2OConceptMapping;
 
 
 public abstract class AbstractMappingDocument implements IParseable {
+	private Map<String, String> mappingDocumentPrefixMap;
+	
+	protected void setMappingDocumentPrefixMap(
+			Map<String, String> mappingDocumentPrefixMap) {
+		this.mappingDocumentPrefixMap = mappingDocumentPrefixMap;
+	}
+	
+	public Map<String, String> getMappingDocumentPrefixMap() {
+		return mappingDocumentPrefixMap;
+	}
+
 	protected Collection<AbstractConceptMapping> classMappings;
 	
 	public abstract void parse(Element xmlElement) throws ParseException;

@@ -80,8 +80,10 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
 				
 				Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-				ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);
-
+				//ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);
+				// onExpression done in alpha generator
+				ZExp onExpression = null; 
+						
 				ZExp uriCondition = null;
 				if(tpObject.isURI()) {
 					R2RMLTriplesMap parentTriplesMap = 

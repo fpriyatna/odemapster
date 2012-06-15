@@ -19,6 +19,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 	public enum ObjectMapType {ObjectMap, RefObjectMap}
 	private static Logger logger = Logger.getLogger(R2RMLPredicateObjectMap.class);
 	private R2RMLMappingDocument mappingDocument;;
+
 	private R2RMLPredicateMap predicateMap;
 	private R2RMLObjectMap objectMap;
 	private R2RMLGraphMap graphMap;

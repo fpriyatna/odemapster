@@ -27,6 +27,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryRewritter;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.TypeInferrer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
@@ -96,8 +97,15 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		this.condSQLGenerator = new R2RMLCondSQLGenerator(betaGenerator, mapInferredTypes);
 		this.condSQLGenerator.setIgnoreRDFTypeStatement(this.ignoreRDFTypeStatement);
 		logger.debug("opSparqlQuery = " + opSparqlQuery);
-		
 		long start = System.currentTimeMillis();
+		
+		
+		if(this.optimizeTripleBlock) {
+			opSparqlQuery = new QueryRewritter().rewrite(opSparqlQuery);
+			logger.info("opSparqlQueryRewritten = " + opSparqlQuery);
+		}
+		
+		
 		SQLQuery result = this.trans(opSparqlQuery);
 		long end = System.currentTimeMillis();
 		logger.info("Query translation time = "+ (end-start)+" ms.");

@@ -180,11 +180,21 @@ public abstract class AbstractCondSQLGenerator {
 			}
 
 		} else { // improvement by Freddy
-			ZExpression exp = new ZExpression("IS NOT NULL");
-			exp.addOperand(betaObj);
-			exps.add(exp);
-			result = new ZExpression("AND", result, exp);
+			boolean isSingleTripleFromTripleBlock = false;
+			
+			if(tp instanceof ExtendedTriple) {
+				ExtendedTriple etp = (ExtendedTriple) tp;
+				if(etp.isSingleTripleFromTripleBlock()) {
+					isSingleTripleFromTripleBlock = true;
+				} 
+			} 
 
+			if(!isSingleTripleFromTripleBlock) {
+				ZExpression exp = new ZExpression("IS NOT NULL");
+				exp.addOperand(betaObj);
+				exps.add(exp);
+				result = new ZExpression("AND", result, exp);
+			}
 		}
 
 		if(subject == predicate) { //line 10
@@ -279,14 +289,14 @@ public abstract class AbstractCondSQLGenerator {
 		} 
 		
 		for(int i=0; i<tripleBlock.size(); i++) {
-			Triple tp1 = tripleBlock.get(i);
-			String tpPredicateURI = tp1.getPredicate().getURI();
+			Triple tp = tripleBlock.get(i);
+			String tpPredicateURI = tp.getPredicate().getURI();
 			boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
 			if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
 				//do nothing
 			} else {
 				ZExpression condPredicateObject = 
-						this.genCondSQLPredicateObject(tp1, this.betaGenerator);
+						this.genCondSQLPredicateObject(tp, this.betaGenerator);
 				//condSQLTB.add(condPredicateObject);
 				if(condPredicateObject != null) {
 					exps.add(condPredicateObject);
@@ -300,7 +310,7 @@ public abstract class AbstractCondSQLGenerator {
 					if(this.ignoreRDFTypeStatement && isRDFTypeStatement2) {
 						
 					} else {
-						Collection<ZExpression> exps2 = this.genCondSQL(tp1, tp2);
+						Collection<ZExpression> exps2 = this.genCondSQL(tp, tp2);
 						exps.addAll(exps2);
 					}
 				}

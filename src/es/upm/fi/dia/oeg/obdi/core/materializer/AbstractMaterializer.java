@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.core.materializer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -14,10 +15,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
 public abstract class AbstractMaterializer {
 	private static Logger logger = Logger.getLogger(AbstractMaterializer.class);
 	protected String outputFileName;
-
-	public AbstractMaterializer() {
-		super();
-	}
+	protected Model model;
+	protected String rdfLanguage;
 	
 	public abstract Object createSubject(boolean isBlankNode, String subjectURI);
 	public abstract void materializeDataPropertyTriple(String predicateName, Object objectValue, String datatype, String lang, String graph);
@@ -27,12 +26,21 @@ public abstract class AbstractMaterializer {
 	
 	public static AbstractMaterializer create(String rdfLanguage, String outputFileName, String jenaMode) throws IOException {
 		if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NTRIPLE)) {
-			return new NTripleMaterializer(outputFileName);
+			Model model = Utility.createJenaModel(jenaMode);
+			return new NTripleMaterializer(outputFileName, model);
 		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_RDFXML)) {
 			Model model = Utility.createJenaModel(jenaMode);
-			return new RDFXMLMaterializer(outputFileName, model);
+			return new RDFXMLMaterializer(outputFileName, model, rdfLanguage);
+		} else if(rdfLanguage.equalsIgnoreCase(R2OConstants.OUTPUT_FORMAT_NQUAD)) {
+			Model model = Utility.createJenaModel(jenaMode);
+			return new RDFXMLMaterializer(outputFileName, model, rdfLanguage);
 		} else {
-			return new NTripleMaterializer(outputFileName);
+			Model model = Utility.createJenaModel(jenaMode);
+			return new NTripleMaterializer(outputFileName, model);
 		}
+	}
+	
+	public void setModelPrefixMap(Map<String, String> prefixMap) {
+		this.model.setNsPrefixes(prefixMap);
 	}
 }

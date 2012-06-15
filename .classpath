@@ -48,5 +48,6 @@
 	<classpathentry kind="lib" path="lib/jena/xercesImpl-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/monetdb-jdbc-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/DBF_JDBC40.jar"/>
+	<classpathentry kind="lib" path="lib/hsqldb.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -8,6 +8,9 @@ import java.io.Writer;
 
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.rdf.model.AnonId;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.Utility;
@@ -19,8 +22,9 @@ public class NTripleMaterializer extends AbstractMaterializer {
 	private static Logger logger = Logger.getLogger(NTripleMaterializer.class);
 	private Writer writer;
 	
-	public NTripleMaterializer(String outputFileName) throws IOException {
+	public NTripleMaterializer(String outputFileName, Model model) throws IOException {
 		this.outputFileName = outputFileName;
+		this.model = model;
 		//this.writer = new OutputStreamWriter (new FileOutputStream (outputFileName), "UTF-8");
 	}
 
@@ -119,6 +123,14 @@ public class NTripleMaterializer extends AbstractMaterializer {
 
 	@Override
 	public String createSubject(boolean isBlankNode, String subjectURI) {
+		Resource subjectResouce;
+		if(isBlankNode) {
+			AnonId anonId = new AnonId(subjectURI);
+			subjectResouce = model.createResource(anonId);		
+		} else {
+			subjectResouce = model.createResource(subjectURI);
+		}
+		
 		if(isBlankNode) {
 			this.currentSubject = Utility.createBlankNode(subjectURI);
 		} else {
@@ -132,9 +144,10 @@ public class NTripleMaterializer extends AbstractMaterializer {
 	public void materialize() throws IOException {
 		//nothing to do, the triples were added during the data translation process
 		if(this.writer != null) {
-			this.writer.flush();
+			//this.writer.flush();
 			this.writer.close();
 		}
+		
 		
 		
 	}

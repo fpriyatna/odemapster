@@ -18,7 +18,7 @@ public class R2RMLBSBMJuan {
 	private static Logger logger = Logger.getLogger(R2RMLBSBMJuan.class);
 	
 	private String mappingDirectory = ODEMapsterTest.getMappingDirectoryByOS();
-	private String configurationDirectory = mappingDirectory + "r2rml/r2rml-bsbm-juan/";
+	private String configurationDirectory = mappingDirectory + "r2rml-mappings/r2rml-bsbm-juan/";
 	private String mappingDocumentFile = configurationDirectory + "bsbm.ttl";
 	static {
 		PropertyConfigurator.configure("log4j.properties");

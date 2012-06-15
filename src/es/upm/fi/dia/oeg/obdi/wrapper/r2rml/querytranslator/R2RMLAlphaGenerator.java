@@ -168,8 +168,6 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 					}
 				}				
 			}
-			
-
 		}
 
 		logger.debug("alphaTB = " + result);

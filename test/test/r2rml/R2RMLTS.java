@@ -26,13 +26,23 @@ public class R2RMLTS {
 	public void run(String configurationDirectory, String configurationFile, String mappingDocumentFile, String testName) {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-					configurationDirectory, configurationFile);
-			R2RMLElementVisitor dataTranslateVisitor = new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile, unfolder); 
-			md.accept(dataTranslateVisitor);
-			
+			runner.run();
+			logger.info("------" + testName + " DONE------\n\n");
+		} catch(Exception e) {
+			//e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("------" + testName + " FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}
+
+	public void run(String databaseName, String configurationFile, String testName) {
+		String configurationDirectory = ODEMapsterTest.getMappingDirectoryByOS() 
+				+ "r2rml-mappings/R2RMLTS/" + databaseName + "/";
+
+		try {
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			runner.run();
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			//e.printStackTrace();
@@ -44,11 +54,10 @@ public class R2RMLTS {
 	
 	@Test
 	public void testR2RMLTC0000() throws Exception {
-		String testName = "D000-1table1column0rows";
-		String configurationDirectory = mappingDirectory + "r2rml-mappings/R2RMLTS/" + testName + "/";
+		String testName = "R2RMLTC0000";
+		String databaseName = "D000-1table1column0rows";
 		String configurationFile = testName + ".r2rml.properties";
-		String mappingDocumentFile = configurationDirectory + "r2rml.ttl";
-		this.run(configurationDirectory, configurationFile, mappingDocumentFile, testName);
+		this.run(databaseName, configurationFile, testName);
 	}
 
 	@Test

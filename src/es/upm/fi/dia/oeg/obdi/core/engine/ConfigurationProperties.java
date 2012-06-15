@@ -41,12 +41,15 @@ public class ConfigurationProperties extends Properties {
 	public ConfigurationProperties() {}
 	
 	public ConfigurationProperties(
-			String r2oConfigurationDir, String r2oConfigurationFile) 
+			String configurationDirectory, String configurationFile) 
 	throws IOException, InvalidConfigurationPropertiesException, SQLException 
 	{
-		String absoluteR2OConfigurationFile = r2oConfigurationFile;
-		if(r2oConfigurationDir != null) {
-			absoluteR2OConfigurationFile = r2oConfigurationDir + r2oConfigurationFile; 
+		String absoluteR2OConfigurationFile = configurationFile;
+		if(configurationDirectory != null) {
+			if(!configurationDirectory.endsWith("/")) {
+				configurationDirectory = configurationDirectory + "/";
+			}
+			absoluteR2OConfigurationFile = configurationDirectory + configurationFile; 
 		}
 
 		try {
@@ -63,7 +66,7 @@ public class ConfigurationProperties extends Properties {
 			throw e;
 		}
 
-		this.readConfigurationFile(r2oConfigurationDir);
+		this.readConfigurationFile(configurationDirectory);
 
 	}
 	

@@ -247,6 +247,7 @@ public class R2RML_BSBM_MYSQL_250K {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(true);
+			queryTranslator.setSubQueryElimination(true);
 			queryTranslator.setSubqueryAsView(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
 			
@@ -264,7 +265,7 @@ public class R2RML_BSBM_MYSQL_250K {
 
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
-			logger.info("------" + testName + " Freddy DONE------\n\n");
+			logger.info("------" + testName + " Freddy DONE------");
 		} catch(Exception e) {
 			e.printStackTrace();
 			logger.error("Error : " + e.getMessage());

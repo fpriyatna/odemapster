@@ -197,8 +197,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		}
 	}
 	
-	public String getResultSetValue(ResultSet rs, String columnName
-			, ResultSetMetaData rsmd)  {
+	public String getResultSetValue(ResultSet rs, String columnName)  {
 		String result = null;
 		
 		try {
@@ -209,7 +208,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 			if(columnName.startsWith("")) {columnName.substring(1);}
 			if(columnName.endsWith("")) {columnName.subSequence(0, columnName.length()-1);}
 			if(selectItem.getTable() != null) {
-				//columnName = selectItem.getTable() + "." + columnName;
+				columnName = selectItem.getTable() + "." + columnName;
 			}
 			
 			if(this.getDatatype() == null) {
@@ -275,8 +274,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 	}
 
 
-	public String getUnfoldedValue(ResultSet rs, String logicalTableAlias
-			, ResultSetMetaData rsmd) {
+	public String getUnfoldedValue(ResultSet rs, String logicalTableAlias) {
 		
 		String result = null;
 		String originalValue = this.getOriginalValue();
@@ -289,7 +287,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 				String columnName = originalValueSplit[originalValueSplit.length - 1];
 				originalValue = logicalTableAlias + "." + columnName;
 			}
-			result = this.getResultSetValue(rs, originalValue, rsmd);
+			result = this.getResultSetValue(rs, originalValue);
 		} else if(this.termMapType == TermMapType.CONSTANT) {
 			result = originalValue;
 		} else if(this.termMapType == TermMapType.TEMPLATE) {
@@ -310,7 +308,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 				} else {
 					databaseColumn = attribute;
 				}
-				databaseValue = this.getResultSetValue(rs, databaseColumn, rsmd);
+				databaseValue = this.getResultSetValue(rs, databaseColumn);
 				
 				
 				if(databaseValue != null) {

@@ -1,47 +1,30 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZSelectItem;
-
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.rdf.model.Model;
 
+import es.upm.fi.dia.oeg.obdi.DatatypeMapper;
 import es.upm.fi.dia.oeg.obdi.Utility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
-import es.upm.fi.dia.oeg.obdi.core.materializer.NTripleMaterializer;
-import es.upm.fi.dia.oeg.obdi.core.materializer.RDFXMLMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2o.PostProcessorException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2OConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2o.R2ORunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLDatatypeMapper;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLTranslateException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLGraphMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLLogicalTable;
@@ -52,8 +35,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
@@ -75,9 +58,8 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 			String outputFileName = properties.getOutputFilePath();
 			String rdfLanguage = properties.getRdfLanguage();
 			String jenaMode = properties.getJenaMode();
-			this.materializer = AbstractMaterializer.create(
-					rdfLanguage, outputFileName, jenaMode);
-
+			this.materializer = AbstractMaterializer.create(rdfLanguage, outputFileName, jenaMode);
+			
 		} catch (IOException e) {
 			logger.error("IO error while loading configuration file : " + configurationFile);
 			logger.error("error message = " + e.getMessage());
@@ -265,20 +247,15 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 		return null;
 	}
 
-
-	
-	@Override
-	public Object visit(R2RMLTriplesMap triplesMap) throws Exception {
-//		String sqlQuery = triplesMap.accept(
-//				new R2RMLElementUnfoldVisitor()).toString();
-		String sqlQuery = triplesMap.accept(this.unfolder).toString();
-
-
-
-
-		
+	public void translateData(R2RMLTriplesMap triplesMap, String sqlQuery) throws SQLException {
 		Connection conn = this.properties.openConnection();
 		ResultSet rs = QueryEvaluator.evaluateQuery(sqlQuery, conn);
+		this.translateData(triplesMap, rs);
+		rs.close();
+		conn.close();		
+	}
+
+	public void translateData(R2RMLTriplesMap triplesMap, ResultSet rs) throws SQLException {
 		Map<String, String> mapXMLDatatype = new HashMap<String, String>();
 		Map<String, Integer> mapDBDatatype = new HashMap<String, Integer>();
 		ResultSetMetaData rsmd = null;
@@ -292,7 +269,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				//logger.info("rsmd.getColumnClassName(i+1) = " + rsmd.getColumnClassName(i+1));
 				//logger.info("rsmd.getColumnTypeName(i+1) = " + rsmd.getColumnTypeName(i+1));
 				
-				String mappedDatatype = R2RMLDatatypeMapper.getMappedType(columnType);
+				String mappedDatatype = DatatypeMapper.getMappedType(columnType);
 				mapXMLDatatype.put(columnName, mappedDatatype);
 				mapDBDatatype.put(columnName, new Integer(columnType));
 			}
@@ -309,7 +286,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				R2RMLGraphMap subjectGraph = subjectMap.getGraphMap();
 				if(subjectGraph != null) {
 					//String subjectGraphAlias = subjectGraph.getAlias();
-					subjectGraphName = subjectGraph.getUnfoldedValue(rs, null, rsmd);
+					subjectGraphName = subjectGraph.getUnfoldedValue(rs, null);
 					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(subjectGraph.getTermType())) {
 						try {
 							subjectGraphName = Utility.encodeURI(subjectGraphName);
@@ -323,7 +300,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 				String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
 				
 				String subjectValue = subjectMap.getUnfoldedValue(
-						rs, logicalTableAlias, rsmd);
+						rs, logicalTableAlias);
 				if(subjectValue != null && R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(
 						subjectMap.getTermType())) {
 					try {
@@ -352,13 +329,13 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 			for(R2RMLPredicateObjectMap predicateObjectMap : predicateObjectMaps){
 				R2RMLPredicateMap predicateMap = predicateObjectMap.getPredicateMap();
 				String predicateMapUnfoldedValue = 
-						predicateMap.getUnfoldedValue(rs, null, rsmd);
+						predicateMap.getUnfoldedValue(rs, null);
 
 				R2RMLGraphMap predicateobjectGraph = predicateObjectMap.getGraphMap();
 				String predicateobjectGraphName = null;
 				if(predicateobjectGraph != null ) {
 					predicateobjectGraphName = 
-							predicateobjectGraph.getUnfoldedValue(rs, null, rsmd);
+							predicateobjectGraph.getUnfoldedValue(rs, null);
 					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(predicateobjectGraph.getTermType())) {
 						try {
 							predicateobjectGraphName = Utility.encodeURI(predicateobjectGraphName);
@@ -375,7 +352,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 					String alias = triplesMap.getLogicalTable().getAlias();
 					
 					String objectMapUnfoldedValue = 
-							objectMap.getUnfoldedValue(rs, alias, rsmd);
+							objectMap.getUnfoldedValue(rs, alias);
 					this.translateObjectMap(objectMap, rs, mapXMLDatatype
 							, subjectGraphName, predicateobjectGraphName
 							, predicateMapUnfoldedValue, objectMapUnfoldedValue
@@ -393,8 +370,7 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 					R2RMLSubjectMap parentSubjectMap = 
 							refObjectMap.getParentTriplesMap().getSubjectMap();
 					//String parentSubjectValue = parentSubjectMap.getUnfoldedValue(rs, refObjectMap.getAlias());
-					String parentSubjectValue = parentSubjectMap.getUnfoldedValue(
-							rs, joinQueryAlias2, rsmd);
+					String parentSubjectValue = parentSubjectMap.getUnfoldedValue(rs, joinQueryAlias2);
 
 					if(parentSubjectValue != null) {
 						this.translateObjectMap(parentSubjectMap, rs, mapXMLDatatype, subjectGraphName
@@ -419,11 +395,14 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 			}
 		}
 
-		rs.close();
-		conn.close();
-
-
-
+	}
+	
+	@Override
+	public Object visit(R2RMLTriplesMap triplesMap) throws Exception {
+//		String sqlQuery = triplesMap.accept(
+//				new R2RMLElementUnfoldVisitor()).toString();
+		String sqlQuery = triplesMap.accept(this.unfolder).toString();
+		this.translateData(triplesMap, sqlQuery);
 		return null;
 	}
 

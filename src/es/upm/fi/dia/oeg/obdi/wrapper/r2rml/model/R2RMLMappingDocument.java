@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -29,7 +30,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionE
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
-
+	
+	
 	private Collection<String> prefixes;
 	//private Collection<AbstractConceptMapping> triplesMaps;
 	private String mappingDocumentPath;
@@ -51,7 +53,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		
 		// read the Turtle file
 		model.read(in, null, "TURTLE");
-
+		super.setMappingDocumentPrefixMap(model.getNsPrefixMap());
 
 //		//parsing ObjectMap resources
 //		ResIterator objectMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_OBJECTSMAP_CLASS);
