@@ -12,8 +12,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
-public class R2RMLBSBMJuan {
-	private static Logger logger = Logger.getLogger(R2RMLBSBMJuan.class);
+public class BSBM_Juan {
+	private static Logger logger = Logger.getLogger(BSBM_Juan.class);
 	
 	private String mappingDirectory = TestUtility.getMappingDirectoryByOS();
 	private String configurationDirectory = mappingDirectory + "r2rml-mappings/r2rml-bsbm-juan/";
@@ -111,25 +111,25 @@ public class R2RMLBSBMJuan {
 	}
 	
 	@Test
-	public void testBSBM01() throws Exception {
+	public void testBSBM01Chebotko() throws Exception {
 		String testName = "bsbm01";
 		this.run(testName);
 	}
 	
 	@Test
-	public void testBSBM01TB() throws Exception {
+	public void testBSBM01Freddy() throws Exception {
 		String testName = "bsbm01";
 		this.runTB(testName);
 	}
 	
 	@Test
-	public void testBSBM02() throws Exception {
+	public void testBSBM02Chebotko() throws Exception {
 		String testName = "bsbm02";
 		this.run(testName);
 	}	
 
 	@Test
-	public void testBSBM02TB() throws Exception {
+	public void testBSBM02Freddy() throws Exception {
 		String testName = "bsbm02";
 		this.runTB(testName);
 	}
@@ -141,37 +141,37 @@ public class R2RMLBSBMJuan {
 	}
 
 	@Test
-	public void testBSBM03() throws Exception {
+	public void testBSBM03Chebotko() throws Exception {
 		String testName = "bsbm03";
 		this.run(testName);
 	}	
 
 	@Test
-	public void testBSBM03TB() throws Exception {
+	public void testBSBM03Freddy() throws Exception {
 		String testName = "bsbm03";
 		this.runTB(testName);
 	}
 	
 	@Test
-	public void testBSBM04() throws Exception {
+	public void testBSBM04Chebotko() throws Exception {
 		String testName = "bsbm04";
 		this.run(testName);
 	}	
 	
 	@Test
-	public void testBSBM04TB() throws Exception {
+	public void testBSBM04Freddy() throws Exception {
 		String testName = "bsbm04";
 		this.runTB(testName);
 	}
 	
 	@Test
-	public void testBSBM05() throws Exception {
+	public void testBSBM05Chebotko() throws Exception {
 		String testName = "bsbm05";
 		this.run(testName);
 	}
 
 	@Test
-	public void testBSBM05TB() throws Exception {
+	public void testBSBM05Freddy() throws Exception {
 		String testName = "bsbm05";
 		this.runTB(testName);
 	}
@@ -183,13 +183,13 @@ public class R2RMLBSBMJuan {
 	}
 	
 	@Test
-	public void testBSBM06() throws Exception {
+	public void testBSBM06Chebotko() throws Exception {
 		String testName = "bsbm06";
 		this.run(testName);
 	}
 
 	@Test
-	public void testBSBM06TB() throws Exception {
+	public void testBSBM06Freddy() throws Exception {
 		String testName = "bsbm06";
 		this.runTB(testName);
 	}
@@ -201,7 +201,7 @@ public class R2RMLBSBMJuan {
 	}
 
 	@Test
-	public void testBSBM07TB() throws Exception {
+	public void testBSBM07Freddy() throws Exception {
 		String testName = "bsbm07";
 		this.runTB(testName);
 	}
@@ -213,25 +213,25 @@ public class R2RMLBSBMJuan {
 	}
 	
 	@Test
-	public void testBSBM08() throws Exception {
+	public void testBSBM08Chebotko() throws Exception {
 		String testName = "bsbm08";
 		this.run(testName);
 	}
 
 	@Test
-	public void testBSBM08TB() throws Exception {
+	public void testBSBM08Freddy() throws Exception {
 		String testName = "bsbm08";
 		this.runTB(testName);
 	}
 
 	@Test
-	public void testBSBM10() throws Exception {
+	public void testBSBM10Chebotko() throws Exception {
 		String testName = "bsbm10";
 		this.run(testName);
 	}	
 
 	@Test
-	public void testBSBM10TB() throws Exception {
+	public void testBSBM10Freddy() throws Exception {
 		String testName = "bsbm10";
 		this.runTB(testName);
 	}
