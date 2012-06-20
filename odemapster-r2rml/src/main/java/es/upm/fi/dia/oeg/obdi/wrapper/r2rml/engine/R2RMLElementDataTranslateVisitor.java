@@ -211,13 +211,11 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 		}
 	}
 
-	@Override
 	public Object visit(R2RMLLogicalTable logicalTable) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Object visit(R2RMLMappingDocument mappingDocument) throws R2RMLTranslateException {
 		try {
 			this.translateData(mappingDocument);
@@ -229,19 +227,16 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 		return null;
 	}
 
-	@Override
 	public Object visit(R2RMLObjectMap objectMap) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Object visit(R2RMLRefObjectMap refObjectMap) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Object visit(R2RMLTermMap r2rmlTermMap) {
 		// TODO Auto-generated method stub
 		return null;
@@ -397,7 +392,6 @@ public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator imp
 
 	}
 	
-	@Override
 	public Object visit(R2RMLTriplesMap triplesMap) throws Exception {
 //		String sqlQuery = triplesMap.accept(
 //				new R2RMLElementUnfoldVisitor()).toString();

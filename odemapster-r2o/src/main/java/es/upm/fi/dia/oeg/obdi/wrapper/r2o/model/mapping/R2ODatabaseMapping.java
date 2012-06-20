@@ -20,7 +20,6 @@ public class R2ODatabaseMapping implements R2OElement {
 		this.parse(element);
 	}
 	
-	@Override
 	public void parse(Element element) throws ParseException {
 		//R2ODatabaseMapping result = new R2ODatabaseMapping();
 		this.name = element.getAttribute(R2OConstants.NAME_ATTRIBUTE);

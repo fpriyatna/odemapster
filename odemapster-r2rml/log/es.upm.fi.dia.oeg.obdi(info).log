@@ -5381,3 +5381,940 @@ FROM "Student"  v_4336
 2012-06-20 12:03:05 INFO  R2RMLTS.run:25  - ------R2RMLTC0020b DONE------
 
 
+2012-06-20 13:25:37 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:37 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6233."Name"
+FROM "Student"  v_6233
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:38 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:38 INFO  R2RMLTS.run:41  - ------R2RMLTC0000 DONE------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8295."Name"
+FROM "Student"  v_8295
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:38 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0001a DONE------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6963."Name"
+FROM "Student"  v_6963
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:38 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0001b DONE------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7131."Name", v_7131."ID"
+FROM "Student"  v_7131
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 78 ms.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:38 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0002a DONE------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8369."Name", v_8369."ID"
+FROM "Student"  v_8369
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:38 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0002b DONE------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3567."Name", v_3567."ID", v_3567."IDs"
+FROM "Student"  v_3567
+2012-06-20 13:25:38 ERROR DBUtility.executeQuery:74  - Error executing query, error message = Unknown column 'v_3567.IDs' in 'field list'
+2012-06-20 13:25:38 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:38 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = Unknown column 'v_3567.IDs' in 'field list'
+2012-06-20 13:25:38 ERROR R2RMLTS.run:28  - Error : Unknown column 'v_3567.IDs' in 'field list'
+2012-06-20 13:25:38 INFO  R2RMLTS.run:29  - ------R2RMLTC0002c FAILED------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Student' || "ID")  AS StudentId, "ID" , "Name" 
+FROM "Student"
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9654.StudentId
+2012-06-20 13:25:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9654.StudentId' not found.
+2012-06-20 13:25:38 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:38 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-06-20 13:25:38 ERROR R2RMLTS.run:28  - Error : null
+2012-06-20 13:25:38 INFO  R2RMLTS.run:29  - ------R2RMLTC0002d FAILED------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1421."ID", v_1421."Name"
+FROM "Students"  v_1421
+2012-06-20 13:25:38 ERROR DBUtility.executeQuery:74  - Error executing query, error message = Table 'd002.students' doesn't exist
+2012-06-20 13:25:38 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:38 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = Table 'd002.students' doesn't exist
+2012-06-20 13:25:38 ERROR R2RMLTS.run:28  - Error : Table 'd002.students' doesn't exist
+2012-06-20 13:25:38 INFO  R2RMLTS.run:29  - ------R2RMLTC0002e FAILED------
+
+
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2076.Name, v_2076."Name", v_2076.ID, v_2076."ID"
+FROM "Student"  v_2076
+2012-06-20 13:25:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:38 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:38 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0002f DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : THIS IS NOT A VALID SQL QUERY;
+2012-06-20 13:25:39 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "THIS" at line 1, column 1.
+Was expecting one of:
+    "COMMIT" ...
+    "DELETE" ...
+    "EXIT" ...
+    "INSERT" ...
+    "LOCK" ...
+    "QUIT" ...
+    "ROLLBACK" ...
+    "SELECT" ...
+    "SET" ...
+    "UPDATE" ...
+    
+2012-06-20 13:25:39 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:39 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-06-20 13:25:39 ERROR R2RMLTS.run:28  - Error : null
+2012-06-20 13:25:39 INFO  R2RMLTS.run:29  - ------R2RMLTC0002g FAILED------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Student' || ID)  AS StudentId, "ID" , "Name" , 1  AS ID
+FROM "Student"
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1254.StudentId
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1254.StudentId' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1254.ID
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1254.ID' not found.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0002h DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "Name" 
+FROM "Student"
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1526.ID
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1526.ID' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1526.Name
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1526.Name' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1526.Name
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1526.Name' not found.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0002i DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Student"."ID" , "Student"."Name" 
+FROM "Student"
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6040.ID
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6040.ID' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6040.Name
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6040.Name' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6040.Name
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6040.Name' not found.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0002j DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "FirstName" , "LastName" 
+FROM "Student"
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8002.ID
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8002.ID' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8002.FirstName
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8002.FirstName' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8002.LastName
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8002.LastName' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8002.ID
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8002.ID' not found.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0003a DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , (("FirstName" || ' ') || "LastName")  AS Name
+FROM "Student"
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_7026.ID
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_7026.ID' not found.
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_7026.Name
+2012-06-20 13:25:39 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_7026.Name' not found.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0003b DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9808."FirstName", v_9808."ID", v_9808."LastName"
+FROM "Student"  v_9808
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0003c DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_5030."Sport"
+FROM "Student_Sport"  v_5030
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5405."Student"
+FROM "Student_Sport"  v_5405
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0004a DONE------
+
+
+2012-06-20 13:25:39 ERROR R2RMLRunner.<init>:76  - error message = Literal is not permitted in the subject!
+2012-06-20 13:25:39 ERROR R2RMLTS.run:28  - Error : Literal is not permitted in the subject!
+2012-06-20 13:25:39 INFO  R2RMLTS.run:29  - ------R2RMLTC0004b FAILED------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8774."lname", v_8774."amount", v_8774."fname"
+FROM "IOUs"  v_8774
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0005a DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT  * 
+FROM "Student"  v_1152
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 16 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0006a DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7170."Name", v_7170."ID"
+FROM "Student"  v_7170
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007a DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9441."Name", v_9441."ID"
+FROM "Student"  v_9441
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007b DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5114."ID", v_5114."Name"
+FROM "Student"  v_5114
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007c DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5958."Name", v_5958."ID"
+FROM "Student"  v_5958
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 16 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007d DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7576."ID", v_7576."Name"
+FROM "Student"  v_7576
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007e DONE------
+
+
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8604."Name", v_8604."ID"
+FROM "Student"  v_8604
+2012-06-20 13:25:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:39 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:39 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007f DONE------
+
+
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0007g DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3092."ID", v_3092."Name"
+FROM "Student"  v_3092
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0007h DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8630."Name", v_8630."ID"
+FROM "Student"  v_8630
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0007i DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5532."Sport", v_5532."ID", v_5532."Name"
+FROM "Student"  v_5532
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0008a DONE------
+
+
+2012-06-20 13:25:40 WARN  R2RMLRefObjectMap.<init>:58  - No join conditions defined!
+2012-06-20 13:25:40 WARN  R2RMLRefObjectMap.<init>:58  - No join conditions defined!
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_9518."Sport"
+FROM "Student"  v_9518
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3865."Name", v_3865."ID", v_985.Sport
+FROM "Student"  v_3865
+LEFT JOIN "Student" v_985
+ON (1 = 1)
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0008b DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7641."Name", v_7641."ID"
+FROM "Student"  v_7641
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0008c DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_3046."Name", v_3046."ID"
+FROM "Sport"  v_3046
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1046."Name", v_8929.ID, v_1046."ID"
+FROM "Student"  v_1046
+LEFT JOIN "Sport" v_8929
+ON (v_1046."Sport" = v_8929."ID")
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009a DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_9201."Name", v_9201."ID"
+FROM "Sport"  v_9201
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8897.ID, v_9268."ID", v_9268."Name"
+FROM "Student"  v_9268
+LEFT JOIN "Sport" v_8897
+ON (v_9268."Sport" = v_8897."ID")
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009b DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Name" , COUNT("Sport") 
+FROM "Student"
+group by "Name"
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1254.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1254.Name' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1254.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1254.Name' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1254.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1254.Name' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1254.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1254.Name' not found.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009c DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Name" , COUNT("Sport")  AS SPORTCOUNT
+FROM "Student"
+group by "Name"
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4016.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4016.Name' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4016.SPORTCOUNT
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4016.SPORTCOUNT' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4016.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4016.Name' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4016.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4016.Name' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4016.SPORTCOUNT
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4016.SPORTCOUNT' not found.
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4016.Name
+2012-06-20 13:25:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4016.Name' not found.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009d DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6474."Country Code", v_6474."Name"
+FROM "Country Info"  v_6474
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0010a DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1359."Country Code", v_1359."Name"
+FROM "Country Info"  v_1359
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0010b DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_545.\{\{ {"ISO 3166", v_545."Country Code", v_545."Name"
+FROM "Country Info"  v_545
+2012-06-20 13:25:40 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\{\{ {"ISO 3166", v_545."Country Code", v_545."Name"
+FROM "Country Info"  v_545' at line 1
+2012-06-20 13:25:40 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:40 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\{\{ {"ISO 3166", v_545."Country Code", v_545."Name"
+FROM "Country Info"  v_545' at line 1
+2012-06-20 13:25:40 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\{\{ {"ISO 3166", v_545."Country Code", v_545."Name"
+FROM "Country Info"  v_545' at line 1
+2012-06-20 13:25:40 INFO  R2RMLTS.run:29  - ------R2RMLTC0010c FAILED------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_5659."Description", v_5659."ID"
+FROM "Sport"  v_5659
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Student"."ID"  AS ID, "Student"."FirstName"  AS FirstName, "Student"."LastName"  AS LastName, "Sport"."Description"  AS Description, "Sport"."ID"  AS Sport_ID
+FROM "Student", "Sport", "Student_Sport"
+WHERE (("Student"."ID" = "Student_Sport"."ID_Student") AND ("Sport"."ID" = "Student_Sport"."ID_Sport"))
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0011a DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_4031."ID", v_4031."Description"
+FROM "Sport"  v_4031
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3773."FirstName", v_3773."ID", v_3773."LastName"
+FROM "Student"  v_3773
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 16 ms.
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : LinkMap_1_2
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - LinkMap_1_2 unfolded = SELECT v_6647."ID_Sport", v_6647."ID_Student"
+FROM "Student_Sport"  v_6647
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:40 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0011b DONE------
+
+
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8565."fname", v_8565."lname", v_8565."amount"
+FROM "IOUs"  v_8565
+2012-06-20 13:25:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:40 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0012a DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_6472."lname", v_6472."city", v_6472."fname"
+FROM "Lives"  v_6472
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9794."fname", v_9794."lname"
+FROM "IOUs"  v_9794
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0012b DONE------
+
+
+2012-06-20 13:25:41 ERROR R2RMLTriplesMap.<init>:78  - Missing rr:subjectMap
+2012-06-20 13:25:41 ERROR R2RMLRunner.<init>:76  - error message = Missing rr:subjectMap
+2012-06-20 13:25:41 ERROR R2RMLTS.run:28  - Error : Missing rr:subjectMap
+2012-06-20 13:25:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0012c FAILED------
+
+
+2012-06-20 13:25:41 ERROR R2RMLTriplesMap.<init>:67  - Multiple rr:subjectMap predicates are not allowed
+2012-06-20 13:25:41 ERROR R2RMLRunner.<init>:76  - error message = Multiple rr:subjectMap predicates are not allowed
+2012-06-20 13:25:41 ERROR R2RMLTS.run:28  - Error : Multiple rr:subjectMap predicates are not allowed
+2012-06-20 13:25:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0012d FAILED------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6179."Name", v_6179."ID", v_6179."DateOfBirth"
+FROM "Person"  v_6179
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0013a DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : SELECT ('Department' || "deptno") AS "deptId"
+            , "deptno"
+            , "dname"
+            , "loc"
+       FROM "DEPT";
+2012-06-20 13:25:41 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"deptId\"" at line 1, column 38.
+Was expecting:
+    <S_IDENTIFIER> ...
+    
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-06-20 13:25:41 ERROR R2RMLTS.run:28  - Error : null
+2012-06-20 13:25:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0014a FAILED------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT ('http://example.com/emp/' || "empno")  AS empURI, "empno" , "ename" , ('http://example.com/emp/job/' || "job")  AS jobTypeURI, "job" , deptno , ('http://example.com/emp/etype/' || "etype")  AS empTypeURI, "etype" , ((('http://example.com/graph/' || "job") || '/') || "etype")  AS graphURI, v_1542.deptId
+FROM "EMP"
+LEFT JOIN (SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT") AS v_1542
+ON (v_9668."deptno" = v_1542."deptno")
+2012-06-20 13:25:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = Column 'deptno' in field list is ambiguous
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap2
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = Column 'deptno' in field list is ambiguous
+2012-06-20 13:25:41 ERROR R2RMLTS.run:28  - Error : Column 'deptno' in field list is ambiguous
+2012-06-20 13:25:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0014b FAILED------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_6532."job", v_6532."ename", v_6532."deptno", v_6532."etype", v_6532."empno", v_2272.deptId
+FROM "EMP"  v_6532
+LEFT JOIN (SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT") AS v_2272
+ON (v_6532."deptno" = v_2272."deptno")
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT"
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_1047.deptId
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_1047.deptId' not found.
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-06-20 13:25:41 ERROR R2RMLTS.run:28  - Error : null
+2012-06-20 13:25:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0014c FAILED------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap4
+2012-06-20 13:25:41 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : SELECT *, (CASE "job"
+            WHEN 'CLERK' THEN 'general-office'
+            WHEN 'NIGHTGUARD' THEN 'security'
+            WHEN 'ENGINEER' THEN 'engineering'
+        END) AS ROLE FROM "EMP";
+2012-06-20 13:25:41 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "," at line 1, column 9.
+Was expecting:
+    "FROM" ...
+    
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap4
+2012-06-20 13:25:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-06-20 13:25:41 ERROR R2RMLTS.run:28  - Error : null
+2012-06-20 13:25:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0014d FAILED------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'ES')
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6220.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6220.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6220.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6220.Name' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6220.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6220.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6220.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6220.Name' not found.
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'EN')
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 16 ms.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9266.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9266.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9266.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9266.Name' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9266.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9266.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9266.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9266.Name' not found.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0015a DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'ES')
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_775.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_775.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_775.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_775.Name' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_775.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_775.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_775.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_775.Name' not found.
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'EN')
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3281.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3281.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3281.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3281.Name' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3281.Code
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3281.Code' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3281.Name
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3281.Name' not found.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0015b DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3017."LastName", v_3017."Sex", v_3017."ID", v_3017."FirstName"
+FROM "Patient"  v_3017
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0016a DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6025."Height", v_6025."ID", v_6025."Weight"
+FROM "Patient"  v_6025
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0016b DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4796."ID", v_4796."BirthDate", v_4796."EntranceDate"
+FROM "Patient"  v_4796
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0016c DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2410."ID", v_2410."PaidInAdvance"
+FROM "Patient"  v_2410
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0016d DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8603."ID", v_8603."Photo"
+FROM "Patient"  v_8603
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0016e DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3903."ID", v_3903."Name"
+FROM "Student"  v_3903
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 16 ms.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0018a DONE------
+
+
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "FirstName" , "LastName" 
+FROM "Employee"
+WHERE ("ID" < 30)
+2012-06-20 13:25:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3485.FirstName
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3485.FirstName' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3485.FirstName
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3485.FirstName' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3485.FirstName
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3485.FirstName' not found.
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3485.FirstName
+2012-06-20 13:25:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3485.FirstName' not found.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:41 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:41 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0019a DONE------
+
+
+2012-06-20 13:25:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7978."FirstName"
+FROM "Employee"  v_7978
+2012-06-20 13:25:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:42 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:42 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:42 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0019b DONE------
+
+
+2012-06-20 13:25:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_608."Name"
+FROM "Student"  v_608
+2012-06-20 13:25:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:42 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:42 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:42 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0020a DONE------
+
+
+2012-06-20 13:25:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-20 13:25:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7146."Name"
+FROM "Student"  v_7146
+2012-06-20 13:25:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-06-20 13:25:42 INFO  AbstractRunner.materializeMappingDocuments:137  - Materializing Mapping Document time was 0 s.
+2012-06-20 13:25:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-20 13:25:42 INFO  AbstractRunner.materializeMappingDocuments:152  - Execution time was 0 s.
+2012-06-20 13:25:42 INFO  AbstractRunner.run:302  - **********************DONE****************************
+
+
+2012-06-20 13:25:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0020b DONE------
+
+

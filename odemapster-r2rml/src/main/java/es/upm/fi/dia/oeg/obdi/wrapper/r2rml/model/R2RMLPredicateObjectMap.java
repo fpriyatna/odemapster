@@ -113,13 +113,11 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		return predicateMap;
 	}
 
-	@Override
 	public String getPropertyMappingID() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public MappingType getPropertyMappingType() {
 		MappingType result;
 		if(this.objectMap != null) {
@@ -137,7 +135,6 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		return result;
 	}
 
-	@Override
 	public String getRangeClassMapping() {
 		// TODO Auto-generated method stub
 		if(this.refObjectMap != null) {
@@ -152,7 +149,6 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		return refObjectMap;
 	}
 
-	@Override
 	public String getRelationName() {
 		// TODO Auto-generated method stub
 		logger.warn("TODO: Implement getRelationName");

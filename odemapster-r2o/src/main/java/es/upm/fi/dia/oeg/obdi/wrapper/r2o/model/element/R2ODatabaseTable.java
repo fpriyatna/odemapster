@@ -24,7 +24,6 @@ public class R2ODatabaseTable implements R2OElement {
 
 
 	
-	@Override
 	public void parse(Element element) throws ParseException {
 		//R2ODatabaseTable result = new R2ODatabaseTable();
 		

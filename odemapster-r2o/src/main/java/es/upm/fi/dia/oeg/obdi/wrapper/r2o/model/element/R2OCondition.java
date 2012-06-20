@@ -35,7 +35,6 @@ public class R2OCondition implements R2OElement, Cloneable{
 		this.operId = operId;
 	}
 
-	@Override
 	public void parse(Element element) throws ParseException {
 		//R2OCondition result = new R2OCondition();
 		

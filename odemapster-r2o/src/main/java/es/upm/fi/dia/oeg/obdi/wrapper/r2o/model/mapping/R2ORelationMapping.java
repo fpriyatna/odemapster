@@ -110,7 +110,6 @@ implements R2OElement, IRelationMapping, Cloneable
 		}
 	}
 
-	@Override
 	public String getRelationName() {
 		return this.name;
 	}
@@ -252,7 +251,6 @@ implements R2OElement, IRelationMapping, Cloneable
 		return null;
 	}
 
-	@Override
 	public String getRangeClassMapping() {
 		return this.toConcept;
 	}

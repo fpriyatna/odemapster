@@ -31,7 +31,6 @@ public class R2ODatabaseColumn implements R2OElement  {
 	}
 
 	
-	@Override
 	public void parse(Element element) throws ParseException {
 		//R2ODatabaseColumn result = new R2ODatabaseColumn();
 		

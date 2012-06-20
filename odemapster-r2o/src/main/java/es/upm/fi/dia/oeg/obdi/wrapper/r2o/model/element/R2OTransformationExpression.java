@@ -37,7 +37,6 @@ public class R2OTransformationExpression extends R2OExpression implements Clonea
 		this.operId = operId;		
 	}
 
-	@Override
 	public void parse(Element element) throws ParseException {
 		//R2OTransformationExpression result = new R2OTransformationExpression();
 		Element operationElement = XMLUtility.getFirstElement(element);

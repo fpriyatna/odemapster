@@ -281,7 +281,6 @@ implements R2OElement, IAttributeMapping, Cloneable {
 	}
 
 
-	@Override
 	public String getAttributeName() {
 		return this.name;
 	}

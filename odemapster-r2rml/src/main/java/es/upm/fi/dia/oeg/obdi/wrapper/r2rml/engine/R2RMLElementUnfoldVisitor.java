@@ -82,7 +82,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	}
 
 	
-	@Override
 	public Collection<SQLQuery> visit(R2RMLMappingDocument mappingDocument) {
 		Collection<SQLQuery> result = new HashSet<SQLQuery>();
 		
@@ -185,7 +184,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	
 
 	
-	@Override
 	public SQLQuery visit(R2RMLTriplesMap triplesMap) {
 		logger.info("unfolding triplesMap : " + triplesMap);
 		String dbType = this.properties.getDatabaseType();
@@ -294,7 +292,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		return result;
 	}
 
-	@Override
 	public SQLLogicalTable visit(R2RMLLogicalTable logicalTable) {
 		SQLLogicalTable result = null;
 		
@@ -315,19 +312,16 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		return result;
 	}
 
-	@Override
 	public Object visit(R2RMLRefObjectMap refObjectMap) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Object visit(R2RMLObjectMap objectMap) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	protected Set<String> unfold(Set<ILogicalQuery> logicalQueries,
 			AbstractMappingDocument mapping) throws Exception {
 		// TODO Auto-generated method stub
@@ -350,7 +344,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		return result;
 	}
 
-	@Override
 	public Object visit(R2RMLTermMap r2rmlTermMap) {
 		// TODO Auto-generated method stub
 		return null;

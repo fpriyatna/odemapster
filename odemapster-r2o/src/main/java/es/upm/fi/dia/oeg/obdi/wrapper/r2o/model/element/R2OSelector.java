@@ -32,7 +32,6 @@ public class R2OSelector implements R2OElement, Cloneable {
 		this.parse(element);
 	}
 	
-	@Override
 	public void parse(Element element) throws ParseException {
 		//R2OSelector result = new R2OSelector();
 		NodeList afterTransformElements = element.getElementsByTagName(R2OConstants.AFTERTRANSFORM_TAG);

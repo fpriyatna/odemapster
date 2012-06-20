@@ -22,7 +22,6 @@ public class R2ODatabaseView implements R2OElement {
 		this.parse(xmlElement);
 	}
 	
-	@Override
 	public void parse(Element xmlElement) throws ParseException {
 		//R2ODatabaseView result = new R2ODatabaseView();
 		

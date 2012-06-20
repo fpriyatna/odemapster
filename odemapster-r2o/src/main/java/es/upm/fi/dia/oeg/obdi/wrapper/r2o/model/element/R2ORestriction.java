@@ -19,7 +19,6 @@ public abstract class R2ORestriction implements R2OElement {
 	//    has-column literal |
 	//    has-transform transformation
 	
-	@Override
 	public abstract void parse(Element element) throws ParseException;
 	
 	@Override

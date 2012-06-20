@@ -24,7 +24,6 @@ extends AbstractPropertyMapping implements R2OElement, IPropertyMapping, Cloneab
 
 
 
-	@Override
 	public String getPropertyMappingID() {
 		String result;
 		if(this.id != null && !this.id.equals("")) {
@@ -37,7 +36,6 @@ extends AbstractPropertyMapping implements R2OElement, IPropertyMapping, Cloneab
 	}
 
 
-	@Override
 	public void parse(Element xmlElement) throws ParseException {
 		// TODO Auto-generated method stub
 		

@@ -20,7 +20,6 @@ public class R2OJoin implements R2OElement, Cloneable {
 		this.parse(xmlElement);
 	}
 	
-	@Override
 	public void parse(Element xmlElement) throws ParseException {
 		//R2OJoin result = new R2OJoin();
 
