@@ -152,6 +152,11 @@ public abstract class AbstractRunner {
 		logger.info("Execution time was "+(duration)+" s.");
 	}
 
+	public String run(String mappingDirectory, String configurationFile) throws Exception {
+		AbstractRunner.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
+		return this.run();
+	}
+	
 	public String run()
 			throws Exception {
 		String status = null;
