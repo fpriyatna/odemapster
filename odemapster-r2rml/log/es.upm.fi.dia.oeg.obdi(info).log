@@ -6318,3 +6318,221 @@ FROM "Student"  v_7146
 2012-06-20 13:25:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0020b DONE------
 
 
+2012-06-21 15:12:12 INFO  R2RML_BSBM_MYSQL_250K.runSQL:58  - ------ Running bsbm01 SQL ------
+2012-06-21 15:12:12 ERROR ConfigurationProperties.<init>:58  - Configuration file C:/Users/Freddy/Dropbox/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.r2rml.properties is not found!
+2012-06-21 15:12:12 ERROR R2RMLRunner.<init>:69  - IO error while loading configuration file : bsbm01.r2rml.properties
+2012-06-21 15:12:12 ERROR R2RMLRunner.<init>:70  - error message = C:\Users\Freddy\Dropbox\oeg\odemapster2\mappings\r2rml-mappings\r2rml-bsbm-mysql-250k\bsbm01.r2rml.properties (The system cannot find the path specified)
+2012-06-21 15:12:12 ERROR R2RML_BSBM_MYSQL_250K.runSQL:84  - Error : C:\Users\Freddy\Dropbox\oeg\odemapster2\mappings\r2rml-mappings\r2rml-bsbm-mysql-250k\bsbm01.r2rml.properties (The system cannot find the path specified)
+2012-06-21 15:12:12 INFO  R2RML_BSBM_MYSQL_250K.runSQL:85  - ------bsbm01 FAILED------
+
+
+2012-06-21 15:13:19 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-21 15:13:21 ERROR R2RMLRunner.<init>:84  - error message = es.pm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator
+2012-06-21 15:13:21 ERROR R2RML_BSBM_MYSQL_250K.runChebotko:190  - Error : es.pm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator
+2012-06-21 15:13:21 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:191  - ------bsbm01 FAILED------
+
+
+2012-06-21 15:15:11 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-21 15:15:12 INFO  AbstractQueryTranslator.translateFromFile:805  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-21 15:15:13 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 126 ms.
+2012-06-21 15:15:13 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:176  - sql query = 
+SELECT  DISTINCT var_product  AS product, var_label  AS label
+FROM (SELECT * 
+FROM (SELECT uri_label1103900028  AS uri_label1103900028, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_productType84528473  AS uri_productType84528473, uri_productFeature1725172119  AS uri_productFeature1725172119, var_label  AS var_label, uri_ProductType351771145453  AS uri_ProductType351771145453, var_value1  AS var_value1, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, v_7332.var_product  AS var_product
+FROM (SELECT v_650.nr AS var_product, 'http://www.w3.org/2000/01/rdf-schema#label' AS uri_label1103900028, v_650.label AS var_label
+FROM product  v_650
+WHERE (v_650.label IS NOT NULL) ) v_7332
+INNER JOIN  (SELECT uri_productType84528473  AS uri_productType84528473, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductType351771145453  AS uri_ProductType351771145453, v_9348.var_product  AS var_product, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, var_value1  AS var_value1, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836
+FROM (SELECT v_1906.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType' AS uri_productType84528473, v_1124.productType AS uri_ProductType351771145453
+FROM product  v_1906
+INNER JOIN producttypeproduct v_1124
+ON (v_1906.nr = v_1124.product)
+WHERE (v_1124.productType = 35) ) v_9348
+INNER JOIN  (SELECT uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, v_812.var_product  AS var_product, var_value1  AS var_value1, v_812.uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280
+FROM (SELECT v_7669.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_7825.productFeature AS uri_ProductFeature1686090836
+FROM product  v_7669
+INNER JOIN productfeatureproduct v_7825
+ON (v_7669.nr = v_7825.product)
+WHERE (v_7825.productFeature = 168) ) v_812
+INNER JOIN  (SELECT uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, v_4619.var_product  AS var_product, var_value1  AS var_value1, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280
+FROM (SELECT v_6567.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_7170.productFeature AS uri_ProductFeature1769188786280
+FROM product  v_6567
+INNER JOIN productfeatureproduct v_7170
+ON (v_6567.nr = v_7170.product)
+WHERE (v_7170.productFeature = 1769) ) v_4619
+INNER JOIN  (SELECT v_1687.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1' AS uri_productPropertyNumeric1653024198, v_1687.propertyNum1 AS var_value1
+FROM product  v_1687
+WHERE (v_1687.propertyNum1 IS NOT NULL) ) v_592 ON ((v_4619.var_product = v_592.var_product) OR (v_4619.var_product IS NULL) OR (v_592.var_product IS NULL)) ) v_5776 ON (((v_812.uri_productFeature1725172119 = v_5776.uri_productFeature1725172119) OR (v_812.uri_productFeature1725172119 IS NULL) OR (v_5776.uri_productFeature1725172119 IS NULL)) AND ((v_812.var_product = v_5776.var_product) OR (v_812.var_product IS NULL) OR (v_5776.var_product IS NULL))) ) v_9071 ON ((v_9348.var_product = v_9071.var_product) OR (v_9348.var_product IS NULL) OR (v_9071.var_product IS NULL)) ) v_1193 ON ((v_7332.var_product = v_1193.var_product) OR (v_7332.var_product IS NULL) OR (v_1193.var_product IS NULL)) ) v_524
+WHERE (var_value1 > 800)
+ORDER BY var_label ) v_4153
+LIMIT 10
+
+2012-06-21 15:15:13 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:185  - test execution time was 1948 ms.
+2012-06-21 15:15:13 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
+
+
+2012-06-21 15:44:04 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-21 15:44:05 INFO  AbstractQueryTranslator.translateFromFile:805  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-21 15:44:05 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 137 ms.
+2012-06-21 15:44:05 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:176  - sql query = 
+SELECT  DISTINCT var_label  AS label, var_product  AS product
+FROM (SELECT * 
+FROM (SELECT uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, var_value1  AS var_value1, var_label  AS var_label, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_label1103900028  AS uri_label1103900028, uri_ProductType351771145453  AS uri_ProductType351771145453, v_8028.var_product  AS var_product, uri_productType84528473  AS uri_productType84528473, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836
+FROM (SELECT v_4476.nr AS var_product, 'http://www.w3.org/2000/01/rdf-schema#label' AS uri_label1103900028, v_4476.label AS var_label
+FROM product  v_4476
+WHERE (v_4476.label IS NOT NULL) ) v_8028
+INNER JOIN  (SELECT uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductType351771145453  AS uri_ProductType351771145453, var_value1  AS var_value1, uri_productType84528473  AS uri_productType84528473, v_2700.var_product  AS var_product, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_productFeature1725172119  AS uri_productFeature1725172119
+FROM (SELECT v_3680.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType' AS uri_productType84528473, v_9945.productType AS uri_ProductType351771145453
+FROM product  v_3680
+INNER JOIN producttypeproduct v_9945
+ON (v_3680.nr = v_9945.product)
+WHERE (v_9945.productType = 35) ) v_2700
+INNER JOIN  (SELECT v_5814.var_product  AS var_product, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, v_5814.uri_productFeature1725172119  AS uri_productFeature1725172119, var_value1  AS var_value1
+FROM (SELECT v_2036.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_959.productFeature AS uri_ProductFeature1686090836
+FROM product  v_2036
+INNER JOIN productfeatureproduct v_959
+ON (v_2036.nr = v_959.product)
+WHERE (v_959.productFeature = 168) ) v_5814
+INNER JOIN  (SELECT uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_productFeature1725172119  AS uri_productFeature1725172119, v_7960.var_product  AS var_product, var_value1  AS var_value1
+FROM (SELECT v_952.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_842.productFeature AS uri_ProductFeature1769188786280
+FROM product  v_952
+INNER JOIN productfeatureproduct v_842
+ON (v_952.nr = v_842.product)
+WHERE (v_842.productFeature = 1769) ) v_7960
+INNER JOIN  (SELECT v_535.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1' AS uri_productPropertyNumeric1653024198, v_535.propertyNum1 AS var_value1
+FROM product  v_535
+WHERE (v_535.propertyNum1 IS NOT NULL) ) v_5740 ON ((v_7960.var_product = v_5740.var_product) OR (v_7960.var_product IS NULL) OR (v_5740.var_product IS NULL)) ) v_6179 ON (((v_5814.var_product = v_6179.var_product) OR (v_5814.var_product IS NULL) OR (v_6179.var_product IS NULL)) AND ((v_5814.uri_productFeature1725172119 = v_6179.uri_productFeature1725172119) OR (v_5814.uri_productFeature1725172119 IS NULL) OR (v_6179.uri_productFeature1725172119 IS NULL))) ) v_2507 ON ((v_2700.var_product = v_2507.var_product) OR (v_2700.var_product IS NULL) OR (v_2507.var_product IS NULL)) ) v_7710 ON ((v_8028.var_product = v_7710.var_product) OR (v_8028.var_product IS NULL) OR (v_7710.var_product IS NULL)) ) v_8244
+WHERE (var_value1 > 800)
+ORDER BY var_label ) v_9931
+LIMIT 10
+
+2012-06-21 15:44:05 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:185  - test execution time was 1473 ms.
+2012-06-21 15:44:05 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
+
+
+2012-06-21 16:37:57 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm02 Chebotko ------
+2012-06-21 16:40:47 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-21 16:40:49 INFO  AbstractQueryTranslator.translateFromFile:806  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-21 16:40:49 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 232 ms.
+2012-06-21 16:40:49 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:176  - sql query = 
+SELECT  DISTINCT var_label  AS label, var_product  AS product
+FROM (SELECT * 
+FROM (SELECT uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_ProductType351771145453  AS uri_ProductType351771145453, var_value1  AS var_value1, uri_productFeature1725172119  AS uri_productFeature1725172119, v_4975.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_label1103900028  AS uri_label1103900028, var_label  AS var_label, uri_productType84528473  AS uri_productType84528473
+FROM (SELECT v_1410.nr AS var_product, 'http://www.w3.org/2000/01/rdf-schema#label' AS uri_label1103900028, v_1410.label AS var_label
+FROM product  v_1410
+WHERE (v_1410.label IS NOT NULL) ) v_4975
+INNER JOIN  (SELECT v_2570.var_product  AS var_product, uri_productType84528473  AS uri_productType84528473, var_value1  AS var_value1, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_ProductType351771145453  AS uri_ProductType351771145453, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836
+FROM (SELECT v_7069.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType' AS uri_productType84528473, v_7332.productType AS uri_ProductType351771145453
+FROM product  v_7069
+INNER JOIN producttypeproduct v_7332
+ON (v_7069.nr = v_7332.product)
+WHERE (v_7332.productType = 35) ) v_2570
+INNER JOIN  (SELECT var_value1  AS var_value1, v_3276.uri_productFeature1725172119  AS uri_productFeature1725172119, v_3276.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280
+FROM (SELECT v_5493.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_3762.productFeature AS uri_ProductFeature1686090836
+FROM product  v_5493
+INNER JOIN productfeatureproduct v_3762
+ON (v_5493.nr = v_3762.product)
+WHERE (v_3762.productFeature = 168) ) v_3276
+INNER JOIN  (SELECT uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, v_7585.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, var_value1  AS var_value1, uri_productFeature1725172119  AS uri_productFeature1725172119
+FROM (SELECT v_2283.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_5139.productFeature AS uri_ProductFeature1769188786280
+FROM product  v_2283
+INNER JOIN productfeatureproduct v_5139
+ON (v_2283.nr = v_5139.product)
+WHERE (v_5139.productFeature = 1769) ) v_7585
+INNER JOIN  (SELECT v_9829.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1' AS uri_productPropertyNumeric1653024198, v_9829.propertyNum1 AS var_value1
+FROM product  v_9829
+WHERE (v_9829.propertyNum1 IS NOT NULL) ) v_8392 ON ((v_7585.var_product = v_8392.var_product) OR (v_7585.var_product IS NULL) OR (v_8392.var_product IS NULL)) ) v_6602 ON (((v_3276.var_product = v_6602.var_product) OR (v_3276.var_product IS NULL) OR (v_6602.var_product IS NULL)) AND ((v_3276.uri_productFeature1725172119 = v_6602.uri_productFeature1725172119) OR (v_3276.uri_productFeature1725172119 IS NULL) OR (v_6602.uri_productFeature1725172119 IS NULL))) ) v_7932 ON ((v_2570.var_product = v_7932.var_product) OR (v_2570.var_product IS NULL) OR (v_7932.var_product IS NULL)) ) v_8241 ON ((v_4975.var_product = v_8241.var_product) OR (v_4975.var_product IS NULL) OR (v_8241.var_product IS NULL)) ) v_3055
+WHERE (var_value1 > 800)
+ORDER BY var_label ) v_6479
+LIMIT 10
+
+2012-06-21 16:40:49 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:185  - test execution time was 2675 ms.
+2012-06-21 16:40:49 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
+
+
+2012-06-22 12:46:36 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-22 12:46:37 ERROR R2RMLRunner.<init>:83  - error message = es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator
+2012-06-22 12:46:37 ERROR R2RML_BSBM_MYSQL_250K.runChebotko:190  - Error : es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator
+2012-06-22 12:46:37 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:191  - ------bsbm01 FAILED------
+
+
+2012-06-22 12:46:59 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-22 12:47:25 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-22 12:47:45 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-22 12:47:47 INFO  AbstractQueryTranslator.translateFromFile:806  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-22 12:47:47 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 153 ms.
+2012-06-22 12:47:47 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:176  - sql query = 
+SELECT  DISTINCT var_label  AS label, var_product  AS product
+FROM (SELECT * 
+FROM (SELECT uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_ProductType351771145453  AS uri_ProductType351771145453, var_value1  AS var_value1, uri_productFeature1725172119  AS uri_productFeature1725172119, v_7488.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_label1103900028  AS uri_label1103900028, var_label  AS var_label, uri_productType84528473  AS uri_productType84528473
+FROM (SELECT v_2459.nr AS var_product, 'http://www.w3.org/2000/01/rdf-schema#label' AS uri_label1103900028, v_2459.label AS var_label
+FROM product  v_2459
+WHERE (v_2459.label IS NOT NULL) ) v_7488
+INNER JOIN  (SELECT v_2237.var_product  AS var_product, uri_productType84528473  AS uri_productType84528473, var_value1  AS var_value1, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_ProductType351771145453  AS uri_ProductType351771145453, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836
+FROM (SELECT v_530.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType' AS uri_productType84528473, v_4636.productType AS uri_ProductType351771145453
+FROM product  v_530
+INNER JOIN producttypeproduct v_4636
+ON (v_530.nr = v_4636.product)
+WHERE (v_4636.productType = 35) ) v_2237
+INNER JOIN  (SELECT var_value1  AS var_value1, v_6663.uri_productFeature1725172119  AS uri_productFeature1725172119, v_6663.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280
+FROM (SELECT v_5374.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_7476.productFeature AS uri_ProductFeature1686090836
+FROM product  v_5374
+INNER JOIN productfeatureproduct v_7476
+ON (v_5374.nr = v_7476.product)
+WHERE (v_7476.productFeature = 168) ) v_6663
+INNER JOIN  (SELECT uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, v_7927.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, var_value1  AS var_value1, uri_productFeature1725172119  AS uri_productFeature1725172119
+FROM (SELECT v_8377.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_1119.productFeature AS uri_ProductFeature1769188786280
+FROM product  v_8377
+INNER JOIN productfeatureproduct v_1119
+ON (v_8377.nr = v_1119.product)
+WHERE (v_1119.productFeature = 1769) ) v_7927
+INNER JOIN  (SELECT v_5981.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1' AS uri_productPropertyNumeric1653024198, v_5981.propertyNum1 AS var_value1
+FROM product  v_5981
+WHERE (v_5981.propertyNum1 IS NOT NULL) ) v_9999 ON ((v_7927.var_product = v_9999.var_product) OR (v_7927.var_product IS NULL) OR (v_9999.var_product IS NULL)) ) v_1969 ON (((v_6663.var_product = v_1969.var_product) OR (v_6663.var_product IS NULL) OR (v_1969.var_product IS NULL)) AND ((v_6663.uri_productFeature1725172119 = v_1969.uri_productFeature1725172119) OR (v_6663.uri_productFeature1725172119 IS NULL) OR (v_1969.uri_productFeature1725172119 IS NULL))) ) v_2566 ON ((v_2237.var_product = v_2566.var_product) OR (v_2237.var_product IS NULL) OR (v_2566.var_product IS NULL)) ) v_6729 ON ((v_7488.var_product = v_6729.var_product) OR (v_7488.var_product IS NULL) OR (v_6729.var_product IS NULL)) ) v_8083
+WHERE (var_value1 > 800)
+ORDER BY var_label ) v_2827
+LIMIT 10
+
+2012-06-22 12:47:47 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:185  - test execution time was 1574 ms.
+2012-06-22 12:47:47 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
+
+
+2012-06-22 12:48:14 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-22 12:48:15 INFO  AbstractQueryTranslator.translateFromFile:806  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-22 12:48:16 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 155 ms.
+2012-06-22 12:48:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:176  - sql query = 
+SELECT  DISTINCT var_label  AS label, var_product  AS product
+FROM (SELECT * 
+FROM (SELECT var_value1  AS var_value1, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_label1103900028  AS uri_label1103900028, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, v_9554.var_product  AS var_product, uri_ProductType351771145453  AS uri_ProductType351771145453, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_productType84528473  AS uri_productType84528473, var_label  AS var_label, uri_productFeature1725172119  AS uri_productFeature1725172119
+FROM (SELECT v_3390.nr AS var_product, 'http://www.w3.org/2000/01/rdf-schema#label' AS uri_label1103900028, v_3390.label AS var_label
+FROM product  v_3390
+WHERE (v_3390.label IS NOT NULL) ) v_9554
+INNER JOIN  (SELECT uri_productFeature1725172119  AS uri_productFeature1725172119, uri_productType84528473  AS uri_productType84528473, var_value1  AS var_value1, v_9148.var_product  AS var_product, uri_ProductType351771145453  AS uri_ProductType351771145453, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280
+FROM (SELECT v_3396.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType' AS uri_productType84528473, v_735.productType AS uri_ProductType351771145453
+FROM product  v_3396
+INNER JOIN producttypeproduct v_735
+ON (v_3396.nr = v_735.product)
+WHERE (v_735.productType = 35) ) v_9148
+INNER JOIN  (SELECT uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, var_value1  AS var_value1, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, v_2178.uri_productFeature1725172119  AS uri_productFeature1725172119, v_2178.var_product  AS var_product
+FROM (SELECT v_3866.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_1789.productFeature AS uri_ProductFeature1686090836
+FROM product  v_3866
+INNER JOIN productfeatureproduct v_1789
+ON (v_3866.nr = v_1789.product)
+WHERE (v_1789.productFeature = 168) ) v_2178
+INNER JOIN  (SELECT uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, var_value1  AS var_value1, v_4177.var_product  AS var_product, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280
+FROM (SELECT v_5635.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_8146.productFeature AS uri_ProductFeature1769188786280
+FROM product  v_5635
+INNER JOIN productfeatureproduct v_8146
+ON (v_5635.nr = v_8146.product)
+WHERE (v_8146.productFeature = 1769) ) v_4177
+INNER JOIN  (SELECT v_4356.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1' AS uri_productPropertyNumeric1653024198, v_4356.propertyNum1 AS var_value1
+FROM product  v_4356
+WHERE (v_4356.propertyNum1 IS NOT NULL) ) v_4540 ON ((v_4177.var_product = v_4540.var_product) OR (v_4177.var_product IS NULL) OR (v_4540.var_product IS NULL)) ) v_6462 ON (((v_2178.uri_productFeature1725172119 = v_6462.uri_productFeature1725172119) OR (v_2178.uri_productFeature1725172119 IS NULL) OR (v_6462.uri_productFeature1725172119 IS NULL)) AND ((v_2178.var_product = v_6462.var_product) OR (v_2178.var_product IS NULL) OR (v_6462.var_product IS NULL))) ) v_325 ON ((v_9148.var_product = v_325.var_product) OR (v_9148.var_product IS NULL) OR (v_325.var_product IS NULL)) ) v_6361 ON ((v_9554.var_product = v_6361.var_product) OR (v_9554.var_product IS NULL) OR (v_6361.var_product IS NULL)) ) v_8891
+WHERE (var_value1 > 800)
+ORDER BY var_label ) v_2566
+LIMIT 10
+
+2012-06-22 12:48:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:185  - test execution time was 1692 ms.
+2012-06-22 12:48:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
+
+

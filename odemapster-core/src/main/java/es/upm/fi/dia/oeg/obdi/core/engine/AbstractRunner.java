@@ -28,7 +28,6 @@ import es.upm.fi.dia.oeg.obdi.core.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
@@ -44,7 +43,7 @@ public abstract class AbstractRunner {
 	}
 	protected AbstractParser parser;
 	protected AbstractDataTranslator dataTranslator;
-	protected AbstractQueryTranslator queryTranslator;
+	protected IQueryTranslator queryTranslator;
 	private AbstractMappingDocument originalMappingDocument;
 	protected Query sparqQuery = null;
 	
@@ -78,7 +77,7 @@ public abstract class AbstractRunner {
 
 
 
-	public AbstractQueryTranslator getQueryTranslator() {
+	public IQueryTranslator getQueryTranslator() {
 		return queryTranslator;
 	}
 
@@ -317,7 +316,7 @@ public abstract class AbstractRunner {
 		this.parser = parser;
 	}
 
-	public void setQueryTranslator(AbstractQueryTranslator queryTranslator) {
+	public void setQueryTranslator(IQueryTranslator queryTranslator) {
 		this.queryTranslator = queryTranslator;
 	}
 

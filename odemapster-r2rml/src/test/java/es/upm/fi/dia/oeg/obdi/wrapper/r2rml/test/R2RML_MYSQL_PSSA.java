@@ -7,13 +7,13 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
 public class R2RML_MYSQL_PSSA {
 	private static Logger logger = Logger.getLogger(R2RML_MYSQL_PSSA.class);
@@ -25,7 +25,7 @@ public class R2RML_MYSQL_PSSA {
 		PropertyConfigurator.configure("log4j.properties");
 	}
 	
-	private R2RMLQueryTranslator getQueryTranslator(String testName) throws Exception {
+	private IQueryTranslator getQueryTranslator(String testName) throws Exception {
 		logger.info("------ Running " + testName + " ------");
 		String configurationFile = testName + ".r2rml.properties";
 		
@@ -36,7 +36,13 @@ public class R2RML_MYSQL_PSSA {
 		R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
 				configurationDirectory, configurationFile);
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
-		R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
+		//R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
+		Class queryTranslatorClass = Class.forName("es.pm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+		queryTranslator.setMappingDocument(md);
+		queryTranslator.setUnfolder(unfolder);
+
+		
 		queryTranslator.setOptimizeTripleBlock(false);
 		queryTranslator.setIgnoreRDFTypeStatement(true);
 		return queryTranslator;
@@ -48,7 +54,7 @@ public class R2RML_MYSQL_PSSA {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			
-			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
+			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(false);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
@@ -69,7 +75,7 @@ public class R2RML_MYSQL_PSSA {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			
-			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
+			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
 			queryTranslator.setSubQueryElimination(true);
@@ -92,7 +98,7 @@ public class R2RML_MYSQL_PSSA {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			
-			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
+			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
 			String queryFilePath = configurationDirectory + testName + "(reordered).sparql";

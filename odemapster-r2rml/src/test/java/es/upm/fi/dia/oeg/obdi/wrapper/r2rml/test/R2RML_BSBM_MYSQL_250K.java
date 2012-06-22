@@ -15,7 +15,7 @@ import Zql.ZStatement;
 import Zql.ZqlParser;
 import es.upm.fi.dia.oeg.obdi.core.ScriptRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
@@ -163,7 +163,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		try {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setSubqueryAsView(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
@@ -201,7 +201,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		try {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setSubqueryAsView(true);
 			queryTranslator.setQueryFilePath(queryFilePath);
@@ -239,7 +239,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		try {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(true);
 			queryTranslator.setSubQueryElimination(true);
 			queryTranslator.setSubqueryAsView(false);
@@ -276,7 +276,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		try {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setSubqueryAsView(true);
 			queryTranslator.setQueryFilePath(queryFilePath);
@@ -311,7 +311,7 @@ public class R2RML_BSBM_MYSQL_250K {
 		
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(true);
 			queryTranslator.setSubqueryAsView(false);
 			queryTranslator.setQueryFilePath(queryFilePath);

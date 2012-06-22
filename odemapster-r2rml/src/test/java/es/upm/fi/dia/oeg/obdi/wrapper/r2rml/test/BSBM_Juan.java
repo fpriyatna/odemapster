@@ -1,16 +1,17 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.test;
 
+import static org.junit.Assert.assertTrue;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
 public class BSBM_Juan {
 	private static Logger logger = Logger.getLogger(BSBM_Juan.class);
@@ -22,7 +23,7 @@ public class BSBM_Juan {
 		PropertyConfigurator.configure("log4j.properties");
 	}
 	
-	private R2RMLQueryTranslator getQueryTranslator(String testName) throws Exception {
+	private IQueryTranslator getQueryTranslator(String testName) throws Exception {
 		logger.info("------ Running " + testName + " ------");
 		String configurationFile = testName + ".r2rml.properties";
 		
@@ -33,7 +34,12 @@ public class BSBM_Juan {
 		R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
 				configurationDirectory, configurationFile);
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
-		R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
+		//R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
+		Class queryTranslatorClass = Class.forName("es.pm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+		queryTranslator.setMappingDocument(md);
+		queryTranslator.setUnfolder(unfolder);
+		
 		queryTranslator.setOptimizeTripleBlock(false);
 		queryTranslator.setIgnoreRDFTypeStatement(true);
 		return queryTranslator;
@@ -41,7 +47,7 @@ public class BSBM_Juan {
 	
 	public void run(String testName) {
 		try {
-			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
+			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(false);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
@@ -58,7 +64,7 @@ public class BSBM_Juan {
 	
 	public void runTB(String testName) {
 		try {
-			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
+			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
@@ -75,7 +81,7 @@ public class BSBM_Juan {
 
 	public void runReorderedTB(String testName) {
 		try {
-			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName);
+			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 			queryTranslator.setOptimizeTripleBlock(true);
 			String queryFilePath = configurationDirectory + testName + "(reordered).sparql";

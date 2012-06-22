@@ -7,9 +7,9 @@ import org.apache.log4j.Logger;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
 public class R2RMLRunner extends AbstractRunner {
 	private static Logger logger = Logger.getLogger(R2RMLRunner.class);
@@ -52,7 +52,14 @@ public class R2RMLRunner extends AbstractRunner {
 			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
 					configurationDirectory, configurationFile);
 
-			this.queryTranslator = new R2RMLQueryTranslator(md, unfolder);
+			//this.queryTranslator = new R2RMLQueryTranslator(md, unfolder);
+			Class queryTranslatorClass = Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+			this.queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+			this.queryTranslator.setMappingDocument(md);
+			this.queryTranslator.setUnfolder(unfolder);
+			
+			//this.queryTranslator = (AbstractQueryTranslator) Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+			
 			this.queryTranslator.setQueryFilePath(queryFilePath);
 			this.dataTranslator = new R2RMLElementDataTranslateVisitor(
 							configurationDirectory, configurationFile, unfolder);

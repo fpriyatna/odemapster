@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
@@ -57,7 +57,7 @@ public class R2RML_Kuwait_Clinic {
 		try {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setSubqueryAsView(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
@@ -92,7 +92,7 @@ public class R2RML_Kuwait_Clinic {
 		try {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			AbstractQueryTranslator queryTranslator = runner.getQueryTranslator();
+			IQueryTranslator queryTranslator = runner.getQueryTranslator();
 			queryTranslator.setOptimizeTripleBlock(true);
 			queryTranslator.setSubqueryAsView(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
