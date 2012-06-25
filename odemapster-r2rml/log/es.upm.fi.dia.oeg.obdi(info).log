@@ -6536,3 +6536,122 @@ LIMIT 10
 2012-06-22 12:48:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
 
 
+2012-06-25 12:23:08 ERROR R2RMLRunner.<init>:83  - error message = Line 31, column 60: Unresolved prefixed name: xsd:double
+2012-06-25 12:23:08 ERROR R2RML_Edna.testEdna03:69  - Error : Line 31, column 60: Unresolved prefixed name: xsd:double
+2012-06-25 12:23:08 INFO  R2RML_Edna.testEdna03:70  - ------testEdna02() FAILED------
+
+
+2012-06-25 12:25:11 ERROR R2RMLRunner.<init>:83  - error message = Lexical error at line 1, column 11.  Encountered: "=" (61), after : "xs"
+2012-06-25 12:25:11 ERROR R2RML_Edna.testEdna03:69  - Error : Lexical error at line 1, column 11.  Encountered: "=" (61), after : "xs"
+2012-06-25 12:25:11 INFO  R2RML_Edna.testEdna03:70  - ------testEdna02() FAILED------
+
+
+2012-06-25 12:25:34 ERROR R2RMLRunner.<init>:83  - error message = Line 32, column 60: Unresolved prefixed name: xsd:double
+2012-06-25 12:25:34 ERROR R2RML_Edna.testEdna03:69  - Error : Line 32, column 60: Unresolved prefixed name: xsd:double
+2012-06-25 12:25:34 INFO  R2RML_Edna.testEdna03:70  - ------testEdna02() FAILED------
+
+
+2012-06-25 12:25:49 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap3
+2012-06-25 12:25:49 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap3 unfolded = SELECT v_623.idStation
+FROM biciLeon  v_623
+2012-06-25 12:25:49 INFO  DBUtility.executeQuery:69  - SQL execution time was 50 ms.
+2012-06-25 12:25:49 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-06-25 12:25:49 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7773.lat, v_7773.lng, v_7773.id, v_7773.url, v_7773.name
+FROM bikeSystem  v_7773
+2012-06-25 12:25:49 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-06-25 12:25:49 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-06-25 12:25:49 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_3327.lng, v_3327.lat, v_9207.idStation, v_5881.id, v_3327.name, v_3327.idStation
+FROM biciLeon  v_3327
+LEFT JOIN biciLeon v_9207
+ON (v_3327.idStation = v_9207.idStation)
+LEFT JOIN bikeSystem v_5881
+ON (v_3327.idSystem = v_5881.id)
+2012-06-25 12:25:49 INFO  DBUtility.executeQuery:69  - SQL execution time was 32 ms.
+2012-06-25 12:25:49 INFO  RDFXMLMaterializer.materialize:105  - Writing model to C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/edna03/batch01-result.rdf.xml ......
+2012-06-25 12:25:50 INFO  RDFXMLMaterializer.materialize:112  - Writing model time was 0 s.
+2012-06-25 12:25:50 INFO  RDFXMLMaterializer.materialize:105  - Writing model to C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/edna03/batch01-result.rdf.xml ......
+2012-06-25 12:25:50 INFO  RDFXMLMaterializer.materialize:112  - Writing model time was 0 s.
+2012-06-25 12:25:50 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-06-25 12:25:50 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-06-25 12:25:50 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-06-25 12:25:50 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-06-25 12:25:50 INFO  R2RML_Edna.testEdna03:65  - ------testEdna03 DONE------
+
+
+2012-06-25 15:24:01 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:159  - ------ Running bsbm01 Chebotko ------
+2012-06-25 15:24:16 INFO  AbstractQueryTranslator.translateFromFile:806  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-25 15:24:16 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 169 ms.
+2012-06-25 15:24:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:176  - sql query = 
+SELECT  DISTINCT var_label  AS label, var_product  AS product
+FROM (SELECT * 
+FROM (SELECT v_3.var_product  AS var_product, uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, var_label  AS var_label, uri_productFeature1725172119  AS uri_productFeature1725172119, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, var_value1  AS var_value1, uri_productType84528473  AS uri_productType84528473, uri_ProductType351771145453  AS uri_ProductType351771145453, uri_label1103900028  AS uri_label1103900028
+FROM (SELECT v_5953.nr AS var_product, 'http://www.w3.org/2000/01/rdf-schema#label' AS uri_label1103900028, v_5953.label AS var_label
+FROM product  v_5953
+WHERE (v_5953.label IS NOT NULL) ) v_3
+INNER JOIN  (SELECT uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, v_9430.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, uri_ProductType351771145453  AS uri_ProductType351771145453, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836, var_value1  AS var_value1, uri_productType84528473  AS uri_productType84528473, uri_productFeature1725172119  AS uri_productFeature1725172119
+FROM (SELECT v_7235.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType' AS uri_productType84528473, v_3957.productType AS uri_ProductType351771145453
+FROM product  v_7235
+INNER JOIN producttypeproduct v_3957
+ON (v_7235.nr = v_3957.product)
+WHERE (v_3957.productType = 35) ) v_9430
+INNER JOIN  (SELECT uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, v_7663.uri_productFeature1725172119  AS uri_productFeature1725172119, var_value1  AS var_value1, v_7663.var_product  AS var_product, uri_ProductFeature1686090836  AS uri_ProductFeature1686090836
+FROM (SELECT v_6066.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_5706.productFeature AS uri_ProductFeature1686090836
+FROM product  v_6066
+INNER JOIN productfeatureproduct v_5706
+ON (v_6066.nr = v_5706.product)
+WHERE (v_5706.productFeature = 168) ) v_7663
+INNER JOIN  (SELECT uri_ProductFeature1769188786280  AS uri_ProductFeature1769188786280, uri_productFeature1725172119  AS uri_productFeature1725172119, v_8945.var_product  AS var_product, uri_productPropertyNumeric1653024198  AS uri_productPropertyNumeric1653024198, var_value1  AS var_value1
+FROM (SELECT v_1434.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature' AS uri_productFeature1725172119, v_2470.productFeature AS uri_ProductFeature1769188786280
+FROM product  v_1434
+INNER JOIN productfeatureproduct v_2470
+ON (v_1434.nr = v_2470.product)
+WHERE (v_2470.productFeature = 1769) ) v_8945
+INNER JOIN  (SELECT v_4442.nr AS var_product, 'http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1' AS uri_productPropertyNumeric1653024198, v_4442.propertyNum1 AS var_value1
+FROM product  v_4442
+WHERE (v_4442.propertyNum1 IS NOT NULL) ) v_1050 ON ((v_8945.var_product = v_1050.var_product) OR (v_8945.var_product IS NULL) OR (v_1050.var_product IS NULL)) ) v_1986 ON (((v_7663.var_product = v_1986.var_product) OR (v_7663.var_product IS NULL) OR (v_1986.var_product IS NULL)) AND ((v_7663.uri_productFeature1725172119 = v_1986.uri_productFeature1725172119) OR (v_7663.uri_productFeature1725172119 IS NULL) OR (v_1986.uri_productFeature1725172119 IS NULL))) ) v_5422 ON ((v_9430.var_product = v_5422.var_product) OR (v_9430.var_product IS NULL) OR (v_5422.var_product IS NULL)) ) v_6531 ON ((v_3.var_product = v_6531.var_product) OR (v_3.var_product IS NULL) OR (v_6531.var_product IS NULL)) ) v_5882
+WHERE (var_value1 > 800)
+ORDER BY var_label ) v_4006
+LIMIT 10
+
+2012-06-25 15:24:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:185  - test execution time was 15599 ms.
+2012-06-25 15:24:16 INFO  R2RML_BSBM_MYSQL_250K.runChebotko:187  - ------bsbm01 Chebotko DONE------
+
+
+2012-06-25 15:24:27 INFO  R2RML_BSBM_MYSQL_250K.runFreddy:235  - ------ Running bsbm01 Freddy ------
+2012-06-25 15:24:32 INFO  AbstractQueryTranslator.translateFromFile:806  - Parsing query file : C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-06-25 15:24:33 INFO  R2RMLQueryTranslator.translate:106  - opSparqlQueryRewritten = (slice _ 10
+  (distinct
+    (project (?product ?label)
+      (order (?label)
+        (filter (> ?value1 800)
+          (bgp
+            (triple <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType35> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/ProductType>)
+            (triple ?product <http://www.w3.org/2000/01/rdf-schema#label> ?label)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType35>)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature168>)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1769>)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1> ?value1)
+            (triple ?product <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product>)
+            (triple ?offer <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer>)
+            (triple <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature168> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/ProductFeature>)
+            (triple <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1769> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/ProductFeature>)
+          ))))))
+
+2012-06-25 15:24:33 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 169 ms.
+2012-06-25 15:24:33 INFO  R2RML_BSBM_MYSQL_250K.runFreddy:253  - query = 
+SELECT  DISTINCT v_2139.nr AS product, v_2139.label AS label
+FROM product  v_2139
+INNER JOIN producttypeproduct v_9543
+ON (v_2139.nr = v_9543.product)
+INNER JOIN productfeatureproduct v_8623
+ON (v_2139.nr = v_8623.product)
+INNER JOIN productfeatureproduct v_8520
+ON (v_2139.nr = v_8520.product)
+WHERE (((v_2139.propertyNum1 IS NOT NULL) AND (v_8623.productFeature = 168) AND (v_9543.productType = 35) AND (v_2139.label IS NOT NULL) AND (v_8520.productFeature = 1769)) AND (v_2139.propertyNum1 > 800))
+ORDER BY label
+LIMIT 10
+
+2012-06-25 15:24:33 INFO  R2RML_BSBM_MYSQL_250K.runFreddy:261  - test execution time was 5374 ms.
+2012-06-25 15:24:33 INFO  R2RML_BSBM_MYSQL_250K.runFreddy:262  - ------bsbm01 Freddy DONE------

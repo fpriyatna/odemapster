@@ -13,6 +13,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 
 public class R2RMLRunner extends AbstractRunner {
 	private static Logger logger = Logger.getLogger(R2RMLRunner.class);
+	private static final String QUERY_TRANSLATOR_CLASS_NAME = "es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator";
 	
 	public static void main(String args[]) {
 		try {
@@ -53,12 +54,12 @@ public class R2RMLRunner extends AbstractRunner {
 					configurationDirectory, configurationFile);
 
 			//this.queryTranslator = new R2RMLQueryTranslator(md, unfolder);
-			Class queryTranslatorClass = Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
-			this.queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
-			this.queryTranslator.setMappingDocument(md);
-			this.queryTranslator.setUnfolder(unfolder);
+//			Class queryTranslatorClass = Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+//			this.queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+//			this.queryTranslator.setMappingDocument(md);
+//			this.queryTranslator.setUnfolder(unfolder);
 			
-			//this.queryTranslator = (AbstractQueryTranslator) Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+			this.queryTranslator = super.createQueryTranslator(R2RMLRunner.QUERY_TRANSLATOR_CLASS_NAME, md, unfolder);
 			
 			this.queryTranslator.setQueryFilePath(queryFilePath);
 			this.dataTranslator = new R2RMLElementDataTranslateVisitor(

@@ -327,4 +327,12 @@ public abstract class AbstractRunner {
 	public void setSparqQuery(String sparqQuery) {
 		this.sparqQuery = QueryFactory.create(sparqQuery);
 	}
+	
+	public IQueryTranslator createQueryTranslator(String queryTranslatorClassName, AbstractMappingDocument md, AbstractUnfolder unfolder) throws Exception {
+		Class queryTranslatorClass = Class.forName(queryTranslatorClassName);
+		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+		queryTranslator.setMappingDocument(md);
+		queryTranslator.setUnfolder(unfolder);
+		return queryTranslator;
+	}
 }
