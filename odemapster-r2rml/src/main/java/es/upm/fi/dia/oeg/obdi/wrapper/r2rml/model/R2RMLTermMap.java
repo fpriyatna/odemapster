@@ -18,7 +18,9 @@ import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTermMapException;
 
 public abstract class R2RMLTermMap implements R2RMLElement {
 	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH}

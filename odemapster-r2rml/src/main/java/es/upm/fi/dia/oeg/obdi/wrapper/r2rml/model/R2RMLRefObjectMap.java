@@ -10,8 +10,8 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObjectMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidRefObjectMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLJoinConditionException;
 
 public class R2RMLRefObjectMap {
 	public static boolean isRefObjectMap(Resource resource) {

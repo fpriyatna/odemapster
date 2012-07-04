@@ -10,6 +10,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTermMapException;
 
 public class R2RMLSubjectMap extends R2RMLTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLSubjectMap.class);

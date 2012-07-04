@@ -4,6 +4,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTermMapException;
 
 public class R2RMLPredicateMap extends R2RMLTermMap {
 

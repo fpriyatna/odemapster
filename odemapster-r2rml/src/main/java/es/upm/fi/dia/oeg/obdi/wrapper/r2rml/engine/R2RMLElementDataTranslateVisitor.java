@@ -25,7 +25,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLTranslateException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLTranslateException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLGraphMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;

@@ -9,8 +9,9 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObjectMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidRefObjectMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTermMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLJoinConditionException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapPosition;
 
 public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements IRelationMapping, IAttributeMapping{

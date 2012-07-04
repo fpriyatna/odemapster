@@ -23,10 +23,12 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidRefObjectMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLInvalidTriplesMapException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidRefObjectMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTermMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTriplesMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLJoinConditionException;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);

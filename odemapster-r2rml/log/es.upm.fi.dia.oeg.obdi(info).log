@@ -6655,3 +6655,1839 @@ LIMIT 10
 
 2012-06-25 15:24:33 INFO  R2RML_BSBM_MYSQL_250K.runFreddy:261  - test execution time was 5374 ms.
 2012-06-25 15:24:33 INFO  R2RML_BSBM_MYSQL_250K.runFreddy:262  - ------bsbm01 Freddy DONE------
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5996."Name"
+FROM "Student"  v_5996
+2012-07-02 11:44:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_5996' at line 1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_5996' at line 1
+2012-07-02 11:44:41 ERROR R2RMLTS.run:44  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_5996' at line 1
+2012-07-02 11:44:41 INFO  R2RMLTS.run:45  - ------R2RMLTC0000 FAILED------
+
+
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_124."Name"
+FROM "Student"  v_124
+2012-07-02 11:44:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_124' at line 1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_124' at line 1
+2012-07-02 11:44:41 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_124' at line 1
+2012-07-02 11:44:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0001a FAILED------
+
+
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5592."Name"
+FROM "Student"  v_5592
+2012-07-02 11:44:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_5592' at line 1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_5592' at line 1
+2012-07-02 11:44:41 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_5592' at line 1
+2012-07-02 11:44:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0001b FAILED------
+
+
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3247."ID", v_3247."Name"
+FROM "Student"  v_3247
+2012-07-02 11:44:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_3247."Name"
+FROM "Student"  v_3247' at line 1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_3247."Name"
+FROM "Student"  v_3247' at line 1
+2012-07-02 11:44:41 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_3247."Name"
+FROM "Student"  v_3247' at line 1
+2012-07-02 11:44:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0002a FAILED------
+
+
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7802."ID", v_7802."Name"
+FROM "Student"  v_7802
+2012-07-02 11:44:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_7802."Name"
+FROM "Student"  v_7802' at line 1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_7802."Name"
+FROM "Student"  v_7802' at line 1
+2012-07-02 11:44:41 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_7802."Name"
+FROM "Student"  v_7802' at line 1
+2012-07-02 11:44:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0002b FAILED------
+
+
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6607."ID", v_6607."Name", v_6607."IDs"
+FROM "Student"  v_6607
+2012-07-02 11:44:42 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_6607."Name", v_6607."IDs"
+FROM "Student"  v_6607' at line 1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_6607."Name", v_6607."IDs"
+FROM "Student"  v_6607' at line 1
+2012-07-02 11:44:42 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_6607."Name", v_6607."IDs"
+FROM "Student"  v_6607' at line 1
+2012-07-02 11:44:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0002c FAILED------
+
+
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Student' || "ID")  AS StudentId, "ID" , "Name" 
+FROM "Student"
+2012-07-02 11:44:42 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:42 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0002d FAILED------
+
+
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1995."ID", v_1995."Name"
+FROM "Students"  v_1995
+2012-07-02 11:44:42 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1995."Name"
+FROM "Students"  v_1995' at line 1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1995."Name"
+FROM "Students"  v_1995' at line 1
+2012-07-02 11:44:42 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1995."Name"
+FROM "Students"  v_1995' at line 1
+2012-07-02 11:44:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0002e FAILED------
+
+
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_173."ID", v_173.ID, v_173.Name, v_173."Name"
+FROM "Student"  v_173
+2012-07-02 11:44:42 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_173.ID, v_173.Name, v_173."Name"
+FROM "Student"  v_173' at line 1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_173.ID, v_173.Name, v_173."Name"
+FROM "Student"  v_173' at line 1
+2012-07-02 11:44:42 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_173.ID, v_173.Name, v_173."Name"
+FROM "Student"  v_173' at line 1
+2012-07-02 11:44:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0002f FAILED------
+
+
+2012-07-02 11:44:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:42 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : THIS IS NOT A VALID SQL QUERY;
+2012-07-02 11:44:42 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "THIS" at line 1, column 1.
+Was expecting one of:
+    "COMMIT" ...
+    "DELETE" ...
+    "EXIT" ...
+    "INSERT" ...
+    "LOCK" ...
+    "QUIT" ...
+    "ROLLBACK" ...
+    "SELECT" ...
+    "SET" ...
+    "UPDATE" ...
+    
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:44:42 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:44:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0002g FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : Select ('Student' || ID ) AS StudentId
+                            , "ID"
+                            , "Name"
+					, 1 AS "ID"
+                       from "Student";
+2012-07-02 11:44:43 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"ID\"" at line 4, column 48.
+Was expecting:
+    <S_IDENTIFIER> ...
+    
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0002h FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "Name" 
+FROM "Student"
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0002i FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Student"."ID" , "Student"."Name" 
+FROM "Student"
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '."ID" , "Student"."Name" 
+FROM "Student"' at line 1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '."ID" , "Student"."Name" 
+FROM "Student"' at line 1
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '."ID" , "Student"."Name" 
+FROM "Student"' at line 1
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0002j FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "FirstName" , "LastName" 
+FROM "Student"
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0003a FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , (("FirstName" || ' ') || "LastName")  AS Name
+FROM "Student"
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"' at line 2
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0003b FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8216."ID", v_8216."FirstName", v_8216."LastName"
+FROM "Student"  v_8216
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8216."FirstName", v_8216."LastName"
+FROM "Student"  v_8216' at line 1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8216."FirstName", v_8216."LastName"
+FROM "Student"  v_8216' at line 1
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8216."FirstName", v_8216."LastName"
+FROM "Student"  v_8216' at line 1
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0003c FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6644."Student"
+FROM "Student_Sport"  v_6644
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+FROM "Student_Sport"  v_6644' at line 1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+FROM "Student_Sport"  v_6644' at line 1
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+FROM "Student_Sport"  v_6644' at line 1
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0004a FAILED------
+
+
+2012-07-02 11:44:43 ERROR R2RMLRunner.<init>:84  - error message = Literal is not permitted in the subject!
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : Literal is not permitted in the subject!
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0004b FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8017."fname", v_8017."amount", v_8017."lname"
+FROM "IOUs"  v_8017
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"fname", v_8017."amount", v_8017."lname"
+FROM "IOUs"  v_8017' at line 1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"fname", v_8017."amount", v_8017."lname"
+FROM "IOUs"  v_8017' at line 1
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"fname", v_8017."amount", v_8017."lname"
+FROM "IOUs"  v_8017' at line 1
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0005a FAILED------
+
+
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT  * 
+FROM "Student"  v_9660
+2012-07-02 11:44:43 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"  v_9660' at line 2
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:43 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"  v_9660' at line 2
+2012-07-02 11:44:43 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"  v_9660' at line 2
+2012-07-02 11:44:43 INFO  R2RMLTS.run:29  - ------R2RMLTC0006a FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2582."ID", v_2582."Name"
+FROM "Student"  v_2582
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_2582."Name"
+FROM "Student"  v_2582' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_2582."Name"
+FROM "Student"  v_2582' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_2582."Name"
+FROM "Student"  v_2582' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007a FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9126."Name", v_9126."ID"
+FROM "Student"  v_9126
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_9126."ID"
+FROM "Student"  v_9126' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_9126."ID"
+FROM "Student"  v_9126' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_9126."ID"
+FROM "Student"  v_9126' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007b FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3577."Name", v_3577."ID"
+FROM "Student"  v_3577
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_3577."ID"
+FROM "Student"  v_3577' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_3577."ID"
+FROM "Student"  v_3577' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_3577."ID"
+FROM "Student"  v_3577' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007c FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1541."ID", v_1541."Name"
+FROM "Student"  v_1541
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1541."Name"
+FROM "Student"  v_1541' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1541."Name"
+FROM "Student"  v_1541' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1541."Name"
+FROM "Student"  v_1541' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007d FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8033."ID", v_8033."Name"
+FROM "Student"  v_8033
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8033."Name"
+FROM "Student"  v_8033' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8033."Name"
+FROM "Student"  v_8033' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8033."Name"
+FROM "Student"  v_8033' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007e FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7752."Name", v_7752."ID"
+FROM "Student"  v_7752
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_7752."ID"
+FROM "Student"  v_7752' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_7752."ID"
+FROM "Student"  v_7752' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_7752."ID"
+FROM "Student"  v_7752' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007f FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5677."ID", v_5677."Name"
+FROM "Student"  v_5677
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_5677."Name"
+FROM "Student"  v_5677' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_5677."Name"
+FROM "Student"  v_5677' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_5677."Name"
+FROM "Student"  v_5677' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007g FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2959."ID", v_2959."Name"
+FROM "Student"  v_2959
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_2959."Name"
+FROM "Student"  v_2959' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_2959."Name"
+FROM "Student"  v_2959' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_2959."Name"
+FROM "Student"  v_2959' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007h FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8318."ID", v_8318."Name"
+FROM "Student"  v_8318
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8318."Name"
+FROM "Student"  v_8318' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8318."Name"
+FROM "Student"  v_8318' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8318."Name"
+FROM "Student"  v_8318' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0007i FAILED------
+
+
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:44 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5509."Sport", v_5509."Name", v_5509."ID"
+FROM "Student"  v_5509
+2012-07-02 11:44:44 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Sport", v_5509."Name", v_5509."ID"
+FROM "Student"  v_5509' at line 1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:44 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Sport", v_5509."Name", v_5509."ID"
+FROM "Student"  v_5509' at line 1
+2012-07-02 11:44:44 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Sport", v_5509."Name", v_5509."ID"
+FROM "Student"  v_5509' at line 1
+2012-07-02 11:44:44 INFO  R2RMLTS.run:29  - ------R2RMLTC0008a FAILED------
+
+
+2012-07-02 11:44:44 WARN  R2RMLRefObjectMap.<init>:58  - No join conditions defined!
+2012-07-02 11:44:45 WARN  R2RMLRefObjectMap.<init>:58  - No join conditions defined!
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1448."ID", v_1448."Name", v_97.Sport
+FROM "Student"  v_1448
+LEFT JOIN "Student" v_97
+ON (1 = 1)
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1448."Name", v_97.Sport
+FROM "Student"  v_1448
+LEFT JOIN "Student" v_97
+' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1448."Name", v_97.Sport
+FROM "Student"  v_1448
+LEFT JOIN "Student" v_97
+' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_1448."Name", v_97.Sport
+FROM "Student"  v_1448
+LEFT JOIN "Student" v_97
+' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0008b FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6239."ID", v_6239."Name"
+FROM "Student"  v_6239
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_6239."Name"
+FROM "Student"  v_6239' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_6239."Name"
+FROM "Student"  v_6239' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_6239."Name"
+FROM "Student"  v_6239' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0008c FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2828."ID", v_4627.ID, v_2828."Name"
+FROM "Student"  v_2828
+LEFT JOIN "Sport" v_4627
+ON (v_2828."Sport" = v_4627."ID")
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_4627.ID, v_2828."Name"
+FROM "Student"  v_2828
+LEFT JOIN "Sport" v_4627
+O' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_4627.ID, v_2828."Name"
+FROM "Student"  v_2828
+LEFT JOIN "Sport" v_4627
+O' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_4627.ID, v_2828."Name"
+FROM "Student"  v_2828
+LEFT JOIN "Sport" v_4627
+O' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0009a FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9031."ID", v_9031."Name", v_4188.ID
+FROM "Student"  v_9031
+LEFT JOIN "Sport" v_4188
+ON (v_9031."Sport" = v_4188."ID")
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_9031."Name", v_4188.ID
+FROM "Student"  v_9031
+LEFT JOIN "Sport" v_4188
+O' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_9031."Name", v_4188.ID
+FROM "Student"  v_9031
+LEFT JOIN "Sport" v_4188
+O' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_9031."Name", v_4188.ID
+FROM "Student"  v_9031
+LEFT JOIN "Sport" v_4188
+O' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0009b FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Name" , COUNT("Sport") 
+FROM "Student"
+group by "Name"
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+group by "Name"' at line 2
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+group by "Name"' at line 2
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+group by "Name"' at line 2
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0009c FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Name" , COUNT("Sport")  AS SPORTCOUNT
+FROM "Student"
+group by "Name"
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+group by "Name"' at line 2
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+group by "Name"' at line 2
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Student"
+group by "Name"' at line 2
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0009d FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_463."Country Code", v_463."Name"
+FROM "Country Info"  v_463
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_463."Name"
+FROM "Country Info"  v_463' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_463."Name"
+FROM "Country Info"  v_463' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_463."Name"
+FROM "Country Info"  v_463' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0010a FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6761."Country Code", v_6761."Name"
+FROM "Country Info"  v_6761
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_6761."Name"
+FROM "Country Info"  v_6761' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_6761."Name"
+FROM "Country Info"  v_6761' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_6761."Name"
+FROM "Country Info"  v_6761' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0010b FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9264."Country Code", v_9264."Name", v_9264.\{\{ {"ISO 3166"
+FROM "Country Info"  v_9264
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_9264."Name", v_9264.\{\{ {"ISO 3166"
+FROM "Country Info"  v_92' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_9264."Name", v_9264.\{\{ {"ISO 3166"
+FROM "Country Info"  v_92' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country Code", v_9264."Name", v_9264.\{\{ {"ISO 3166"
+FROM "Country Info"  v_92' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0010c FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Student"."ID"  AS ID, "Student"."FirstName"  AS FirstName, "Student"."LastName"  AS LastName, "Sport"."Description"  AS Description, "Sport"."ID"  AS Sport_ID
+FROM "Student", "Sport", "Student_Sport"
+WHERE (("Student"."ID" = "Student_Sport"."ID_Student") AND ("Sport"."ID" = "Student_Sport"."ID_Sport"))
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '."ID"  AS ID, "Student"."FirstName"  AS FirstName, "Student"."LastName"  AS Last' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '."ID"  AS ID, "Student"."FirstName"  AS FirstName, "Student"."LastName"  AS Last' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '."ID"  AS ID, "Student"."FirstName"  AS FirstName, "Student"."LastName"  AS Last' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0011a FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : LinkMap_1_2
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - LinkMap_1_2 unfolded = SELECT v_1933."ID_Sport", v_1933."ID_Student"
+FROM "Student_Sport"  v_1933
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID_Sport", v_1933."ID_Student"
+FROM "Student_Sport"  v_1933' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : LinkMap_1_2
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID_Sport", v_1933."ID_Student"
+FROM "Student_Sport"  v_1933' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID_Sport", v_1933."ID_Student"
+FROM "Student_Sport"  v_1933' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0011b FAILED------
+
+
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:45 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6966."fname", v_6966."amount", v_6966."lname"
+FROM "IOUs"  v_6966
+2012-07-02 11:44:45 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"fname", v_6966."amount", v_6966."lname"
+FROM "IOUs"  v_6966' at line 1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:45 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"fname", v_6966."amount", v_6966."lname"
+FROM "IOUs"  v_6966' at line 1
+2012-07-02 11:44:45 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"fname", v_6966."amount", v_6966."lname"
+FROM "IOUs"  v_6966' at line 1
+2012-07-02 11:44:45 INFO  R2RMLTS.run:29  - ------R2RMLTC0012a FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_879."lname", v_879."fname"
+FROM "IOUs"  v_879
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"lname", v_879."fname"
+FROM "IOUs"  v_879' at line 1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"lname", v_879."fname"
+FROM "IOUs"  v_879' at line 1
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"lname", v_879."fname"
+FROM "IOUs"  v_879' at line 1
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0012b FAILED------
+
+
+2012-07-02 11:44:46 ERROR R2RMLTriplesMap.<init>:78  - Missing rr:subjectMap
+2012-07-02 11:44:46 ERROR R2RMLRunner.<init>:84  - error message = Missing rr:subjectMap
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : Missing rr:subjectMap
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0012c FAILED------
+
+
+2012-07-02 11:44:46 ERROR R2RMLTriplesMap.<init>:67  - Multiple rr:subjectMap predicates are not allowed
+2012-07-02 11:44:46 ERROR R2RMLRunner.<init>:84  - error message = Multiple rr:subjectMap predicates are not allowed
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : Multiple rr:subjectMap predicates are not allowed
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0012d FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4127."ID", v_4127."DateOfBirth", v_4127."Name"
+FROM "Person"  v_4127
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_4127."DateOfBirth", v_4127."Name"
+FROM "Person"  v_4127' at line 1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_4127."DateOfBirth", v_4127."Name"
+FROM "Person"  v_4127' at line 1
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_4127."DateOfBirth", v_4127."Name"
+FROM "Person"  v_4127' at line 1
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0013a FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : SELECT ('Department' || "deptno") AS "deptId"
+            , "deptno"
+            , "dname"
+            , "loc"
+       FROM "DEPT";
+2012-07-02 11:44:46 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"deptId\"" at line 1, column 38.
+Was expecting:
+    <S_IDENTIFIER> ...
+    
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0014a FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT"
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"DEPT"' at line 2
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"DEPT"' at line 2
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"DEPT"' at line 2
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0014b FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT"
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"DEPT"' at line 2
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"DEPT"' at line 2
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"DEPT"' at line 2
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0014c FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap4
+2012-07-02 11:44:46 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : SELECT "EMP".*, (CASE "job"
+            WHEN 'CLERK' THEN 'general-office'
+            WHEN 'NIGHTGUARD' THEN 'security'
+            WHEN 'ENGINEER' THEN 'engineering'
+        END) AS ROLE FROM "EMP";
+2012-07-02 11:44:46 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"job\"" at line 1, column 23.
+Was expecting one of:
+    "AND" ...
+    "BETWEEN" ...
+    "IN" ...
+    "IS" ...
+    "LIKE" ...
+    "NOT" ...
+    "OR" ...
+    ")" ...
+    "=" ...
+    "." ...
+    "!=" ...
+    "#" ...
+    "<>" ...
+    ">" ...
+    ">=" ...
+    "<" ...
+    "<=" ...
+    "+" ...
+    "-" ...
+    "*" ...
+    "||" ...
+    "/" ...
+    "**" ...
+    "(" ...
+    
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap4
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0014d FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'EN')
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country"
+WHERE ("Lan" = 'EN')' at line 2
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country"
+WHERE ("Lan" = 'EN')' at line 2
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country"
+WHERE ("Lan" = 'EN')' at line 2
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0015a FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'EN')
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country"
+WHERE ("Lan" = 'EN')' at line 2
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country"
+WHERE ("Lan" = 'EN')' at line 2
+2012-07-02 11:44:46 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Country"
+WHERE ("Lan" = 'EN')' at line 2
+2012-07-02 11:44:46 INFO  R2RMLTS.run:29  - ------R2RMLTC0015b FAILED------
+
+
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:46 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2018."Sex", v_2018."ID", v_2018."FirstName", v_2018."LastName"
+FROM "Patient"  v_2018
+2012-07-02 11:44:46 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Sex", v_2018."ID", v_2018."FirstName", v_2018."LastName"
+FROM "Patient"  v_2018' at line 1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:46 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Sex", v_2018."ID", v_2018."FirstName", v_2018."LastName"
+FROM "Patient"  v_2018' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Sex", v_2018."ID", v_2018."FirstName", v_2018."LastName"
+FROM "Patient"  v_2018' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0016a FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2131."Weight", v_2131."ID", v_2131."Height"
+FROM "Patient"  v_2131
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Weight", v_2131."ID", v_2131."Height"
+FROM "Patient"  v_2131' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Weight", v_2131."ID", v_2131."Height"
+FROM "Patient"  v_2131' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Weight", v_2131."ID", v_2131."Height"
+FROM "Patient"  v_2131' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0016b FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8951."BirthDate", v_8951."ID", v_8951."EntranceDate"
+FROM "Patient"  v_8951
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"BirthDate", v_8951."ID", v_8951."EntranceDate"
+FROM "Patient"  v_8951' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"BirthDate", v_8951."ID", v_8951."EntranceDate"
+FROM "Patient"  v_8951' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"BirthDate", v_8951."ID", v_8951."EntranceDate"
+FROM "Patient"  v_8951' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0016c FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5029."PaidInAdvance", v_5029."ID"
+FROM "Patient"  v_5029
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"PaidInAdvance", v_5029."ID"
+FROM "Patient"  v_5029' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"PaidInAdvance", v_5029."ID"
+FROM "Patient"  v_5029' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"PaidInAdvance", v_5029."ID"
+FROM "Patient"  v_5029' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0016d FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8804."ID", v_8804."Photo"
+FROM "Patient"  v_8804
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8804."Photo"
+FROM "Patient"  v_8804' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8804."Photo"
+FROM "Patient"  v_8804' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"ID", v_8804."Photo"
+FROM "Patient"  v_8804' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0016e FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8174."Name", v_8174."ID"
+FROM "Student"  v_8174
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_8174."ID"
+FROM "Student"  v_8174' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_8174."ID"
+FROM "Student"  v_8174' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name", v_8174."ID"
+FROM "Student"  v_8174' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0018a FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "FirstName" , "LastName" 
+FROM "Employee"
+WHERE ("ID" < 30)
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Employee"
+WHERE ("ID" < 30)' at line 2
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Employee"
+WHERE ("ID" < 30)' at line 2
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Employee"
+WHERE ("ID" < 30)' at line 2
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0019a FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2016."FirstName"
+FROM "Employee"  v_2016
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"FirstName"
+FROM "Employee"  v_2016' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"FirstName"
+FROM "Employee"  v_2016' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"FirstName"
+FROM "Employee"  v_2016' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0019b FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8330."Name"
+FROM "Student"  v_8330
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_8330' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_8330' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_8330' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0020a FAILED------
+
+
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:44:47 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6374."Name"
+FROM "Student"  v_6374
+2012-07-02 11:44:47 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_6374' at line 1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:44:47 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_6374' at line 1
+2012-07-02 11:44:47 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '"Name"
+FROM "Student"  v_6374' at line 1
+2012-07-02 11:44:47 INFO  R2RMLTS.run:29  - ------R2RMLTC0020b FAILED------
+
+
+2012-07-02 11:45:27 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:27 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2206."Name"
+FROM "Student"  v_2206
+2012-07-02 11:45:27 INFO  DBUtility.executeQuery:69  - SQL execution time was 39 ms.
+2012-07-02 11:45:27 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:27 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:27 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:27 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:27 INFO  R2RMLTS.run:41  - ------R2RMLTC0000 DONE------
+
+
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4905."Name"
+FROM "Student"  v_4905
+2012-07-02 11:45:35 INFO  DBUtility.executeQuery:69  - SQL execution time was 10 ms.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:35 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:35 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:35 INFO  R2RMLTS.run:41  - ------R2RMLTC0000 DONE------
+
+
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_888."Name"
+FROM "Student"  v_888
+2012-07-02 11:45:35 INFO  DBUtility.executeQuery:69  - SQL execution time was 24 ms.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:35 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:35 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:35 INFO  R2RMLTS.run:25  - ------R2RMLTC0001a DONE------
+
+
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9926."Name"
+FROM "Student"  v_9926
+2012-07-02 11:45:35 INFO  DBUtility.executeQuery:69  - SQL execution time was 17 ms.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:35 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:35 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:35 INFO  R2RMLTS.run:25  - ------R2RMLTC0001b DONE------
+
+
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1246."Name", v_1246."ID"
+FROM "Student"  v_1246
+2012-07-02 11:45:35 INFO  DBUtility.executeQuery:69  - SQL execution time was 15 ms.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:35 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:35 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:35 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:35 INFO  R2RMLTS.run:25  - ------R2RMLTC0002a DONE------
+
+
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:35 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7745."Name", v_7745."ID"
+FROM "Student"  v_7745
+2012-07-02 11:45:36 INFO  DBUtility.executeQuery:69  - SQL execution time was 5 ms.
+2012-07-02 11:45:36 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:36 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:36 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:36 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:36 INFO  R2RMLTS.run:25  - ------R2RMLTC0002b DONE------
+
+
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6109."IDs", v_6109."Name", v_6109."ID"
+FROM "Student"  v_6109
+2012-07-02 11:45:36 ERROR DBUtility.executeQuery:74  - Error executing query, error message = Unknown column 'v_6109.IDs' in 'field list'
+2012-07-02 11:45:36 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:36 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = Unknown column 'v_6109.IDs' in 'field list'
+2012-07-02 11:45:36 ERROR R2RMLTS.run:28  - Error : Unknown column 'v_6109.IDs' in 'field list'
+2012-07-02 11:45:36 INFO  R2RMLTS.run:29  - ------R2RMLTC0002c FAILED------
+
+
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Student' || "ID")  AS StudentId, "ID" , "Name" 
+FROM "Student"
+2012-07-02 11:45:36 INFO  DBUtility.executeQuery:69  - SQL execution time was 18 ms.
+2012-07-02 11:45:36 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9292.StudentId
+2012-07-02 11:45:36 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9292.StudentId' not found.
+2012-07-02 11:45:36 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:36 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:36 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:36 INFO  R2RMLTS.run:29  - ------R2RMLTC0002d FAILED------
+
+
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9359."Name", v_9359."ID"
+FROM "Students"  v_9359
+2012-07-02 11:45:36 ERROR DBUtility.executeQuery:74  - Error executing query, error message = Table 'd002.Students' doesn't exist
+2012-07-02 11:45:36 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:36 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = Table 'd002.Students' doesn't exist
+2012-07-02 11:45:36 ERROR R2RMLTS.run:28  - Error : Table 'd002.Students' doesn't exist
+2012-07-02 11:45:36 INFO  R2RMLTS.run:29  - ------R2RMLTC0002e FAILED------
+
+
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:36 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9627."Name", v_9627.Name, v_9627."ID", v_9627.ID
+FROM "Student"  v_9627
+2012-07-02 11:45:37 INFO  DBUtility.executeQuery:69  - SQL execution time was 20 ms.
+2012-07-02 11:45:37 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:37 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:37 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:37 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:37 INFO  R2RMLTS.run:25  - ------R2RMLTC0002f DONE------
+
+
+2012-07-02 11:45:37 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:37 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : THIS IS NOT A VALID SQL QUERY;
+2012-07-02 11:45:37 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "THIS" at line 1, column 1.
+Was expecting one of:
+    "COMMIT" ...
+    "DELETE" ...
+    "EXIT" ...
+    "INSERT" ...
+    "LOCK" ...
+    "QUIT" ...
+    "ROLLBACK" ...
+    "SELECT" ...
+    "SET" ...
+    "UPDATE" ...
+    
+2012-07-02 11:45:37 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:37 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:37 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:37 INFO  R2RMLTS.run:29  - ------R2RMLTC0002g FAILED------
+
+
+2012-07-02 11:45:37 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:37 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : Select ('Student' || ID ) AS StudentId
+                            , "ID"
+                            , "Name"
+					, 1 AS "ID"
+                       from "Student";
+2012-07-02 11:45:37 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"ID\"" at line 4, column 48.
+Was expecting:
+    <S_IDENTIFIER> ...
+    
+2012-07-02 11:45:37 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:37 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:37 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:37 INFO  R2RMLTS.run:29  - ------R2RMLTC0002h FAILED------
+
+
+2012-07-02 11:45:37 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:37 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "Name" 
+FROM "Student"
+2012-07-02 11:45:37 INFO  DBUtility.executeQuery:69  - SQL execution time was 11 ms.
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3790.ID
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3790.ID' not found.
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3790.Name
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3790.Name' not found.
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3790.Name
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3790.Name' not found.
+2012-07-02 11:45:37 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:37 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:37 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:37 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:37 INFO  R2RMLTS.run:25  - ------R2RMLTC0002i DONE------
+
+
+2012-07-02 11:45:37 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:37 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Student"."ID" , "Student"."Name" 
+FROM "Student"
+2012-07-02 11:45:37 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3811.ID
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3811.ID' not found.
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3811.Name
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3811.Name' not found.
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_3811.Name
+2012-07-02 11:45:37 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_3811.Name' not found.
+2012-07-02 11:45:37 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:37 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:37 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:37 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:37 INFO  R2RMLTS.run:25  - ------R2RMLTC0002j DONE------
+
+
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "FirstName" , "LastName" 
+FROM "Student"
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 29 ms.
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4017.ID
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4017.ID' not found.
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4017.FirstName
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4017.FirstName' not found.
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4017.LastName
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4017.LastName' not found.
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_4017.ID
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_4017.ID' not found.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:38 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0003a DONE------
+
+
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , (("FirstName" || ' ') || "LastName")  AS Name
+FROM "Student"
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6203.ID
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6203.ID' not found.
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6203.Name
+2012-07-02 11:45:38 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6203.Name' not found.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:38 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0003b DONE------
+
+
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6650."LastName", v_6650."FirstName", v_6650."ID"
+FROM "Student"  v_6650
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 6 ms.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:38 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0003c DONE------
+
+
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4874."Student"
+FROM "Student_Sport"  v_4874
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 24 ms.
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_2006."Sport"
+FROM "Student_Sport"  v_2006
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 3 ms.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:38 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0004a DONE------
+
+
+2012-07-02 11:45:38 ERROR R2RMLRunner.<init>:84  - error message = Literal is not permitted in the subject!
+2012-07-02 11:45:38 ERROR R2RMLTS.run:28  - Error : Literal is not permitted in the subject!
+2012-07-02 11:45:38 INFO  R2RMLTS.run:29  - ------R2RMLTC0004b FAILED------
+
+
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7167."lname", v_7167."fname", v_7167."amount"
+FROM "IOUs"  v_7167
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 4 ms.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:38 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0005a DONE------
+
+
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:38 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT  * 
+FROM "Student"  v_4019
+2012-07-02 11:45:38 INFO  DBUtility.executeQuery:69  - SQL execution time was 24 ms.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:38 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:38 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:38 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:38 INFO  R2RMLTS.run:25  - ------R2RMLTC0006a DONE------
+
+
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9948."Name", v_9948."ID"
+FROM "Student"  v_9948
+2012-07-02 11:45:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 17 ms.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:39 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007a DONE------
+
+
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5304."ID", v_5304."Name"
+FROM "Student"  v_5304
+2012-07-02 11:45:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 0 ms.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:39 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007b DONE------
+
+
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1655."ID", v_1655."Name"
+FROM "Student"  v_1655
+2012-07-02 11:45:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:39 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007c DONE------
+
+
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5590."Name", v_5590."ID"
+FROM "Student"  v_5590
+2012-07-02 11:45:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 5 ms.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:39 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007d DONE------
+
+
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8691."Name", v_8691."ID"
+FROM "Student"  v_8691
+2012-07-02 11:45:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 12 ms.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:39 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007e DONE------
+
+
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:39 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6287."ID", v_6287."Name"
+FROM "Student"  v_6287
+2012-07-02 11:45:39 INFO  DBUtility.executeQuery:69  - SQL execution time was 7 ms.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:39 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:39 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:39 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:39 INFO  R2RMLTS.run:25  - ------R2RMLTC0007f DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2227."Name", v_2227."ID"
+FROM "Student"  v_2227
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0007g DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6552."Name", v_6552."ID"
+FROM "Student"  v_6552
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0007h DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_7007."Name", v_7007."ID"
+FROM "Student"  v_7007
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0007i DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8151."ID", v_8151."Name", v_8151."Sport"
+FROM "Student"  v_8151
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0008a DONE------
+
+
+2012-07-02 11:45:40 WARN  R2RMLRefObjectMap.<init>:58  - No join conditions defined!
+2012-07-02 11:45:40 WARN  R2RMLRefObjectMap.<init>:58  - No join conditions defined!
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4118."ID", v_4118."Name", v_4676.Sport
+FROM "Student"  v_4118
+LEFT JOIN "Student" v_4676
+ON (1 = 1)
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 5 ms.
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_8019."Sport"
+FROM "Student"  v_8019
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0008b DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6626."Name", v_6626."ID"
+FROM "Student"  v_6626
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 3 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0008c DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_791."ID", v_9242.ID, v_791."Name"
+FROM "Student"  v_791
+LEFT JOIN "Sport" v_9242
+ON (v_791."Sport" = v_9242."ID")
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 3 ms.
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_8567."Name", v_8567."ID"
+FROM "Sport"  v_8567
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009a DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8751."Name", v_9717.ID, v_8751."ID"
+FROM "Student"  v_8751
+LEFT JOIN "Sport" v_9717
+ON (v_8751."Sport" = v_9717."ID")
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_1152."ID", v_1152."Name"
+FROM "Sport"  v_1152
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009b DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Name" , COUNT("Sport") 
+FROM "Student"
+group by "Name"
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_182.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_182.Name' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_182.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_182.Name' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_182.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_182.Name' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_182.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_182.Name' not found.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009c DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Name" , COUNT("Sport")  AS SPORTCOUNT
+FROM "Student"
+group by "Name"
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9275.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9275.Name' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9275.SPORTCOUNT
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9275.SPORTCOUNT' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9275.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9275.Name' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9275.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9275.Name' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9275.SPORTCOUNT
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9275.SPORTCOUNT' not found.
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_9275.Name
+2012-07-02 11:45:40 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_9275.Name' not found.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0009d DONE------
+
+
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:40 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_2813."Name", v_2813."Country Code"
+FROM "Country Info"  v_2813
+2012-07-02 11:45:40 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:40 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:40 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:40 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:40 INFO  R2RMLTS.run:25  - ------R2RMLTC0010a DONE------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9778."Country Code", v_9778."Name"
+FROM "Country Info"  v_9778
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 3 ms.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:41 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0010b DONE------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3990.\{\{ {"ISO 3166", v_3990."Country Code", v_3990."Name"
+FROM "Country Info"  v_3990
+2012-07-02 11:45:41 ERROR DBUtility.executeQuery:74  - Error executing query, error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\{\{ {"ISO 3166", v_3990."Country Code", v_3990."Name"
+FROM "Country Info"  v_39' at line 1
+2012-07-02 11:45:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\{\{ {"ISO 3166", v_3990."Country Code", v_3990."Name"
+FROM "Country Info"  v_39' at line 1
+2012-07-02 11:45:41 ERROR R2RMLTS.run:28  - Error : You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\{\{ {"ISO 3166", v_3990."Country Code", v_3990."Name"
+FROM "Country Info"  v_39' at line 1
+2012-07-02 11:45:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0010c FAILED------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Student"."ID"  AS ID, "Student"."FirstName"  AS FirstName, "Student"."LastName"  AS LastName, "Sport"."Description"  AS Description, "Sport"."ID"  AS Sport_ID
+FROM "Student", "Sport", "Student_Sport"
+WHERE (("Student"."ID" = "Student_Sport"."ID_Student") AND ("Sport"."ID" = "Student_Sport"."ID_Sport"))
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 50 ms.
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_4286."ID", v_4286."Description"
+FROM "Sport"  v_4286
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:41 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0011a DONE------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : LinkMap_1_2
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - LinkMap_1_2 unfolded = SELECT v_6382."ID_Student", v_6382."ID_Sport"
+FROM "Student_Sport"  v_6382
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_223."LastName", v_223."ID", v_223."FirstName"
+FROM "Student"  v_223
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 6 ms.
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_5112."ID", v_5112."Description"
+FROM "Sport"  v_5112
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:41 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0011b DONE------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1474."fname", v_1474."lname", v_1474."amount"
+FROM "IOUs"  v_1474
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 7 ms.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:41 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0012a DONE------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1650."lname", v_1650."fname"
+FROM "IOUs"  v_1650
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT v_6813."city", v_6813."lname", v_6813."fname"
+FROM "Lives"  v_6813
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 18 ms.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:41 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0012b DONE------
+
+
+2012-07-02 11:45:41 ERROR R2RMLTriplesMap.<init>:78  - Missing rr:subjectMap
+2012-07-02 11:45:41 ERROR R2RMLRunner.<init>:84  - error message = Missing rr:subjectMap
+2012-07-02 11:45:41 ERROR R2RMLTS.run:28  - Error : Missing rr:subjectMap
+2012-07-02 11:45:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0012c FAILED------
+
+
+2012-07-02 11:45:41 ERROR R2RMLTriplesMap.<init>:67  - Multiple rr:subjectMap predicates are not allowed
+2012-07-02 11:45:41 ERROR R2RMLRunner.<init>:84  - error message = Multiple rr:subjectMap predicates are not allowed
+2012-07-02 11:45:41 ERROR R2RMLTS.run:28  - Error : Multiple rr:subjectMap predicates are not allowed
+2012-07-02 11:45:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0012d FAILED------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5324."DateOfBirth", v_5324."ID", v_5324."Name"
+FROM "Person"  v_5324
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 13 ms.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:41 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:41 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:41 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:41 INFO  R2RMLTS.run:25  - ------R2RMLTC0013a DONE------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : SELECT ('Department' || "deptno") AS "deptId"
+            , "deptno"
+            , "dname"
+            , "loc"
+       FROM "DEPT";
+2012-07-02 11:45:41 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"deptId\"" at line 1, column 38.
+Was expecting:
+    <S_IDENTIFIER> ...
+    
+2012-07-02 11:45:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:41 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0014a FAILED------
+
+
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:41 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT"
+2012-07-02 11:45:41 INFO  DBUtility.executeQuery:69  - SQL execution time was 6 ms.
+2012-07-02 11:45:41 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5020.deptId
+2012-07-02 11:45:41 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5020.deptId' not found.
+2012-07-02 11:45:41 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:41 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:41 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:41 INFO  R2RMLTS.run:29  - ------R2RMLTC0014b FAILED------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT ('Department' || "deptno")  AS deptId, "deptno" , "dname" , "loc" 
+FROM "DEPT"
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_6156.deptId
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_6156.deptId' not found.
+2012-07-02 11:45:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap1
+2012-07-02 11:45:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:42 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0014c FAILED------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap4
+2012-07-02 11:45:42 ERROR R2RMLUtility.toZQuery:109  - error parsing query string : SELECT "EMP".*, (CASE "job"
+            WHEN 'CLERK' THEN 'general-office'
+            WHEN 'NIGHTGUARD' THEN 'security'
+            WHEN 'ENGINEER' THEN 'engineering'
+        END) AS ROLE FROM "EMP";
+2012-07-02 11:45:42 ERROR R2RMLUtility.toZQuery:110  - error message = Encountered "\"job\"" at line 1, column 23.
+Was expecting one of:
+    "AND" ...
+    "BETWEEN" ...
+    "IN" ...
+    "IS" ...
+    "LIKE" ...
+    "NOT" ...
+    "OR" ...
+    ")" ...
+    "=" ...
+    "." ...
+    "!=" ...
+    "#" ...
+    "<>" ...
+    ">" ...
+    ">=" ...
+    "<" ...
+    "<=" ...
+    "+" ...
+    "-" ...
+    "*" ...
+    "||" ...
+    "/" ...
+    "**" ...
+    "(" ...
+    
+2012-07-02 11:45:42 ERROR R2RMLElementDataTranslateVisitor.translateData:103  - error while translating data of triplesMap : TriplesMap4
+2012-07-02 11:45:42 ERROR R2RMLElementDataTranslateVisitor.translateData:104  - error message = null
+2012-07-02 11:45:42 ERROR R2RMLTS.run:28  - Error : null
+2012-07-02 11:45:42 INFO  R2RMLTS.run:29  - ------R2RMLTC0014d FAILED------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'EN')
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_616.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_616.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_616.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_616.Name' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_616.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_616.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_616.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_616.Name' not found.
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'ES')
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 4 ms.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8240.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8240.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8240.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8240.Name' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8240.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8240.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_8240.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_8240.Name' not found.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0015a DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'EN')
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_2497.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_2497.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_2497.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_2497.Name' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_2497.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_2497.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_2497.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_2497.Name' not found.
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap2
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap2 unfolded = SELECT "Code" , "Name" , "Lan" 
+FROM "Country"
+WHERE ("Lan" = 'ES')
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5940.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5940.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5940.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5940.Name' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5940.Code
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5940.Code' not found.
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5940.Name
+2012-07-02 11:45:42 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5940.Name' not found.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0015b DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_5750."LastName", v_5750."ID", v_5750."FirstName", v_5750."Sex"
+FROM "Patient"  v_5750
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 199 ms.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0016a DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_1547."Weight", v_1547."ID", v_1547."Height"
+FROM "Patient"  v_1547
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0016b DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_8734."ID", v_8734."EntranceDate", v_8734."BirthDate"
+FROM "Patient"  v_8734
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 2 ms.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0016c DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_6806."PaidInAdvance", v_6806."ID"
+FROM "Patient"  v_6806
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0016d DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4087."ID", v_4087."Photo"
+FROM "Patient"  v_4087
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0016e DONE------
+
+
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:42 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_3914."Name", v_3914."ID"
+FROM "Student"  v_3914
+2012-07-02 11:45:42 INFO  DBUtility.executeQuery:69  - SQL execution time was 4 ms.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:42 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:42 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:42 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:42 INFO  R2RMLTS.run:25  - ------R2RMLTC0018a DONE------
+
+
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT "ID" , "FirstName" , "LastName" 
+FROM "Employee"
+WHERE ("ID" < 30)
+2012-07-02 11:45:43 INFO  DBUtility.executeQuery:69  - SQL execution time was 20 ms.
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5284.FirstName
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5284.FirstName' not found.
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5284.FirstName
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5284.FirstName' not found.
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5284.FirstName
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5284.FirstName' not found.
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:222  - error occured when translating result, check your database values for v_5284.FirstName
+2012-07-02 11:45:43 ERROR R2RMLTermMap.getResultSetValue:223  - error message = Column 'v_5284.FirstName' not found.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:43 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:43 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:43 INFO  R2RMLTS.run:25  - ------R2RMLTC0019a DONE------
+
+
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_9344."FirstName"
+FROM "Employee"  v_9344
+2012-07-02 11:45:43 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:43 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:43 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:43 INFO  R2RMLTS.run:25  - ------R2RMLTC0019b DONE------
+
+
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4612."Name"
+FROM "Student"  v_4612
+2012-07-02 11:45:43 INFO  DBUtility.executeQuery:69  - SQL execution time was 9 ms.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:43 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:43 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:43 INFO  R2RMLTS.run:25  - ------R2RMLTC0020a DONE------
+
+
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:188  - unfolding triplesMap : TriplesMap1
+2012-07-02 11:45:43 INFO  R2RMLElementUnfoldVisitor.visit:290  - TriplesMap1 unfolded = SELECT v_4686."Name"
+FROM "Student"  v_4686
+2012-07-02 11:45:43 INFO  DBUtility.executeQuery:69  - SQL execution time was 1 ms.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:136  - Materializing Mapping Document time was 0 s.
+2012-07-02 11:45:43 INFO  DBUtility.closeConnection:84  - Closing db connection.
+2012-07-02 11:45:43 INFO  AbstractRunner.materializeMappingDocuments:151  - Execution time was 0 s.
+2012-07-02 11:45:43 INFO  AbstractRunner.run:306  - **********************DONE****************************
+
+
+2012-07-02 11:45:43 INFO  R2RMLTS.run:25  - ------R2RMLTC0020b DONE------
+
+
+2012-07-03 12:52:53 INFO  BSBM_MYSQL_250K.runFreddy:235  - ------ Running bsbm01 Freddy ------
+2012-07-03 12:52:56 INFO  AbstractQueryTranslator.translateFromFile:806  - Parsing query file : /home/fpriyatna/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql
+2012-07-03 12:52:57 INFO  R2RMLQueryTranslator.translate:106  - opSparqlQueryRewritten = (slice _ 10
+  (distinct
+    (project (?product ?label)
+      (order (?label)
+        (filter (> ?value1 800)
+          (bgp
+            (triple <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType35> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/ProductType>)
+            (triple ?product <http://www.w3.org/2000/01/rdf-schema#label> ?label)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productType> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductType35>)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature168>)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productFeature> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1769>)
+            (triple ?product <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/productPropertyNumeric1> ?value1)
+            (triple ?product <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product>)
+            (triple ?offer <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer>)
+            (triple <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature168> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/ProductFeature>)
+            (triple <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/ProductFeature1769> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/ProductFeature>)
+          ))))))
+
+2012-07-03 12:52:57 INFO  R2RMLQueryTranslator.translate:112  - Query translation time = 472 ms.
+2012-07-03 12:52:57 INFO  BSBM_MYSQL_250K.runFreddy:253  - query = 
+SELECT  DISTINCT v_7722.nr AS product, v_7722.label AS label
+FROM product  v_7722
+INNER JOIN producttypeproduct v_3148
+ON (v_7722.nr = v_3148.product)
+INNER JOIN productfeatureproduct v_9215
+ON (v_7722.nr = v_9215.product)
+INNER JOIN productfeatureproduct v_152
+ON (v_7722.nr = v_152.product)
+WHERE (((v_7722.propertyNum1 IS NOT NULL) AND (v_9215.productFeature = 168) AND (v_3148.productType = 35) AND (v_152.productFeature = 1769) AND (v_7722.label IS NOT NULL)) AND (v_7722.propertyNum1 > 800))
+ORDER BY label
+LIMIT 10
+
+2012-07-03 12:52:57 INFO  BSBM_MYSQL_250K.runFreddy:261  - test execution time was 3978 ms.
+2012-07-03 12:52:57 INFO  BSBM_MYSQL_250K.runFreddy:262  - ------bsbm01 Freddy DONE------

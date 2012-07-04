@@ -7,6 +7,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
 
 public abstract class R2RMLLogicalTable implements R2RMLElement {
@@ -16,6 +17,7 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 	//public enum LogicalTableType {TABLE, SQLQUERY};
 	LogicalTableType logicalTableType;
 	private String alias;
+	
 	
 	static R2RMLLogicalTable parse(Resource resource) {
 		R2RMLLogicalTable logicalTable = null; 
