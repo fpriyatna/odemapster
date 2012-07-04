@@ -23,8 +23,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
 
-public class R2RML_BSBM_MYSQL_250K {
-	private static Logger logger = Logger.getLogger(R2RML_BSBM_MYSQL_250K.class);
+public class BSBM_MYSQL_250K {
+	private static Logger logger = Logger.getLogger(BSBM_MYSQL_250K.class);
 	
 	private String mappingDirectory = TestUtility.getMappingDirectoryByOS();
 	private String configurationDirectory = mappingDirectory + "r2rml-mappings/r2rml-bsbm-mysql-250k/";

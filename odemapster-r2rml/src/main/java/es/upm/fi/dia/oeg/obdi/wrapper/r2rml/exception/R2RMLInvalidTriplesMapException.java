@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception;
 
 public class R2RMLInvalidTriplesMapException extends Exception {
 

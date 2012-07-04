@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.exception;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception;
 
 public class R2RMLJoinConditionException extends Exception {
 

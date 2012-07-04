@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception;
 
 public class R2RMLInvalidTermMapException extends Exception {
 
