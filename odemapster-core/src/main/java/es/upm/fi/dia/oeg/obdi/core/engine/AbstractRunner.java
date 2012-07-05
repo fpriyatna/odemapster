@@ -31,6 +31,13 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
+	protected AbstractParser parser;
+	protected AbstractDataTranslator dataTranslator;
+	protected IQueryTranslator queryTranslator;
+	private AbstractMappingDocument originalMappingDocument;
+	protected Query sparqQuery = null;
+	
+	public static ConfigurationProperties configurationProperties;
 	
 	public static ConfigurationProperties getConfigurationProperties() {
 		if(configurationProperties == null) {
@@ -41,13 +48,6 @@ public abstract class AbstractRunner {
 	public static Connection getConnection() {
 		return AbstractRunner.configurationProperties.getConn();
 	}
-	protected AbstractParser parser;
-	protected AbstractDataTranslator dataTranslator;
-	protected IQueryTranslator queryTranslator;
-	private AbstractMappingDocument originalMappingDocument;
-	protected Query sparqQuery = null;
-	
-	public static ConfigurationProperties configurationProperties;
 
 //	public AbstractRunner() {}
 //
@@ -71,16 +71,24 @@ public abstract class AbstractRunner {
 		return result;
 	}
 
+	public IQueryTranslator createQueryTranslator(String queryTranslatorClassName, AbstractMappingDocument md, AbstractUnfolder unfolder) throws Exception {
+		Class queryTranslatorClass = Class.forName(queryTranslatorClassName);
+		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+		queryTranslator.setMappingDocument(md);
+		queryTranslator.setUnfolder(unfolder);
+		return queryTranslator;
+	}
+
+
+
 	public AbstractDataTranslator getDataTranslator() {
 		return dataTranslator;
 	}
 
-
-
 	public IQueryTranslator getQueryTranslator() {
 		return queryTranslator;
 	}
-
+	
 	protected ConfigurationProperties loadConfigurationFile(
 			String mappingDirectory, String configurationFile) 
 	throws IOException, SQLException, InvalidConfigurationPropertiesException {
@@ -96,7 +104,7 @@ public abstract class AbstractRunner {
 			throw e;
 		}
 	}
-	
+
 	protected void materializeMappingDocuments(String outputFileName
 			, AbstractMappingDocument translationResultMappingDocument) throws Exception {
 		long start = System.currentTimeMillis();
@@ -149,11 +157,6 @@ public abstract class AbstractRunner {
 		long end = System.currentTimeMillis();
 		long duration = (end-start) / 1000;
 		logger.info("Execution time was "+(duration)+" s.");
-	}
-
-	public String run(String mappingDirectory, String configurationFile) throws Exception {
-		AbstractRunner.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
-		return this.run();
 	}
 	
 	public String run()
@@ -308,6 +311,11 @@ public abstract class AbstractRunner {
 
 	}
 
+	public String run(String mappingDirectory, String configurationFile) throws Exception {
+		AbstractRunner.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
+		return this.run();
+	}
+
 	public void setDataTranslator(AbstractDataTranslator dataTranslator) {
 		this.dataTranslator = dataTranslator;
 	}
@@ -319,20 +327,12 @@ public abstract class AbstractRunner {
 	public void setQueryTranslator(IQueryTranslator queryTranslator) {
 		this.queryTranslator = queryTranslator;
 	}
-
+	
 	public void setSparqQuery(Query sparqQuery) {
 		this.sparqQuery = sparqQuery;
 	}
 	
 	public void setSparqQuery(String sparqQuery) {
 		this.sparqQuery = QueryFactory.create(sparqQuery);
-	}
-	
-	public IQueryTranslator createQueryTranslator(String queryTranslatorClassName, AbstractMappingDocument md, AbstractUnfolder unfolder) throws Exception {
-		Class queryTranslatorClass = Class.forName(queryTranslatorClassName);
-		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
-		queryTranslator.setMappingDocument(md);
-		queryTranslator.setUnfolder(unfolder);
-		return queryTranslator;
 	}
 }
