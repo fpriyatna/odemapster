@@ -306,7 +306,7 @@ public abstract class AbstractRunner {
 			//logger.debug("translationResult = " + translationResultMappingDocument);			 
 		}
 		
-		logger.info("**********************DONE****************************\n\n");
+		logger.info("**********************DONE****************************");
 		return status;
 
 	}

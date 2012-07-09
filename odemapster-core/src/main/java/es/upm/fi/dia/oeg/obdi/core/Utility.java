@@ -244,7 +244,7 @@ public class Utility {
 		someString = someString.replaceAll("Ñ", "N");
 		someString = someString.replaceAll("ñ", "n");
 		someString = someString.replaceAll("á", "a");
-		someString = someString.replaceAll("�?", "A");
+		//someString = someString.replaceAll("�?", "A");
 		someString = someString.replaceAll("ª", "a");
 		someString = someString.replaceAll("ã", "a");
 		someString = someString.replaceAll("Ã", "A");
@@ -254,9 +254,9 @@ public class Utility {
 		someString = someString.replaceAll("ë", "e");
 		someString = someString.replaceAll("Ë", "E");
 		someString = someString.replaceAll("í", "i");
-		someString = someString.replaceAll("�?", "I");
+		//someString = someString.replaceAll("�?", "I");
 		someString = someString.replaceAll("ï", "i");
-		someString = someString.replaceAll("�?", "I");
+		//someString = someString.replaceAll("�?", "I");
 		someString = someString.replaceAll("ó", "o");
 		someString = someString.replaceAll("Ó", "O");
 		someString = someString.replaceAll("ö", "o");

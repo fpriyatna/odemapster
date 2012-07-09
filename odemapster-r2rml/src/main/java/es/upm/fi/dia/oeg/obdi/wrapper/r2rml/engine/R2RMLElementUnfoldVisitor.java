@@ -125,7 +125,11 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 			}
 		} else if(logicalTable instanceof R2RMLSQLQuery) {
 			ZQuery zQuery = (ZQuery) logicalTable.accept(this);
-			result = new SQLQuery(zQuery);
+			//result = new SQLQuery(zQuery);
+			SQLFromItem logicalTableFromItem = new SQLFromItem(zQuery.toString(), LogicalTableType.SQLQUERY);
+			logicalTableFromItem.generateAlias();
+			result.addFrom(logicalTableFromItem);
+			
 
 			if(result.getFrom().size() == 1) {
 				ZFromItem fromItem = (ZFromItem) result.getFrom().iterator().next();
@@ -208,7 +212,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				//unfold predicateMap
 				R2RMLPredicateMap predicateMap = predicateObjectMap.getPredicateMap();
 				Collection<String> predicateMapColumnsString = predicateMap.getDatabaseColumnsString();
-				if(predicateMapColumnsString != null && logicalTable instanceof R2RMLTable) {
+				//if(predicateMapColumnsString != null && logicalTable instanceof R2RMLTable) {
+				if(predicateMapColumnsString != null) {
 					for(String predicateMapColumnString : predicateMapColumnsString) {
 						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(predicateMapColumnString, logicalTableAlias);
 						if(selectItem != null) {
@@ -222,7 +227,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				if(objectMap != null) {
 					//objectMap.setAlias(logicalTableAlias);
 					Collection<String> objectMapColumnsString = objectMap.getDatabaseColumnsString();
-					if(objectMapColumnsString != null && logicalTable instanceof R2RMLTable) {
+					//if(objectMapColumnsString != null && logicalTable instanceof R2RMLTable) {
+					if(objectMapColumnsString != null) {
 						for(String objectMapColumnString : objectMapColumnsString) {
 							SQLSelectItem selectItem = R2RMLUtility.toSelectItem(objectMapColumnString, logicalTableAlias);
 							if(selectItem != null) {

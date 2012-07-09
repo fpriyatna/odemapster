@@ -17,6 +17,7 @@ import Zql.ZQuery;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.Utility;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 
 public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	private static Logger logger = Logger.getLogger(SQLQuery.class);
@@ -266,7 +267,16 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		if(mainQueryFromItems != null && mainQueryFromItems.size()!=0) {
 			for(ZFromItem mainQueryFromItem : mainQueryFromItems) {
 				if(mainQueryFromItem instanceof SQLFromItem) {
+					SQLFromItem sqlFromItem = (SQLFromItem) mainQueryFromItem;
 					fromSQL += mainQueryFromItem.toString() + ", ";
+					
+//					if(sqlFromItem.getForm() == LogicalTableType.TABLE) {
+//						fromSQL += mainQueryFromItem.toString() + ", ";
+//					} else {
+//						String subQueryFromItem = "(" + mainQueryFromItem.toString() + ") " + mainQueryFromItem.getAlias();
+//						fromSQL += subQueryFromItem + ", ";
+//					}
+					
 				} else {
 					if(mainQueryFromItem.getSchema() != null) {
 						fromSQL += mainQueryFromItem.getSchema() + ".";
