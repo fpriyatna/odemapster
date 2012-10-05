@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/deployed/odemapster-2.9.6.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/odemapster-core/odemapster2jar.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <file path="/odemapster-core/log4j.properties"/>
+        <javaElement handleIdentifier="=odemapster-core-querytranslator/src\/main\/java"/>
+        <javaElement handleIdentifier="=odemapster-core/src\/main\/java"/>
+        <file path="/odemapster-core/primitiveOperations.cfg"/>
+        <javaElement handleIdentifier="=odemapster-r2rml/src\/main\/java"/>
+        <javaElement handleIdentifier="=odemapster-r2rml-querytranslator/src\/main\/java"/>
+    </selectedElements>
+</jardesc>
