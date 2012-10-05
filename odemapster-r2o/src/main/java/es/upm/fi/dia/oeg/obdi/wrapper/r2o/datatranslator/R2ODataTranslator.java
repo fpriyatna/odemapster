@@ -66,6 +66,7 @@ public class R2ODataTranslator extends AbstractDataTranslator {
 	private void createRDFTypeTriple(String subjectURI, String conceptName) 
 	throws IOException {
 		boolean isBlankNodeSubject;
+		
 		if(Utility.isIRI(subjectURI)) {
 			isBlankNodeSubject = false;
 		} else {
@@ -639,6 +640,8 @@ public class R2ODataTranslator extends AbstractDataTranslator {
 
 	@Override
 	public void translateData(AbstractMappingDocument abstractMappingDocument) throws Exception {
+		int timeout = R2ORunner.configurationProperties.getDatabaseTimeout();
+		
 		R2OMappingDocument mappingDocument = (R2OMappingDocument) abstractMappingDocument;
 		Collection<AbstractConceptMapping> conceptMappings = 
 			mappingDocument.getConceptMappings();
@@ -668,7 +671,8 @@ public class R2ODataTranslator extends AbstractDataTranslator {
 					logger.info(conceptMapping.getName() + " unfolded = \n" + sqlQuery + "\n");
 					if(sqlQuery != null) {
 						//evaluate query
-						rs = QueryEvaluator.evaluateQuery(sqlQuery, R2ORunner.configurationProperties.getConn());
+						rs = QueryEvaluator.evaluateQuery(
+								sqlQuery, R2ORunner.configurationProperties.getConn());
 						this.processConceptMapping(rs, conceptMapping);
 					}
 				} catch(SQLException e) {

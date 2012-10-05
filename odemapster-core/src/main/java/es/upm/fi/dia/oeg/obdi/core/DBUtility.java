@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
 public class DBUtility {
 	private static Logger logger = Logger.getLogger(DBUtility.class);
@@ -37,7 +40,7 @@ public class DBUtility {
 
 	}
 	
-	public static ResultSet executeQuery(Connection conn, String query) throws SQLException {
+	public static ResultSet executeQuery(Connection conn, String query, int timeout) throws SQLException {
 		//		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 		//				ResultSet.CONCUR_READ_ONLY);
 
@@ -54,10 +57,12 @@ public class DBUtility {
 		Statement stmt = conn.createStatement();
 				
 		try  {
-			stmt.setQueryTimeout(120);
+			if(timeout > 0) {
+				stmt.setQueryTimeout(timeout);
+			}
 			//stmt.setFetchSize(Integer.MIN_VALUE);
 		} catch(Exception e) {
-			logger.debug("Can't set fetch size!");
+			logger.warn("Exception occur : " + e.getMessage());
 		}
 
 		logger.debug("Executing query = \n" + query);

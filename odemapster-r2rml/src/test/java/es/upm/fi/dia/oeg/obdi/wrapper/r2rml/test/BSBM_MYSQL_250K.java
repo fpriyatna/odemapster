@@ -167,7 +167,8 @@ public class BSBM_MYSQL_250K {
 			queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setSubqueryAsView(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
-
+			queryTranslator.setSubQueryElimination(true);
+			
 //			boolean optimizeTripleBlock = false;
 //			boolean subqueryAsView = false;			
 //			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);

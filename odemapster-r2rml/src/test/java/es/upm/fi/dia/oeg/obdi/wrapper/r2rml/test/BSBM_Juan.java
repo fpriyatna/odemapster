@@ -6,7 +6,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
@@ -27,15 +29,15 @@ public class BSBM_Juan {
 		logger.info("------ Running " + testName + " ------");
 		String configurationFile = testName + ".r2rml.properties";
 		
-		R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
+		AbstractMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
 //		R2RMLElementDataTranslateVisitor dataTranslator = 
 //				new R2RMLElementDataTranslateVisitor(configurationDirectory, configurationFile); 
 //		md.accept(dataTranslator);
-		R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
+		AbstractUnfolder unfolder = new R2RMLElementUnfoldVisitor(
 				configurationDirectory, configurationFile);
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
 		//R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
-		Class queryTranslatorClass = Class.forName("es.pm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
+		Class queryTranslatorClass = Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
 		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
 		queryTranslator.setMappingDocument(md);
 		queryTranslator.setUnfolder(unfolder);

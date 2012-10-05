@@ -1,5 +1,8 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
+import java.util.Map;
+
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
@@ -26,5 +29,7 @@ public interface IQueryTranslator {
 	void setSubqueryAsView(boolean b);
 
 	SQLQuery translateFromFile() throws Exception;
+	
+
 
 }

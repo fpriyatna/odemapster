@@ -25,6 +25,8 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 	private R2RMLRefObjectMap refObjectMap;
 	private ObjectMapType objectMapType;
 	
+	private String alias;
+	
 	public R2RMLPredicateObjectMap(Resource resource, R2RMLMappingDocument mappingDocument, R2RMLTriplesMap parent) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		this.mappingDocument = mappingDocument;
@@ -161,6 +163,14 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		return "R2RMLPredicateObjectMap [predicateMap=" + predicateMap
 				+ ", objectMap=" + objectMap + ", refObjectMap=" + refObjectMap
 				+ ", objectMapType=" + objectMapType + "]";
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	

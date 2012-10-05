@@ -34,8 +34,8 @@ public class SparqlTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String query01URL = "/home/fpriyatna/Dropbox/bsbm/queries/query01.sparql";
-		//String query01URL = "C:/Users/fpriyatna/My Dropbox/bsbm/queries/query01.sparql";
+//		String query01URL = "/home/fpriyatna/Dropbox/bsbm/queries/query01.sparql";
+		String query01URL = "C:/Users/fpriyatna/My Dropbox/bsbm/queries/query01.sparql";
 		Query query = QueryFactory.read(query01URL) ;
 		System.out.println("Query = " + query);
 		

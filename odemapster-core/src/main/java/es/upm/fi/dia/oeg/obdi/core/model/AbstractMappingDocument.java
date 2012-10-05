@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.w3c.dom.Element;
@@ -16,6 +17,9 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 
 public abstract class AbstractMappingDocument implements IParseable {
 	private Map<String, String> mappingDocumentPrefixMap;
+	private String title;
+	private String id;
+	private String purpose;
 	
 	protected void setMappingDocumentPrefixMap(
 			Map<String, String> mappingDocumentPrefixMap) {
@@ -32,7 +36,7 @@ public abstract class AbstractMappingDocument implements IParseable {
 	public abstract String getMappingDocumentID();
 	
 	public abstract List<String> getMappedConcepts();
-	public abstract Collection<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptURI);
+	public abstract Set<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptURI);
 
 	
 	public abstract List<String> getMappedProperties();
@@ -57,6 +61,19 @@ public abstract class AbstractMappingDocument implements IParseable {
 		}
 
 		return null;
+	}
+
+	public Set<AbstractConceptMapping> getConceptMappingByPropertyUri(String propertyUri) {
+		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
+		
+		for(AbstractConceptMapping conceptMapping : this.classMappings) {
+			Collection<AbstractPropertyMapping> pms = conceptMapping.getPropertyMappings(propertyUri);
+			if(pms != null && pms.size() != 0) {
+				result.add(conceptMapping);
+			}
+		}
+
+		return result;
 	}
 
 	public Collection<AbstractConceptMapping> getConceptMappings() {
@@ -230,6 +247,30 @@ public abstract class AbstractMappingDocument implements IParseable {
 			}
 		}
 		return result;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getPurpose() {
+		return purpose;
+	}
+
+	public void setPurpose(String purpose) {
+		this.purpose = purpose;
+	}
+
+	public Collection<AbstractConceptMapping> getClassMappings() {
+		return classMappings;
+	}
+
+	public void setClassMappings(Collection<AbstractConceptMapping> classMappings) {
+		this.classMappings = classMappings;
 	}
 	
 }

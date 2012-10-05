@@ -1,11 +1,51 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
+import org.apache.log4j.Logger;
+
+import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.exception.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 public abstract class AbstractDataTranslator {
+	private static Logger logger = Logger.getLogger(AbstractDataTranslator.class);
 	protected AbstractMaterializer materializer;
+	protected ConfigurationProperties properties;
+	protected AbstractUnfolder unfolder;
+	
+	public AbstractDataTranslator(ConfigurationProperties properties, AbstractUnfolder unfolder) {
+		this.properties = properties;
+		this.unfolder = unfolder;
+	}
+	
+	public AbstractDataTranslator(String configurationDirectory
+			, String configurationFile, AbstractUnfolder unfolder) {
+		try {
+			this.properties = new ConfigurationProperties(
+					configurationDirectory, configurationFile);
+			this.unfolder = unfolder;
+			
+			String outputFileName = properties.getOutputFilePath();
+			String rdfLanguage = properties.getRdfLanguage();
+			String jenaMode = properties.getJenaMode();
+			this.materializer = AbstractMaterializer.create(rdfLanguage, outputFileName, jenaMode);
+		} catch (IOException e) {
+			logger.error("IO error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+		} catch (InvalidConfigurationPropertiesException e) {
+			logger.error("invalid configuration error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			logger.error("Database error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 	
 	protected abstract Object processCustomFunctionTransformationExpression(Object argument) 
 			throws PostProcessorException;

@@ -2,7 +2,6 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml;
 
 
 import java.io.ByteArrayInputStream;
-import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,11 +11,14 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-
+import Zql.ZConstant;
+import Zql.ZExp;
+import Zql.ZExpression;
+import Zql.ZQuery;
+import Zql.ZSelectItem;
+import Zql.ZStatement;
+import Zql.ZqlParser;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
@@ -26,16 +28,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap.TermMapType;
-
-import Zql.ZConstant;
-import Zql.ZExp;
-import Zql.ZExpression;
-import Zql.ZQuery;
-import Zql.ZSelectItem;
-import Zql.ZStatement;
-import Zql.ZqlParser;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLUtility {
 	private static Logger logger = Logger.getLogger(R2RMLUtility.class);
@@ -61,32 +55,34 @@ public class R2RMLUtility {
 		
 		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
 		Matcher matcher = pattern.matcher(text);
-		StringBuffer buffer = new StringBuffer();
 		while (matcher.find()) {
 			String matcherGroup1 = matcher.group(1);
 			attributes.add(matcherGroup1);
 		}
-		
 		return attributes;		
 	}
-			
-	public static String replaceTokens(String text,
-			Map<String, String> replacements) {
-		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
-		Matcher matcher = pattern.matcher(text);
+	
+	public static String replaceTokens(Matcher matcher
+			, String text, Map<String, String> replacements) {
 		StringBuffer buffer = new StringBuffer();
 		while (matcher.find()) {
 			String matcherGroup1 = matcher.group(1);
 			String replacement = replacements.get(matcherGroup1);
 			if (replacement != null) {
-				//                  matcher.appendReplacement(buffer, replacement);
-				// see comment 
 				matcher.appendReplacement(buffer, "");
 				buffer.append(replacement);
 			}
 		}
 		matcher.appendTail(buffer);
-		return buffer.toString();
+		return buffer.toString();		
+	}
+	
+	public static String replaceTokens(String text,
+			Map<String, String> replacements) {
+		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+		Matcher matcher = pattern.matcher(text);
+		
+		return R2RMLUtility.replaceTokens(matcher, text, replacements);
 	}
 	
 	public static SQLQuery toSQLQuery(String sqlString) {
@@ -105,8 +101,8 @@ public class R2RMLUtility {
 			
 			return zQuery;
 		} catch(Exception e) {
-			e.printStackTrace();
-			logger.error("error parsing query string : " + sqlString);
+			//e.printStackTrace();
+			logger.error("error parsing query string : \n" + sqlString);
 			logger.error("error message = " + e.getMessage());
 			return null;
 		}

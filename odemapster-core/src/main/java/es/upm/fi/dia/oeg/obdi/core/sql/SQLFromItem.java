@@ -6,7 +6,7 @@ import Zql.ZFromItem;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
 public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
-	public enum LogicalTableType {TABLE, SQLQUERY};
+	public enum LogicalTableType {TABLE_NAME, QUERY_STRING};
 	
 //	public static int FORM_TABLE = ZAliasedName.FORM_TABLE;
 //	public static int FORM_QUERY = FORM_TABLE + ZAliasedName.FORM_COLUMN;  
@@ -39,7 +39,7 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 		String alias = this.getAlias();
 		if(alias != null) {
 			this.setAlias("");
-			if(this.form == LogicalTableType.TABLE) {
+			if(this.form == LogicalTableType.TABLE_NAME) {
 				String tableName = super.toString();
 				//tableName = R2RMLUtility.replaceNameWithSpaceChars(tableName);
 				result = tableName + " " + alias;

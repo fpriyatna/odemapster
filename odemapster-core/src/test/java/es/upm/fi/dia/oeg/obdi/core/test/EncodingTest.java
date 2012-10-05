@@ -180,4 +180,25 @@ public class EncodingTest extends TestCase {
 		System.out.println("strEncoded = " + strEncoded);
 	}	
 
+	@Test
+	public void testEncode22() throws Exception {
+		String str = "\"Hello World\" ";
+		String strEncoded = Utility.encodeURI(str);
+		System.out.println("strEncoded = " + strEncoded);
+	}	
+
+	@Test
+	public void testEncode23() throws Exception {
+		String str = "I Workshop of POMSEBES ¿Policy oriented measures in support of the evolving Biosystems Engineering Studies in EU-USA\"";
+		String strEncoded = Utility.encodeLiteral(str);
+		System.out.println("strEncoded = " + strEncoded);
+	}	
+	
+	@Test
+	public void testEncode24() throws Exception {
+		String str = "\\A\nTwo-Dimensional Self-Adaptive hp Finite Element Method for the Analysis of\rOpen Region Problems in Electromagnetics.\"";
+		System.out.println("str = " + str);
+		String strEncoded = Utility.encodeLiteral(str);
+		System.out.println("strEncoded2 = " + strEncoded);
+	}	
 }

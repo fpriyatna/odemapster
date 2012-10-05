@@ -145,6 +145,10 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		}
 	}
 
+	public void setWhere(ZExp where) {
+		super.addWhere(where);
+	}
+	
 	public void addOn(ZExp newOn) {
 		ZExp oldOn = this.onExp;
 		if(newOn != null) {
@@ -410,7 +414,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		}
 
 
-		if(this.joinType != null) {
+		if(this.joinType != null && !this.joinType.equals("")) {
 			result = this.joinType + " JOIN " + result;
 		}
 
@@ -461,6 +465,18 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 	public String getAlias() {
 		return this.alias;
+	}
+
+	public String getJoinType() {
+		return joinType;
+	}
+
+	public Collection<SQLLogicalTable> getLogicalTables() {
+		return logicalTables;
+	}
+
+	public void setLogicalTables(Collection<SQLLogicalTable> logicalTables) {
+		this.logicalTables = logicalTables;
 	}
 
 }

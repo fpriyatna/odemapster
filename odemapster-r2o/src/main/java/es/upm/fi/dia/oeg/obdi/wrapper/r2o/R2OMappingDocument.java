@@ -2,7 +2,9 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2o;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -66,8 +68,8 @@ public class R2OMappingDocument extends AbstractMappingDocument {
 	}
 
 	@Override
-	public Collection<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptName) {
-		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
+	public Set<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptName) {
+		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
 
 		if(this.classMappings != null) {
 			for(AbstractConceptMapping conceptMapping : this.classMappings) {

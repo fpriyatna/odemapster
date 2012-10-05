@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -28,6 +30,12 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ModelMaker;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.shared.CannotEncodeCharacterException;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
@@ -118,8 +126,8 @@ public class Utility {
 	public static Connection getLocalConnection(
 			String username, String databaseName, String password, String driverString, String url, String requester) 
 					throws SQLException {
+		
 		Connection conn;
-
 		try {
 			Properties prop = new Properties();
 			prop.put("ResultSetMetaDataOptions", "1");
@@ -227,11 +235,15 @@ public class Utility {
 		String result = originalLiteral;
 		try {
 			if(result != null) {
-				result = result.replaceAll("\"", "\\\\\"");
-				result = result.replaceAll("\'", "\\\\\'");
+				result = result.replaceAll("\\\\", "/");
+				result = result.replaceAll("\"", "%22");
 				result = result.replaceAll("\\\\n", " ");
 				result = result.replaceAll("\\\\r", " ");
+				result = result.replaceAll("\\\\ ", " ");
 				result = result.replaceAll("_{2,}+", "_");
+				result = result.replaceAll("\n","");
+				result = result.replaceAll("\r", "");
+				result = result.replace("\\ ", "/");
 			}
 		} catch(Exception e) {
 			logger.error("Error encoding literal for literal = " + originalLiteral + " because of " + e.getMessage());
@@ -280,6 +292,8 @@ public class Utility {
 		uri = uri.replaceAll("\\n", " ");
 		uri = uri.replaceAll("\t", " ");
 		uri = uri.replaceAll("\\t", " ");
+		uri = uri.replaceAll("\\r", " ");
+		
 		//			uri = uri.replaceAll("\"", "_");
 
 		uri = uri.replaceAll("\\\\", "%5C");
@@ -287,7 +301,7 @@ public class Utility {
 
 
 
-		uri = Utility.removeStrangeChars(uri);
+		
 
 
 
@@ -314,6 +328,8 @@ public class Utility {
 	public static String encodeURI(String originalURI)  throws Exception {
 		String uri = originalURI;
 		try {
+			uri = Utility.removeStrangeChars(uri);
+			
 			uri = Utility.preEncoding(uri);
 
 			//	uri = new URI(uri).toASCIIString();
@@ -321,9 +337,6 @@ public class Utility {
 
 			uri = Utility.postEncoding(uri);
 
-			if(uri.equals("http://edu.linkeddata.es/investigacionUPM/resource/DateTimeDescription///")) {
-				logger.debug("uri");
-			}
 		} catch(Exception e) {
 			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
 			throw e;
@@ -385,6 +398,10 @@ public class Utility {
 		String uri8 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÃ�LISIS%20E%20INVESTIGACIÃ“N%20DE%20ACELERACIÃ“N%20DE\n%20VALORACIÃ“N%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
 		System.out.println("uri8Encoded = " + Utility.encodeURI(uri8));
 
+		String uri9 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÃ�LISIS%20E%20INVESTIGACIÃ“N%20DE%20ACELERACIÃ“N%20DE\n%20VALORACIÃ“N%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
+		System.out.println("uri8Encoded = " + Utility.encodeURI(uri8));
+
+		
 		String literal1 = "Say \\r \"Hello World\"";
 		System.out.println("literal1 = " + literal1);
 		System.out.println("literal1Encoded = " + Utility.encodeLiteral(literal1));
@@ -398,6 +415,11 @@ public class Utility {
 
 		String str10 = "A & D ARQUITECTURA Y DECORACIÓN 2000";
 		System.out.println("str10Encoded = " + Utility.encodeURI(str10));
+
+		String str11 = "Hello / World #, How are \\ you?";
+		System.out.println("str11 before encoded = " + str11);
+		System.out.println("str11 = " + Utility.encodeUnsafeChars(str11));
+		System.out.println("str11 = " + Utility.encodeReservedChars(str11));
 
 		/*
 		Connection conn = Utility.getLocalConnection("bsbm1m", "bsbm1m"
@@ -762,4 +784,84 @@ public class Utility {
 		
 		return result;
 	}
+	
+	public static String encodeUnsafeChars(String originalValue) {
+		String result = originalValue; 
+		if(result != null) {
+			result = result.replaceAll("\\%", "%25");//put this first
+			result = result.replaceAll("<", "%3C");
+			result = result.replaceAll(">", "%3E");
+			result = result.replaceAll("#", "%23");
+			
+			result = result.replaceAll("\\{", "%7B");
+			result = result.replaceAll("\\}", "%7D");
+			result = result.replaceAll("\\|", "%7C");
+			result = result.replaceAll("\\\\", "%5C");
+			result = result.replaceAll("\\^", "%5E");
+			result = result.replaceAll("~", "%7E");
+			result = result.replaceAll("\\[", "%5B");
+			result = result.replaceAll("\\]", "%5D");
+			result = result.replaceAll("`", "%60");
+		}
+		return result;
+	}
+	
+	public static String encodeReservedChars(String originalValue) {
+		String result = originalValue; 
+		if(result != null) {
+			result = result.replaceAll("\\$", "%24");
+			result = result.replaceAll("&", "%26");
+			result = result.replaceAll("\\+", "%2B");
+			result = result.replaceAll(",", "%2C");
+			result = result.replaceAll("/", "%2F");
+			result = result.replaceAll(":", "%3A");
+			result = result.replaceAll(";", "%3B");
+			result = result.replaceAll("=", "%3D");
+			result = result.replaceAll("\\?", "%3F");
+			result = result.replaceAll("@", "%40");
+		}
+		return result;
+	}
+	
+	
+    protected static Pattern elementContentEntities = Pattern.compile( "<|>|&|[\0-\37&&[^\n\t]]|\uFFFF|\uFFFE" );
+    /**
+        Answer <code>s</code> modified to replace &lt;, &gt;, and &amp; by
+        their corresponding entity references. 
+        
+    <p>
+        Implementation note: as a (possibly misguided) performance hack, 
+        the obvious cascade of replaceAll calls is replaced by an explicit
+        loop that looks for all three special characters at once.
+    */
+    public static String substituteEntitiesInElementContent( String s ) 
+    {
+    Matcher m = elementContentEntities.matcher( s );
+    if (!m.find())
+        return s;
+    else
+        {
+        int start = 0;
+        StringBuffer result = new StringBuffer();
+        do
+            {
+            result.append( s.substring( start, m.start() ) );
+            char ch = s.charAt( m.start() );
+            switch ( ch )
+            {
+                case '\r': result.append( "&#xD;" ); break;
+                case '<': result.append( "&lt;" ); break;
+                case '&': result.append( "&amp;" ); break;
+                case '>': result.append( "&gt;" ); break;
+                default: throw new CannotEncodeCharacterException( ch, "XML" );
+            }
+            start = m.end();
+            } while (m.find( start ));
+        result.append( s.substring( start ) );
+        return result.toString();
+        }
+    }
+    
+
+    
 }

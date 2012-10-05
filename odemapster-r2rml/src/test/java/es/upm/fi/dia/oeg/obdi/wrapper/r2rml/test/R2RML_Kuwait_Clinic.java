@@ -69,7 +69,7 @@ public class R2RML_Kuwait_Clinic {
 			SQLQuery query = queryTranslator.translateFromFile();
 			logger.info("sql query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConnection();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+			ResultSet rs = DBUtility.executeQuery(conn, query.toString(), 0);
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			
@@ -104,7 +104,7 @@ public class R2RML_Kuwait_Clinic {
 			SQLQuery query = queryTranslator.translateFromFile();
 			logger.info("query = \n" + query + "\n");
 			Connection conn = AbstractRunner.getConnection();
-			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
+			ResultSet rs = DBUtility.executeQuery(conn, query.toString(), 0);
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			int noOfRows = DBUtility.getRowCount(rs);

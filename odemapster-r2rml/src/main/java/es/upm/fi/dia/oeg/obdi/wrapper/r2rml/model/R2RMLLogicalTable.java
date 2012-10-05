@@ -19,7 +19,7 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 	private String alias;
 	
 	
-	static R2RMLLogicalTable parse(Resource resource) {
+	static R2RMLLogicalTable parse(Resource resource) throws Exception {
 		R2RMLLogicalTable logicalTable = null; 
 		
 		Statement tableNameStatement = resource.getProperty(R2RMLConstants.R2RML_TABLENAME_PROPERTY);

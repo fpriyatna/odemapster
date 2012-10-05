@@ -48,15 +48,10 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 		
 		if(datatype == null) {
 			String propValString = propVal.toString();
-			if(AbstractRunner.configurationProperties.isLiteralRemoveStrangeChars()) {
-				propValString = Utility.removeStrangeChars(propValString);
-			}
-			
 			
 			if(lang == null) {
 				literal =  model.createTypedLiteral(propValString);
 			} else {
-		
 				literal =  model.createLiteral(propValString, lang);
 			}
 		} else {
@@ -116,10 +111,4 @@ public class RDFXMLMaterializer extends AbstractMaterializer {
 			throw fnfe;			
 		} 	
 	}
-
-
-
-
-
-	
 }

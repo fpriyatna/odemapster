@@ -11,8 +11,11 @@ import es.upm.fi.dia.oeg.obdi.core.Utility;
 public class QueryEvaluator {
 	
 	public static ResultSet evaluateQuery(String query, Connection conn) throws SQLException {
-		
-		
-		return DBUtility.executeQuery(conn, query);
+		int timeout = 0;
+		ConfigurationProperties conf = AbstractRunner.getConfigurationProperties(); 
+		if(conf != null) {
+			timeout = conf.getDatabaseTimeout(); 
+		}
+		return DBUtility.executeQuery(conn, query, timeout);
 	}
 }

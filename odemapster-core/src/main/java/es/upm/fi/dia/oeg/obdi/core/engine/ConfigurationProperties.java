@@ -25,13 +25,17 @@ public class ConfigurationProperties extends Properties {
 	private String databaseType;
 	private boolean optimizeTB;
 	private boolean subQueryElimination;
+	private boolean subQueryAsView;
 	private boolean literalRemoveStrangeChars;
+	private boolean encodeUnsafeChars;
+	private boolean encodeReservedChars;
 	
 	private String databaseDriver; 
 	private String databaseURL;
 	private String databaseName;
 	private String databaseUser;
 	private String databasePassword;
+	private int databaseTimeout = 0;
 	
 	public boolean isOptimizeTB() {
 		return optimizeTB;
@@ -104,11 +108,18 @@ public class ConfigurationProperties extends Properties {
 			String propertyDatabaseType = Constants.DATABASE_TYPE_PROP_NAME  + "[" + i + "]";
 			this.databaseType = this.getProperty(propertyDatabaseType);
 
+			String propertyDatabaseTimeout = Constants.DATABASE_TIMEOUT_PROP_NAME  + "[" + i + "]";
+			String timeoutPropertyString = this.getProperty(propertyDatabaseTimeout);
+			if(timeoutPropertyString != null && !timeoutPropertyString.equals("")) {
+				this.databaseTimeout = Integer.parseInt(timeoutPropertyString.trim());
+			}
+			
+			logger.info("Getting database connection...");
 			try {
 				this.conn = Utility.getLocalConnection(
 						databaseUser, databaseName, databasePassword, 
 						databaseDriver, 
-						databaseURL, "R2ORunner");
+						databaseURL, "Runner");
 			} catch (SQLException e) {
 				String errorMessage = "Error loading database, error message = " + e.getMessage();
 				logger.error(errorMessage);
@@ -165,13 +176,32 @@ public class ConfigurationProperties extends Properties {
 		}
 		logger.debug("Subquery elimination = " + this.subQueryElimination);
 
+		this.subQueryAsView = this.readBoolean(Constants.SUBQUERY_AS_VIEW, false);
+		logger.debug("Subquery as view = " + this.subQueryAsView);
+
 		String removeStrangeCharsFromLiteral = this.getProperty(Constants.REMOVE_STRANGE_CHARS_FROM_LITERAL);
 		if(removeStrangeCharsFromLiteral != null) {
 			if(removeStrangeCharsFromLiteral.equalsIgnoreCase("yes") || removeStrangeCharsFromLiteral.equalsIgnoreCase("true")) {
 				this.literalRemoveStrangeChars = true;
 			}
 		}
-		logger.debug("Self join elimination = " + this.optimizeTB);
+		logger.debug("Remove Strange Chars From Literal Column = " + this.literalRemoveStrangeChars);
+
+		String encodeUnsafeCharsString = this.getProperty(Constants.ENCODE_UNSAFE_CHARS_IN_URI_COLUMN);
+		if(encodeUnsafeCharsString != null) {
+			if(encodeUnsafeCharsString.equalsIgnoreCase("yes") || encodeUnsafeCharsString.equalsIgnoreCase("true")) {
+				this.encodeUnsafeChars = true;
+			}
+		}
+		logger.debug("Encode Unsafe Chars From URI Column = " + this.encodeUnsafeChars);
+
+		String encodeReservedCharsString = this.getProperty(Constants.ENCODE_RESERVED_CHARS_IN_URI_COLUMN);
+		if(encodeReservedCharsString != null) {
+			if(encodeReservedCharsString.equalsIgnoreCase("yes") || encodeReservedCharsString.equalsIgnoreCase("true")) {
+				this.encodeReservedChars = true;
+			}
+		}
+		logger.debug("Encode Reserved Chars From URI Column = " + this.encodeReservedChars);
 
 	}
 
@@ -226,6 +256,41 @@ public class ConfigurationProperties extends Properties {
 			//e.printStackTrace();
 			throw e;
 		}
+	}
+
+	public int getDatabaseTimeout() {
+		return databaseTimeout;
+	}
+
+	public boolean isEncodeUnsafeChars() {
+		return encodeUnsafeChars;
+	}
+
+	public boolean isEncodeReservedChars() {
+		return encodeReservedChars;
+	}
+
+	public boolean isSubQueryAsView() {
+		return subQueryAsView;
+	}
+
+	public void setSubQueryAsView(boolean subQueryAsView) {
+		this.subQueryAsView = subQueryAsView;
+	}
+
+	private boolean readBoolean(String property, boolean defaultValue) {
+		boolean result = defaultValue;
+
+		String propertyString = this.getProperty(property);
+		if(propertyString != null) {
+			if(propertyString.equalsIgnoreCase("yes") || propertyString.equalsIgnoreCase("true")) {
+				result = true;
+			} else if(propertyString.equalsIgnoreCase("no") || propertyString.equalsIgnoreCase("false")) {
+				result = false;
+			}
+		}
+
+		return result;
 	}
 	
 	

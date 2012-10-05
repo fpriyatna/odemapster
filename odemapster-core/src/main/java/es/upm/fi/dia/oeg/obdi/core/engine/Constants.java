@@ -33,6 +33,9 @@ public class Constants {
 	public static final String DATABASE_USER_PROP_NAME = "database.user";
 	public static final String DATABASE_PWD_PROP_NAME = "database.pwd";
 	public static final String DATABASE_TYPE_PROP_NAME = "database.type";
+	public static final String DATABASE_TIMEOUT_PROP_NAME = "database.timeout";
+
+	
 	public static final String MAPPINGDOCUMENT_FILE_PATH = "mappingdocument.file.path";
 	public static final String QUERYFILE_PROP_NAME = "query.file.path";
 	public static final String ONTOFILE_PROP_NAME = "onto.file.path";
@@ -42,7 +45,10 @@ public class Constants {
 	public static final String SPLIT_OUTPUT_PER_CONCEPT = "split_output_per_concept";
 	public static final String OPTIMIZE_TB = "querytranslator.selfjoinelimination";
 	public static final String SUBQUERY_ELIMINATION = "querytranslator.subqueryelimination";
+	public static final String SUBQUERY_AS_VIEW = "querytranslator.subqueryasview";
 	public static final String REMOVE_STRANGE_CHARS_FROM_LITERAL = "literal.removestrangechars";
+	public static final String ENCODE_UNSAFE_CHARS_IN_URI_COLUMN = "uricolumn.encodeunsafecharacters";
+	public static final String ENCODE_RESERVED_CHARS_IN_URI_COLUMN = "uricolumn.encodereserveccharacters";
 	
 	//aliases
 	public static final String URI_AS_ALIAS="uri_";

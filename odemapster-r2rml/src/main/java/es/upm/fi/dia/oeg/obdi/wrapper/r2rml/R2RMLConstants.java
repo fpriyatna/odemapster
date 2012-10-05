@@ -92,4 +92,5 @@ public class R2RMLConstants {
 	public static final String R2RML_DEFAULT_GRAPH_URI = R2RML_NS + "defaultGraph";
 	public static final Resource R2RML_DEFAULT_GRAPH_CLASS = ResourceFactory.createResource(R2RML_DEFAULT_GRAPH_URI);
 
+	public static final String R2RML_TEMPLATE_PATTERN = "\\{(.+?)\\}";
 }

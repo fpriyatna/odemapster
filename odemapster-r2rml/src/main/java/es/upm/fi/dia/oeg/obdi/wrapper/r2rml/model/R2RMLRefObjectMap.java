@@ -5,6 +5,9 @@ import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
@@ -26,7 +29,7 @@ public class R2RMLRefObjectMap {
 
 	private R2RMLMappingDocument owner;
 	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
-	private String parentTriplesMap;
+	private RDFNode parentTriplesMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
 	//private String alias;
 	
@@ -37,7 +40,8 @@ public class R2RMLRefObjectMap {
 		
 		Statement parentTriplesMapStatement = resource.getProperty(R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
 		if(parentTriplesMapStatement != null)  {
-			this.parentTriplesMap = parentTriplesMapStatement.getObject().toString();
+			//this.parentTriplesMap = parentTriplesMapStatement.getObject().toString();
+			this.parentTriplesMap = parentTriplesMapStatement.getObject();
 		}
 		
 		this.joinConditions = new HashSet<R2RMLJoinCondition>();
@@ -81,11 +85,14 @@ public class R2RMLRefObjectMap {
 	}
 
 	public String getParentTripleMapName() {
-		return this.parentTriplesMap;
+		return this.parentTriplesMap.asResource().getURI();
 	}
 
 	public R2RMLTriplesMap getParentTriplesMap() {
-		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) this.owner.getConceptMappingByMappingId(this.parentTriplesMap);
+		//String parentTriplesMapKey = this.parentTriplesMap;
+		String parentTriplesMapKey = this.parentTriplesMap.asResource().getLocalName();
+		R2RMLTriplesMap triplesMap = 
+				(R2RMLTriplesMap) this.owner.getConceptMappingByMappingId(parentTriplesMapKey);
 		return triplesMap;
 	}
 
@@ -95,7 +102,7 @@ public class R2RMLRefObjectMap {
 
 	@Override
 	public String toString() {
-		return this.parentTriplesMap;
+		return this.parentTriplesMap.toString();
 	}
 
 }

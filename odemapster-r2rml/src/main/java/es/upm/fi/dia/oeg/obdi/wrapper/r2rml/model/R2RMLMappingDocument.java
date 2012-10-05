@@ -2,8 +2,10 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -13,6 +15,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
 
@@ -38,6 +41,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 	//private Collection<AbstractConceptMapping> triplesMaps;
 	private String mappingDocumentPath;
 	
+	public R2RMLMappingDocument() {}
 
 	public R2RMLMappingDocument(String mappingDocumentPath) 
 			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
@@ -47,7 +51,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		
 		 Model model = ModelFactory.createDefaultModel();
 		 // use the FileManager to find the input file
-		 InputStream in = FileManager.get().open( inputFileName );
+		InputStream in = FileManager.get().open( inputFileName );
 		if (in == null) {
 		    throw new IllegalArgumentException(
 		                                 "File: " + inputFileName + " not found");
@@ -70,15 +74,27 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 //		}
 
 		//parsing TriplesMap resources
-		ResIterator triplesMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
+//		StmtIterator stmtIterator = model.listStatements();
+//		while(stmtIterator.hasNext()) {
+//			logger.info(stmtIterator.nextStatement());
+//		}
+		
+		ResIterator triplesMapResources = model.listResourcesWithProperty(
+				RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
 		if(triplesMapResources != null) {
 			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
 				Resource triplesMapResource = triplesMapResources.nextResource();
-				String triplesMapKey = triplesMapResource.getNameSpace() + triplesMapResource.getLocalName();
-				R2RMLTriplesMap tm = new R2RMLTriplesMap(triplesMapResource, this);
-				tm.setId(triplesMapKey);
-				this.classMappings.add(tm);
+				//String triplesMapKey = triplesMapResource.getNameSpace() + triplesMapResource.getLocalName();
+				String triplesMapKey = triplesMapResource.getLocalName();
+				try {
+					R2RMLTriplesMap tm = new R2RMLTriplesMap(triplesMapResource, this);
+					tm.setId(triplesMapKey);
+					this.classMappings.add(tm);					
+				} catch(Exception e) {
+					logger.error("Error occured during parsing TriplesMap " + triplesMapResource.getLocalName() + " because " + e.getMessage());
+				}
+
 			}
 		}
 		
@@ -152,12 +168,12 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 
 
 	@Override
-	public Collection<AbstractConceptMapping> getConceptMappingsByConceptName(
+	public Set<AbstractConceptMapping> getConceptMappingsByConceptName(
 			String conceptURI) {
-		Collection<AbstractConceptMapping> result = null;
+		Set<AbstractConceptMapping> result = null;
 		
 		if(this.classMappings != null && this.classMappings.size() > 0) {
-			result = new Vector<AbstractConceptMapping>();
+			result = new HashSet<AbstractConceptMapping>();
 			for(AbstractConceptMapping triplesMap : this.classMappings) {
 				R2RMLSubjectMap subjectMap = ((R2RMLTriplesMap)triplesMap).getSubjectMap();
 				Collection<String> classURIs = subjectMap.getClassURIs();

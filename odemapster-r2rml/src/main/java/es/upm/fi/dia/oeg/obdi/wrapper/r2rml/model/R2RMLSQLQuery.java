@@ -9,7 +9,7 @@ public class R2RMLSQLQuery extends R2RMLLogicalTable {
 	public R2RMLSQLQuery(String sqlQuery) {
 		super();
 		this.sqlQuery = sqlQuery;
-		super.logicalTableType = LogicalTableType.SQLQUERY;
+		super.logicalTableType = LogicalTableType.QUERY_STRING;
 	}
 
 	@Override

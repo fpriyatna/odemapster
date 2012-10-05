@@ -41,18 +41,23 @@ implements R2RMLElement, IConceptMapping {
 		this.mappingDocument = owner;
 		this.triplesMapName = triplesMap.getLocalName();
 
-
-		Statement logicalTableStatement = triplesMap.getProperty(
-				R2RMLConstants.R2RML_LOGICALTABLE_PROPERTY);
-		if(logicalTableStatement != null) {
-			RDFNode logicalTableStatementObject = logicalTableStatement.getObject();
-			Resource logicalTableStatementObjectResource = (Resource) logicalTableStatementObject;
-			this.logicalTable = R2RMLLogicalTable.parse(
-					logicalTableStatementObjectResource);
-		} else {
-			String errorMessage = "Missing rr:logicalTable";
-			logger.error("Missing rr:logicalTable");
-			throw new R2RMLInvalidTriplesMapException(errorMessage);
+		try {
+			Statement logicalTableStatement = triplesMap.getProperty(
+					R2RMLConstants.R2RML_LOGICALTABLE_PROPERTY);
+			if(logicalTableStatement != null) {
+				RDFNode logicalTableStatementObject = logicalTableStatement.getObject();
+				Resource logicalTableStatementObjectResource = (Resource) logicalTableStatementObject;
+				this.logicalTable = R2RMLLogicalTable.parse(
+						logicalTableStatementObjectResource);
+			} else {
+				String errorMessage = "Missing rr:logicalTable";
+				logger.error(errorMessage);
+				throw new R2RMLInvalidTriplesMapException(errorMessage);
+			}
+			
+		} catch(Exception e) {
+			
+			throw new R2RMLInvalidTriplesMapException(e);
 		}
 
 

@@ -8,9 +8,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -18,6 +20,7 @@ import org.w3c.dom.Element;
 
 import Zql.ZUtils;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
@@ -36,6 +39,7 @@ public abstract class AbstractRunner {
 	protected IQueryTranslator queryTranslator;
 	private AbstractMappingDocument originalMappingDocument;
 	protected Query sparqQuery = null;
+	
 	
 	public static ConfigurationProperties configurationProperties;
 	
@@ -76,6 +80,12 @@ public abstract class AbstractRunner {
 		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
 		queryTranslator.setMappingDocument(md);
 		queryTranslator.setUnfolder(unfolder);
+		boolean optimizeTriplesSameSubject = AbstractRunner.configurationProperties.isOptimizeTB();
+		queryTranslator.setOptimizeTripleBlock(optimizeTriplesSameSubject);
+		boolean eliminateSubQuery = AbstractRunner.configurationProperties.isSubQueryElimination();
+		queryTranslator.setSubQueryElimination(eliminateSubQuery);
+		boolean subQueryAsView = AbstractRunner.configurationProperties.isSubQueryAsView();
+		queryTranslator.setSubqueryAsView(subQueryAsView);
 		return queryTranslator;
 	}
 
@@ -169,11 +179,6 @@ public abstract class AbstractRunner {
 		ZUtils.addCustomFunction("abs", 1);
 		ZUtils.addCustomFunction("lower", 1);
 		
-
-		//Loading configuration file
-//		AbstractRunner.configurationProperties = 
-//			this.loadConfigurationFile(mappingDirectory, configurationFile);
-
 		//loading ontology file
 		String ontologyFilePath = configurationProperties.getOntologyFilePath();
 		
@@ -184,19 +189,15 @@ public abstract class AbstractRunner {
 		//set output file
 		String outputFileName = configurationProperties.getOutputFilePath();
 
-		//parsing sparql file path
-		String queryFilePath = configurationProperties.getQueryFilePath();
-//		R2OMappingDocument translationResultMappingDocument = null;
-
-
+		//process SPARQL file
 		if(this.sparqQuery == null) {
-			//process SPARQL file
+			String queryFilePath = configurationProperties.getQueryFilePath();
 			if(queryFilePath != null && !queryFilePath.equals("") ) {
 				logger.info("Parsing query file : " + queryFilePath);
 				this.sparqQuery = QueryFactory.read(queryFilePath);
 			}
 		}
-		
+
 		if(this.sparqQuery == null) {
 			this.materializeMappingDocuments(outputFileName, originalMappingDocument);
 		} else {
@@ -214,96 +215,14 @@ public abstract class AbstractRunner {
 				//queries = rewritterWapper.rewrite(originalQuery);
 				queries = RewriterWrapper.rewrite(this.sparqQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
 				
-				
 				logger.debug("No of rewriting query result = " + queries.size());
 				logger.debug("queries = " + queries);
 			}			
 			
 			
-			//translate sparql into sql
-			this.queryTranslator.setOptimizeTripleBlock(this.configurationProperties.isOptimizeTB());
-			this.queryTranslator.setSubQueryElimination(this.configurationProperties.isSubQueryElimination());
-			Document xmlDoc = XMLUtility.createNewXMLDocument();
-			Connection conn = this.configurationProperties.getConn();
-
-			Element rootElement = null;
-			Element headElement = null;
-			Element resultsElement = null;
-			List<Element> headElements = null;
-			List<String> headElementsString = null;
-			
-
-			
-			for(Query query : queries) {
-//				translationResultMappingDocument = translator.processQuery(query);
-				try {
-					
-					
-					logger.debug("query(i) = " + query);
-					String sparql2SQLResult = 
-							this.queryTranslator.translate(query).toString();
-					logger.debug("sparql2sql = \n" + sparql2SQLResult);
-
-					ResultSet rs = DBUtility.executeQuery(conn, sparql2SQLResult);
-					ResultSetMetaData rsmd = rs.getMetaData();
-
-
-					//create root
-					if(rootElement == null) {
-						String rootString = "sparql";
-						rootElement = xmlDoc.createElement(rootString);
-						xmlDoc.appendChild(rootElement);
-					}
-
-					//create header
-					if(headElement == null) {
-						String headString = "head";
-						headElement = xmlDoc.createElement(headString);
-						rootElement.appendChild(headElement);
-						headElements = this.createHeadElementFromColumnNames(rsmd, xmlDoc);
-						headElementsString = new ArrayList<String>();
-						for(Element element : headElements) {
-							headElement.appendChild(element);
-							headElementsString.add(element.getAttribute("name"));
-						}						
-					}
-
-					//create results
-					if(resultsElement == null) {
-						String resultsString = "results";
-						resultsElement = xmlDoc.createElement(resultsString);
-						rootElement.appendChild(resultsElement);						
-					}
-
-					
-					String resultString = "result";
-					String bindingString = "binding";
-					int i=0;
-					while(rs.next()) {
-						Element resultElement = xmlDoc.createElement(resultString);
-						resultsElement.appendChild(resultElement);
-						Iterator<String> headElementsStringIterator = headElementsString.iterator(); 
-						while(headElementsStringIterator.hasNext()) {
-							String columnLabel = headElementsStringIterator.next();
-							Element bindingElement = xmlDoc.createElement(bindingString);
-							bindingElement.setAttribute("name", columnLabel);
-							bindingElement.setTextContent(rs.getString(columnLabel));
-							resultElement.appendChild(bindingElement);
-						}
-						i++;
-					}
-					status = i  + " instance(s) retrieved ";
-					logger.info(status);
-					//translationResultMappingDocuments.add(translator.processQuery(query));
-				} catch(Exception e) {
-					//e.printStackTrace();
-					logger.error("error processing query, error message = " + e.getMessage());
-					throw e;
-				}
-
-			}
-			XMLUtility.saveXMLDocument(xmlDoc, outputFileName);
-			//logger.debug("translationResult = " + translationResultMappingDocument);			 
+			//translate sparql queries into sql queries
+			Collection<String> sqlQueries = this.translateSPARQLQueriesIntoSQLQueries(queries);
+			this.generateSPARQLXMLBindingDocument(sqlQueries, outputFileName);
 		}
 		
 		logger.info("**********************DONE****************************");
@@ -311,6 +230,98 @@ public abstract class AbstractRunner {
 
 	}
 
+	private Collection<String> translateSPARQLQueriesIntoSQLQueries(Collection<Query> queries) throws Exception {
+		Collection<String> sparqlQueries = new Vector<String>();
+		for(Query query : queries) {
+			logger.debug("SPARQL Query = \n" + query);
+			String sparql2SQLResult = 
+					this.queryTranslator.translate(query).toString();
+			logger.info("SQL Query = \n" + sparql2SQLResult);
+			sparqlQueries.add(sparql2SQLResult);
+		}
+		
+		return sparqlQueries;
+	}
+	
+	private void generateSPARQLXMLBindingDocument(Collection<String> queries, String outputFileName) throws Exception {
+		Document xmlDoc = XMLUtility.createNewXMLDocument();
+		Connection conn = this.configurationProperties.getConn();
+		int timeout = this.configurationProperties.getDatabaseTimeout();
+		
+		Element rootElement = null;
+		Element headElement = null;
+		Element resultsElement = null;
+		List<Element> headElements = null;
+		List<String> headElementsString = null;
+		
+
+		
+		for(String query : queries) {
+			try {
+				ResultSet rs = DBUtility.executeQuery(conn, query, timeout);
+				ResultSetMetaData rsmd = rs.getMetaData();
+
+				//create root
+				if(rootElement == null) {
+					String rootString = "sparql";
+					rootElement = xmlDoc.createElement(rootString);
+					xmlDoc.appendChild(rootElement);
+				}
+
+				//create header
+				if(headElement == null) {
+					String headString = "head";
+					headElement = xmlDoc.createElement(headString);
+					rootElement.appendChild(headElement);
+					headElements = this.createHeadElementFromColumnNames(rsmd, xmlDoc);
+					headElementsString = new ArrayList<String>();
+					for(Element element : headElements) {
+						headElement.appendChild(element);
+						headElementsString.add(element.getAttribute("name"));
+					}						
+				}
+
+				//create results
+				if(resultsElement == null) {
+					String resultsString = "results";
+					resultsElement = xmlDoc.createElement(resultsString);
+					rootElement.appendChild(resultsElement);						
+				}
+
+				
+				String resultString = "result";
+				String bindingString = "binding";
+				int i=0;
+				while(rs.next()) {
+					Element resultElement = xmlDoc.createElement(resultString);
+					resultsElement.appendChild(resultElement);
+					Iterator<String> headElementsStringIterator = headElementsString.iterator(); 
+					while(headElementsStringIterator.hasNext()) {
+						String columnLabel = headElementsStringIterator.next();
+						Element bindingElement = xmlDoc.createElement(bindingString);
+						bindingElement.setAttribute("name", columnLabel);
+						String dbValue = rs.getString(columnLabel);
+						dbValue = this.translateResultSet(columnLabel, dbValue);
+						bindingElement.setTextContent(dbValue);
+						resultElement.appendChild(bindingElement);
+					}
+					i++;
+				}
+				String status = i  + " instance(s) retrieved ";
+				logger.info(status);
+				//translationResultMappingDocuments.add(translator.processQuery(query));
+			} catch(Exception e) {
+				e.printStackTrace();
+				logger.error("error processing query, error message = " + e.getMessage());
+				throw e;
+			}
+
+		}
+		XMLUtility.saveXMLDocument(xmlDoc, outputFileName);
+	}
+	
+	protected abstract String translateResultSet(String columnLabel, String dbValue);
+	
 	public String run(String mappingDirectory, String configurationFile) throws Exception {
 		AbstractRunner.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
 		return this.run();
