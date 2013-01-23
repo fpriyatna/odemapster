@@ -9,12 +9,11 @@ import es.upm.fi.dia.oeg.obdi.core.Utility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
-public class SQLSelectItem extends ZSelectItem implements Cloneable {
+public class SQLSelectItem extends ZSelectItem {
 	private String dbType;
 	private String schema;
 	private String table;
 	private String column;
-	
 	
 	public static SQLSelectItem createSQLItem(String dbType) {
 		SQLSelectItem selectItem = new SQLSelectItem();
@@ -212,25 +211,6 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		System.out.println("selectItems = " + selectItems);
 		
 	}
-
-	@Override
-	public ZSelectItem clone() throws CloneNotSupportedException {
-		ZSelectItem selectItem;
-		if(this.isExpression()) {
-			selectItem = new ZSelectItem();
-			selectItem.setExpression(this.getExpression());
-		} else {
-			String alias = this.getAlias();
-			this.setAlias("");
-			selectItem = new ZSelectItem(this.toString());
-			if(alias != null) {
-				this.setAlias(alias);	
-			}
-		}
-		
-		return selectItem;
-	}
-
 	
 	
 	

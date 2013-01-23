@@ -46,7 +46,6 @@ public class Constants {
 	public static final String OPTIMIZE_TB = "querytranslator.selfjoinelimination";
 	public static final String SUBQUERY_ELIMINATION = "querytranslator.subqueryelimination";
 	public static final String SUBQUERY_AS_VIEW = "querytranslator.subqueryasview";
-	public static final String QUERY_TRANSLATOR_CLASSNAME = "querytranslator.classname";
 	public static final String REMOVE_STRANGE_CHARS_FROM_LITERAL = "literal.removestrangechars";
 	public static final String ENCODE_UNSAFE_CHARS_IN_URI_COLUMN = "uricolumn.encodeunsafecharacters";
 	public static final String ENCODE_RESERVED_CHARS_IN_URI_COLUMN = "uricolumn.encodereserveccharacters";

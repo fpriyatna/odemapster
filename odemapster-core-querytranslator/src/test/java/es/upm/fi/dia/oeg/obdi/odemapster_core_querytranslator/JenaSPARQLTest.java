@@ -18,11 +18,8 @@ public class JenaSPARQLTest {
 	
 	@Test
 	public void testReadFromFile() throws Exception {
-		String queryFilePath = "C:/Users/Freddy/Dropbox/Documents/oeg/pig-script/bsbm01.sparql";
-		//String queryFilePath = "C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql";
-		//String queryFilePath = "/home/fpriyatna/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql";
-		//String queryFilePath = "C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql";
-		
+		//String queryFilePath = "C:/Users/Freddy/Dropbox/Documents/oeg/pig-script/bsbm04.sparql";
+		String queryFilePath = "C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/r2rml-mappings/r2rml-bsbm-mysql-250k/bsbm01.sparql";
 		logger.info("Query file : " + queryFilePath);		
 		
 		Query sparqlQuery = QueryFactory.read(queryFilePath);

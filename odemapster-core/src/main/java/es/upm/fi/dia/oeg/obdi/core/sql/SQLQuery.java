@@ -32,8 +32,6 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	private long slice = -1;
 	private boolean distinct = false;
 
-	private String comments;
-	
 	public SQLQuery(ZQuery zQuery) {
 		
 		if(zQuery.getSelect() != null) { this.addSelect(zQuery.getSelect());}
@@ -350,9 +348,6 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	public String toString() {
 		String result = "";
 
-		if(comments != null) {
-			result += "--" + this.comments + "\n";
-		}
 
 		//print select
 		String selectSQL = this.printSelect();
@@ -427,7 +422,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			result += "ON " + this.onExp + "\n";
 		}
 
-		String unionSQL = "\nUNION\n";
+		String unionSQL = "UNION ";
 		if(this.unionQueries != null) {
 			for(SQLQuery unionQuery : this.unionQueries) {
 				String unionQueryString = unionQuery.toString(); 
@@ -482,10 +477,6 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 	public void setLogicalTables(Collection<SQLLogicalTable> logicalTables) {
 		this.logicalTables = logicalTables;
-	}
-
-	public void setComments(String comments) {
-		this.comments = comments;
 	}
 
 }
