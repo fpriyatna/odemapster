@@ -7,8 +7,10 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
@@ -33,8 +35,7 @@ public class BSBM_Juan {
 //		R2RMLElementDataTranslateVisitor dataTranslator = 
 //				new R2RMLElementDataTranslateVisitor(configurationDirectory, configurationFile); 
 //		md.accept(dataTranslator);
-		AbstractUnfolder unfolder = new R2RMLElementUnfoldVisitor(
-				configurationDirectory, configurationFile);
+		AbstractUnfolder unfolder = new R2RMLElementUnfoldVisitor();
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
 		//R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
 		Class queryTranslatorClass = Class.forName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator");
@@ -42,18 +43,25 @@ public class BSBM_Juan {
 		queryTranslator.setMappingDocument(md);
 		queryTranslator.setUnfolder(unfolder);
 		
-		queryTranslator.setOptimizeTripleBlock(false);
+		//queryTranslator.setOptimizeTripleBlock(false);
 		queryTranslator.setIgnoreRDFTypeStatement(true);
+		
+		IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
+		queryTranslationOptimizer.setSelfJoinElimination(false);
+		queryTranslator.setOptimizer(queryTranslationOptimizer);
+
 		return queryTranslator;
 	}
 	
-	public void run(String testName) {
+	public void runChebotko(String testName) {
 		try {
 			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
-			queryTranslator.setOptimizeTripleBlock(false);
+			//queryTranslator.setOptimizeTripleBlock(false);
+			
+			
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
@@ -64,13 +72,19 @@ public class BSBM_Juan {
 		}
 	}
 	
-	public void runTB(String testName) {
+	public void runFreddy(String testName) {
 		try {
 			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
-			queryTranslator.setOptimizeTripleBlock(true);
+			//queryTranslator.setOptimizeTripleBlock(true);
+			
+			IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
+			queryTranslationOptimizer.setSelfJoinElimination(true);
+			queryTranslationOptimizer.setUnionQueryReduction(true);
+			queryTranslator.setOptimizer(queryTranslationOptimizer);
+			
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
@@ -81,22 +95,7 @@ public class BSBM_Juan {
 		}
 	}
 
-	public void runReorderedTB(String testName) {
-		try {
-			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
-			queryTranslator.setIgnoreRDFTypeStatement(true);
-			queryTranslator.setOptimizeTripleBlock(true);
-			String queryFilePath = configurationDirectory + testName + "(reordered).sparql";
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
-			logger.info("query = \n" + query + "\n");
-			logger.info("------" + testName + " DONE------\n\n");
-		} catch(Exception e) {
-			e.printStackTrace();
-			logger.error("Error : " + e.getMessage());
-			logger.info("------" + testName + " FAILED------\n\n");
-			assertTrue(e.getMessage(), false);
-		}
-	}
+
 	
 	@Test
 	public void testBSBM() throws Exception {
@@ -105,10 +104,8 @@ public class BSBM_Juan {
 		String mappingDocumentFile = configurationDirectory + testName + ".ttl";
 		try {
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-					configurationDirectory, configurationFile);
 			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile, unfolder));
+					, configurationFile));
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -121,133 +118,117 @@ public class BSBM_Juan {
 	@Test
 	public void testBSBM01Chebotko() throws Exception {
 		String testName = "bsbm01";
-		this.run(testName);
+		this.runChebotko(testName);
 	}
 	
 	@Test
 	public void testBSBM01Freddy() throws Exception {
 		String testName = "bsbm01";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
 	@Test
 	public void testBSBM02Chebotko() throws Exception {
 		String testName = "bsbm02";
-		this.run(testName);
+		this.runChebotko(testName);
 	}	
 
 	@Test
 	public void testBSBM02Freddy() throws Exception {
 		String testName = "bsbm02";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 
-	@Test
-	public void testBSBM02ReorderedTB() throws Exception {
-		String testName = "bsbm02";
-		this.runReorderedTB(testName);
-	}
+
 
 	@Test
 	public void testBSBM03Chebotko() throws Exception {
 		String testName = "bsbm03";
-		this.run(testName);
+		this.runChebotko(testName);
 	}	
 
 	@Test
 	public void testBSBM03Freddy() throws Exception {
 		String testName = "bsbm03";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
 	@Test
 	public void testBSBM04Chebotko() throws Exception {
 		String testName = "bsbm04";
-		this.run(testName);
+		this.runChebotko(testName);
 	}	
 	
 	@Test
 	public void testBSBM04Freddy() throws Exception {
 		String testName = "bsbm04";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
 	@Test
 	public void testBSBM05Chebotko() throws Exception {
 		String testName = "bsbm05";
-		this.run(testName);
+		this.runChebotko(testName);
 	}
 
 	@Test
 	public void testBSBM05Freddy() throws Exception {
 		String testName = "bsbm05";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
-	@Test
-	public void testBSBM05ReorderedTB() throws Exception {
-		String testName = "bsbm05";
-		this.runReorderedTB(testName);
-	}
+
 	
 	@Test
 	public void testBSBM06Chebotko() throws Exception {
 		String testName = "bsbm06";
-		this.run(testName);
+		this.runChebotko(testName);
 	}
 
 	@Test
 	public void testBSBM06Freddy() throws Exception {
 		String testName = "bsbm06";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 
 	@Test
 	public void testBSBM07() throws Exception {
 		String testName = "bsbm07";
-		this.run(testName);
+		this.runChebotko(testName);
 	}
 
 	@Test
 	public void testBSBM07Freddy() throws Exception {
 		String testName = "bsbm07";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 
-	@Test
-	public void testBSBM07ReorderedTB() throws Exception {
-		String testName = "bsbm07";
-		this.runReorderedTB(testName);
-	}
+
 	
 	@Test
 	public void testBSBM08Chebotko() throws Exception {
 		String testName = "bsbm08";
-		this.run(testName);
+		this.runChebotko(testName);
 	}
 
 	@Test
 	public void testBSBM08Freddy() throws Exception {
 		String testName = "bsbm08";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 
 	@Test
 	public void testBSBM10Chebotko() throws Exception {
 		String testName = "bsbm10";
-		this.run(testName);
+		this.runChebotko(testName);
 	}	
 
 	@Test
 	public void testBSBM10Freddy() throws Exception {
 		String testName = "bsbm10";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
-	@Test
-	public void testBSBM10ReorderedTB() throws Exception {
-		String testName = "bsbm10";
-		this.runReorderedTB(testName);
-	}
+
 	
 }

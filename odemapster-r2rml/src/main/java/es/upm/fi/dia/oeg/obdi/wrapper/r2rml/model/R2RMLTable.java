@@ -5,8 +5,8 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 public class R2RMLTable extends R2RMLLogicalTable {
 	private String tableName;
 
-	public R2RMLTable(String tableName) throws Exception {
-		super();
+	public R2RMLTable(String tableName, R2RMLTriplesMap owner) throws Exception {
+		super(owner);
 		if(tableName == null || tableName.equals("")) {
 			throw new Exception("Empty table name specified!");
 		}

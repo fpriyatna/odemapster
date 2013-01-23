@@ -7,7 +7,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
@@ -33,8 +35,8 @@ public class R2RML_BSBM_MONETDB_250K {
 //		R2RMLElementDataTranslateVisitor dataTranslator = 
 //				new R2RMLElementDataTranslateVisitor(configurationDirectory, configurationFile); 
 //		md.accept(dataTranslator);
-		R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-				configurationDirectory, configurationFile);
+		R2RMLElementUnfoldVisitor unfolder = 
+				new R2RMLElementUnfoldVisitor();
 
 		String queryFilePath = configurationDirectory + testName + ".sparql"; 
 		//R2RMLQueryTranslator queryTranslator = new R2RMLQueryTranslator(md, unfolder);
@@ -43,7 +45,7 @@ public class R2RML_BSBM_MONETDB_250K {
 		queryTranslator.setMappingDocument(md);
 		queryTranslator.setUnfolder(unfolder);
 
-		queryTranslator.setOptimizeTripleBlock(false);
+		//queryTranslator.setOptimizeTripleBlock(false);
 		queryTranslator.setIgnoreRDFTypeStatement(true);
 		return queryTranslator;
 	}
@@ -56,9 +58,9 @@ public class R2RML_BSBM_MONETDB_250K {
 			
 			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			queryTranslator.setIgnoreRDFTypeStatement(true);
-			queryTranslator.setOptimizeTripleBlock(false);
+			//queryTranslator.setOptimizeTripleBlock(false);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("final query = \n" + query + "\n");
 			//Connection conn = AbstractRunner.getConfigurationProperties().getConn();
 			//ResultSet rs = Utility.executeQuery(conn, query.toString());
@@ -72,16 +74,13 @@ public class R2RML_BSBM_MONETDB_250K {
 		}
 	}
 	
-	public void runTB(String testName) {
+	public void runFreddy(String testName) {
 		String configurationFile = testName + ".r2rml.properties";
 		try {
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			
+			AbstractRunner runner = new R2RMLRunnerFreddy(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
-			queryTranslator.setIgnoreRDFTypeStatement(true);
-			queryTranslator.setOptimizeTripleBlock(true);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("final query = \n" + query + "\n");
 			//Connection conn = AbstractRunner.getConfigurationProperties().getConn();
 			//ResultSet rs = Utility.executeQuery(conn, query.toString());
@@ -95,25 +94,7 @@ public class R2RML_BSBM_MONETDB_250K {
 		}
 	}
 
-	public void runReorderedTB(String testName) {
-		String configurationFile = testName + ".r2rml.properties";
-		try {
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			
-			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
-			queryTranslator.setIgnoreRDFTypeStatement(true);
-			queryTranslator.setOptimizeTripleBlock(true);
-			String queryFilePath = configurationDirectory + testName + "(reordered).sparql";
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
-			logger.info("query = \n" + query + "\n");
-			logger.info("------" + testName + " DONE------\n\n");
-		} catch(Exception e) {
-			e.printStackTrace();
-			logger.error("Error : " + e.getMessage());
-			logger.info("------" + testName + " FAILED------\n\n");
-			assertTrue(e.getMessage(), false);
-		}
-	}
+
 	
 	@Test
 	public void testBSBMBatch() throws Exception {
@@ -143,7 +124,7 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM01TB() throws Exception {
 		String testName = "bsbm01";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
 	@Test
@@ -155,14 +136,10 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM02TB() throws Exception {
 		String testName = "bsbm02";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
-	@Test
-	public void testBSBM02ReorderedTB() throws Exception {
-		String testName = "bsbm02";
-		this.runReorderedTB(testName);
-	}
+
 	
 	@Test
 	public void testBSBM03() throws Exception {
@@ -173,7 +150,7 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM03TB() throws Exception {
 		String testName = "bsbm03";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
 	@Test
@@ -185,7 +162,7 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM04TB() throws Exception {
 		String testName = "bsbm04";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
 	@Test
@@ -197,14 +174,10 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM05TB() throws Exception {
 		String testName = "bsbm05";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
-	@Test
-	public void testBSBM05ReorderedTB() throws Exception {
-		String testName = "bsbm05";
-		this.runReorderedTB(testName);
-	}
+
 	
 	@Test
 	public void testBSBM06() throws Exception {
@@ -215,7 +188,7 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM06TB() throws Exception {
 		String testName = "bsbm06";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 
 	@Test
@@ -227,14 +200,10 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM07TB() throws Exception {
 		String testName = "bsbm07";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
-	@Test
-	public void testBSBM07ReorderedTB() throws Exception {
-		String testName = "bsbm07";
-		this.runReorderedTB(testName);
-	}
+
 
 	@Test
 	public void testBSBM08() throws Exception {
@@ -245,14 +214,10 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM08TB() throws Exception {
 		String testName = "bsbm08";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 
-	@Test
-	public void testBSBM08ReorderedTB() throws Exception {
-		String testName = "bsbm08";
-		this.runReorderedTB(testName);
-	}
+
 
 	@Test
 	public void testBSBM10() throws Exception {
@@ -263,13 +228,9 @@ public class R2RML_BSBM_MONETDB_250K {
 	@Test
 	public void testBSBM10TB() throws Exception {
 		String testName = "bsbm10";
-		this.runTB(testName);
+		this.runFreddy(testName);
 	}
 	
-	@Test
-	public void testBSBM10ReorderedTB() throws Exception {
-		String testName = "bsbm10";
-		this.runReorderedTB(testName);
-	}
+
 	
 }

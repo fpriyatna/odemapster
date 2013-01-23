@@ -11,7 +11,9 @@ import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
@@ -34,10 +36,8 @@ public class R2RML_Kuwait_Clinic {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-					configurationDirectory, configurationFile);
 			R2RMLElementVisitor dataTranslateVisitor = new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile, unfolder); 
+					, configurationFile); 
 			md.accept(dataTranslateVisitor);
 			
 			logger.info("------" + testName + " DONE------\n\n");
@@ -58,17 +58,16 @@ public class R2RML_Kuwait_Clinic {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(false);
-			queryTranslator.setSubqueryAsView(false);
+			//queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
 
 //			boolean optimizeTripleBlock = false;
 //			boolean subqueryAsView = false;			
 //			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
 			
-			SQLQuery query = queryTranslator.translateFromFile();
+			SQLQuery query = queryTranslator.translateFromPropertyFile();
 			logger.info("sql query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConnection();
+			Connection conn = runner.getConnection();
 			ResultSet rs = DBUtility.executeQuery(conn, query.toString(), 0);
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
@@ -91,19 +90,11 @@ public class R2RML_Kuwait_Clinic {
 		
 		try {
 			long start = System.currentTimeMillis();
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			AbstractRunner runner = new R2RMLRunnerFreddy(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(true);
-			queryTranslator.setSubqueryAsView(false);
-			queryTranslator.setQueryFilePath(queryFilePath);
-			
-//			boolean optimizeTripleBlock = true;
-//			boolean subqueryAsView = false;
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-			
-			SQLQuery query = queryTranslator.translateFromFile();
+			SQLQuery query = queryTranslator.translateFromPropertyFile();
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConnection();
+			Connection conn = runner.getConnection();
 			ResultSet rs = DBUtility.executeQuery(conn, query.toString(), 0);
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");

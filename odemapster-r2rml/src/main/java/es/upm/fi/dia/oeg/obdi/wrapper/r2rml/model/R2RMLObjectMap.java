@@ -14,8 +14,8 @@ public class R2RMLObjectMap extends R2RMLTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
 	
 	
-	public R2RMLObjectMap(Resource resource) throws R2RMLInvalidTermMapException {
-		super(resource, TermMapPosition.OBJECT);
+	public R2RMLObjectMap(Resource resource, R2RMLTriplesMap owner) throws R2RMLInvalidTermMapException {
+		super(resource, TermMapPosition.OBJECT, owner);
 		
 	}
 	

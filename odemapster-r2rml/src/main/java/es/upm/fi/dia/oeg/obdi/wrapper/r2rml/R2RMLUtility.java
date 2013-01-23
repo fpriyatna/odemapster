@@ -179,10 +179,10 @@ public class R2RMLUtility {
 		String columnNameSplit[] = columnName.split("\\.");
 		if(columnNameSplit.length == 1) {
 			//result = new SQLSelectItem(tableAlias + "." + columnName);
-			result = SQLSelectItem.createSQLItem(dbType, tableAlias + "." + columnName);
+			result = SQLSelectItem.createSQLItem(dbType, columnName, tableAlias);
 		} else if(columnNameSplit.length > 1) {
 			//result = new SQLSelectItem(tableAlias + "." + columnNameSplit[columnNameSplit.length - 1]);
-			result = SQLSelectItem.createSQLItem(dbType, tableAlias + "." + columnNameSplit[columnNameSplit.length - 1]);
+			result = SQLSelectItem.createSQLItem(dbType, columnNameSplit[columnNameSplit.length - 1], tableAlias);
 		}
 
 		return result;
@@ -199,7 +199,7 @@ public class R2RMLUtility {
 				//String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
 				String childColumnName = joinCondition.getChildColumnName();
 				//SQLSelectItem childSelectItem = new SQLSelectItem(childColumnName);  
-				SQLSelectItem childSelectItem = SQLSelectItem.createSQLItem(dbType, childColumnName);
+				SQLSelectItem childSelectItem = SQLSelectItem.createSQLItem(dbType, childColumnName, null);
 				
 //				String[] childColumnNameSplit = childColumnName.split("\\.");
 //				if(childColumnNameSplit.length == 1) {
@@ -211,7 +211,7 @@ public class R2RMLUtility {
 
 				 
 				String parentColumnName = joinCondition.getParentColumnName();
-				SQLSelectItem parentSelectItem = SQLSelectItem.createSQLItem(dbType, parentColumnName);
+				SQLSelectItem parentSelectItem = SQLSelectItem.createSQLItem(dbType, parentColumnName, null);
 				parentColumnName = joinQueryAlias + "." + parentSelectItem.columnToString();
 				ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
 				

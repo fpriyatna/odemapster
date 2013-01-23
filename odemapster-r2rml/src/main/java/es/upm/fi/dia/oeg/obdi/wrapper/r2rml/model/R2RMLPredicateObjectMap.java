@@ -27,7 +27,8 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 	
 	private String alias;
 	
-	public R2RMLPredicateObjectMap(Resource resource, R2RMLMappingDocument mappingDocument, R2RMLTriplesMap parent) 
+	public R2RMLPredicateObjectMap(Resource resource, R2RMLMappingDocument mappingDocument
+			, R2RMLTriplesMap parent) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		this.mappingDocument = mappingDocument;
 		this.parent = parent;
@@ -35,7 +36,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		Statement predicateMapStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATEMAP_PROPERTY);
 		if(predicateMapStatement != null) {
 			Resource predicateMapResource = (Resource) predicateMapStatement.getObject();
-			this.predicateMap = new R2RMLPredicateMap(predicateMapResource, TermMapPosition.PREDICATE);
+			this.predicateMap = new R2RMLPredicateMap(predicateMapResource, parent);
 		}
 
 		Statement predicateStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATE_PROPERTY);
@@ -53,7 +54,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 				this.refObjectMap = new R2RMLRefObjectMap(objectMapStatementObject, mappingDocument);				
 			} else {
 				this.objectMapType = ObjectMapType.ObjectMap;
-				this.objectMap = new R2RMLObjectMap(objectMapStatementObject);
+				this.objectMap = new R2RMLObjectMap(objectMapStatementObject, parent);
 			}
 		}
 
@@ -74,7 +75,8 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 
 		Statement graphMapStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPHMAP_PROPERTY);
 		if(graphMapStatement != null) {
-			this.graphMap = new R2RMLGraphMap((Resource) graphMapStatement.getObject());
+			Resource graphMapResource = (Resource) graphMapStatement.getObject();
+			this.graphMap = new R2RMLGraphMap(graphMapResource, parent);
 		}
 		
 		Statement graphStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPH_PROPERTY);

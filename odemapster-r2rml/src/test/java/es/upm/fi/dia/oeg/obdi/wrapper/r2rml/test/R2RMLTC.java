@@ -43,10 +43,8 @@ public class R2RMLTC {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-					configurationDirectory, configurationFile);
 			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile, unfolder));
+					, configurationFile));
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();

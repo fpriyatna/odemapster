@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
 
 import java.io.InputStream;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -36,49 +37,50 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLJoinConditionExceptio
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
 	
-	
+
 	private Collection<String> prefixes;
 	//private Collection<AbstractConceptMapping> triplesMaps;
 	private String mappingDocumentPath;
-	
-	public R2RMLMappingDocument() {}
 
-	public R2RMLMappingDocument(String mappingDocumentPath) 
+
+	public R2RMLMappingDocument(String mappingDocumentPath, Connection conn) 
 			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		super();
 		this.mappingDocumentPath = mappingDocumentPath;
-		String inputFileName = this.getMappingDocumentPath();
+		this.setConn(conn);
 		
-		 Model model = ModelFactory.createDefaultModel();
-		 // use the FileManager to find the input file
+		String inputFileName = this.getMappingDocumentPath();
+
+		Model model = ModelFactory.createDefaultModel();
+		// use the FileManager to find the input file
 		InputStream in = FileManager.get().open( inputFileName );
 		if (in == null) {
-		    throw new IllegalArgumentException(
-		                                 "File: " + inputFileName + " not found");
+			throw new IllegalArgumentException(
+					"Mapping File: " + inputFileName + " not found");
 		}
-		
+
 		// read the Turtle file
 		model.read(in, null, "TURTLE");
 		super.setMappingDocumentPrefixMap(model.getNsPrefixMap());
 
-//		//parsing ObjectMap resources
-//		ResIterator objectMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_OBJECTSMAP_CLASS);
-//		if(objectMapResources != null) {
-//			this.objectMaps = new HashMap<String, R2RMLObjectMap>();
-//			while(objectMapResources.hasNext()) {
-//				Resource objectMapResource = objectMapResources.nextResource();
-//				String objectMapKey = objectMapResource.getNameSpace() + objectMapResource.getLocalName();
-//				R2RMLObjectMap om = new R2RMLObjectMap(objectMapResource);
-//				this.objectMaps.put(objectMapKey, om);
-//			}
-//		}
+		//		//parsing ObjectMap resources
+		//		ResIterator objectMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_OBJECTSMAP_CLASS);
+		//		if(objectMapResources != null) {
+		//			this.objectMaps = new HashMap<String, R2RMLObjectMap>();
+		//			while(objectMapResources.hasNext()) {
+		//				Resource objectMapResource = objectMapResources.nextResource();
+		//				String objectMapKey = objectMapResource.getNameSpace() + objectMapResource.getLocalName();
+		//				R2RMLObjectMap om = new R2RMLObjectMap(objectMapResource);
+		//				this.objectMaps.put(objectMapKey, om);
+		//			}
+		//		}
 
 		//parsing TriplesMap resources
-//		StmtIterator stmtIterator = model.listStatements();
-//		while(stmtIterator.hasNext()) {
-//			logger.info(stmtIterator.nextStatement());
-//		}
-		
+		//		StmtIterator stmtIterator = model.listStatements();
+		//		while(stmtIterator.hasNext()) {
+		//			logger.info(stmtIterator.nextStatement());
+		//		}
+
 		ResIterator triplesMapResources = model.listResourcesWithProperty(
 				RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
 		if(triplesMapResources != null) {
@@ -97,10 +99,13 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 
 			}
 		}
+
 		
-		
-		// write it to standard out
-		//model.write(System.out);		
+	}
+	
+	public R2RMLMappingDocument(String mappingDocumentPath) 
+			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
+		this(mappingDocumentPath, null);
 	}
 
 	public Object accept(R2RMLElementVisitor visitor) throws Exception {
@@ -110,15 +115,15 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 
 	public void parse() throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		String inputFileName = this.getMappingDocumentPath();
-		
-		 Model model = ModelFactory.createDefaultModel();
-		 // use the FileManager to find the input file
-		 InputStream in = FileManager.get().open( inputFileName );
+
+		Model model = ModelFactory.createDefaultModel();
+		// use the FileManager to find the input file
+		InputStream in = FileManager.get().open( inputFileName );
 		if (in == null) {
-		    throw new IllegalArgumentException(
-		                                 "File: " + inputFileName + " not found");
+			throw new IllegalArgumentException(
+					"File: " + inputFileName + " not found");
 		}
-		
+
 		// read the Turtle file
 		model.read(in, null, "TURTLE");
 
@@ -133,12 +138,12 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 			}
 
 		}
-		
-		
+
+
 		// write it to standard out
 		//model.write(System.out);		
 	}
-	
+
 	public String getMappingDocumentPath() {
 		return mappingDocumentPath;
 	}
@@ -150,7 +155,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 	@Override
 	public void parse(Element xmlElement) throws ParseException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -171,7 +176,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 	public Set<AbstractConceptMapping> getConceptMappingsByConceptName(
 			String conceptURI) {
 		Set<AbstractConceptMapping> result = null;
-		
+
 		if(this.classMappings != null && this.classMappings.size() > 0) {
 			result = new HashSet<AbstractConceptMapping>();
 			for(AbstractConceptMapping triplesMap : this.classMappings) {
@@ -263,12 +268,6 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 	public void setTriplesMaps(Collection<AbstractConceptMapping> triplesMaps) {
 		this.classMappings = triplesMaps;
 	}
-
-
-
-
-
-
 
 
 

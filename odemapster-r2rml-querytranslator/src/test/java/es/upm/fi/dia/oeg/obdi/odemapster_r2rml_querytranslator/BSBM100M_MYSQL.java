@@ -15,22 +15,39 @@ import Zql.ZStatement;
 import Zql.ZqlParser;
 import es.upm.fi.dia.oeg.obdi.core.ScriptRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementDataTranslateVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
 
 public class BSBM100M_MYSQL {
 	private static Logger logger = Logger.getLogger(BSBM100M_MYSQL.class);
 	
-	private String mappingDirectory = TestUtility.getMappingDirectoryByOS();
-	private String configurationDirectory = mappingDirectory + "r2rml-mappings/r2rml-bsbm-mysql-100m/";
-	private String mappingDocumentFile = configurationDirectory + "bsbm.ttl";
+	private static String mappingDirectory = TestUtility.getMappingDirectoryByOS();
+	private static String configurationDirectory = mappingDirectory + "r2rml-mappings/r2rml-bsbm-mysql-100m/";
+	private static String mappingDocumentFile = configurationDirectory + "bsbm.ttl";
+	private static IQueryTranslator queryTranslatorFreddy = null;
+	
 	static {
 		PropertyConfigurator.configure("log4j.properties");
+		try {
+			queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocumentFile); 
+			IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
+			queryTranslationOptimizer.setSelfJoinElimination(true);
+			queryTranslationOptimizer.setUnionQueryReduction(true);
+			queryTranslationOptimizer.setSubQueryElimination(true);
+			queryTranslationOptimizer.setSubQueryAsView(false);
+			queryTranslatorFreddy.setOptimizer(queryTranslationOptimizer);
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 //	private R2RMLQueryTranslator getQueryTranslator(String testName, 
@@ -69,7 +86,7 @@ public class BSBM100M_MYSQL {
 			String query = statement.toString();
 			
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			Connection conn = runner.getConnection();
 //			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
 //			int noOfRows = DBUtility.getRowCount(rs);
 //			logger.info("noOfRows = " + noOfRows);
@@ -102,7 +119,7 @@ public class BSBM100M_MYSQL {
 			String query = statement.toString();
 			
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			Connection conn = runner.getConnection();
 			ScriptRunner scriprunner = 
 					new ScriptRunner(conn, false, true);
 			scriprunner.runScript(new BufferedReader(new FileReader(queryFilePath)));
@@ -135,7 +152,7 @@ public class BSBM100M_MYSQL {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConfigurationProperties().getConn();
+			Connection conn = runner.getConnection();
 			
 //			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
 //			int noOfRows = DBUtility.getRowCount(rs);
@@ -164,18 +181,19 @@ public class BSBM100M_MYSQL {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(false);
-			queryTranslator.setSubqueryAsView(false);
+			//queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
-			queryTranslator.setSubQueryElimination(true);
+			
+
+
 			
 //			boolean optimizeTripleBlock = false;
 //			boolean subqueryAsView = false;			
 //			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
 			
-			SQLQuery query = queryTranslator.translateFromFile();
+			SQLQuery query = queryTranslator.translateFromPropertyFile();
 			logger.info("sql query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConnection();
+			Connection conn = runner.getConnection();
 			
 //			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
 //			int noOfRows = DBUtility.getRowCount(rs);
@@ -203,17 +221,18 @@ public class BSBM100M_MYSQL {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(false);
-			queryTranslator.setSubqueryAsView(true);
+			//queryTranslator.setOptimizeTripleBlock(false);
 			queryTranslator.setQueryFilePath(queryFilePath);
 			
+
+
 //			boolean optimizeTripleBlock = false;
 //			boolean subqueryAsView = true;
 //			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
 //			
-			SQLQuery query = queryTranslator.translateFromFile();
+			SQLQuery query = queryTranslator.translateFromPropertyFile();
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConnection();
+			Connection conn = runner.getConnection();
 			
 //			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
 //			int noOfRows = DBUtility.getRowCount(rs);
@@ -239,25 +258,10 @@ public class BSBM100M_MYSQL {
 		
 		try {
 			long start = System.currentTimeMillis();
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(true);
-			queryTranslator.setSubQueryElimination(true);
-			queryTranslator.setSubqueryAsView(false);
-			queryTranslator.setQueryFilePath(queryFilePath);
-			
-//			boolean optimizeTripleBlock = true;
-//			boolean subqueryAsView = false;
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-			
-			SQLQuery query = queryTranslator.translateFromFile();
+			queryTranslatorFreddy.setQueryFilePath(queryFilePath);
+			SQLQuery query = queryTranslatorFreddy.translateFromPropertyFile();
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConnection();
-
-//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
-//			int noOfRows = DBUtility.getRowCount(rs);
-//			logger.info("noOfRows = " + noOfRows);
-
+			//Connection conn = runner.getConnection();
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			logger.info("------" + testName + " Freddy DONE------");
@@ -278,17 +282,22 @@ public class BSBM100M_MYSQL {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(true);
-			queryTranslator.setSubqueryAsView(true);
+			//queryTranslator.setOptimizeTripleBlock(true);
 			queryTranslator.setQueryFilePath(queryFilePath);
+			
+			IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
+			queryTranslationOptimizer.setSelfJoinElimination(true);
+			queryTranslationOptimizer.setUnionQueryReduction(true);
+			queryTranslator.setOptimizer(queryTranslationOptimizer);
+
 			
 //			boolean optimizeTripleBlock = true;
 //			boolean subqueryAsView = true;
 //			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
 //			
-			SQLQuery query = queryTranslator.translateFromFile();
+			SQLQuery query = queryTranslator.translateFromPropertyFile();
 			logger.info("query = \n" + query + "\n");
-			Connection conn = AbstractRunner.getConnection();
+			Connection conn = runner.getConnection();
 
 //			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
 //			int noOfRows = DBUtility.getRowCount(rs);
@@ -306,31 +315,7 @@ public class BSBM100M_MYSQL {
 		}
 	}
 	
-	public void runReorderedTB(String testName) {
-		String configurationFile = testName + ".r2rml.properties";
-		String queryFilePath = configurationDirectory + testName + "(reordered).sparql";
-		
-		try {
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			queryTranslator.setOptimizeTripleBlock(true);
-			queryTranslator.setSubqueryAsView(false);
-			queryTranslator.setQueryFilePath(queryFilePath);
-			
-//			boolean optimizeTripleBlock = true;
-//			boolean subqueryAsView = false;
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-			
-			SQLQuery query = queryTranslator.translateFromFile(queryFilePath);
-			logger.info("query = \n" + query + "\n");
-			logger.info("------" + testName + " DONE------\n\n");
-		} catch(Exception e) {
-			e.printStackTrace();
-			logger.error("Error : " + e.getMessage());
-			logger.info("------" + testName + " FAILED------\n\n");
-			assertTrue(e.getMessage(), false);
-		}
-	}
+
 	
 	@Test
 	public void testBSBM() throws Exception {
@@ -340,10 +325,8 @@ public class BSBM100M_MYSQL {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-					runner.configurationProperties);
 			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile, unfolder));
+					, configurationFile));
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -413,10 +396,7 @@ public class BSBM100M_MYSQL {
 		this.runFreddyView(testName);
 	}
 
-	public void testBSBM02ReorderedTB() throws Exception {
-		String testName = "bsbm02";
-		this.runReorderedTB(testName);
-	}
+
 
 	@Test
 	public void testBSBM03SQL() throws Exception {
@@ -516,10 +496,7 @@ public class BSBM100M_MYSQL {
 		this.runFreddyView(testName);
 	}
 
-	public void testBSBM05ReorderedTB() throws Exception {
-		String testName = "bsbm05";
-		this.runReorderedTB(testName);
-	}
+
 
 	@Test
 	public void testBSBM06SQL() throws Exception {
@@ -588,10 +565,7 @@ public class BSBM100M_MYSQL {
 		this.runFreddyView(testName);
 	}
 
-	public void testBSBM07ReorderedTB() throws Exception {
-		String testName = "bsbm07";
-		this.runReorderedTB(testName);
-	}
+
 
 	@Test
 	public void testBSBM08SQL() throws Exception {
@@ -653,9 +627,6 @@ public class BSBM100M_MYSQL {
 		this.runFreddyView(testName);
 	}
 
-	public void testBSBM10ReorderedTB() throws Exception {
-		String testName = "bsbm10";
-		this.runReorderedTB(testName);
-	}
+
 	
 }

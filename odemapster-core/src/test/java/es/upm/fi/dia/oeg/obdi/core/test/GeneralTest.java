@@ -13,7 +13,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
 
 public class GeneralTest {
@@ -26,7 +26,7 @@ public class GeneralTest {
 	public static void main(String[] args) throws Exception {
 		
 		String input = "http://www.google.com/Hello Río";
-		System.out.println(Utility.encodeURI(input));
+		System.out.println(ODEMapsterUtility.encodeURI(input));
 		String inputString1 = "INSERT INTO TBLSTUDENT(CL1, CL2, CL3, CL4, CL5, CL6) VALUES (a, b, c, d, e, f);";
 		String inputString2 = "INSERT INTO TBLSTUDENT(a, b, c, d, e ,f);";
 		

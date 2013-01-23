@@ -12,8 +12,8 @@ public class R2RMLGraphMap extends R2RMLTermMap {
 		super.setTermType(R2RMLConstants.R2RML_LITERAL_URI);
 	}
 	
-	public R2RMLGraphMap(Resource resource) throws R2RMLInvalidTermMapException {
-		super(resource, TermMapPosition.GRAPH);
+	public R2RMLGraphMap(Resource resource, R2RMLTriplesMap owner) throws R2RMLInvalidTermMapException {
+		super(resource, TermMapPosition.GRAPH, owner);
 	}
 
 

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 
 public class TestUtility {
@@ -37,11 +37,11 @@ public class TestUtility {
 //			String str2 = Utility.encodeUnsafeChars(str1);
 //			System.out.println("str1 after encodeUnsafeChars = " + str2);
 			
-			String str3 = Utility.encodeReservedChars(str1);
+			String str3 = ODEMapsterUtility.encodeReservedChars(str1);
 			System.out.println("str1 after encodeReservedChars = " + str3);
 
-			String str4 = Utility.encodeUnsafeChars(str1);
-			String str5 = Utility.encodeReservedChars(str4);
+			String str4 = ODEMapsterUtility.encodeUnsafeChars(str1);
+			String str5 = ODEMapsterUtility.encodeReservedChars(str4);
 			System.out.println("str1 after encodeUnsafeChars,encodeReservedChars = " + str5);
 
 			assertTrue(true);

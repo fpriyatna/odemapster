@@ -26,10 +26,8 @@ public class R2RML_Atlashp {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
-			R2RMLElementUnfoldVisitor unfolder = new R2RMLElementUnfoldVisitor(
-					configurationDirectory, configurationFile);
 			R2RMLElementVisitor dataTranslateVisitor = new R2RMLElementDataTranslateVisitor(configurationDirectory
-					, configurationFile, unfolder); 
+					, configurationFile); 
 			md.accept(dataTranslateVisitor);
 			
 			logger.info("------" + testName + " DONE------\n\n");

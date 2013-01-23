@@ -23,9 +23,9 @@ public class R2RMLSubjectMap extends R2RMLTermMap {
 		super.setTermType(R2RMLConstants.R2RML_LITERAL_URI);
 	}
 	
-	public R2RMLSubjectMap(Resource resource) throws R2RMLInvalidTermMapException {
-		super(resource, TermMapPosition.SUBJECT);
-
+	public R2RMLSubjectMap(Resource resource, R2RMLTriplesMap owner) throws R2RMLInvalidTermMapException {
+		super(resource, TermMapPosition.SUBJECT, owner);
+		
 		if(this.getTermType() != null && this.getTermType().equals(R2RMLConstants.R2RML_LITERAL_URI)) {
 			throw new R2RMLInvalidTermMapException("Literal is not permitted in the subject!");
 		}
@@ -42,7 +42,7 @@ public class R2RMLSubjectMap extends R2RMLTermMap {
 		
 		Statement graphMapStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPHMAP_PROPERTY);
 		if(graphMapStatement != null) {
-			this.graphMap = new R2RMLGraphMap((Resource) graphMapStatement.getObject());
+			this.graphMap = new R2RMLGraphMap((Resource) graphMapStatement.getObject(), owner);
 		}
 
 		Statement graphStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPH_PROPERTY);

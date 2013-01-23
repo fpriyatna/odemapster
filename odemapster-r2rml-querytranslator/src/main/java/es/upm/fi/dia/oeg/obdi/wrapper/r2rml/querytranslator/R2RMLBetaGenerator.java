@@ -1,23 +1,19 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
-import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
@@ -30,121 +26,109 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLBetaGenerator.class);
-	
-	public R2RMLBetaGenerator(AbstractQueryTranslator owner,
-			Map<Node, Set<AbstractConceptMapping>> mapNodeConceptMapping,
-			AbstractMappingDocument mappingDocument) {
-		super(owner, mapNodeConceptMapping, mappingDocument);
+
+	public R2RMLBetaGenerator(AbstractQueryTranslator owner) {
+		super(owner);
 	}
 
 
-
 	@Override
-	public ZSelectItem calculateBetaObject(
-			AbstractConceptMapping cm, Triple triple)
-			throws QueryTranslationException {
-		Node object = triple.getObject();
-		String predicateURI = triple.getPredicate().getURI();
+	protected SQLSelectItem calculateBetaObject(Triple tp, AbstractConceptMapping cm
+			, String predicateURI, AlphaResult alphaResult) throws QueryTranslationException {
+		SQLSelectItem selectItem = null;
+		Node object = tp.getObject();
 		
-		ZSelectItem selectItem = null;
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
-		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
-		String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
+		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
+		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 		
-		if(RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-			ZConstant conceptNameConstant = new ZConstant(cm.getConceptName()
-					, ZConstant.STRING);
-			selectItem = new SQLSelectItem();
-			selectItem.setExpression(conceptNameConstant);
-		} else {
-			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
-			if(pms != null) {
-				if(pms.size() > 1) {
-					logger.warn("Multiple property mappings defined, result may be wrong!");
+		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
+		if(pms == null || pms.isEmpty()) {
+			String errorMessage = "Undefined mappings for : " + predicateURI 
+					+ " for class " + cm.getConceptName();
+			logger.warn(errorMessage);
+		} else if (pms.size() > 1) {
+			String errorMessage = "Multiple property mappings defined, result may be wrong!";
+			throw new QueryTranslationException(errorMessage);			
+		} else {//if(pms.size() == 1)
+			AbstractPropertyMapping pm = pms.iterator().next();
+			R2RMLPredicateObjectMap predicateObjectMap =(R2RMLPredicateObjectMap) pm;
+			R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap(); 
+			String databaseColumnString = null;
+			Collection<String> databaseColumnsString = null;
+
+			if(refObjectMap == null) {
+				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
+				if(object.isVariable()) {
+					this.getOwner().getMapVarMapping().put(object.getName(), objectMap);
+				}
+
+				if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
+					String constantValue = objectMap.getConstantValue();
+					selectItem = new SQLSelectItem();
+					ZConstant zConstant = new ZConstant(constantValue, ZConstant.STRING);
+					selectItem.setExpression(zConstant);
+				} else {
+					databaseColumnsString = objectMap.getDatabaseColumnsString();
+					if(databaseColumnsString != null) {
+						if(databaseColumnsString.size() > 1) {
+							logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
+						}
+						databaseColumnString = databaseColumnsString.iterator().next();
+					}
+					selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);							
+				}
+
+			} else {
+				if(object.isVariable()) {
+					this.getOwner().getMapVarMapping().put(object.getName(), refObjectMap);
 				}
 				
-				for(AbstractPropertyMapping pm : pms) {
-					R2RMLPredicateObjectMap predicateObjectMap =(R2RMLPredicateObjectMap) pm;
-					R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap(); 
-					String databaseColumnString = null;
-					Collection<String> databaseColumnsString = null;
+				databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
+				//String refObjectMapAlias = refObjectMap.getAlias(); 
+				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
 
-					if(refObjectMap == null) {
-						R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
-						if(object.isVariable()) {
-							this.getOwner().getMapVarMapping().put(object.getName(), objectMap);
-						}
-						
-						
-						if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
-							String constantValue = objectMap.getConstantValue();
-							selectItem = new ZSelectItem();
-							ZConstant zConstant = new ZConstant(constantValue, ZConstant.STRING);
-							selectItem.setExpression(zConstant);
-						} else {
-							databaseColumnsString = objectMap.getDatabaseColumnsString();
-							if(databaseColumnsString != null) {
-								if(databaseColumnsString.size() > 1) {
-									logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
-								}
-								databaseColumnString = databaseColumnsString.iterator().next();
-							}
-							selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);							
-						}
-
-					} else {
-						databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
-						//String refObjectMapAlias = refObjectMap.getAlias(); 
-						String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
-						
-						if(databaseColumnsString != null) {
-							if(databaseColumnsString.size() > 1) {
-								logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
-							}
-							databaseColumnString = databaseColumnsString.iterator().next();
-						}
-						selectItem = R2RMLUtility.toSelectItem(databaseColumnString, refObjectMapAlias);						
-								
+				if(databaseColumnsString != null) {
+					if(databaseColumnsString.size() > 1) {
+						logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
 					}
-
-					
-
+					databaseColumnString = databaseColumnsString.iterator().next();
 				}
-			}
-			
-			
+				selectItem = R2RMLUtility.toSelectItem(databaseColumnString, refObjectMapAlias);						
+
+			}			
 		}
-		logger.debug("calculateBetaCMObject = " + selectItem);
+
+
 		return selectItem;
 	}
 
 
-
 	@Override
-	public SQLSelectItem calculateBetaSubject(AbstractConceptMapping cm) {
+	protected SQLSelectItem calculateBetaSubject(Triple tp, AbstractConceptMapping cm, AlphaResult alphaResult) {
 		SQLSelectItem selectItem = null;
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
-		String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
+		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
+		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
+		
 		Collection<String> databaseColumnsString = subjectMap.getDatabaseColumnsString();
 		if(databaseColumnsString != null) {
 			if(databaseColumnsString.size() > 1) {
 				logger.warn("Multiple columns for subject maps is not supported, result might be wrong!");
 			} 
-			
+
 			String databaseColumnString = databaseColumnsString.iterator().next();
 			selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);
 		}
-		
+
 		logger.debug("calculateBetaCMSubject = " + selectItem);
 		return selectItem;
 	}
 
-
-
-	public R2RMLQueryTranslator getOwner() {
-		// TODO Auto-generated method stub
-		return (R2RMLQueryTranslator) super.getOwner();
+	protected AbstractQueryTranslator getOwner() {
+		AbstractQueryTranslator result = super.getOwner();
+		return result;
 	}
 
 

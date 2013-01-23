@@ -14,8 +14,9 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
@@ -30,27 +31,30 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 	public enum TermMapType {CONSTANT, COLUMN, TEMPLATE};
 	private TermMapType termMapType;
 
-	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);;
+	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);
 
 	private String constantValue;
 	private String columnName;
-
+	private int columnDataType;
+	private String columnDataTypeName;
+	
 	private String termType;//IRI, BlankNode, or Literal
 	private String languageTag;
 	private String datatype;
-
-
+	
 	private String template;
 	private String inverseExpression;
 
-
+	R2RMLTriplesMap owner;
 
 	private TermMapPosition termMapPosition;
 	//private String alias;
 
-	R2RMLTermMap(Resource resource, TermMapPosition termMapPosition) throws R2RMLInvalidTermMapException {
+	R2RMLTermMap(Resource resource, TermMapPosition termMapPosition, R2RMLTriplesMap owner) 
+			throws R2RMLInvalidTermMapException {
 		this.termMapPosition = termMapPosition;
-
+		this.owner = owner;
+		
 		Statement constantStatement = resource.getProperty(R2RMLConstants.R2RML_CONSTANT_PROPERTY);
 		if(constantStatement != null) {
 			this.termMapType = TermMapType.CONSTANT;
@@ -60,6 +64,13 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 			if(columnStatement != null) {
 				this.termMapType = TermMapType.COLUMN;
 				this.columnName = columnStatement.getObject().toString();
+				ResultSetMetaData rsmd = this.owner.getLogicalTable().getRsmd();
+				try {
+					this.columnDataTypeName = QueryTranslatorUtility.getColumnTypeName(rsmd, columnName);
+					this.columnDataType = QueryTranslatorUtility.getColumnType(rsmd, columnName);
+				} catch(Exception e) {
+					logger.warn("Unable to determine data type of column : " + this.columnName);
+				}
 			} else {
 				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);
 				if(templateStatement != null) {
@@ -205,7 +216,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		try {
 			String dbType = AbstractRunner.getConfigurationProperties().getDatabaseType();
 			//SQLSelectItem selectItem = new SQLSelectItem(columnName);
-			SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName);
+			SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName, null);
 			columnName = selectItem.getColumn();
 			if(columnName.startsWith("")) {columnName.substring(1);}
 			if(columnName.endsWith("")) {columnName.subSequence(0, columnName.length()-1);}
@@ -259,7 +270,12 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 			int beginIndex = stringTemplate.indexOf("{");
 			int endIndex = stringTemplate.indexOf("}");
 
-			result = uri.substring(beginIndex);
+			String stringTemplateSubString = stringTemplate.substring(0, beginIndex);
+			if(uri.startsWith(stringTemplateSubString)) {
+				//result = uri.substring(beginIndex);
+				result = uri.substring(beginIndex , uri.length());
+			}
+			
 			//result = uri.substring(beginIndex -1 , uri.length());
 		}
 
@@ -314,11 +330,11 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 				if(databaseValue != null) {
 					if(R2RMLConstants.R2RML_IRI_URI.equals(this.termType)) {
 						if(AbstractRunner.getConfigurationProperties().isEncodeUnsafeChars()) {
-							databaseValue = Utility.encodeUnsafeChars(databaseValue);
+							databaseValue = ODEMapsterUtility.encodeUnsafeChars(databaseValue);
 						}
 
 						if(AbstractRunner.getConfigurationProperties().isEncodeReservedChars()) {
-							databaseValue = Utility.encodeReservedChars(databaseValue);
+							databaseValue = ODEMapsterUtility.encodeReservedChars(databaseValue);
 						}							
 
 					}
@@ -397,12 +413,24 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 			result = "Template";
 		}
 
-		result += ":" + this.getOriginalValue();
+		result += "::" + this.getOriginalValue();
 
+		if(this.termMapType == TermMapType.COLUMN) {
+			result += ":" + this.columnDataTypeName;
+		}
+		
 		return result;
 	}
 
 	public String getConstantValue() {
 		return constantValue;
+	}
+
+	public int getColumnType() {
+		return columnDataType;
+	}
+
+	public String getColumnTypeName() {
+		return columnDataTypeName;
 	}	
 }

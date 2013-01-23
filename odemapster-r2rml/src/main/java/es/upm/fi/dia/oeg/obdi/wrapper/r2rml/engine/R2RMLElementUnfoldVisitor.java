@@ -20,6 +20,7 @@ import Zql.ZSelectItem;
 import Zql.ZUtils;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.engine.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -45,17 +46,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
 
 public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
-	
 	private Map<R2RMLRefObjectMap, String> mapRefObjectMapAlias = new HashMap<R2RMLRefObjectMap, String>();
 
-	public R2RMLElementUnfoldVisitor(ConfigurationProperties properties) {
-		super(properties);
-	}
-
-	public R2RMLElementUnfoldVisitor(String configurationDirectory,
-			String configurationFile) {
-		super(configurationDirectory, configurationFile);
-	}
 
 	public Map<R2RMLRefObjectMap, String> getMapRefObjectMapAlias() {
 		return mapRefObjectMapAlias;
@@ -167,7 +159,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 	public SQLQuery visit(R2RMLTriplesMap triplesMap) {
 		logger.info("unfolding triplesMap : " + triplesMap);
-		String dbType = this.properties.getDatabaseType();
+		String dbType = this.dbType;
+		
 
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		SQLQuery result = new SQLQuery();
@@ -236,14 +229,14 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 							refObjectMap.getParentDatabaseColumnsString();
 					if(refObjectMapColumnsString != null ) {
 						for(String refObjectMapColumnString : refObjectMapColumnsString) {
-							SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, refObjectMapColumnString);
+							SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, refObjectMapColumnString, null);
 
 							String selectItemColumn = selectItem.getColumn();
-							String selectItem2Name = joinQueryAlias + "." + selectItemColumn;
-							SQLSelectItem selectItem2 = SQLSelectItem.createSQLItem(dbType, selectItem2Name);
-
-							String selectItemAlias = joinQueryAlias + "_" + refObjectMapColumnString;
+							SQLSelectItem selectItem2 = SQLSelectItem.createSQLItem(dbType, selectItemColumn, joinQueryAlias);
 							resultSelectItems.add(selectItem2);
+							
+							//String selectItemAlias = joinQueryAlias + "_" + refObjectMapColumnString;
+							
 						}
 					}
 

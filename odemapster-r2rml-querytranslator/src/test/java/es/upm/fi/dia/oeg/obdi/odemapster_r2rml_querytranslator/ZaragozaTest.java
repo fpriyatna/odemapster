@@ -70,7 +70,6 @@ public class ZaragozaTest {
 		logger.info("configurationDirectory = " + configurationDirectory);
 		logger.info("configurationFile = " + configurationDirectory + configurationFile);
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(false);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -84,7 +83,7 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza06.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -99,7 +98,6 @@ public class ZaragozaTest {
 				+ "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza02.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(false);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -113,7 +111,7 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza06.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -140,7 +138,7 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza06.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -153,7 +151,6 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza04.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(false);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -168,7 +165,7 @@ public class ZaragozaTest {
 				+ "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza04.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -181,7 +178,6 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza05a.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(false);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -194,7 +190,7 @@ public class ZaragozaTest {
 				+ "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza05a.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -207,7 +203,6 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza05b.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(false);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -220,7 +215,7 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza05b.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -233,7 +228,6 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza06.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(false);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
@@ -246,7 +240,7 @@ public class ZaragozaTest {
 				TestUtility.getMappingDirectoryByOS() + "r2rml-mappings/zaragoza02/";
 		String configurationFile = "zaragoza05b.r2rml.properties";
 		AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-		runner.getQueryTranslator().setSubqueryAsView(true);
+		runner.getQueryTranslator().getOptimizer().setSubQueryAsView(true);
 		runner.run();
 		logger.info("------ " + testName + " DONE------");
 		assertTrue(true);
