@@ -1,7 +1,10 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
@@ -29,22 +32,19 @@ public class QueryRewritter implements Rewrite {
 	private static Logger logger = Logger.getLogger(QueryRewritter.class);
 
 	public Op rewrite(Op op) {
+		Op result = null;
+		
 		if(op instanceof OpBGP) { //triple or bgp pattern
-			OpBGP bgp = (OpBGP) op; 
-			BasicPattern basicPattern = bgp.getPattern();
-			ReorderTransformation reorderTransformation = new ReorderSubject();
-			BasicPattern basicPattern2 = reorderTransformation.reorder(basicPattern);
-			OpBGP bgp2 = new OpBGP(basicPattern2);
-			Op result = bgp2;
+			OpBGP bgp = (OpBGP) op;
+			result = QueryTranslatorUtility.reorderTriplesBySubject(bgp);
 			
-			List<OpBGP> bgpSplitted = QueryTranslatorUtility.splitBGP(bgp2.getPattern().getList());
-			if(bgpSplitted.size() > 1) {
-				Op op2 = QueryTranslatorUtility.bgpsToJoin(bgpSplitted);
-				return op2; 
-			} else {
-				return bgp2;
-			}
-			
+//			List<OpBGP> bgpSplitted = QueryTranslatorUtility.splitBGP(bgp2.getPattern().getList());
+//			if(bgpSplitted.size() > 1) {
+//				Op op2 = QueryTranslatorUtility.bgpsToJoin(bgpSplitted);
+//				return op2; 
+//			} else {
+//				return bgp2;
+//			}
 		} else if(op instanceof OpJoin) { // AND pattern
 			OpJoin opJoin = (OpJoin) op;
 			Op leftChild = opJoin.getLeft();
@@ -55,13 +55,14 @@ public class QueryRewritter implements Rewrite {
 				OpBGP leftChildRewrittenBGP = (OpBGP) leftChildRewritten;
 				OpBGP rightChildRewrittenBGP = (OpBGP) rightChildRewritten;
 				leftChildRewrittenBGP.getPattern().addAll(rightChildRewrittenBGP.getPattern());
-				return leftChildRewrittenBGP;
+				result = leftChildRewrittenBGP;
 			} else {
-				return OpJoin.create(leftChildRewritten, rightChildRewritten);
+				result = OpJoin.create(leftChildRewritten, rightChildRewritten);
 			}
 
 		} else if(op instanceof OpLeftJoin) { //OPT pattern
 			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
+			ExprList exprList = opLeftJoin.getExprs();
 			Op leftChild = opLeftJoin.getLeft();
 			Op rightChild = opLeftJoin.getRight();
 			Op leftChildRewritten = this.rewrite(leftChild);
@@ -89,29 +90,25 @@ public class QueryRewritter implements Rewrite {
 						BasicPattern leftChildRewrittenPattern = leftChildRewrittenBGP.getPattern();
 						leftChildRewrittenPattern.add(rightEtp);
 						logger.debug("leftChildRewrittenPattern = " + leftChildRewrittenPattern);
-						
-						
-						return leftChildRewrittenBGP;
-					} 					
-					
-
+						result = leftChildRewrittenBGP;
+					} else {
+						result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
+					}
 					//List<Triple> leftChildTriplesList = leftChildRewrittenBGP.getPattern().getList();
 					//SortedSet<Triple> leftChildTriplesListSorted = new TreeSet<Triple>(leftChildTriplesList);
-
-					
-				} 
-			} 
-
-			
-			ExprList exprList = opLeftJoin.getExprs();
-			return OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
+				} else {
+					result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
+				}
+			} else {
+				result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);				
+			}
 		} else if(op instanceof OpUnion) { //UNION pattern
 			OpUnion opUnion = (OpUnion) op;
 			Op leftChild = opUnion.getLeft();
 			Op rightChild = opUnion.getRight();
 			Op leftChildRewritten = this.rewrite(leftChild);
 			Op rightChildRewritten = this.rewrite(rightChild);
-			return new OpUnion(leftChildRewritten, rightChildRewritten);
+			result = new OpUnion(leftChildRewritten, rightChildRewritten);
 		} else if(op instanceof OpFilter) { //FILTER pattern
 			OpFilter opFilter = (OpFilter) op;
 			ExprList exprs = opFilter.getExprs();
@@ -128,32 +125,33 @@ public class QueryRewritter implements Rewrite {
 //				op2 = TransformFilterPlacement.transform(exprs, basicPattern);
 //			}
 			Op subOpRewritten = this.rewrite(subOp);
-			return OpFilter.filter(exprs, subOpRewritten);
+			result = OpFilter.filter(exprs, subOpRewritten);
 		} else if(op instanceof OpProject) {
 			//			logger.debug("op instanceof OpProject/OpSlice/OpDistinct");
 			OpProject opProject = (OpProject) op;
 			Op subOp = opProject.getSubOp();
 			Op subOpRewritten = this.rewrite(subOp);
-			return new OpProject(subOpRewritten, opProject.getVars());
+			result = new OpProject(subOpRewritten, opProject.getVars());
 		} else if(op instanceof OpSlice) {
 			OpSlice opSlice = (OpSlice) op;
 			Op subOp = opSlice.getSubOp();
 			Op subOpRewritten = this.rewrite(subOp);
-			return new OpSlice(subOpRewritten, opSlice.getStart(), opSlice.getLength());
+			result = new OpSlice(subOpRewritten, opSlice.getStart(), opSlice.getLength());
 		} else if(op instanceof OpDistinct) {
 			OpDistinct opDistinct = (OpDistinct) op;
 			Op subOp = opDistinct.getSubOp();
 			Op subOpRewritten = this.rewrite(subOp);
-			return new OpDistinct(subOpRewritten);
+			result = new OpDistinct(subOpRewritten);
 		} else if(op instanceof OpOrder) {
 			OpOrder opOrder = (OpOrder) op;
 			Op subOp = opOrder.getSubOp();
 			Op subOpRewritten = this.rewrite(subOp);
-			return new OpOrder(subOpRewritten, opOrder.getConditions());
+			result = new OpOrder(subOpRewritten, opOrder.getConditions());
 		} else {
-			return op;
+			result = op;
 		}
 
+		return result;
 	}
 
 }

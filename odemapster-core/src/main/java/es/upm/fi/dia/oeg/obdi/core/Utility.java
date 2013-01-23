@@ -1,9 +1,11 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,6 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -126,7 +129,7 @@ public class Utility {
 	public static Connection getLocalConnection(
 			String username, String databaseName, String password, String driverString, String url, String requester) 
 					throws SQLException {
-		
+
 		Connection conn;
 		try {
 			Properties prop = new Properties();
@@ -188,6 +191,27 @@ public class Utility {
 			if (f != null) try { f.close(); } catch (IOException ignored) { }
 		}
 		return new String(buffer);
+	}
+
+	public static List<String> readFileAsLines(String aFile) throws IOException{
+		BufferedReader input =  new BufferedReader(new FileReader(aFile));
+		List<String> lines = new Vector<String>();
+		try {
+			String line = null; //not declared within while loop
+			/*
+			 * readLine is a bit quirky :
+			 * it returns the content of a line MINUS the newline.
+			 * it returns null only for the END of the stream.
+			 * it returns an empty String if two newlines appear in a row.
+			 */
+			while (( line = input.readLine()) != null){
+				lines.add(line);
+			}
+		}
+		finally {
+			input.close();
+		}
+		return lines;
 	}
 
 	public static OntModel openOntoDescFromFile(String filePath) {
@@ -293,7 +317,7 @@ public class Utility {
 		uri = uri.replaceAll("\t", " ");
 		uri = uri.replaceAll("\\t", " ");
 		uri = uri.replaceAll("\\r", " ");
-		
+
 		//			uri = uri.replaceAll("\"", "_");
 
 		uri = uri.replaceAll("\\\\", "%5C");
@@ -301,7 +325,7 @@ public class Utility {
 
 
 
-		
+
 
 
 
@@ -329,7 +353,7 @@ public class Utility {
 		String uri = originalURI;
 		try {
 			uri = Utility.removeStrangeChars(uri);
-			
+
 			uri = Utility.preEncoding(uri);
 
 			//	uri = new URI(uri).toASCIIString();
@@ -401,7 +425,7 @@ public class Utility {
 		String uri9 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÃ�LISIS%20E%20INVESTIGACIÃ“N%20DE%20ACELERACIÃ“N%20DE\n%20VALORACIÃ“N%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
 		System.out.println("uri8Encoded = " + Utility.encodeURI(uri8));
 
-		
+
 		String literal1 = "Say \\r \"Hello World\"";
 		System.out.println("literal1 = " + literal1);
 		System.out.println("literal1Encoded = " + Utility.encodeLiteral(literal1));
@@ -741,8 +765,8 @@ public class Utility {
 			}
 		}
 		return result;
-	}
-	
+			}
+
 	public static ZConstant constructDatabaseColumn(String columnName) {
 		String databaseType = null;
 
@@ -772,19 +796,19 @@ public class Utility {
 	public static ZConstant constructDatabaseColumn(String schema, String table, String column) {
 		return Utility.constructDatabaseColumn(schema + "." + table + "." + column);
 	}
-	
+
 	public static String replaceNameWithSpaceChars(String tableName) {
 		tableName = tableName.trim();
 		String result = tableName;
-		
+
 		String[] tableNameSplits = tableName.split(" ");
 		if(tableNameSplits.length > 1) {
 			result = "`" + tableName + "`"; 
 		}
-		
+
 		return result;
 	}
-	
+
 	public static String encodeUnsafeChars(String originalValue) {
 		String result = originalValue; 
 		if(result != null) {
@@ -792,7 +816,7 @@ public class Utility {
 			result = result.replaceAll("<", "%3C");
 			result = result.replaceAll(">", "%3E");
 			result = result.replaceAll("#", "%23");
-			
+
 			result = result.replaceAll("\\{", "%7B");
 			result = result.replaceAll("\\}", "%7D");
 			result = result.replaceAll("\\|", "%7C");
@@ -805,7 +829,7 @@ public class Utility {
 		}
 		return result;
 	}
-	
+
 	public static String encodeReservedChars(String originalValue) {
 		String result = originalValue; 
 		if(result != null) {
@@ -822,46 +846,46 @@ public class Utility {
 		}
 		return result;
 	}
-	
-	
-    protected static Pattern elementContentEntities = Pattern.compile( "<|>|&|[\0-\37&&[^\n\t]]|\uFFFF|\uFFFE" );
-    /**
+
+
+	protected static Pattern elementContentEntities = Pattern.compile( "<|>|&|[\0-\37&&[^\n\t]]|\uFFFF|\uFFFE" );
+	/**
         Answer <code>s</code> modified to replace &lt;, &gt;, and &amp; by
         their corresponding entity references. 
-        
+
     <p>
         Implementation note: as a (possibly misguided) performance hack, 
         the obvious cascade of replaceAll calls is replaced by an explicit
         loop that looks for all three special characters at once.
-    */
-    public static String substituteEntitiesInElementContent( String s ) 
-    {
-    Matcher m = elementContentEntities.matcher( s );
-    if (!m.find())
-        return s;
-    else
-        {
-        int start = 0;
-        StringBuffer result = new StringBuffer();
-        do
-            {
-            result.append( s.substring( start, m.start() ) );
-            char ch = s.charAt( m.start() );
-            switch ( ch )
-            {
-                case '\r': result.append( "&#xD;" ); break;
-                case '<': result.append( "&lt;" ); break;
-                case '&': result.append( "&amp;" ); break;
-                case '>': result.append( "&gt;" ); break;
-                default: throw new CannotEncodeCharacterException( ch, "XML" );
-            }
-            start = m.end();
-            } while (m.find( start ));
-        result.append( s.substring( start ) );
-        return result.toString();
-        }
-    }
-    
+	 */
+	public static String substituteEntitiesInElementContent( String s ) 
+	{
+		Matcher m = elementContentEntities.matcher( s );
+		if (!m.find())
+			return s;
+		else
+		{
+			int start = 0;
+			StringBuffer result = new StringBuffer();
+			do
+			{
+				result.append( s.substring( start, m.start() ) );
+				char ch = s.charAt( m.start() );
+				switch ( ch )
+				{
+				case '\r': result.append( "&#xD;" ); break;
+				case '<': result.append( "&lt;" ); break;
+				case '&': result.append( "&amp;" ); break;
+				case '>': result.append( "&gt;" ); break;
+				default: throw new CannotEncodeCharacterException( ch, "XML" );
+				}
+				start = m.end();
+			} while (m.find( start ));
+			result.append( s.substring( start ) );
+			return result.toString();
+		}
+	}
 
-    
+
+
 }

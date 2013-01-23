@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.model;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ public abstract class AbstractMappingDocument implements IParseable {
 	private String title;
 	private String id;
 	private String purpose;
+	private Connection conn;
 	
 	protected void setMappingDocumentPrefixMap(
 			Map<String, String> mappingDocumentPrefixMap) {
@@ -271,6 +273,14 @@ public abstract class AbstractMappingDocument implements IParseable {
 
 	public void setClassMappings(Collection<AbstractConceptMapping> classMappings) {
 		this.classMappings = classMappings;
+	}
+
+	public Connection getConn() {
+		return conn;
+	}
+
+	protected void setConn(Connection conn) {
+		this.conn = conn;
 	}
 	
 }

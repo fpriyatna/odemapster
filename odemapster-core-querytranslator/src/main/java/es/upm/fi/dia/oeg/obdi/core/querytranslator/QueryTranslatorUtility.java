@@ -1,5 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpLeftJoin;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
+import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.Utility;
@@ -48,7 +51,7 @@ public class QueryTranslatorUtility {
 		return false;
 	}
 	
-	public static boolean isTripleBlock(List<Triple> triples) {
+	public static boolean isTriplesSameSubject(List<Triple> triples) {
 		if(triples.size() <= 1) {
 			return false;
 		} else {
@@ -69,7 +72,7 @@ public class QueryTranslatorUtility {
 	
 	public static boolean isTripleBlock(OpBGP bgp) {
 		List<Triple> triples = bgp.getPattern().getList();
-		return QueryTranslatorUtility.isTripleBlock(triples);
+		return QueryTranslatorUtility.isTriplesSameSubject(triples);
 	}
 
 	public static boolean isTripleBlock(Op op) {
@@ -85,7 +88,7 @@ public class QueryTranslatorUtility {
 		int result = 1;
 		for(int i=1; i<triples.size()+1; i++) {
 			List<Triple> sublist = triples.subList(0, i);
-			if(QueryTranslatorUtility.isTripleBlock(sublist)) {
+			if(QueryTranslatorUtility.isTriplesSameSubject(sublist)) {
 				result = i;
 			}
 		}
@@ -211,10 +214,13 @@ public class QueryTranslatorUtility {
 						oldValue = fromItem.getAlias() + "." + oldValue;
 					}
 					
-					newOuterWhereCondition = QueryTranslatorUtility.replaceColumnNames(newOuterWhereCondition, oldValue, newValue);
+					newOuterWhereCondition = QueryTranslatorUtility.replaceColumnNames(
+							newOuterWhereCondition, oldValue, newValue);
 				}
-				ZExp innerWhereCondition = fromItemSQLQuery.getWhere();
-				ZExp newWhereCondition = QueryTranslatorUtility.combineExpressions(innerWhereCondition, newOuterWhereCondition);
+				ZExpression newOuterWhereConditionExpression = (ZExpression) newOuterWhereCondition;
+				ZExpression innerWhereCondition = (ZExpression) fromItemSQLQuery.getWhere();
+				ZExp newWhereCondition = QueryTranslatorUtility.combineExpressions(
+						innerWhereCondition, newOuterWhereConditionExpression);
 				//result.set
 				result.setWhere(newWhereCondition);
 				
@@ -383,8 +389,10 @@ public class QueryTranslatorUtility {
 
 	public static Set<Node> terms(Triple tp, boolean ignoreRDFTypeStatement) {
 		Set<Node> result = new HashSet<Node>();
-		if(RDF.type.getURI().equals(tp.getPredicate().getURI())) {
-			return result;
+		if(tp.getPredicate().isURI()) {
+			if(RDF.type.getURI().equals(tp.getPredicate().getURI())) {
+				return result;
+			}
 		}
 
 		Node subject = tp.getSubject();
@@ -405,7 +413,25 @@ public class QueryTranslatorUtility {
 		return result;
 	}
 	
-	public static ZExp combineExpressions(ZExp exp1, ZExp exp2) {
+	public static ZExpression combineExpresions(Collection<ZExpression> exps) {
+		Iterator<ZExpression> it = exps.iterator();
+		ZExpression result = null;
+		int expsSize = exps.size();
+		
+		if(exps.size() == 1) {
+			result = it.next();
+		} else if(exps.size() > 1) {
+			result = new ZExpression("AND");
+			while(it.hasNext()) {
+				result.addOperand(it.next());
+			}
+		}
+		
+		return result;
+	}
+
+	
+	public static ZExpression combineExpressions(ZExpression exp1, ZExpression exp2) {
 		if(exp1 == null) {
 			return exp2;
 		} 
@@ -438,9 +464,144 @@ public class QueryTranslatorUtility {
 		return result;
 	}
 	
+	public static int getColumnType(ResultSetMetaData rsmd, String columnName) 
+			throws SQLException{
+		int result = -1;
+		
+		int columnCount = rsmd.getColumnCount();
+		for(int i=1; i<=columnCount; i++) {
+			String rsmdColumnName = rsmd.getColumnName(i);
+			if(columnName.equalsIgnoreCase(rsmdColumnName)) {
+				result = rsmd.getColumnType(i);
+			}
+		}
+		
+		return result;
+	}
 
+	public static String getColumnTypeName(ResultSetMetaData rsmd, String columnName) 
+			throws SQLException{
+		String result = null;
+		
+		int columnCount = rsmd.getColumnCount();
+		for(int i=1; i<=columnCount; i++) {
+			String rsmdColumnName = rsmd.getColumnName(i);
+			if(columnName.equalsIgnoreCase(rsmdColumnName)) {
+				result = rsmd.getColumnTypeName(i);
+			}
+		}
+		
+		return result;
+	}
 
+	public static boolean isRDFSTypeStatement(Triple tp) {
+		Node tpPredicate = tp.getPredicate();
+		if(tpPredicate.isURI() && RDF.type.getURI().equals(tpPredicate.getURI())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
+	public static OpBGP reorderTriplesBySubject(OpBGP bgp) {
+		try {
+			BasicPattern basicPattern = bgp.getPattern();
+			Map<Integer, List<Triple>> mapTripleHashCode = new HashMap<Integer, List<Triple>>();
+			
+			for(Triple tp : basicPattern) {
+				Integer tripleSubjectHashCode = new Integer(tp.getSubject().hashCode());
+				List<Triple> triplesByHashCode;
+				if(mapTripleHashCode.containsKey(tripleSubjectHashCode)) {
+					triplesByHashCode = mapTripleHashCode.get(tripleSubjectHashCode);
+					
+				} else {
+					triplesByHashCode = new Vector<Triple>();
+					mapTripleHashCode.put(tripleSubjectHashCode, triplesByHashCode);
+				}
+				triplesByHashCode.add(tp);
+			}
+			List<Triple> triplesReordered = new Vector<Triple>();
+			for(Integer key : mapTripleHashCode.keySet()) {
+				List<Triple> triplesByHashCode = mapTripleHashCode.get(key);
+				triplesReordered.addAll(triplesByHashCode);
+			}
+			BasicPattern basicPattern2 = BasicPattern.wrap(triplesReordered);
+			OpBGP bgp2 = new OpBGP(basicPattern2);
+			return bgp2;			 
+		} catch(Exception e) {
+			String errorMessage = "Error while reordering triples, original triples will be returned.";
+			logger.warn(errorMessage);
+			return bgp;
+		}
+	}
+	
+	public static OpBGP reorderTriplesBySubjectUsingTransformation(OpBGP bgp) {
+		BasicPattern basicPattern = bgp.getPattern();
+		ReorderTransformation reorderTransformation = new ReorderSubject();
+		BasicPattern basicPattern2 = reorderTransformation.reorder(basicPattern);
+		OpBGP bgp2 = new OpBGP(basicPattern2);
+		return bgp2;
+	}
 
+	public static <T> Set<T> setsIntersection(List<Set<T>> listMapNodeTypes) {
+		int listSize = listMapNodeTypes.size();
+		
+		if(listMapNodeTypes == null || listMapNodeTypes.isEmpty()) {
+			return null;
+		} else if(listSize == 1) {
+			return listMapNodeTypes.get(0);
+		} else if(listSize == 2) {
+			return QueryTranslatorUtility.setsIntersection(listMapNodeTypes.get(0), listMapNodeTypes.get(1));
+		} else {
+			Set<T> head = listMapNodeTypes.get(0);
+			List<Set<T>> tail = listMapNodeTypes.subList(1, listSize);
+			Set<T> tailMerged = QueryTranslatorUtility.setsIntersection(tail);
+			return QueryTranslatorUtility.setsIntersection(head, tailMerged);
+		}
+	}
 
+	public static <T> Set<T> setsIntersection(Set<T> set1, Set<T> set2) {
+		Set<T> intersection = new HashSet<T>();
+		intersection.addAll(set1);
+		intersection.retainAll(set2); 
+		return intersection;
+	}
+	
+	public static <T, K> Map<K, Set<T>> mergeMaps(List<Map<K, Set<T>>> maps) {
+		int size = maps.size();
+		
+		if(maps == null || maps.isEmpty()) {
+			return null;
+		} else if(size == 1) {
+			return maps.get(0);
+		} else if(size == 2) {
+			return QueryTranslatorUtility.mergeMaps(maps.get(0), maps.get(1));
+		} else {
+			Map<K, Set<T>> head = maps.get(0);
+			List<Map<K, Set<T>>> tail = maps.subList(1, size);
+			Map<K, Set<T>> tailMerged = QueryTranslatorUtility.mergeMaps(tail);
+			return QueryTranslatorUtility.mergeMaps(head, tailMerged);
+		}		
+	}
+			
+	public static <T, K> Map<K, Set<T>> mergeMaps(
+			Map<K, Set<T>> map1, 
+			Map<K, Set<T>> map2) {
+		Map<K, Set<T>> result = new HashMap<K, Set<T>>();
+		result.putAll(map1);
+		
+		Set<K> map2Key = map2.keySet();
+		for(K map2KeyNode : map2Key) {
+			Set<T> map2Values = map2.get(map2KeyNode);
+			if(result.containsKey(map2KeyNode)) {
+				Set<T> map1Values = map1.get(map2KeyNode);
+				Set<T> intersection = QueryTranslatorUtility.setsIntersection(map1Values, map2Values);
+				result.put(map2KeyNode, intersection);
+			} else {
+				result.put(map2KeyNode, map2Values);
+			}
+		}
+		
+		return result;
+	}	
 }

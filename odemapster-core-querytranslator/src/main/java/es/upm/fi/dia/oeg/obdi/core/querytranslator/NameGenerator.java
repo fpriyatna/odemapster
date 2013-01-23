@@ -6,12 +6,12 @@ import com.hp.hpl.jena.sparql.core.Var;
 
 
 public class NameGenerator {
-	public String generateName(Triple tp, Node node) {
+	public String generateName(Node node) {
 		String nodeHashCode = (node.hashCode() + "").replaceAll("-", "");//remove negative values
 		
 		String result = null;
 		if(node.isVariable()) {
-			result = this.generateName(tp, (Var) node);
+			result = this.generateName((Var) node);
 		} else if(node.isURI()) {
 			String localName = node.getLocalName(); 
 			result = "uri_" + localName + nodeHashCode;
@@ -23,7 +23,9 @@ public class NameGenerator {
 		return result;
 	}
 	
-	public String generateName(Triple tp, Var var) {
+	public String generateName(Var var) {
 		return "var_" + var.getName();
 	}
+	
+
 }

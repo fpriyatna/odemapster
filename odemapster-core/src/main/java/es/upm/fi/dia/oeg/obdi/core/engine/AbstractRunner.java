@@ -8,7 +8,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +19,13 @@ import org.w3c.dom.Element;
 
 import Zql.ZUtils;
 
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
 import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
+import es.upm.fi.dia.oeg.obdi.core.Utility;
 import es.upm.fi.dia.oeg.obdi.core.XMLUtility;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
@@ -34,23 +33,112 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
+	private Connection conn;
 	protected AbstractParser parser;
 	protected AbstractDataTranslator dataTranslator;
 	protected IQueryTranslator queryTranslator;
-	private AbstractMappingDocument originalMappingDocument;
+	private AbstractMappingDocument mappingDocument;
 	protected Query sparqQuery = null;
-	
-	
 	public static ConfigurationProperties configurationProperties;
 	
+	public AbstractRunner(String configurationDirectory, String configurationFile) 
+			throws Exception {
+		try {
+			AbstractRunner.configurationProperties = new ConfigurationProperties(configurationDirectory, configurationFile);
+			String mappingDocumentFile = AbstractRunner.configurationProperties.getMappingDocumentFilePath();
+			String queryFilePath = AbstractRunner.configurationProperties.getQueryFilePath();
+			
+			//mapping document
+			this.mappingDocument = this.createMappingDocument(mappingDocumentFile);
+			
+			//unfolder
+			AbstractUnfolder unfolder = this.createUnfolder();
+
+			//query translator
+			this.queryTranslator = this.createQueryTranslator(this.mappingDocument, unfolder);
+			this.queryTranslator.setQueryFilePath(queryFilePath);
+			this.queryTranslator.setMappingDocument(this.mappingDocument);
+			this.queryTranslator.setUnfolder(unfolder);
+			
+			
+			//query translation optimizer
+			IQueryTranslationOptimizer queryTranslationOptimizer = this.createQueryTranslationOptimizer();
+			boolean optimizeTriplesSameSubject = AbstractRunner.configurationProperties.isSelfJoinElimination();
+			queryTranslationOptimizer.setSelfJoinElimination(optimizeTriplesSameSubject);
+			boolean eliminateSubQuery = AbstractRunner.configurationProperties.isSubQueryElimination();
+			queryTranslationOptimizer.setSubQueryElimination(eliminateSubQuery);
+			boolean subQueryAsView = AbstractRunner.configurationProperties.isSubQueryAsView();
+			queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
+			this.queryTranslator.setOptimizer(queryTranslationOptimizer);
+			
+			//data translator
+			this.dataTranslator = this.createDataTranslator(AbstractRunner.configurationProperties, unfolder);
+			
+		} catch (IOException e) {
+			logger.error("IO error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			//e.printStackTrace();
+			throw e;
+		} catch (InvalidConfigurationPropertiesException e) {
+			logger.error("invalid configuration error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			//e.printStackTrace();
+			throw e;
+		} catch (SQLException e) {
+			logger.error("Database error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			//e.printStackTrace();
+			throw e;
+		} catch(Exception e) {
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+			
+		}		
+	}
+	
+	protected abstract AbstractDataTranslator createDataTranslator(
+			ConfigurationProperties configurationProperties,
+			AbstractUnfolder unfolder);
+
+	protected abstract IQueryTranslator createQueryTranslator(
+			AbstractMappingDocument mappingDocument, AbstractUnfolder unfolder);
+
+	protected abstract IQueryTranslationOptimizer createQueryTranslationOptimizer();
+
+	protected abstract AbstractUnfolder createUnfolder();
+
+	protected abstract AbstractMappingDocument createMappingDocument(String mappingDocumentFile) throws Exception;
+
 	public static ConfigurationProperties getConfigurationProperties() {
 		if(configurationProperties == null) {
 			configurationProperties = new ConfigurationProperties();
 		}
 		return configurationProperties;
 	}
-	public static Connection getConnection() {
-		return AbstractRunner.configurationProperties.getConn();
+	
+	public Connection getConnection() throws SQLException {
+		if(this.conn == null) {
+			String databaseUser = this.configurationProperties.getDatabaseUser();
+			String databaseName = this.configurationProperties.getDatabaseName();
+			String databasePassword = this.configurationProperties.getDatabasePassword();
+			String databaseDriver = this.configurationProperties.getDatabaseDriver();
+			String databaseURL = this.configurationProperties.getDatabaseURL();
+
+			try {
+				this.conn = Utility.getLocalConnection(
+						databaseUser, databaseName, databasePassword, 
+						databaseDriver, 
+						databaseURL, "Runner");
+			} catch (SQLException e) {
+				String errorMessage = "Error loading database, error message = " + e.getMessage();
+				logger.error(errorMessage);
+				//e.printStackTrace();
+				throw e;
+			}			
+		}
+		
+		return this.conn;
 	}
 
 //	public AbstractRunner() {}
@@ -75,19 +163,20 @@ public abstract class AbstractRunner {
 		return result;
 	}
 
-	public IQueryTranslator createQueryTranslator(String queryTranslatorClassName, AbstractMappingDocument md, AbstractUnfolder unfolder) throws Exception {
-		Class queryTranslatorClass = Class.forName(queryTranslatorClassName);
-		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
-		queryTranslator.setMappingDocument(md);
-		queryTranslator.setUnfolder(unfolder);
-		boolean optimizeTriplesSameSubject = AbstractRunner.configurationProperties.isOptimizeTB();
-		queryTranslator.setOptimizeTripleBlock(optimizeTriplesSameSubject);
-		boolean eliminateSubQuery = AbstractRunner.configurationProperties.isSubQueryElimination();
-		queryTranslator.setSubQueryElimination(eliminateSubQuery);
-		boolean subQueryAsView = AbstractRunner.configurationProperties.isSubQueryAsView();
-		queryTranslator.setSubqueryAsView(subQueryAsView);
-		return queryTranslator;
-	}
+//	public IQueryTranslator createQueryTranslator(String queryTranslatorClassName, AbstractMappingDocument md, AbstractUnfolder unfolder) throws Exception {
+//		Class queryTranslatorClass = Class.forName(queryTranslatorClassName);
+//		IQueryTranslator queryTranslator = (IQueryTranslator) queryTranslatorClass.newInstance();
+//		queryTranslator.setMappingDocument(md);
+//		queryTranslator.setUnfolder(unfolder);
+//		boolean optimizeTriplesSameSubject = AbstractRunner.configurationProperties.isOptimizeTB();
+//		queryTranslator.setOptimizeTripleBlock(optimizeTriplesSameSubject);
+//		boolean eliminateSubQuery = AbstractRunner.configurationProperties.isSubQueryElimination();
+//		queryTranslator.setSubQueryElimination(eliminateSubQuery);
+//		boolean subQueryAsView = AbstractRunner.configurationProperties.isSubQueryAsView();
+//		queryTranslator.setSubqueryAsView(subQueryAsView);
+//		
+//		return queryTranslator;
+//	}
 
 
 
@@ -129,7 +218,7 @@ public abstract class AbstractRunner {
 	    //Writer out = new OutputStreamWriter (fileOut, "UTF-8");
 	    String jenaMode = configurationProperties.getJenaMode();
 		AbstractMaterializer materializer = AbstractMaterializer.create(rdfLanguage, outputFileName, jenaMode);
-		Map<String, String> mappingDocumentPrefixMap = this.originalMappingDocument.getMappingDocumentPrefixMap(); 
+		Map<String, String> mappingDocumentPrefixMap = this.mappingDocument.getMappingDocumentPrefixMap(); 
 		if(mappingDocumentPrefixMap != null) {
 			materializer.setModelPrefixMap(mappingDocumentPrefixMap);
 		}
@@ -163,7 +252,7 @@ public abstract class AbstractRunner {
 			
 		}
 
-		DBUtility.closeConnection(configurationProperties.getConn(), "r2o wrapper");
+		DBUtility.closeConnection(this.conn, "AbstractRunner");
 		long end = System.currentTimeMillis();
 		long duration = (end-start) / 1000;
 		logger.info("Execution time was "+(duration)+" s.");
@@ -184,7 +273,7 @@ public abstract class AbstractRunner {
 		
 		//parsing mapping document
 		String mappingDocumentPath = configurationProperties.getMappingDocumentFilePath();
-		originalMappingDocument = parser.parse(mappingDocumentPath);
+		mappingDocument = parser.parse(mappingDocumentPath);
 
 		//set output file
 		String outputFileName = configurationProperties.getOutputFilePath();
@@ -199,7 +288,7 @@ public abstract class AbstractRunner {
 		}
 
 		if(this.sparqQuery == null) {
-			this.materializeMappingDocuments(outputFileName, originalMappingDocument);
+			this.materializeMappingDocuments(outputFileName, mappingDocument);
 		} else {
 			//rewrite the SPARQL query if necessary
 			List<Query> queries = new ArrayList<Query>();
@@ -245,7 +334,7 @@ public abstract class AbstractRunner {
 	
 	private void generateSPARQLXMLBindingDocument(Collection<String> queries, String outputFileName) throws Exception {
 		Document xmlDoc = XMLUtility.createNewXMLDocument();
-		Connection conn = this.configurationProperties.getConn();
+		Connection conn = this.conn;
 		int timeout = this.configurationProperties.getDatabaseTimeout();
 		
 		Element rootElement = null;
@@ -345,5 +434,9 @@ public abstract class AbstractRunner {
 	
 	public void setSparqQuery(String sparqQuery) {
 		this.sparqQuery = QueryFactory.create(sparqQuery);
+	}
+
+	public AbstractMappingDocument getMappingDocument() {
+		return mappingDocument;
 	}
 }

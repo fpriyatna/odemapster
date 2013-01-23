@@ -1,18 +1,19 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
+import java.sql.Connection;
 import java.util.Map;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 
+import es.upm.fi.dia.oeg.obdi.core.exception.QueryTranslatorException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public interface IQueryTranslator {
-
-	void setOptimizeTripleBlock(boolean optimizeTB);
-
-	void setSubQueryElimination(boolean subQueryElimination);
+	Connection getConnection();
+	
+	void setOptimizer(IQueryTranslationOptimizer optimizer);
 
 	Object translate(Query query) throws Exception;
 
@@ -24,11 +25,13 @@ public interface IQueryTranslator {
 
 	void setIgnoreRDFTypeStatement(boolean b);
 
-	SQLQuery translateFromFile(String queryFilePath) throws Exception;
+	SQLQuery translateFromQueryFile(String queryFilePath) throws Exception;
 
-	void setSubqueryAsView(boolean b);
+	IQueryTranslationOptimizer getOptimizer();
 
-	SQLQuery translateFromFile() throws Exception;
+	SQLQuery translateFromPropertyFile() throws Exception;
+
+	SQLQuery translateFromString(String queryString) throws Exception ;
 	
 
 

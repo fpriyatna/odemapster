@@ -7,7 +7,8 @@ public class ReorderSubject extends ReorderTransformationBase {
 
 	@Override
 	protected double weight(PatternTriple pt) {
-		return pt.subject.hashCode();
+		double ptHashCode = pt.subject.hashCode(); 
+		return Math.abs(ptHashCode);
 	}
 
 }
