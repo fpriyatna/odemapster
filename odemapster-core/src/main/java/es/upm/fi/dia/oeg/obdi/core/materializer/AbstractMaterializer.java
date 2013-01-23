@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
 public abstract class AbstractMaterializer {
@@ -24,16 +24,16 @@ public abstract class AbstractMaterializer {
 	
 	public static AbstractMaterializer create(String rdfLanguage, String outputFileName, String jenaMode) throws IOException {
 		if(rdfLanguage.equalsIgnoreCase(Constants.OUTPUT_FORMAT_NTRIPLE)) {
-			Model model = Utility.createJenaModel(jenaMode);
+			Model model = ODEMapsterUtility.createJenaModel(jenaMode);
 			return new NTripleMaterializer(outputFileName, model);
 		} else if(rdfLanguage.equalsIgnoreCase(Constants.OUTPUT_FORMAT_RDFXML)) {
-			Model model = Utility.createJenaModel(jenaMode);
+			Model model = ODEMapsterUtility.createJenaModel(jenaMode);
 			return new RDFXMLMaterializer(outputFileName, model, rdfLanguage);
 		} else if(rdfLanguage.equalsIgnoreCase(Constants.OUTPUT_FORMAT_NQUAD)) {
-			Model model = Utility.createJenaModel(jenaMode);
+			Model model = ODEMapsterUtility.createJenaModel(jenaMode);
 			return new RDFXMLMaterializer(outputFileName, model, rdfLanguage);
 		} else {
-			Model model = Utility.createJenaModel(jenaMode);
+			Model model = ODEMapsterUtility.createJenaModel(jenaMode);
 			return new NTripleMaterializer(outputFileName, model);
 		}
 	}

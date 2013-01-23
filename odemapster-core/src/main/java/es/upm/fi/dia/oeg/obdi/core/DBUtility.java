@@ -1,12 +1,15 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
+import Zql.ZSelectItem;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
@@ -123,5 +126,65 @@ public class DBUtility {
        else                                      // If there WAS a current row  
           set.absolute(currentRow);              // Restore it  
        return rowCount;  
-    }  
+    }
+    
+	public static String getValueWithoutAlias(ZSelectItem selectItem) {
+		String result;
+
+		String selectItemString = selectItem.toString();
+		String alias = selectItem.getAlias();
+		if(alias == null) {
+			result = selectItemString;
+		} else {
+			selectItem.setAlias("");
+			//result = selectItemString.substring(0, selectItemString.length() - alias.length());
+			result = selectItem.toString();
+			selectItem.setAlias(alias);
+		}
+
+		//		selectItem.setAlias("");
+		//		result = selectItem.toString();
+		//
+		//		
+		//		if(alias != null) {
+		//			selectItem.setAlias(alias);
+		//		} else {
+		//			if(selectItem.isExpression()) {
+		//				ZExp selectItemExpression = selectItem.getExpression();
+		//				selectItem = new R2OSelectItem();
+		//				selectItem.setExpression(selectItemExpression);
+		//			} else {
+		//				selectItem = new R2OSelectItem(result);
+		//			}
+		//		}
+
+		return result.trim();
+	}
+	
+	public static Connection getLocalConnection(
+			String username, String databaseName, String password, String driverString, String url, String requester) 
+					throws SQLException {
+
+		Connection conn;
+		try {
+			Properties prop = new Properties();
+			prop.put("ResultSetMetaDataOptions", "1");
+			prop.put("user", username);
+			prop.put("database", databaseName);
+			prop.put("password", password);
+			prop.put("autoReconnect", "true");
+			Class.forName(driverString);
+			logger.debug("Opening database connection.");
+			return DriverManager.getConnection(url, prop);
+		} catch(ClassNotFoundException e) {
+			String errorMessage = "Error opening database connection, class not found : " + e.getMessage();
+			logger.error(errorMessage);
+			throw new SQLException(e.getMessage(), e);
+		} catch (Exception e) {
+			logger.error("Error opening database connection : " + e.getMessage());
+			//e.printStackTrace();
+
+			throw new SQLException(e.getMessage(), e);
+		}		
+	}
 }

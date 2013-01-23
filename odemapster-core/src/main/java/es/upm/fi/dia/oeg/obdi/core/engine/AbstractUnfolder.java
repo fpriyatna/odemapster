@@ -15,9 +15,10 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 public abstract class AbstractUnfolder {
 	private static Logger logger = Logger.getLogger(AbstractUnfolder.class);
-	protected ConfigurationProperties properties;
-
-	private AbstractUnfolder() {
+	//protected ConfigurationProperties properties;
+	protected String dbType = Constants.DATABASE_MYSQL;
+	
+	protected AbstractUnfolder() {
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("substring", 3);
 		ZUtils.addCustomFunction("convert", 2);
@@ -28,35 +29,16 @@ public abstract class AbstractUnfolder {
 		ZUtils.addCustomFunction("TRIM", 1);
 	}
 	
-	public AbstractUnfolder(String configurationDirectory, String configurationFile) {
-		this();
-		
-		try {
-			this.properties = new ConfigurationProperties(configurationDirectory, configurationFile);
-		} catch (IOException e) {
-			logger.error("IO error while loading configuration file : " + configurationFile);
-			logger.error("error message = " + e.getMessage());
-			e.printStackTrace();
-		} catch (InvalidConfigurationPropertiesException e) {
-			logger.error("invalid configuration error while loading configuration file : " + configurationFile);
-			logger.error("error message = " + e.getMessage());
-			e.printStackTrace();
-		} catch (SQLException e) {
-			logger.error("Database error while loading configuration file : " + configurationFile);
-			logger.error("error message = " + e.getMessage());
-			//e.printStackTrace();
-		}
-	}
-	
-	public AbstractUnfolder(ConfigurationProperties properties) {
-		this();
-		this.properties = properties;
-	}
+
 	
 	protected abstract Collection<String> unfold(Set<ILogicalQuery> logicalQueries, AbstractMappingDocument mapping) throws Exception;
 
 	public abstract String unfoldConceptMapping(AbstractConceptMapping mapping) throws Exception;
 	
 	protected abstract Collection<String> unfold(AbstractMappingDocument mappingDocument) throws Exception;
+
+	public void setDbType(String dbType) {
+		this.dbType = dbType;
+	}
 
 }

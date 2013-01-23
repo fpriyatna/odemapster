@@ -14,7 +14,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 
 
@@ -46,11 +46,11 @@ public class NTripleMaterializer extends AbstractMaterializer {
 			//this.currentSubject = this.currentSubject.replaceAll("\n","").replaceAll("\r", "");
 
 			triple = 
-					Utility.createQuad(
+					ODEMapsterUtility.createQuad(
 							this.currentSubject
-							, Utility.createURIref(RDF.type.toString())
-							, Utility.createURIref(conceptName)
-							, Utility.createURIref(graph)
+							, ODEMapsterUtility.createURIref(RDF.type.toString())
+							, ODEMapsterUtility.createURIref(conceptName)
+							, ODEMapsterUtility.createURIref(graph)
 							); 
 
 			//writer.append(triple);
@@ -65,25 +65,25 @@ public class NTripleMaterializer extends AbstractMaterializer {
 	public void materializeDataPropertyTriple(String predicateName,
 			Object propVal, String datatype,
 			String lang, String graph) {
-		String triplePredicate = Utility.createURIref(predicateName);
+		String triplePredicate = ODEMapsterUtility.createURIref(predicateName);
 
 		String propValString = propVal.toString();
 
 		String literalString = null;
 		if(datatype == null) {
 			if(lang == null) {
-				literalString = Utility.createLiteral(propValString);
+				literalString = ODEMapsterUtility.createLiteral(propValString);
 			} else {
-				literalString = Utility.createLanguageLiteral(propValString, lang);
+				literalString = ODEMapsterUtility.createLanguageLiteral(propValString, lang);
 			}
 		} else {
-			literalString = Utility.createDataTypeLiteral(propValString, datatype);
+			literalString = ODEMapsterUtility.createDataTypeLiteral(propValString, datatype);
 		}
 
 		String tripleString = null; 
 		try {
 			if(this.currentSubject != null) {
-				tripleString = Utility.createQuad(this.currentSubject, triplePredicate, literalString, Utility.createURIref(graph));
+				tripleString = ODEMapsterUtility.createQuad(this.currentSubject, triplePredicate, literalString, ODEMapsterUtility.createURIref(graph));
 				//writer.append(tripleString);
 				this.write(tripleString);
 			}
@@ -100,17 +100,17 @@ public class NTripleMaterializer extends AbstractMaterializer {
 
 		String objectString;
 		if(isBlankNodeObject) {
-			objectString = Utility.createBlankNode(rangeURI);
+			objectString = ODEMapsterUtility.createBlankNode(rangeURI);
 		} else {
-			objectString = Utility.createURIref(rangeURI);
+			objectString = ODEMapsterUtility.createURIref(rangeURI);
 		}
 
 		String triple = null;
 		try {
 			if(this.currentSubject != null) {
-				triple = Utility.createQuad( this.currentSubject
-						, Utility.createURIref(predicateName)
-						, objectString, Utility.createURIref(graph)); 
+				triple = ODEMapsterUtility.createQuad( this.currentSubject
+						, ODEMapsterUtility.createURIref(predicateName)
+						, objectString, ODEMapsterUtility.createURIref(graph)); 
 				this.write(triple);				
 			}
 		} catch(Exception e) {
@@ -132,12 +132,12 @@ public class NTripleMaterializer extends AbstractMaterializer {
 		}
 
 		if(isBlankNode) {
-			this.currentSubject = Utility.createBlankNode(subjectURI);
+			this.currentSubject = ODEMapsterUtility.createBlankNode(subjectURI);
 		} else {
-			this.currentSubject = Utility.createURIref(subjectURI);
+			this.currentSubject = ODEMapsterUtility.createURIref(subjectURI);
 			
 			try {
-				Utility.substituteEntitiesInElementContent(this.currentSubject);
+				ODEMapsterUtility.substituteEntitiesInElementContent(this.currentSubject);
 			} catch(Exception e) {
 				logger.warn("Not well formed address : " + this.currentSubject);
 			}

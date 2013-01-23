@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 
 public class QueryEvaluator {
 	

@@ -16,17 +16,15 @@ public abstract class AbstractDataTranslator {
 	protected ConfigurationProperties properties;
 	protected AbstractUnfolder unfolder;
 	
-	public AbstractDataTranslator(ConfigurationProperties properties, AbstractUnfolder unfolder) {
+	public AbstractDataTranslator(ConfigurationProperties properties) {
 		this.properties = properties;
-		this.unfolder = unfolder;
 	}
 	
 	public AbstractDataTranslator(String configurationDirectory
-			, String configurationFile, AbstractUnfolder unfolder) {
+			, String configurationFile) {
 		try {
 			this.properties = new ConfigurationProperties(
 					configurationDirectory, configurationFile);
-			this.unfolder = unfolder;
 			
 			String outputFileName = properties.getOutputFilePath();
 			String rdfLanguage = properties.getRdfLanguage();
@@ -51,5 +49,9 @@ public abstract class AbstractDataTranslator {
 			throws PostProcessorException;
 	public abstract void setMaterializer(AbstractMaterializer materializer);
 	public abstract void translateData(AbstractMappingDocument mappingDocument) throws Exception;
+
+	public void setUnfolder(AbstractUnfolder unfolder) {
+		this.unfolder = unfolder;
+	}
 	
 }

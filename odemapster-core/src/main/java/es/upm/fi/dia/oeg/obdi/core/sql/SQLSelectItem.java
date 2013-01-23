@@ -5,15 +5,16 @@ import java.util.HashSet;
 
 import Zql.ZExp;
 import Zql.ZSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
-public class SQLSelectItem extends ZSelectItem {
+public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	private String dbType;
 	private String schema;
 	private String table;
 	private String column;
+	
 	
 	public static SQLSelectItem createSQLItem(String dbType) {
 		SQLSelectItem selectItem = new SQLSelectItem();
@@ -26,7 +27,11 @@ public class SQLSelectItem extends ZSelectItem {
 	}
 
 	
-	public static SQLSelectItem createSQLItem(String dbType, String inputColumnName) {
+	public static SQLSelectItem createSQLItem(String dbType, String inputColumnName, String tableAlias) {
+		if(tableAlias != null && !tableAlias.equals("")) {
+			inputColumnName = tableAlias + "." + inputColumnName;
+		}
+		
 		SQLSelectItem selectItem = new SQLSelectItem(inputColumnName);
 		selectItem.dbType = dbType;
 		return selectItem;
@@ -37,29 +42,29 @@ public class SQLSelectItem extends ZSelectItem {
 		
 		String[] splitColumns = arg0.split("\\.");
 		if(splitColumns.length == 1) {//nr
-			String columnName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
+			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
 			this.column = splitColumns[0];
 		} else if(splitColumns.length == 2) { //product.nr
-			String tableName = Utility.replaceNameWithSpaceChars(splitColumns[0]);			
+			//String tableName = Utility.replaceNameWithSpaceChars(splitColumns[0]);			
 			this.table = splitColumns[0];
-			String columnName = Utility.replaceNameWithSpaceChars(splitColumns[1]);
+			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[1]);
 			this.column = splitColumns[1];
 		} else if(splitColumns.length == 3) { //benchmark.product.nr
-			String schemaName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
+			//String schemaName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
 			this.schema = splitColumns[0];
-			String tableName = Utility.replaceNameWithSpaceChars(splitColumns[1]);
+			//String tableName = Utility.replaceNameWithSpaceChars(splitColumns[1]);
 			this.table = splitColumns[1];
-			String columnName = Utility.replaceNameWithSpaceChars(splitColumns[2]);
+			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[2]);
 			this.column = splitColumns[2];
 		} else if(splitColumns.length == 4) {//benchmark.dbo.product.nr			
-			String schemaName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
+			//String schemaName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
 			this.schema = splitColumns[0];
 
-			String tableName1 = Utility.replaceNameWithSpaceChars(splitColumns[1]);
-			String tableName2 = Utility.replaceNameWithSpaceChars(splitColumns[2]);
+			//String tableName1 = Utility.replaceNameWithSpaceChars(splitColumns[1]);
+			//String tableName2 = Utility.replaceNameWithSpaceChars(splitColumns[2]);
 			this.table = splitColumns[1] + "." + splitColumns[2];
 			
-			String columnName = Utility.replaceNameWithSpaceChars(splitColumns[3]);
+			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[3]);
 			this.column = splitColumns[3];
 		}
 	}
@@ -211,6 +216,25 @@ public class SQLSelectItem extends ZSelectItem {
 		System.out.println("selectItems = " + selectItems);
 		
 	}
+
+	@Override
+	public ZSelectItem clone() throws CloneNotSupportedException {
+		ZSelectItem selectItem;
+		if(this.isExpression()) {
+			selectItem = new ZSelectItem();
+			selectItem.setExpression(this.getExpression());
+		} else {
+			String alias = this.getAlias();
+			this.setAlias("");
+			selectItem = new ZSelectItem(this.toString());
+			if(alias != null) {
+				this.setAlias(alias);	
+			}
+		}
+		
+		return selectItem;
+	}
+
 	
 	
 	

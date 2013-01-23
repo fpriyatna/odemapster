@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,7 +10,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.DBUtility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 
 public class ConfigurationProperties extends Properties {
@@ -23,13 +25,19 @@ public class ConfigurationProperties extends Properties {
 	private String rdfLanguage;
 	private String jenaMode;
 	private String databaseType;
-	private boolean optimizeTB;
+	
+	//query translator
+	private boolean selfJoinElimination;
 	private boolean subQueryElimination;
 	private boolean subQueryAsView;
+	private String queryTranslatorClassName;
+	
+	//batch upgrade
 	private boolean literalRemoveStrangeChars;
 	private boolean encodeUnsafeChars;
 	private boolean encodeReservedChars;
 	
+	//database
 	private String databaseDriver; 
 	private String databaseURL;
 	private String databaseName;
@@ -37,11 +45,20 @@ public class ConfigurationProperties extends Properties {
 	private String databasePassword;
 	private int databaseTimeout = 0;
 	
-	public boolean isOptimizeTB() {
-		return optimizeTB;
+	public boolean isSelfJoinElimination() {
+		return selfJoinElimination;
 	}
 
 	public ConfigurationProperties() {}
+	
+	public ConfigurationProperties(String configurationAbsoluteFilePath) throws IOException {
+		File file = new File(configurationAbsoluteFilePath);
+		logger.info("file.getAbsolutePath() = " + file.getAbsolutePath());
+		logger.info("file.getName() = " + file.getName());
+		logger.info("file.getCanonicalPath() = " + file.getCanonicalPath());
+		logger.info("file.getParent() = " + file.getParent());
+		logger.info("file.getPath() = " + file.getPath());
+	}
 	
 	public ConfigurationProperties(
 			String configurationDirectory, String configurationFile) 
@@ -114,18 +131,17 @@ public class ConfigurationProperties extends Properties {
 				this.databaseTimeout = Integer.parseInt(timeoutPropertyString.trim());
 			}
 			
-			logger.info("Getting database connection...");
-			try {
-				this.conn = Utility.getLocalConnection(
-						databaseUser, databaseName, databasePassword, 
-						databaseDriver, 
-						databaseURL, "Runner");
-			} catch (SQLException e) {
-				String errorMessage = "Error loading database, error message = " + e.getMessage();
-				logger.error(errorMessage);
-				//e.printStackTrace();
-				throw e;
-			}
+//			logger.info("Getting database connection...");
+//			try {
+//				this.conn = Utility.getLocalConnection(
+//						databaseUser, databaseName, databasePassword, 
+//						databaseDriver, databaseURL, "Runner");
+//			} catch (SQLException e) {
+//				String errorMessage = "Error loading database, error message = " + e.getMessage();
+//				logger.error(errorMessage);
+//				//e.printStackTrace();
+//				throw e;
+//			}
 		}
 
 		this.mappingDocumentFilePath = this.getProperty(Constants.MAPPINGDOCUMENT_FILE_PATH);
@@ -163,10 +179,10 @@ public class ConfigurationProperties extends Properties {
 		String optimizeTBString = this.getProperty(Constants.OPTIMIZE_TB);
 		if(optimizeTBString != null) {
 			if(optimizeTBString.equalsIgnoreCase("yes") || optimizeTBString.equalsIgnoreCase("true")) {
-				this.optimizeTB = true;
+				this.selfJoinElimination = true;
 			}
 		}
-		logger.debug("Self join elimination = " + this.optimizeTB);
+		logger.debug("Self join elimination = " + this.selfJoinElimination);
 
 		String subQueryEliminationString = this.getProperty(Constants.SUBQUERY_ELIMINATION);
 		if(subQueryEliminationString != null) {
@@ -179,6 +195,9 @@ public class ConfigurationProperties extends Properties {
 		this.subQueryAsView = this.readBoolean(Constants.SUBQUERY_AS_VIEW, false);
 		logger.debug("Subquery as view = " + this.subQueryAsView);
 
+		String queryTranslatorDefaultClass = "es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator";
+		this.queryTranslatorClassName = this.readString(Constants.QUERY_TRANSLATOR_CLASSNAME, queryTranslatorDefaultClass);
+		
 		String removeStrangeCharsFromLiteral = this.getProperty(Constants.REMOVE_STRANGE_CHARS_FROM_LITERAL);
 		if(removeStrangeCharsFromLiteral != null) {
 			if(removeStrangeCharsFromLiteral.equalsIgnoreCase("yes") || removeStrangeCharsFromLiteral.equalsIgnoreCase("true")) {
@@ -205,7 +224,7 @@ public class ConfigurationProperties extends Properties {
 
 	}
 
-	public Connection getConn() {
+	private Connection getConn() {
 		return conn;
 	}
 
@@ -245,7 +264,7 @@ public class ConfigurationProperties extends Properties {
 	
 	public Connection openConnection() throws SQLException {
 		try {
-			this.conn = Utility.getLocalConnection(
+			this.conn = DBUtility.getLocalConnection(
 					databaseUser, databaseName, databasePassword, 
 					databaseDriver, 
 					databaseURL, "R2ORunner");
@@ -291,6 +310,39 @@ public class ConfigurationProperties extends Properties {
 		}
 
 		return result;
+	}
+	
+	private String readString(String property, String defaultValue) {
+		String result = defaultValue;
+		
+		String propertyString = this.getProperty(property);
+		if(propertyString != null && !propertyString.equals("")) {
+			result = propertyString;
+		}
+		
+		return result;
+				
+				
+	}
+
+	public String getDatabaseUser() {
+		return databaseUser;
+	}
+
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public String getDatabasePassword() {
+		return databasePassword;
+	}
+
+	public String getDatabaseDriver() {
+		return databaseDriver;
+	}
+
+	public String getDatabaseURL() {
+		return databaseURL;
 	}
 	
 	

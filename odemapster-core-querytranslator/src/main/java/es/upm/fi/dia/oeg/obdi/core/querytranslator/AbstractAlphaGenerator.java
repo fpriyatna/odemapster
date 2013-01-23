@@ -1,38 +1,143 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
+import java.util.Vector;
+
+import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
-
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public abstract class AbstractAlphaGenerator {
-	protected Map<Node, Set<AbstractConceptMapping>> mapNodeConceptMapping;
-	protected AbstractMappingDocument mappingDocument;
+	private static Logger logger = Logger.getLogger(AbstractAlphaGenerator.class);
+	
+	protected AbstractQueryTranslator owner; 
 	protected boolean ignoreRDFTypeStatement = false;
 	protected boolean subqueryAsView = false;
 	
-	public AbstractAlphaGenerator(Map<Node, Set<AbstractConceptMapping>> mapNodeConceptMapping,
-			AbstractMappingDocument mappingDocument) {
-		this.mapNodeConceptMapping = mapNodeConceptMapping;
-		this.mappingDocument = mappingDocument;
+	public AbstractAlphaGenerator(AbstractQueryTranslator owner) {
+		this.owner = owner;
 	}
 	
-	public abstract Object calculateAlpha(Triple tp) throws Exception;
-	protected abstract Object calculateAlphaPredicateObject(
-			AbstractPropertyMapping pm, Triple triple
-			, AbstractConceptMapping abstractConceptMapping) throws Exception;
-	protected abstract Object calculateAlphaSubject(
+
+	public AlphaResultUnion calculateAlpha(Triple tp, AbstractConceptMapping cm) throws Exception {
+		AlphaResultUnion result = null;
+		
+		Node tpPredicate = tp.getPredicate();
+		if(tpPredicate.isURI()) {
+			String predicateURI = tpPredicate.getURI();
+			AlphaResult alphaResult = this.calculateAlpha(tp, cm, predicateURI);
+//			String logicalTableAlias = cm.getLogicalTableAlias();
+//			if(logicalTableAlias == null || logicalTableAlias.equals("")) {
+//				cm.setLogicalTableAlias(alphaResult.getAlphaSubject().getAlias());
+//			}
+			result = new AlphaResultUnion(alphaResult);
+		} else if(tpPredicate.isVariable()) {
+			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
+			if(pms != null && pms.size() > 0) {
+				List<AlphaResult> alphaResults = new Vector<AlphaResult>();
+				for(AbstractPropertyMapping pm : pms) {
+					String predicateURI = pm.getMappedPredicateName();
+					AlphaResult alphaResult = this.calculateAlpha(tp, cm, predicateURI);
+					alphaResults.add(alphaResult);
+				}
+				result = new AlphaResultUnion(alphaResults);
+			} else {
+				//TODO : deal when no predicateobjectmap is specified, but only subjectmap
+//				SQLLogicalTable alphaSubject = (SQLLogicalTable) this.calculateAlphaSubject(tp.getSubject(), cm);
+//				AlphaResult alphaResult = new AlphaResult(alphaSubject, null, null);
+//				result = new AlphaResultUnion(alphaResult);	
+			}
+		} else {
+			String errorMessage = "Predicate has to be either an URI or a variable";
+			throw new QueryTranslationException(errorMessage);
+		}
+		
+		
+		logger.debug("alpha(tp) = " + result);
+		return result;
+	}
+	
+	public abstract AlphaResult calculateAlpha(Triple tp
+			, AbstractConceptMapping abstractConceptMapping, String predicateURI) throws Exception;
+	
+	protected abstract Object calculateAlphaPredicateObject(Triple triple
+			, AbstractConceptMapping abstractConceptMapping, AbstractPropertyMapping pm 
+			, String logicalTableAlias) throws Exception;
+	
+	protected abstract SQLLogicalTable calculateAlphaSubject(
 			Node subject, AbstractConceptMapping abstractConceptMapping) throws Exception;
-	public abstract Object calculateAlphaTSS(Collection<Triple> triples) throws Exception;
+	
+	public List<AlphaResultUnion> calculateAlphaSTG(Collection<Triple> triples, AbstractConceptMapping cm)
+			throws Exception {
+		List<AlphaResultUnion> alphaResultUnionList = new Vector<AlphaResultUnion>();
+		
+		Triple firstTriple = triples.iterator().next();
+		Node tpSubject = firstTriple.getSubject();
+		SQLLogicalTable alphaSubject = this.calculateAlphaSubject(tpSubject, cm);
+		//String logicalTableAlias = cm.getLogicalTableAlias();
+		String logicalTableAlias = alphaSubject.getAlias();
+//		if(logicalTableAlias == null || logicalTableAlias.equals("")) {
+//			cm.setLogicalTableAlias(alphaSubject.getAlias());
+//		}
+		
+		//mapping projection of corresponding predicates
+		
+		for(Triple tp : triples) {
+			Node tpPredicate = tp.getPredicate();
+			List<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
+			if(tpPredicate.isURI()) {
+				String tpPredicateURI = tpPredicate.getURI();
+				List<SQLQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+						tp, cm, tpPredicateURI,logicalTableAlias);
+				if(alphaPredicateObjectAux != null) {
+					alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
+				}
+				AlphaResult alphaResult = new AlphaResult(alphaSubject
+						, alphaPredicateObjects, tpPredicateURI);
+				AlphaResultUnion alphaTP = new AlphaResultUnion(alphaResult);
+				alphaResultUnionList.add(alphaTP);
+			} else if(tpPredicate.isVariable()){
+				Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
+				AlphaResultUnion alphaTP = new AlphaResultUnion();
+				for(AbstractPropertyMapping pm : pms) {
+					String tpPredicateURI = pm.getMappedPredicateName();
+					List<SQLQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+							tp, cm, tpPredicateURI,logicalTableAlias);
+					alphaPredicateObjects.addAll(alphaPredicateObjectAux);
+					AlphaResult alphaResult = new AlphaResult(alphaSubject
+							, alphaPredicateObjects, tpPredicateURI);
+					alphaTP.add(alphaResult);
+				}
+				
+				if(alphaTP != null) {
+					alphaResultUnionList.add(alphaTP);	
+				}
+				
+			} else {
+				String errorMessage = "Predicate has to be either an URI or a variable";
+				throw new QueryTranslationException(errorMessage);				
+			}
+
+		}
+
+		logger.debug("alphaSTG = " + alphaResultUnionList);
+		return alphaResultUnionList;
+	}
+	
 //	public abstract AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception;
 //	public abstract AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples) throws Exception;
+
+	public abstract List<SQLQuery> calculateAlphaPredicateObjectSTG(Triple tp,
+			AbstractConceptMapping cm, String tpPredicateURI,
+			String logicalTableAlias) throws Exception;
+
 
 	public boolean isIgnoreRDFTypeStatement() {
 		return ignoreRDFTypeStatement;

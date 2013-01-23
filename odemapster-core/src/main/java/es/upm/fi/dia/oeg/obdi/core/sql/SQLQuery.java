@@ -15,7 +15,8 @@ import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.Utility;
+import es.upm.fi.dia.oeg.obdi.core.DBUtility;
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 
@@ -32,6 +33,8 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	private long slice = -1;
 	private boolean distinct = false;
 
+	private String comments;
+	
 	public SQLQuery(ZQuery zQuery) {
 		
 		if(zQuery.getSelect() != null) { this.addSelect(zQuery.getSelect());}
@@ -195,7 +198,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		Iterator selectItems = this.getSelect().iterator();
 		while(selectItems.hasNext()) {
 			ZSelectItem selectItem = (ZSelectItem) selectItems.next();
-			String selectItemFullValue = Utility.getValueWithoutAlias(selectItem);
+			String selectItemFullValue = DBUtility.getValueWithoutAlias(selectItem);
 			String splitValues[] = selectItemFullValue.split("\\.");
 			String columnValue = splitValues[splitValues.length-1];
 			if(value.equals(columnValue)) {
@@ -209,7 +212,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		Iterator selectItems = this.getSelect().iterator();
 		while(selectItems.hasNext()) {
 			ZSelectItem selectItem = (ZSelectItem) selectItems.next();
-			if(value.equals(Utility.getValueWithoutAlias(selectItem))) {
+			if(value.equals(DBUtility.getValueWithoutAlias(selectItem))) {
 				return selectItem;
 			}
 		}
@@ -348,6 +351,9 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	public String toString() {
 		String result = "";
 
+		if(comments != null) {
+			result += "--" + this.comments + "\n";
+		}
 
 		//print select
 		String selectSQL = this.printSelect();
@@ -399,6 +405,15 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		String whereSQL = null;
 		if(this.getWhere() != null) {
 			whereSQL = this.getWhere().toString();
+			if(whereSQL.startsWith("(") && whereSQL.endsWith(")")) {
+				whereSQL = whereSQL.substring(1, whereSQL.length() - 1);
+			}
+			
+			if(whereSQL.startsWith("(") && whereSQL.endsWith(")")) {
+				whereSQL = whereSQL.substring(1, whereSQL.length() - 1);
+			}
+			
+			whereSQL = whereSQL.replaceAll("\\) AND \\(", " AND ");
 			result += "WHERE " + whereSQL + "\n"; 
 		}
 
@@ -422,7 +437,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			result += "ON " + this.onExp + "\n";
 		}
 
-		String unionSQL = "UNION ";
+		String unionSQL = "\nUNION\n";
 		if(this.unionQueries != null) {
 			for(SQLQuery unionQuery : this.unionQueries) {
 				String unionQueryString = unionQuery.toString(); 
@@ -477,6 +492,10 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 	public void setLogicalTables(Collection<SQLLogicalTable> logicalTables) {
 		this.logicalTables = logicalTables;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 
 }

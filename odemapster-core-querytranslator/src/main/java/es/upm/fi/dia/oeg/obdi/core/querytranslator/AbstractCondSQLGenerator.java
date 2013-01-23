@@ -3,8 +3,6 @@ package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -18,41 +16,42 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 
 public abstract class AbstractCondSQLGenerator {
 	private static Logger logger = Logger.getLogger(AbstractCondSQLGenerator.class);
-	protected AbstractBetaGenerator betaGenerator;
-	protected Map<Node, Set<AbstractConceptMapping>> mapInferredTypes;
+	//protected AbstractBetaGenerator betaGenerator;
 	protected boolean ignoreRDFTypeStatement = false;
+	protected AbstractQueryTranslator owner;
 
-
-	public AbstractCondSQLGenerator(AbstractBetaGenerator betaGenerator,
-			Map<Node, Set<AbstractConceptMapping>> mapInferredTypes2) {
+	public AbstractCondSQLGenerator(AbstractQueryTranslator owner) {
 		super();
-		this.betaGenerator = betaGenerator;
-		this.mapInferredTypes = mapInferredTypes2;
+		this.owner = owner;
 	}
 
-	public ZExpression genCondSQL(Triple tp) throws Exception {
-		ZExpression condSQLSubject = this.genCondSQLSubject(tp, betaGenerator);
-		ZExpression condSQL = this.genCondSQLPredicateObject(tp, betaGenerator);
-		ZExpression condSQL2 = null;
-		if(condSQLSubject == null && condSQL==null) {
-			condSQL2 = null;
-		} else if(condSQLSubject != null && condSQL==null) {
-			condSQL2 = condSQLSubject;
-		} else if(condSQLSubject == null && condSQL!=null) {
-			condSQL2 = condSQL;
+	public CondSQLResult genCondSQL(Triple tp
+			, AlphaResult alphaResult, BetaResult betaResult
+			, AbstractConceptMapping cm) throws Exception {
+		ZExpression condSQLSubject = this.genCondSQLSubject(tp, alphaResult, betaResult, cm);
+		ZExpression condSQLPredicateObject = this.genCondSQLPredicateObject(tp, alphaResult, betaResult, cm);
+		ZExpression condSQL = null;
+		if(condSQLSubject == null && condSQLPredicateObject==null) {
+			condSQL = null;
+		} else if(condSQLSubject != null && condSQLPredicateObject==null) {
+			condSQL = condSQLSubject;
+		} else if(condSQLSubject == null && condSQLPredicateObject!=null) {
+			condSQL = condSQLPredicateObject;
 		} else {
-			condSQL2 = new ZExpression("AND", condSQLSubject, condSQL);
+			condSQL = new ZExpression("AND", condSQLSubject, condSQLPredicateObject);
 		}
 
-		logger.debug("genCondSQL = " + condSQL2);
-		return condSQL2;
+		logger.debug("genCondSQL = " + condSQL);
+		return new CondSQLResult(condSQL);
 	}
 
-	private Collection<ZExpression> genCondSQL(Triple tp1, Triple tp2) throws Exception {
+	private ZExpression genCondSQL(Triple tp1, BetaResult betaResult1
+			, Triple tp2, BetaResult betaResult2
+			, AlphaResult alphaResult 
+			) throws Exception {
 		Collection<ZExpression> exps = new HashSet<ZExpression>();
 		
 		Node tp1Subject = tp1.getSubject();
@@ -62,71 +61,81 @@ public abstract class AbstractCondSQLGenerator {
 		Node tp2Predicate = tp2.getPredicate();
 		Node tp2Object = tp2.getObject();
 
-		ZExp betaSub1 = betaGenerator.calculateBeta(tp1, POS.sub).getExpression();
-		ZExp betaPre1 = betaGenerator.calculateBeta(tp1, POS.pre).getExpression();
-		ZExp betaObj1;
-		ZSelectItem betaObject1 = betaGenerator.calculateBeta(tp1, POS.obj);
-		if(betaObject1.isExpression()) {
-			betaObj1 = betaObject1.getExpression();
+		//ZExp betaSub1 = betaGenerator.calculateBeta(tp1, POS.sub, predicateURI1).getExpression();
+		//ZExp betaPre1 = betaGenerator.calculateBeta(tp1, POS.pre).getExpression();
+		//ZSelectItem betaObj1 = betaGenerator.calculateBeta(tp1, POS.obj);
+		ZExp betaSub1Exp = betaResult1.getBetaSub().getExpression();
+		ZExp betaPre1Exp = betaResult1.getBetaPre().getExpression();
+		ZExp betaObj1Exp;
+		ZSelectItem betaObj1 = betaResult1.getBetaObj();
+		if(betaObj1.isExpression()) {
+			betaObj1Exp = betaObj1.getExpression();
 		} else {
-			betaObj1 = new ZConstant(betaObject1.toString(), ZConstant.COLUMNNAME);
+			betaObj1Exp = new ZConstant(betaObj1.toString(), ZConstant.COLUMNNAME);
 		}
 
-		ZExp betaSub2 = betaGenerator.calculateBeta(tp2, POS.sub).getExpression();
-		ZExp betaPre2 = betaGenerator.calculateBeta(tp2, POS.pre).getExpression();
-		ZExp betaObj2;
-		ZSelectItem betaObject2 = betaGenerator.calculateBeta(tp2, POS.obj);
-		if(betaObject2.isExpression()) {
-			betaObj2 = betaObject2.getExpression();
+//		ZExp betaSub2Exp = betaGenerator.calculateBeta(tp2, POS.sub).getExpression();
+//		ZExp betaPre2Exp = betaGenerator.calculateBeta(tp2, POS.pre).getExpression();
+//		ZSelectItem betaObj2 = betaGenerator.calculateBeta(tp2, POS.obj);
+		ZExp betaSub2Exp = betaResult2.getBetaSub().getExpression();
+		ZExp betaPre2Exp = betaResult2.getBetaPre().getExpression();
+		ZSelectItem betaObj2 = betaResult2.getBetaObj();
+		ZExp betaObj2Exp;
+		if(betaObj2.isExpression()) {
+			betaObj2Exp = betaObj2.getExpression();
 		} else {
-			betaObj2 = new ZConstant(betaObject2.toString(), ZConstant.COLUMNNAME);
+			betaObj2Exp = new ZConstant(betaObj2.toString(), ZConstant.COLUMNNAME);
 		}
 		
 		if(tp1Subject.toString().equals(tp2Predicate.toString())) {
 			ZExpression exp = new ZExpression("="
-					, betaSub1
-					, betaPre2);
+					, betaSub1Exp
+					, betaPre2Exp);
 			exps.add(exp);			
 		}
 
 		if(tp1Subject.toString().equals(tp2Object.toString())) {
 			ZExpression exp = new ZExpression("="
-					, betaSub1
-					, betaObj2);
+					, betaSub1Exp
+					, betaObj2Exp);
 			exps.add(exp);			
 		}
 
 		if(tp1Predicate.toString().equals(tp2Object.toString())) {
 			ZExpression exp = new ZExpression("="
-					, betaPre1
-					, betaObj2);
+					, betaPre1Exp
+					, betaObj2Exp);
 			exps.add(exp);			
 		}
 		
 		if(tp1Object.toString().equals(tp2Predicate.toString())) {
 			ZExpression exp = new ZExpression("="
-					, betaObj1
-					, betaPre2);
+					, betaObj1Exp
+					, betaPre2Exp);
 			exps.add(exp);			
 		}
 
 		if(tp1Object.toString().equals(tp2Object.toString())) {
 			ZExpression exp = new ZExpression("="
-					, betaObj1
-					, betaObj2);
+					, betaObj1Exp
+					, betaObj2Exp);
 			exps.add(exp);			
 		}
 		
 
-		
-		return exps;
+		ZExpression result = QueryTranslatorUtility.combineExpresions(exps);
+		return result;
 	}
 	
-	protected abstract ZExpression genCondSQLPredicateObject(Triple tp
-			, AbstractBetaGenerator betaGenerator) throws Exception;
+	public ZExpression generateIsNotNullExpression(ZExp betaObjectExpression) {
+		ZExpression exp = new ZExpression("IS NOT NULL");
+		exp.addOperand(betaObjectExpression);
+		return exp;
+	}
 
 	protected ZExpression genCondSQLPredicateObject(Triple tp
-			, AbstractBetaGenerator betaGenerator, AbstractConceptMapping cm) throws Exception {
+			,AlphaResult alphaResult, BetaResult betaResult
+			, AbstractConceptMapping cm) throws Exception {
 		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
 		Collection<ZExpression> exps = new HashSet<ZExpression>();
 
@@ -135,21 +144,25 @@ public abstract class AbstractCondSQLGenerator {
 		Node object = tp.getObject();
 		//R2OConceptMapping cm = this.mapTripleCM.get(tp);
 
-		ZSelectItem betaSubject = betaGenerator.calculateBeta(tp, POS.sub);
-		ZSelectItem betaPredicate = betaGenerator.calculateBeta(tp, POS.pre);
-		ZSelectItem betaObject = betaGenerator.calculateBeta(tp, POS.obj);
-		ZExp betaSub = betaGenerator.calculateBeta(tp, POS.sub).getExpression();
-		ZExp betaPre = betaGenerator.calculateBeta(tp, POS.pre).getExpression();
-		ZExp betaObj;
+//		ZSelectItem betaSubject = betaGenerator.calculateBeta(tp, POS.sub);
+//		ZSelectItem betaPredicate = betaGenerator.calculateBeta(tp, POS.pre);
+//		ZSelectItem betaObject = betaGenerator.calculateBeta(tp, POS.obj);
+		ZSelectItem betaSubject = betaResult.getBetaSub();
+		ZSelectItem betaPredicate = betaResult.getBetaPre();
+		ZSelectItem betaObject = betaResult.getBetaObj();
+		
+		ZExp betaSubjectExpression = betaSubject.getExpression();
+		ZExp betaPredicateExpression = betaPredicate.getExpression();
+		ZExp betaObjectExpression;
 		if(betaObject.isExpression()) {
-			betaObj = betaObject.getExpression();
+			betaObjectExpression = betaObject.getExpression();
 		} else {
-			betaObj = new ZConstant(betaObject.toString(), ZConstant.COLUMNNAME);
+			betaObjectExpression = new ZConstant(betaObject.toString(), ZConstant.COLUMNNAME);
 		}
 
 		if(!predicate.isVariable()) { //line 08
 			ZExp exp = new ZExpression("="
-					, betaPre
+					, betaPredicateExpression
 					, new ZConstant(predicate.toString(), ZConstant.STRING));
 		}
 
@@ -158,19 +171,19 @@ public abstract class AbstractCondSQLGenerator {
 
 			if(object.isURI()) {
 				ZConstant objConstant = new ZConstant(object.getURI(), ZConstant.STRING);
-				exp = new ZExpression("=", betaObj, objConstant);
+				exp = new ZExpression("=", betaObjectExpression, objConstant);
 			} else if(object.isLiteral()) {
 				Object literalValue = object.getLiteralValue();
 				if(literalValue instanceof String) {
 					ZConstant objConstant = new ZConstant(literalValue.toString(), ZConstant.STRING);
-					exp = new ZExpression("=", betaObj, objConstant);					
+					exp = new ZExpression("=", betaObjectExpression, objConstant);					
 				} else if (literalValue instanceof Double) {
 					ZConstant objConstant = new ZConstant(literalValue.toString(), ZConstant.NUMBER);
-					exp = new ZExpression("=", betaObj, objConstant);
+					exp = new ZExpression("=", betaObjectExpression, objConstant);
 				} else {
 					ZConstant objConstant = new ZConstant(literalValue.toString(), ZConstant.STRING);
 					exp = new ZExpression("="
-							, betaObj
+							, betaObjectExpression
 							, objConstant);					
 				}
 			}
@@ -189,34 +202,37 @@ public abstract class AbstractCondSQLGenerator {
 				} 
 			} 
 
+			//for deadling with unbound() function, we should remove this part
 			if(!isSingleTripleFromTripleBlock) {
-				ZExpression exp = new ZExpression("IS NOT NULL");
-				exp.addOperand(betaObj);
-				exps.add(exp);
-				result = new ZExpression("AND", result, exp);
+				ZExpression exp = this.generateIsNotNullExpression(betaObjectExpression);
+				if(exp != null) {
+					exps.add(exp);
+					result = new ZExpression("AND", result, exp);					
+				}
+
 			}
 		}
 
 		if(subject == predicate) { //line 10
 			ZExpression exp = new ZExpression("="
-					, betaSub
-					, betaPre);
+					, betaSubjectExpression
+					, betaPredicateExpression);
 			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
 		}
 
 		if(subject == object) { //line 11
 			ZExpression exp = new ZExpression("="
-					, betaSub
-					, betaObj);
+					, betaSubjectExpression
+					, betaObjectExpression);
 			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
 		}
 
 		if(object == predicate) { //line 12
 			ZExpression exp = new ZExpression("="
-					, betaObj
-					, betaPre);
+					, betaObjectExpression
+					, betaPredicateExpression);
 			exps.add(exp);
 			result = new ZExpression("AND", result, exp);
 		}
@@ -235,82 +251,127 @@ public abstract class AbstractCondSQLGenerator {
 		return result2;
 	}
 	
-	protected abstract ZExpression genCondSQLSubject(Triple tp, AbstractBetaGenerator betaGenerator) throws Exception;
 	
-	protected ZExpression genCondSQLSubject(Triple tp, AbstractBetaGenerator betaGenerator, AbstractConceptMapping cm) throws Exception {
-		ZExpression exp = null;
+	protected ZExpression genCondSQLSubject(Triple tp, AlphaResult alphaResult 
+			, BetaResult betaResult, AbstractConceptMapping cm) throws Exception {
+		ZExpression result1 = null;
 		Node subject = tp.getSubject();
-		ZSelectItem betaCMSelectItem = betaGenerator.calculateBeta(tp, POS.sub);
-		ZExp betaSub = betaCMSelectItem.getExpression();
+		//ZSelectItem betaCMSelectItem = betaGenerator.calculateBeta(tp, POS.sub);
+		ZSelectItem betaSubject = betaResult.getBetaSub();
+		ZExp betaSubjectExpression = betaSubject.getExpression();
 
 		if(!subject.isVariable()) {
 
+			
 			if(subject.isURI()) {
-//				exp = new ZExpression("="
-//						, betaSub
-//						, new ZConstant(subject.toString(), ZConstant.STRING));
-				//we handle this in R2RMLCondSQLGenerator
+				Node tpSubject = tp.getSubject();
+				result1 = this.genCondSQLSubjectURI(
+						tpSubject, alphaResult, betaResult, cm);
 			} else if(subject.isLiteral()) {
 				logger.warn("Literal as subject is not supported!");
 				Object literalValue = subject.getLiteralValue();
 				if(literalValue instanceof String) {
-					exp = new ZExpression("="
-							, betaSub
+					result1 = new ZExpression("="
+							, betaSubjectExpression
 							, new ZConstant(subject.toString(), ZConstant.STRING));				
 				} else if (literalValue instanceof Double) {
-					exp = new ZExpression("="
-							, betaSub
+					result1 = new ZExpression("="
+							, betaSubjectExpression
 							, new ZConstant(subject.toString(), ZConstant.NUMBER));
 				} else {
-					exp = new ZExpression("="
-							, betaSub
+					result1 = new ZExpression("="
+							, betaSubjectExpression
 							, new ZConstant(subject.toString(), ZConstant.STRING));				
 				}
 			}
 
 		}
 
-		return exp;
+		return result1;
 
 	}
 	
-	public ZExpression genCondSQLTB(List<Triple> tripleBlock) throws Exception {
-		//List<ZExpression> condSQLTB = new ArrayList<ZExpression>();
+	protected abstract ZExpression genCondSQLSubjectURI(Node tpSubject,
+			AlphaResult alphaResult, BetaResult betaResult,
+			AbstractConceptMapping cm) throws Exception;
+
+	public ZExpression genCondSQLSTG(List<Triple> stg
+			, List<AlphaResultUnion> stgAlphaResults, List<BetaResultSet> stgBetaResults
+			, AbstractConceptMapping cm) 
+					throws Exception {
 		
-		ZExp result = new ZConstant("TRUE", ZConstant.UNKNOWN);
 		Collection<ZExpression> exps = new HashSet<ZExpression>();
-		Triple firstTriple = tripleBlock.iterator().next();
-		ZExpression condSubject = this.genCondSQLSubject(
-				firstTriple, this.betaGenerator);
+		Triple firstTriple = stg.get(0);
+		AlphaResultUnion firstTripleAlphaResultUnion = stgAlphaResults.get(0);
+		BetaResultSet firstTripleBetaResultSet = stgBetaResults.get(0);
+		if(firstTripleBetaResultSet.size() > 1) {
+			String errorMessage = "Multiple beta is not permitted in triple : " + firstTriple;
+			logger.warn(errorMessage);
+		}
+		AlphaResult firstTripleAlphaResult = firstTripleAlphaResultUnion.get(0);
+		BetaResult firstTripleBetaResult = firstTripleBetaResultSet.get(0);
+		ZExpression condSubject = this.genCondSQLSubject(firstTriple
+				, firstTripleAlphaResult, firstTripleBetaResult, cm);
 		if(condSubject != null) {
 			exps.add(condSubject);
 			//condSQLTB.add(condSubject);
 		} 
 		
-		for(int i=0; i<tripleBlock.size(); i++) {
-			Triple tp = tripleBlock.get(i);
-			String tpPredicateURI = tp.getPredicate().getURI();
-			boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
-			if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
+		
+		
+		for(int i=0; i<stg.size(); i++) {
+			Triple iTP = stg.get(i);
+			AlphaResultUnion alphaResultUnion = stgAlphaResults.get(i);
+			BetaResultSet betaResultSet = stgBetaResults.get(i);
+			if(betaResultSet.size() > 1) {
+				String errorMessage = "Multiple beta is not permitted in triple : " + iTP;
+				logger.warn(errorMessage);
+			}
+			AlphaResult iAlphaResult = alphaResultUnion.get(0);
+			BetaResult iBetaResult = betaResultSet.get(0);
+			
+			Node iTPPredicate = iTP.getPredicate();
+			if(iTPPredicate.isVariable()) {
+				String errorMessage = "Unbounded predicate is not permitted in triple : " + iTP;
+				logger.warn(errorMessage);
+			}
+			
+			if(iTPPredicate.isURI() && this.ignoreRDFTypeStatement 
+					&& RDF.type.getURI().equals(iTPPredicate.getURI())) {
 				//do nothing
 			} else {
-				ZExpression condPredicateObject = 
-						this.genCondSQLPredicateObject(tp, this.betaGenerator);
+				ZExpression condPredicateObject = this.genCondSQLPredicateObject(
+						iTP, iAlphaResult, iBetaResult, cm);
 				//condSQLTB.add(condPredicateObject);
 				if(condPredicateObject != null) {
 					exps.add(condPredicateObject);
 				}
-				result = new ZExpression("AND", result, condPredicateObject);
 
-				for(int j=i+1; j<tripleBlock.size(); j++) {
-					Triple tp2 = tripleBlock.get(j);
-					String tp2PredicateURI = tp2.getPredicate().getURI();
-					boolean isRDFTypeStatement2 = RDF.type.getURI().equals(tp2PredicateURI);
-					if(this.ignoreRDFTypeStatement && isRDFTypeStatement2) {
+				for(int j=i+1; j<stg.size(); j++) {
+					Triple jTP = stg.get(j);
+					BetaResultSet jBetaResultSet = stgBetaResults.get(j);
+					if(jBetaResultSet.size() > 1) {
+						String errorMessage = "Multiple beta is not permitted in triple : " + jTP;
+						logger.warn(errorMessage);
+					}
+					BetaResult jBetaResult = jBetaResultSet.get(0);
+					
+					Node jTPPredicate = jTP.getPredicate();
+					if(jTPPredicate.isVariable()) {
+						String errorMessage = "Unbounded predicate is not permitted in triple : " + jTP;
+						logger.warn(errorMessage);
+					}
+					
+					if(jTPPredicate.isURI() &&  this.ignoreRDFTypeStatement 
+							&& RDF.type.getURI().equals(jTPPredicate.getURI())) {
 						
 					} else {
-						Collection<ZExpression> exps2 = this.genCondSQL(tp, tp2);
-						exps.addAll(exps2);
+						ZExpression expsPredicateObject = this.genCondSQL(
+								iTP, iBetaResult, jTP, jBetaResult, iAlphaResult);
+						if(expsPredicateObject != null) {
+							exps.add(expsPredicateObject);	
+						}
+						
 					}
 				}
 			}
@@ -318,35 +379,9 @@ public abstract class AbstractCondSQLGenerator {
 
 		}
 		
-//		for(Triple tp : tripleBlock) {
-//			String tpPredicateURI = tp.getPredicate().getURI();
-//			boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
-//			if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
-//				//do nothing
-//			} else {
-//				ZExpression condPredicateObject = 
-//						this.genCondSQLPredicateObject(tp, this.betaGenerator);
-//				//condSQLTB.add(condPredicateObject);
-//				if(condPredicateObject != null) {
-//					exps.add(condPredicateObject);
-//				}
-//				result = new ZExpression("AND", result, condPredicateObject);				
-//			}
-//		}
-
-		ZExpression result2;
-		if(exps.size() == 0) {
-			result2 = null;
-		} else if(exps.size() == 1) {
-			result2 = exps.iterator().next();
-		} else {
-			result2 = new ZExpression("AND");
-			for(ZExp exp : exps) {
-				result2.addOperand(exp);
-			}
-		}
-		logger.debug("genCondSQLTB = " + result2);
-		return result2;
+		ZExpression result = QueryTranslatorUtility.combineExpresions(exps);
+		logger.debug("genCondSQLTB = " + result);
+		return result;
 
 	}
 
