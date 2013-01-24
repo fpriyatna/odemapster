@@ -69,7 +69,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 					this.columnDataTypeName = QueryTranslatorUtility.getColumnTypeName(rsmd, columnName);
 					this.columnDataType = QueryTranslatorUtility.getColumnType(rsmd, columnName);
 				} catch(Exception e) {
-					logger.warn("Unable to determine data type of column : " + this.columnName);
+					logger.debug("Unable to determine data type of column : " + this.columnName);
 				}
 			} else {
 				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);

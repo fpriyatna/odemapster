@@ -333,7 +333,7 @@ public abstract class AbstractRunner {
 			logger.debug("SPARQL Query = \n" + sparqlQuery);
 			SQLQuery sqlQuery = 
 					this.queryTranslator.translate(sparqlQuery);
-			logger.info("SQL Query = \n" + sqlQuery);
+			logger.debug("SQL Query = \n" + sqlQuery);
 			sqlQueries.add(sqlQuery);
 		}
 		

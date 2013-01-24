@@ -47,17 +47,16 @@ public class DBUtility {
 		//		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 		//				ResultSet.CONCUR_READ_ONLY);
 
-		//		Statement st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-		//		ResultSet.CONCUR_READ_ONLY);
-
 		//st.setFetchSize(1000);
 		//		Statement st = conn.createStatement();
-		//		st.setFetchSize(1000);
+		
 
-//		Statement stmt = conn.createStatement(
-//				java.sql.ResultSet.TYPE_FORWARD_ONLY,
-//				java.sql.ResultSet.CONCUR_READ_ONLY);
-		Statement stmt = conn.createStatement();
+		Statement stmt = conn.createStatement(
+				java.sql.ResultSet.TYPE_FORWARD_ONLY,
+				java.sql.ResultSet.CONCUR_READ_ONLY);
+		stmt.setFetchSize(Integer.MIN_VALUE);
+		
+		//Statement stmt = conn.createStatement();//outofmemory error:Java heap space
 				
 		try  {
 			if(timeout > 0) {
@@ -74,7 +73,7 @@ public class DBUtility {
 			long start = System.currentTimeMillis();
 			ResultSet result = stmt.executeQuery(query);
 			long end = System.currentTimeMillis();
-			logger.info("SQL execution time was "+(end-start)+" ms.");
+			logger.debug("SQL execution time was "+(end-start)+" ms.");
 
 			return result;
 		} catch(SQLException e) {

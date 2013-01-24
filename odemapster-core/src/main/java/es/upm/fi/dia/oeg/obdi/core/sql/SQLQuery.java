@@ -105,7 +105,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			if(selectItemAlias != null && !selectItemAlias.equals("")) {
 				if(selectItemAlias.equalsIgnoreCase(newSelectItemAlias)) {
 					alreadySelected = true;
-					logger.warn(selectItemAlias + " already selected");
+					logger.debug(selectItemAlias + " already selected");
 				}
 				selectItem.setAlias(selectItemAlias);
 			}			

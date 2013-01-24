@@ -264,7 +264,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				result.addSelect(selectItem);
 			}
 		}
-		logger.info(triplesMap + " unfolded = " + result);
+		logger.debug(triplesMap + " unfolded = " + result);
 
 		return result;
 	}
