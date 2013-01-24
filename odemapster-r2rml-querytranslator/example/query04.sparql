@@ -5,11 +5,11 @@ SELECT ?a ?n ?e ?w
 WHERE 
 { 
 	{
-		?a <http://mappingpedia.linkeddata.es/ontologies/hasName> ?n .
+		?a <http://mappingpedia.linkeddata.es/vocabulary/name> ?n .
 	}
 	{
-	{ ?a <http://mappingpedia.linkeddata.es/ontologies/email> ?e . } 
+	{ ?a <http://mappingpedia.linkeddata.es/vocabulary/email> ?e . } 
 	UNION 
-	{?a <http://mappingpedia.linkeddata.es/ontologies/webPage> ?w .}
+	{?a <http://mappingpedia.linkeddata.es/vocabulary/webpage> ?w .}
 	}
 }

@@ -3,7 +3,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 SELECT ?a ?n ?p
 WHERE { 
-	?a <http://mappingpedia.linkeddata.es/ontologies/hasName> ?n .
-	OPTIONAL {?a <http://mappingpedia.linkeddata.es/ontologies/phone> ?p .}
+	?a <http://mappingpedia.linkeddata.es/vocabulary/name> ?n .
+	OPTIONAL {?a <http://mappingpedia.linkeddata.es/vocabulary/phone> ?p .}
 	FILTER (?n = "Paul")
 }

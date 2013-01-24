@@ -22,6 +22,15 @@
 		rr:class <http://mappingpedia.linkeddata.es/vocabulary/Person>;
 	];
 
+	rr:predicateObjectMap
+    [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/name> ]; 
+      rr:objectMap    [ 
+             rr:column "Name";
+             rr:termType rr:Literal;
+      ];
+    ];
+	
     rr:predicateObjectMap
     [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/webpage> ]; 
@@ -30,4 +39,22 @@
              rr:termType rr:Literal;
       ];
     ];
-.	
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/phone> ]; 
+      rr:objectMap    [ 
+             rr:column "phone";
+             rr:termType rr:Literal;
+      ];
+    ];	
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/email> ]; 
+      rr:objectMap    [ 
+             rr:column "email";
+             rr:termType rr:Literal;
+      ];
+    ];		
+.
