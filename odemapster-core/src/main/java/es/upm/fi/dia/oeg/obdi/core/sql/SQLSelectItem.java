@@ -5,9 +5,9 @@ import java.util.HashSet;
 
 import Zql.ZExp;
 import Zql.ZSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
 public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	private String dbType;

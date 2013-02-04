@@ -816,7 +816,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		//logger.info("opSparqlQuery = " + opSparqlQuery);
 		if(this.optimizer != null && this.optimizer.isSelfJoinElimination()) {
 			Op opSparqlQuery2 = new QueryRewritter().rewrite(opSparqlQuery);
-			logger.debug("opSparqlQueryRewritten = \n" + opSparqlQuery2);
+			logger.info("opSparqlQueryRewritten = \n" + opSparqlQuery2);
 			result = this.trans(opSparqlQuery2);
 		} else {
 			result = this.trans(opSparqlQuery);
@@ -854,7 +854,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		result.setSelectItems(selectItems2);
 		
 		long end = System.currentTimeMillis();
-		logger.debug("Query translation time = "+ (end-start)+" ms.");
+		logger.info("Query translation time = "+ (end-start)+" ms.");
 
 		//logger.info("trans query = \n" + result + "\n");
 		return result;

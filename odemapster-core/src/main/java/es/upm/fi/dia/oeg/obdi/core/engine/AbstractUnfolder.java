@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 
 import Zql.ZUtils;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.obdi.core.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;

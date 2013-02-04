@@ -3,7 +3,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.Random;
 
 import Zql.ZFromItem;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 
 public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	public enum LogicalTableType {TABLE_NAME, QUERY_STRING};

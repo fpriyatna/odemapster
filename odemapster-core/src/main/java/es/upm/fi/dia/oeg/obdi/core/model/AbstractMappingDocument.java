@@ -11,7 +11,7 @@ import java.util.Vector;
 
 import org.w3c.dom.Element;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.IParseable;
+import es.upm.fi.dia.oeg.obdi.core.IParseable;
 import es.upm.fi.dia.oeg.obdi.core.exception.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 
@@ -21,7 +21,7 @@ public abstract class AbstractMappingDocument implements IParseable {
 	private String title;
 	private String id;
 	private String purpose;
-	private Connection conn;
+	//private Connection conn;
 	
 	protected void setMappingDocumentPrefixMap(
 			Map<String, String> mappingDocumentPrefixMap) {
@@ -275,12 +275,12 @@ public abstract class AbstractMappingDocument implements IParseable {
 		this.classMappings = classMappings;
 	}
 
-	public Connection getConn() {
-		return conn;
-	}
-
-	protected void setConn(Connection conn) {
-		this.conn = conn;
-	}
+//	public Connection getConn() {
+//		return conn;
+//	}
+//
+//	protected void setConn(Connection conn) {
+//		this.conn = conn;
+//	}
 	
 }

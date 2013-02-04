@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.exception.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
@@ -40,6 +41,10 @@ public abstract class AbstractDataTranslator {
 			e.printStackTrace();
 		} catch (SQLException e) {
 			logger.error("Database error while loading configuration file : " + configurationFile);
+			logger.error("error message = " + e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Error while loading configuration file : " + configurationFile);
 			logger.error("error message = " + e.getMessage());
 			e.printStackTrace();
 		}

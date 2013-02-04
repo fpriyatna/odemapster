@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -18,10 +18,10 @@ import Zql.ZFromItem;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZUtils;
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.obdi.core.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
-import es.upm.fi.dia.oeg.obdi.core.engine.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
@@ -30,19 +30,19 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLJoinCondition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLLogicalTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLObjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLPredicateObjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLRefObjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSQLQuery;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTable;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLJoinCondition;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLLogicalTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLObjectMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateObjectMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSQLQuery;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTable;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
@@ -264,7 +264,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				result.addSelect(selectItem);
 			}
 		}
-		logger.info(triplesMap + " unfolded = " + result);
+		logger.debug(triplesMap + " unfolded = " + result);
 
 		return result;
 	}

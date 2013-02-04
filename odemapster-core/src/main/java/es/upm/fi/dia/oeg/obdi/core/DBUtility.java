@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 
 import Zql.ZSelectItem;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 
 public class DBUtility {
 	private static Logger logger = Logger.getLogger(DBUtility.class);

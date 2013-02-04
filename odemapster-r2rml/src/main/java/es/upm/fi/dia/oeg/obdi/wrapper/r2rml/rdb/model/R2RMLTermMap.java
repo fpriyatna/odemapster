@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -18,11 +18,11 @@ import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.R2RMLUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElement;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLElementVisitor;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.exception.R2RMLInvalidTermMapException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 
 public abstract class R2RMLTermMap implements R2RMLElement {
 	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH}
@@ -69,7 +69,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 					this.columnDataTypeName = QueryTranslatorUtility.getColumnTypeName(rsmd, columnName);
 					this.columnDataType = QueryTranslatorUtility.getColumnType(rsmd, columnName);
 				} catch(Exception e) {
-					logger.warn("Unable to determine data type of column : " + this.columnName);
+					logger.debug("Unable to determine data type of column : " + this.columnName);
 				}
 			} else {
 				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);
