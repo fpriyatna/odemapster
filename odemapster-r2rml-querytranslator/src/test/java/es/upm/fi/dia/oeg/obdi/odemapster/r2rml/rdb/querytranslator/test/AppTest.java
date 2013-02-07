@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.odemapster_r2rml_querytranslator;
+package es.upm.fi.dia.oeg.obdi.odemapster.r2rml.rdb.querytranslator.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

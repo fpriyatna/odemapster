@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator;
 
 import java.util.Collection;
 import java.util.Vector;
@@ -15,8 +15,8 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.BetaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLSubjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.model.R2RMLTriplesMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLPRSQLGenerator.class);

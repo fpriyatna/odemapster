@@ -1,4 +1,4 @@
-package es.upm.fi.dia.oeg.obdi.odemapster_r2rml_querytranslator;
+package es.upm.fi.dia.oeg.obdi.odemapster.r2rml.rdb.querytranslator.test;
 
 import static org.junit.Assert.assertTrue;
 
@@ -23,7 +23,7 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.querytranslator.R2RMLQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator;
 
 public class BSBM100M_20Run_MySQL {
 	private static Logger logger = Logger.getLogger(BSBM100M_MYSQL.class);
