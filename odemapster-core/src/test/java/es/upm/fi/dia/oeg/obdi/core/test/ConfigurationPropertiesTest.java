@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 
 public class ConfigurationPropertiesTest {
 

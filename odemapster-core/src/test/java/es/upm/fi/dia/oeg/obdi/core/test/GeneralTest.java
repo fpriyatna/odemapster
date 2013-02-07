@@ -14,7 +14,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.QueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.core.engine.RDBQueryEvaluator;
 
 public class GeneralTest {
 
