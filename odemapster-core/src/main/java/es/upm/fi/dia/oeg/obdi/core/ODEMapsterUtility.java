@@ -42,8 +42,6 @@ import com.hp.hpl.jena.shared.CannotEncodeCharacterException;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 

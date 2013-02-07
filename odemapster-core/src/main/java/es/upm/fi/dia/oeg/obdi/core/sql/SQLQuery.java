@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -15,9 +16,10 @@ import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
+import Zql.ZUtils;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 
 public class SQLQuery extends ZQuery implements SQLLogicalTable {
@@ -36,6 +38,12 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	private String comments;
 	
 	public SQLQuery(ZQuery zQuery) {
+		ZUtils.addCustomFunction("concat", 2);
+		ZUtils.addCustomFunction("substring", 3);
+		ZUtils.addCustomFunction("convert", 2);
+		ZUtils.addCustomFunction("coalesce", 2);
+		ZUtils.addCustomFunction("abs", 1);
+		ZUtils.addCustomFunction("lower", 1);
 		
 		if(zQuery.getSelect() != null) { this.addSelect(zQuery.getSelect());}
 		if(zQuery.getFrom() != null) { this.addFrom(zQuery.getFrom());}
@@ -498,4 +506,24 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		this.comments = comments;
 	}
 
+	 
+	public List<String> getSelectItemAliases() {
+		List<String> result = new Vector<String>();
+		for(ZSelectItem selectItem : this.getSelect()) {
+			result.add(selectItem.getAlias());
+		}
+		return result;
+	}
+
+	@Override
+	public Vector<ZSelectItem> getSelect() {
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		Vector selectItems = super.getSelect();
+		if(selectItems != null) {
+			for(Object selectItem : selectItems) {
+				result.add((ZSelectItem) selectItem);
+			}
+		}
+		return super.getSelect();
+	}
 }
