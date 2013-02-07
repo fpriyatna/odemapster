@@ -50,10 +50,10 @@ import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.core.engine.Constants;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -816,7 +816,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		//logger.info("opSparqlQuery = " + opSparqlQuery);
 		if(this.optimizer != null && this.optimizer.isSelfJoinElimination()) {
 			Op opSparqlQuery2 = new QueryRewritter().rewrite(opSparqlQuery);
-			logger.info("opSparqlQueryRewritten = \n" + opSparqlQuery2);
+			logger.debug("opSparqlQueryRewritten = \n" + opSparqlQuery2);
 			result = this.trans(opSparqlQuery2);
 		} else {
 			result = this.trans(opSparqlQuery);
@@ -854,7 +854,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		result.setSelectItems(selectItems2);
 		
 		long end = System.currentTimeMillis();
-		logger.info("Query translation time = "+ (end-start)+" ms.");
+		logger.debug("Query translation time = "+ (end-start)+" ms.");
 
 		//logger.info("trans query = \n" + result + "\n");
 		return result;

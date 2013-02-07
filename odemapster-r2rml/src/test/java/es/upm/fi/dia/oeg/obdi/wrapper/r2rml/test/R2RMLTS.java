@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.engine.R2RMLRunner;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
 
 public class R2RMLTS {
 	private static Logger logger = Logger.getLogger(R2RMLTS.class);
