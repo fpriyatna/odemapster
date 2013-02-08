@@ -105,7 +105,7 @@ public class ConfigurationProperties extends Properties {
 		return mappingDocumentFilePath;
 	}
 
-	private void readConfigurationFile(String r2oConfigurationDir) 
+	private void readConfigurationFile(String configurationDir) 
 			throws Exception {
 
 		this.noOfDatabase = this.readInteger(Constants.NO_OF_DATABASE_NAME_PROP_NAME, 0); 
@@ -159,14 +159,14 @@ public class ConfigurationProperties extends Properties {
 		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME);
 		
 
-		if(r2oConfigurationDir != null) {
-			this.mappingDocumentFilePath = r2oConfigurationDir + mappingDocumentFilePath;
-			this.outputFilePath = r2oConfigurationDir + outputFilePath;
+		if(configurationDir != null) {
+			this.mappingDocumentFilePath = configurationDir + mappingDocumentFilePath;
+			this.outputFilePath = configurationDir + outputFilePath;
 			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
-				this.queryFilePath = r2oConfigurationDir + queryFilePath;
+				this.queryFilePath = configurationDir + queryFilePath;
 			}
 			if(this.ontologyFilePath != null && !this.ontologyFilePath.equals("")) {
-				this.ontologyFilePath = r2oConfigurationDir + ontologyFilePath;
+				this.ontologyFilePath = configurationDir + ontologyFilePath;
 			}
 			
 		}
