@@ -35,19 +35,6 @@ public class XMLUtility {
 	{
 		PropertyConfigurator.configure("log4j.properties");
 		logger.debug("logger initialized");
-	
-		/*
-		String folder = "D:\\home\\freddy\\My Dropbox\\oeg\\odemapster++\\from_luis\\20091014(mappings)\\nconciso\\";
-		String filename = "mappingsR2Onconciso.r2o";
-		String filePath = folder + "\\" +filename;  
-		
-		Document document = XMLUtility.loadXMLFile(filePath);
-		removeFromRootElement(document, "dbschema-desc", "name", "mysql");
-		StringWriter writer = new StringWriter();
-		*/
-		
-		//test34
-		
 	}
 	
 	public static Document removeFromRootElement(Document document, String nodeName, String attributeName, String attributeValue) {
