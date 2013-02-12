@@ -25,7 +25,7 @@ extends AbstractResultSet {
 	}
 	
 	def getString(columnLabel : String ) : String = {
-	  val columnIndex = columnNames.indexOf(columnLabel);
+	  val columnIndex = super.getColumnNames().indexOf(columnLabel);
 		return this.getString(columnIndex);
 	}
 	

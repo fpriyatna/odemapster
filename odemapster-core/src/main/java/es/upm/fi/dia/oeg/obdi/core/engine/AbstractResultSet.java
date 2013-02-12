@@ -5,7 +5,7 @@ import java.util.List;
 import es.upm.fi.dia.oeg.obdi.core.exception.ResultSetException;
 
 public abstract class AbstractResultSet {
-	protected List<String> columnNames = null;
+	private List<String> columnNames = null;
 
 	public abstract boolean next() throws ResultSetException;
 //	public Object getObject(int columnIndex) throws ResultSetException;
@@ -13,11 +13,11 @@ public abstract class AbstractResultSet {
 	public abstract String getString(int columnIndex) throws ResultSetException;
 	public abstract String getString(String columnLabel) throws ResultSetException;
 
-	protected List<String> getColumnNames() {
+	public List<String> getColumnNames() {
 		return columnNames;
 	}
 
-	protected void setColumnNames(List<String> columnNames) {
+	public void setColumnNames(List<String> columnNames) {
 		this.columnNames = columnNames;
 	}
 	
