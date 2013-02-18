@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sparql>
     <head>
-        <variable name="a"/>
         <variable name="p"/>
         <variable name="n"/>
+        <variable name="a"/>
     </head>
     <results>
         <result>
-            <binding name="a">http://mappingpedia.linkeddata.es/resource/Student/1</binding>
             <binding name="p">777-3426</binding>
             <binding name="n">Paul</binding>
+            <binding name="a">http://mappingpedia.linkeddata.es/resources/Person1</binding>
         </result>
     </results>
 </sparql>
