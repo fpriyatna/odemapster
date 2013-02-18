@@ -44,8 +44,9 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 
 
 	@Override
-	protected SQLQuery calculateAlphaPredicateObject  (Triple triple, AbstractConceptMapping abstractConceptMapping
-			, AbstractPropertyMapping abstractPropertyMapping, String logicalTableAlias) throws Exception {
+	protected SQLQuery calculateAlphaPredicateObject  (
+			Triple triple, AbstractConceptMapping abstractConceptMapping
+			, AbstractPropertyMapping abstractPropertyMapping, String logicalTableAlias) throws QueryTranslationException {
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
 		//String tripleMapAlias = cm.getAlias();
 		//String tripleMapAlias = cm.getLogicalTable().getAlias();
@@ -69,19 +70,23 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 			SQLLogicalTable sqlParentLogicalTable = unfolder.visit(parentLogicalTable);
 			if(this.subqueryAsView && sqlParentLogicalTable instanceof SQLQuery) {
-				Connection conn = this.owner.getConnection();
-				
-				String subQueryViewName = "sa" + Math.abs(triple.hashCode());
-				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
-				logger.info(dropViewSQL + ";\n");
-				boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
-				
-				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlParentLogicalTable;
-				logger.info(createViewSQL + ";\n");
-				boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+				try {
+					Connection conn = this.owner.getConnection();
+					
+					String subQueryViewName = "sa" + Math.abs(triple.hashCode());
+					String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
+					logger.info(dropViewSQL + ";\n");
+					boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+					
+					String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlParentLogicalTable;
+					logger.info(createViewSQL + ";\n");
+					boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
 
-				SQLFromItem alphaPredicateObject2 = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
-				joinQuery.addLogicalTable(alphaPredicateObject2);
+					SQLFromItem alphaPredicateObject2 = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
+					joinQuery.addLogicalTable(alphaPredicateObject2);					
+				} catch(Exception e) {
+					throw new QueryTranslationException(e);
+				}
 			} else {
 				joinQuery.addLogicalTable(sqlParentLogicalTable);
 			}
@@ -103,25 +108,29 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 
 	@Override
 	protected SQLLogicalTable calculateAlphaSubject(Node subject,
-			AbstractConceptMapping abstractConceptMapping) throws Exception {
+			AbstractConceptMapping abstractConceptMapping) throws QueryTranslationException {
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
 		R2RMLLogicalTable r2rmlLogicalTable = cm.getLogicalTable();
 		//SQLLogicalTable sqlLogicalTable = new R2RMLElementUnfoldVisitor().visit(logicalTable);
 		R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 		SQLLogicalTable sqlLogicalTable = unfolder.visit(r2rmlLogicalTable);
 		if(this.subqueryAsView && sqlLogicalTable instanceof SQLQuery) {
-			Connection conn = this.owner.getConnection();
-			
-			String subQueryViewName = "sa" + Math.abs(subject.hashCode());
-			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
-			logger.info(dropViewSQL + ";\n");
-			boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
-			
-			String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlLogicalTable;
-			logger.info(createViewSQL + ";\n");
-			boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
-			
-			sqlLogicalTable = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
+			try {
+				Connection conn = this.owner.getConnection();
+				
+				String subQueryViewName = "sa" + Math.abs(subject.hashCode());
+				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
+				logger.info(dropViewSQL + ";\n");
+				boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+				
+				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlLogicalTable;
+				logger.info(createViewSQL + ";\n");
+				boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+				
+				sqlLogicalTable = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);				
+			} catch(Exception e) {
+				throw new QueryTranslationException(e);
+			}
 		}
 		
 		//String logicalTableAlias = sqlLogicalTable.generateAlias();
@@ -169,7 +178,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	@Override
 	public AlphaResult calculateAlpha(Triple tp, AbstractConceptMapping abstractConceptMapping
 			, String predicateURI)
-			throws Exception {
+			throws QueryTranslationException {
 		
 		//alpha subject
 		Node tpSubject = tp.getSubject();

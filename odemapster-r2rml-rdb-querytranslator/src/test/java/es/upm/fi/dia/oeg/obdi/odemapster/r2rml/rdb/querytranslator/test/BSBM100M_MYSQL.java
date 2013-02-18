@@ -25,6 +25,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.test.R2RMLRunnerChebotko;
 
 public class BSBM100M_MYSQL {
 	private static Logger logger = Logger.getLogger(BSBM100M_MYSQL.class);
@@ -179,30 +180,13 @@ public class BSBM100M_MYSQL {
 		
 		try {
 			long start = System.currentTimeMillis();
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			AbstractRunner runner = new R2RMLRunnerChebotko(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			//queryTranslator.setOptimizeTripleBlock(false);
-			queryTranslator.setQueryFilePath(queryFilePath);
-			
-
-
-			
-//			boolean optimizeTripleBlock = false;
-//			boolean subqueryAsView = false;			
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-			
-			SQLQuery query = queryTranslator.translateFromPropertyFile();
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("sql query = \n" + query + "\n");
 			Connection conn = runner.getConnection();
-			
-//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
-//			int noOfRows = DBUtility.getRowCount(rs);
-//			logger.info("noOfRows = " + noOfRows);
-
-			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
-			
 			logger.info("------" + testName + " Chebotko DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -221,27 +205,10 @@ public class BSBM100M_MYSQL {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			//queryTranslator.setOptimizeTripleBlock(false);
-			queryTranslator.setQueryFilePath(queryFilePath);
-			
-
-
-//			boolean optimizeTripleBlock = false;
-//			boolean subqueryAsView = true;
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-//			
-			SQLQuery query = queryTranslator.translateFromPropertyFile();
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
-			Connection conn = runner.getConnection();
-			
-//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
-//			int noOfRows = DBUtility.getRowCount(rs);
-//			logger.info("noOfRows = " + noOfRows);
-
-			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
-
 			logger.info("------" + testName + " Chebotko View DONE------\n\n");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -258,8 +225,7 @@ public class BSBM100M_MYSQL {
 		
 		try {
 			long start = System.currentTimeMillis();
-			queryTranslatorFreddy.setQueryFilePath(queryFilePath);
-			SQLQuery query = queryTranslatorFreddy.translateFromPropertyFile();
+			SQLQuery query = queryTranslatorFreddy.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			//Connection conn = runner.getConnection();
 			long end = System.currentTimeMillis();
@@ -282,28 +248,12 @@ public class BSBM100M_MYSQL {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			//queryTranslator.setOptimizeTripleBlock(true);
-			queryTranslator.setQueryFilePath(queryFilePath);
-			
 			IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
 			queryTranslationOptimizer.setSelfJoinElimination(true);
 			queryTranslationOptimizer.setUnionQueryReduction(true);
 			queryTranslator.setOptimizer(queryTranslationOptimizer);
-
-			
-//			boolean optimizeTripleBlock = true;
-//			boolean subqueryAsView = true;
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-//			
-			SQLQuery query = queryTranslator.translateFromPropertyFile();
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
-			Connection conn = runner.getConnection();
-
-//			ResultSet rs = DBUtility.executeQuery(conn, query.toString());
-//			int noOfRows = DBUtility.getRowCount(rs);
-//			logger.info("noOfRows = " + noOfRows);
-
-			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			logger.info("------" + testName + " Freddy View DONE------\n\n");

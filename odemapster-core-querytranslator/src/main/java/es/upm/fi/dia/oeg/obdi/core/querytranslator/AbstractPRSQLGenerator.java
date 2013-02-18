@@ -14,6 +14,8 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 public abstract class AbstractPRSQLGenerator {
 	private static Logger logger = Logger.getLogger(AbstractPRSQLGenerator.class);
@@ -30,25 +32,28 @@ public abstract class AbstractPRSQLGenerator {
 //			, NameGenerator nameGenerator)
 //					throws Exception;
 
-	public Collection<ZSelectItem> genPRSQL(Triple tp, BetaResult betaResult
-			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject)
-					throws Exception {
+	public Collection<ZSelectItem> genPRSQL(Triple tp
+			, AlphaResult alphaResult
+			, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator
+			, AbstractConceptMapping cmSubject, String predicateURI)
+					throws QueryTranslationException {
 		Node subject = tp.getSubject();
 		Node predicate = tp.getPredicate();
 		Node object = tp.getObject();
-		//R2OConceptMapping cmSubject = this.mapTripleCM.get(tp);
-		//R2OConceptMapping cmSubject = (R2OConceptMapping) this.mapInferredTypes.get(subject).iterator().next();
 
 		Collection<ZSelectItem> prList = new Vector<ZSelectItem>();
 
-		Collection<ZSelectItem> selectItemsSubjects = this.genPRSQLSubject(
-				subject, tp, betaResult, cmSubject, nameGenerator);
+		Collection<ZSelectItem> selectItemsSubjects = 
+				this.genPRSQLSubject(tp, alphaResult, betaGenerator
+						,nameGenerator, cmSubject);
 		prList.addAll(selectItemsSubjects);
 
 		if(predicate != subject) {
 			//line 22
 			ZSelectItem selectItemPredicate = this.genPRSQLPredicate(
-					predicate, tp, betaResult, cmSubject, nameGenerator);
+					tp, alphaResult, betaGenerator, nameGenerator
+					, predicateURI);
 			if(selectItemPredicate != null) {
 				prList.add(selectItemPredicate);
 			}
@@ -58,7 +63,8 @@ public abstract class AbstractPRSQLGenerator {
 		if(object != subject && object != predicate) {
 			//line 23
 			Collection<ZSelectItem> selectItems = this.genPRSQLObject(
-					object, tp, betaResult, cmSubject, nameGenerator);
+					tp, alphaResult, betaGenerator, nameGenerator,
+					cmSubject, predicateURI);
 			prList.addAll(selectItems);
 		}
 
@@ -67,92 +73,105 @@ public abstract class AbstractPRSQLGenerator {
 
 	}
 	
-	protected Collection<ZSelectItem> genPRSQLObject(Node object, Triple tp,
-			BetaResult betaResult, AbstractConceptMapping cmSubject
-			, NameGenerator nameGenerator) throws Exception {
+	protected Collection<ZSelectItem> genPRSQLObject(Triple tp
+			, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject
+			, String predicateURI
+			) throws QueryTranslationException {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
 
-		ZSelectItem selectItem = betaResult.getBetaObj().clone();
-		String selectItemAlias = nameGenerator.generateName(object);
-		if(selectItemAlias != null) {
-			selectItem.setAlias(selectItemAlias);
-		}
-		selectItems.add(selectItem); //line 23
+		try {
+			SQLSelectItem betaObj = betaGenerator.calculateBetaObject(
+					tp, cmSubject, predicateURI, alphaResult);
+			ZSelectItem selectItem = betaObj.clone();
+			String selectItemAlias = nameGenerator.generateName(
+					tp.getObject());
+			if(selectItemAlias != null) {
+				selectItem.setAlias(selectItemAlias);
+			}
+			selectItems.add(selectItem); //line 23
 
-		logger.debug("genPRSQLObject = " + selectItem);
-		return selectItems;
+			logger.debug("genPRSQLObject = " + selectItem);
+			return selectItems;			
+		} catch (Exception e) {
+			throw new QueryTranslationException(e);
+		}
+
 	}
 
-	public ZSelectItem genPRSQLPredicate(Node predicate, Triple tp,
-			BetaResult betaResult,
-			AbstractConceptMapping cmSubject, NameGenerator nameGenerator) throws Exception {
-		ZSelectItem selectItem = betaResult.getBetaPre().clone();
-		selectItem.setAlias(nameGenerator.generateName(predicate));
-		logger.debug("genPRSQLPredicate = " + selectItem);
-		return selectItem;
+	protected ZSelectItem genPRSQLPredicate(Triple tp
+			, AlphaResult alphaResult
+			, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator
+			, String predicateURI) throws QueryTranslationException {
+		try {
+			SQLSelectItem betaPre = 
+					betaGenerator.calculateBetaPredicate(predicateURI);
+			ZSelectItem selectItem = betaPre.clone();
+			String alias = nameGenerator.generateName(tp.getPredicate());
+			selectItem.setAlias(alias);
+			logger.debug("genPRSQLPredicate = " + selectItem);
+			return selectItem;			
+		} catch (Exception e) {
+			throw new QueryTranslationException(e);
+		}
+
 	}
 	
-	protected abstract Collection<ZSelectItem> genPRSQLSubject(Node subject, Triple tp
-			, BetaResult betaResult, AbstractConceptMapping cmSubject, NameGenerator nameGenerator) 
-					throws Exception;
+	protected abstract Collection<ZSelectItem> genPRSQLSubject(
+			Triple tp, AlphaResult alphaResult
+			, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator
+			, AbstractConceptMapping cmSubject) 
+					throws QueryTranslationException;
 
 //	public abstract Collection<ZSelectItem> genPRSQLSTG(List<Triple> stg
 //			, List<BetaResultSet> betaResultSetList, NameGenerator nameGenerator) 
 //					throws Exception;;
 
-	protected Collection<ZSelectItem> genPRSQLSTG(List<Triple> stg
-			, List<BetaResultSet> betaResultSetList, NameGenerator nameGenerator
-			, AbstractConceptMapping cmSubject) throws Exception {
-		if(stg.size() != betaResultSetList.size()) {
-			String errorMessage = "Numbers of beta is not consistent with STG size.";
-			throw new QueryTranslationException(errorMessage);
-		}
+	protected Collection<ZSelectItem> genPRSQLSTG(List<Triple> stg,
+			AlphaResult alphaResult, AbstractBetaGenerator betaGenerator,
+			NameGenerator nameGenerator, AbstractConceptMapping cmSubject) throws Exception {
 		Collection<ZSelectItem> prList = new HashSet<ZSelectItem>();
 		
 		Triple firstTriple = stg.get(0);
-		BetaResultSet firstTripleBetaResultSet = betaResultSetList.get(0);
-		if(firstTripleBetaResultSet.size() > 1) {
-			String errorMessage = "Multiple betas are not permitted for triple " + firstTriple;
-			logger.warn(errorMessage);
-		}
-		
-		BetaResult firstTripleBetaResult = firstTripleBetaResultSet.get(0);
-		Node subject = firstTriple.getSubject();
-		Collection<ZSelectItem> selectItemsSubjects = this.genPRSQLSubject(
-				subject, firstTriple, firstTripleBetaResult, cmSubject, nameGenerator);
+		Collection<ZSelectItem> selectItemsSubjects = 
+				this.genPRSQLSubject(firstTriple, 
+						alphaResult, betaGenerator, 
+						nameGenerator, cmSubject);
 		prList.addAll(selectItemsSubjects);
 
+		Node subject = firstTriple.getSubject();
 		for(int i=0; i<stg.size(); i++) {
 			Triple tp = stg.get(i);
-			BetaResultSet betaResultSet = betaResultSetList.get(i);
-			if(betaResultSet.size() > 1) {
-				String errorMessage = "Multiple betas are not permitted for triple " + tp;
-				logger.warn(errorMessage);
-			}
-			BetaResult betaResult = betaResultSet.get(0);
 			
 			Node predicate = tp.getPredicate();
-			if(predicate.isVariable()) {
-				String errorMessage = "Unbounded property is not supported in STG.";
+			if(!predicate.isURI()) {
+				String errorMessage = "Only bounded predicate is supported in STG.";
 				logger.warn(errorMessage);
 			}
+			String predicateURI = predicate.getURI();
 			
-			if(predicate.isURI() && this.ignoreRDFTypeStatement 
-					&& RDF.type.getURI().equals(predicate.getURI())) {
+			if(this.ignoreRDFTypeStatement 
+					&& RDF.type.getURI().equals(predicateURI)) {
 				//do nothing
 			} else {
 				Node object = tp.getObject();
 				if(predicate != subject) {
-					ZSelectItem selectItemPredicate = this.genPRSQLPredicate(
-							predicate, tp, betaResult, cmSubject, nameGenerator);
+					ZSelectItem selectItemPredicate = 
+							this.genPRSQLPredicate(tp, alphaResult,
+									betaGenerator, nameGenerator,
+									predicateURI);
 					if(selectItemPredicate != null) {
 						prList.add(selectItemPredicate);	
 					}
 					
 				}
 				if(object != subject && object != predicate) {
-					Collection<ZSelectItem> selectItemsObject = this.genPRSQLObject(
-							object, tp, betaResult, cmSubject, nameGenerator);
+					Collection<ZSelectItem> selectItemsObject = 
+							this.genPRSQLObject(tp, alphaResult,
+									betaGenerator, nameGenerator,
+									cmSubject, predicateURI);
 					prList.addAll(selectItemsObject);
 				}				
 			}

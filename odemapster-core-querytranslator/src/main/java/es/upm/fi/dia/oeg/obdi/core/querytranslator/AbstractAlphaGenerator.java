@@ -26,46 +26,46 @@ public abstract class AbstractAlphaGenerator {
 	}
 	
 
-	public AlphaResultUnion calculateAlpha(Triple tp, AbstractConceptMapping cm) throws Exception {
-		AlphaResultUnion result = null;
-		
-		Node tpPredicate = tp.getPredicate();
-		if(tpPredicate.isURI()) {
-			String predicateURI = tpPredicate.getURI();
-			AlphaResult alphaResult = this.calculateAlpha(tp, cm, predicateURI);
-//			String logicalTableAlias = cm.getLogicalTableAlias();
-//			if(logicalTableAlias == null || logicalTableAlias.equals("")) {
-//				cm.setLogicalTableAlias(alphaResult.getAlphaSubject().getAlias());
+//	public AlphaResultUnion calculateAlpha(Triple tp, AbstractConceptMapping cm) throws Exception {
+//		AlphaResultUnion result = null;
+//		
+//		Node tpPredicate = tp.getPredicate();
+//		if(tpPredicate.isURI()) {
+//			String predicateURI = tpPredicate.getURI();
+//			AlphaResult alphaResult = this.calculateAlpha(tp, cm, predicateURI);
+////			String logicalTableAlias = cm.getLogicalTableAlias();
+////			if(logicalTableAlias == null || logicalTableAlias.equals("")) {
+////				cm.setLogicalTableAlias(alphaResult.getAlphaSubject().getAlias());
+////			}
+//			result = new AlphaResultUnion(alphaResult);
+//		} else if(tpPredicate.isVariable()) {
+//			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
+//			if(pms != null && pms.size() > 0) {
+//				List<AlphaResult> alphaResults = new Vector<AlphaResult>();
+//				for(AbstractPropertyMapping pm : pms) {
+//					String predicateURI = pm.getMappedPredicateName();
+//					AlphaResult alphaResult = this.calculateAlpha(tp, cm, predicateURI);
+//					alphaResults.add(alphaResult);
+//				}
+//				result = new AlphaResultUnion(alphaResults);
+//			} else {
+//				//TODO : deal when no predicateobjectmap is specified, but only subjectmap
+////				SQLLogicalTable alphaSubject = (SQLLogicalTable) this.calculateAlphaSubject(tp.getSubject(), cm);
+////				AlphaResult alphaResult = new AlphaResult(alphaSubject, null, null);
+////				result = new AlphaResultUnion(alphaResult);	
 //			}
-			result = new AlphaResultUnion(alphaResult);
-		} else if(tpPredicate.isVariable()) {
-			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
-			if(pms != null && pms.size() > 0) {
-				List<AlphaResult> alphaResults = new Vector<AlphaResult>();
-				for(AbstractPropertyMapping pm : pms) {
-					String predicateURI = pm.getMappedPredicateName();
-					AlphaResult alphaResult = this.calculateAlpha(tp, cm, predicateURI);
-					alphaResults.add(alphaResult);
-				}
-				result = new AlphaResultUnion(alphaResults);
-			} else {
-				//TODO : deal when no predicateobjectmap is specified, but only subjectmap
-//				SQLLogicalTable alphaSubject = (SQLLogicalTable) this.calculateAlphaSubject(tp.getSubject(), cm);
-//				AlphaResult alphaResult = new AlphaResult(alphaSubject, null, null);
-//				result = new AlphaResultUnion(alphaResult);	
-			}
-		} else {
-			String errorMessage = "Predicate has to be either an URI or a variable";
-			throw new QueryTranslationException(errorMessage);
-		}
-		
-		
-		logger.debug("alpha(tp) = " + result);
-		return result;
-	}
+//		} else {
+//			String errorMessage = "Predicate has to be either an URI or a variable";
+//			throw new QueryTranslationException(errorMessage);
+//		}
+//		
+//		
+//		logger.debug("alpha(tp) = " + result);
+//		return result;
+//	}
 	
 	public abstract AlphaResult calculateAlpha(Triple tp
-			, AbstractConceptMapping abstractConceptMapping, String predicateURI) throws Exception;
+			, AbstractConceptMapping abstractConceptMapping, String predicateURI) throws QueryTranslationException;
 	
 	protected abstract Object calculateAlphaPredicateObject(Triple triple
 			, AbstractConceptMapping abstractConceptMapping, AbstractPropertyMapping pm 

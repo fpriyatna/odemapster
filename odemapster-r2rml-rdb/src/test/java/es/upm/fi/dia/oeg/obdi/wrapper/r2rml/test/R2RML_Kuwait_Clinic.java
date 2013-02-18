@@ -56,22 +56,14 @@ public class R2RML_Kuwait_Clinic {
 		
 		try {
 			long start = System.currentTimeMillis();
-			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			AbstractRunner runner = new R2RMLRunnerChebotko(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			//queryTranslator.setOptimizeTripleBlock(false);
-			queryTranslator.setQueryFilePath(queryFilePath);
-
-//			boolean optimizeTripleBlock = false;
-//			boolean subqueryAsView = false;			
-//			R2RMLQueryTranslator queryTranslator = this.getQueryTranslator(testName, optimizeTripleBlock, subqueryAsView);
-			
-			SQLQuery query = queryTranslator.translateFromPropertyFile();
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("sql query = \n" + query + "\n");
 			Connection conn = runner.getConnection();
 			ResultSet rs = DBUtility.executeQuery(conn, query.toString(), 0);
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
-			
 			int noOfRows = DBUtility.getRowCount(rs);
 			logger.info("noOfRows = " + noOfRows);
 			logger.info("------" + testName + " Chebotko DONE------\n\n");
@@ -92,7 +84,7 @@ public class R2RML_Kuwait_Clinic {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunnerFreddy(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			SQLQuery query = queryTranslator.translateFromPropertyFile();
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			Connection conn = runner.getConnection();
 			ResultSet rs = DBUtility.executeQuery(conn, query.toString(), 0);

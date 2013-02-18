@@ -15,13 +15,15 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 
 public abstract class AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(AbstractBetaGenerator.class);
 	protected AbstractQueryTranslator owner;
-
+	protected AbstractAlphaGenerator alphaGenerator;
+	
 	public AbstractBetaGenerator(AbstractQueryTranslator owner) {
 		super();
 		this.owner = owner;
@@ -50,65 +52,91 @@ public abstract class AbstractBetaGenerator {
 //		return betaResult;
 //	}
 	
-	List<BetaResultSet> calculateBetaSTG(List<Triple> stg, AbstractConceptMapping cm, List<AlphaResultUnion> listofAlphaResultUnion) throws Exception {
-		List<BetaResultSet> result = new Vector<BetaResultSet>();
-		for(int i=0; i<stg.size(); i++) {
-			Triple tp = stg.get(i);
-			AlphaResultUnion alphaResultUnion = listofAlphaResultUnion.get(i);
-			BetaResultSet betaResult = this.calculateBeta(tp, cm, alphaResultUnion);
-			result.add(betaResult);
-		}
-		return result;
-	}
+//	List<BetaResultSet> calculateBetaSTG(List<Triple> stg, AbstractConceptMapping cm, List<AlphaResultUnion> listofAlphaResultUnion) throws Exception {
+//		List<BetaResultSet> result = new Vector<BetaResultSet>();
+//		for(int i=0; i<stg.size(); i++) {
+//			Triple tp = stg.get(i);
+//			AlphaResultUnion alphaResultUnion = listofAlphaResultUnion.get(i);
+//			BetaResultSet betaResult = this.calculateBeta(tp, cm, alphaResultUnion);
+//			result.add(betaResult);
+//		}
+//		return result;
+//	}
 	
-	public BetaResultSet calculateBeta(Triple tp, AbstractConceptMapping cm, AlphaResultUnion alphaResultSet) throws Exception {
-		BetaResultSet result = null;
-		Node tpSubject = tp.getSubject();
-		Node tpPredicate = tp.getPredicate();
-		Node tpObject = tp.getObject();
+//	public BetaResultSet calculateBeta(Triple tp, AbstractConceptMapping cm, AlphaResultUnion alphaResultSet) throws Exception {
+//		BetaResultSet result = null;
+//		Node tpSubject = tp.getSubject();
+//		Node tpPredicate = tp.getPredicate();
+//		Node tpObject = tp.getObject();
+//		
+//		if(tpPredicate.isURI()) {
+//			String predicateURI = tp.getPredicate().getURI();
+//			AlphaResult alphaResult = alphaResultSet.get(0);
+//			BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI, alphaResult);
+//			result = new BetaResultSet(betaResult);
+//		} else if(tpPredicate.isVariable()) {
+//			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
+//			Iterator<AbstractPropertyMapping> pmsIterator = pms.iterator();
+//			List<BetaResult> betaResults = new Vector<BetaResult>();
+//			while(pmsIterator.hasNext()) {
+//				AbstractPropertyMapping pm = pmsIterator.next();
+//				String predicateURI = pm.getMappedPredicateName();
+//				AlphaResult alphaResult = alphaResultSet.get(predicateURI);
+//				BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI, alphaResult);
+//				betaResults.add(betaResult);
+//			}
+//			result = new BetaResultSet(betaResults);
+//			
+//		} else {
+//			String errorMessage = "Predicate has to be either an URI or a variable";
+//			throw new QueryTranslationException(errorMessage);
+//		}
+//		
+//		return result;
+//	}
+	
+//	public BetaResult calculateBeta2(Triple tp, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult) throws QueryTranslationException {
+//		SQLSelectItem betaSubject = this.calculateBetaSubject(tp, cm, alphaResult);
+//		SQLSelectItem betaPredicate = this.calculateBetaPredicate(predicateURI);
+//		SQLSelectItem betaObject;
+//		boolean predicateIsRDFSType = RDF.type.getURI().equals(predicateURI);
+//		if(predicateIsRDFSType) {
+//			ZConstant className = new ZConstant(cm.getConceptName(), ZConstant.STRING);
+//			betaObject = new SQLSelectItem();betaObject.setExpression(className);
+//		} else {
+//			betaObject = this.calculateBetaObject(tp, cm, predicateURI, alphaResult);	
+//		}
+//		
+//		BetaResult betaResult = new BetaResult(betaSubject, betaPredicate, betaObject, predicateURI);
+//		return betaResult;
+//	}
+
+	public SQLSelectItem calculateBeta(Triple tp, POS pos
+			, AbstractConceptMapping cm, String predicateURI
+			, AlphaResult alphaResult) throws QueryTranslationException {
+		SQLSelectItem result;
 		
-		if(tpPredicate.isURI()) {
-			String predicateURI = tp.getPredicate().getURI();
-			AlphaResult alphaResult = alphaResultSet.get(0);
-			BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI, alphaResult);
-			result = new BetaResultSet(betaResult);
-		} else if(tpPredicate.isVariable()) {
-			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
-			Iterator<AbstractPropertyMapping> pmsIterator = pms.iterator();
-			List<BetaResult> betaResults = new Vector<BetaResult>();
-			while(pmsIterator.hasNext()) {
-				AbstractPropertyMapping pm = pmsIterator.next();
-				String predicateURI = pm.getMappedPredicateName();
-				AlphaResult alphaResult = alphaResultSet.get(predicateURI);
-				BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI, alphaResult);
-				betaResults.add(betaResult);
+		if(pos == POS.sub) {
+			result = this.calculateBetaSubject(cm, alphaResult);
+		} else if(pos == POS.pre) {
+			result = this.calculateBetaPredicate(predicateURI);
+		} else if(pos == POS.obj) {
+			boolean predicateIsRDFSType = RDF.type.getURI().equals(predicateURI);
+			if(predicateIsRDFSType) {
+				ZConstant className = new ZConstant(
+						cm.getConceptName(), ZConstant.STRING);
+				result = new SQLSelectItem();
+				result.setExpression(className);
+			} else {
+				result = this.calculateBetaObject(
+						tp, cm, predicateURI, alphaResult);	
 			}
-			result = new BetaResultSet(betaResults);
-			
 		} else {
-			String errorMessage = "Predicate has to be either an URI or a variable";
-			throw new QueryTranslationException(errorMessage);
+			throw new QueryTranslationException("invalid Pos value in beta!");
 		}
-		
 		return result;
 	}
-	
-	private BetaResult calculateBeta(Triple tp, AbstractConceptMapping cm
-			, String predicateURI, AlphaResult alphaResult) throws Exception {
-		SQLSelectItem betaSubject = this.calculateBetaSubject(tp, cm, alphaResult);
-		SQLSelectItem betaPredicate = this.calculateBetaPredicate(predicateURI);
-		SQLSelectItem betaObject;
-		boolean predicateIsRDFSType = RDF.type.getURI().equals(predicateURI);
-		if(predicateIsRDFSType) {
-			ZConstant className = new ZConstant(cm.getConceptName(), ZConstant.STRING);
-			betaObject = new SQLSelectItem();betaObject.setExpression(className);
-		} else {
-			betaObject = this.calculateBetaObject(tp, cm, predicateURI, alphaResult);	
-		}
-		
-		BetaResult betaResult = new BetaResult(betaSubject, betaPredicate, betaObject, predicateURI);
-		return betaResult;
-	}
+
 	
 //	public List<ZSelectItem> calculateBeta(Triple tp, POS pos) throws Exception {
 //		List<ZSelectItem> result = new Vector<ZSelectItem>();
@@ -150,7 +178,7 @@ public abstract class AbstractBetaGenerator {
 //		return result;
 //	}
 
-	protected abstract SQLSelectItem calculateBetaObject(Triple triple
+	public abstract SQLSelectItem calculateBetaObject(Triple triple
 			, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult)
 	throws QueryTranslationException;
 
@@ -162,7 +190,7 @@ public abstract class AbstractBetaGenerator {
 		return selectItem;
 	}
 	
-	protected abstract SQLSelectItem calculateBetaSubject(Triple tp, AbstractConceptMapping cm, AlphaResult alphaResult);
+	public abstract SQLSelectItem calculateBetaSubject(AbstractConceptMapping cm, AlphaResult alphaResult);
 
 	protected AbstractQueryTranslator getOwner() {
 		return owner;

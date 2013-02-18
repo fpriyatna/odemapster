@@ -44,89 +44,8 @@ class R2RMLFusionTablesQueryTranslator  extends R2RMLQueryTranslator {
   override protected def buildPRSQLGenerator(): Unit = {  
     super.setPrSQLGenerator(new R2RMLFusionTablesPRSQLGenerator(this));
   }
-  
-  override protected  def trans(tp: Triple, cm: AbstractConceptMapping): SQLQuery = {
-		var result : SQLQuery = null;
-		try {
-			val tpPredicate = tp.getPredicate();
 
-			if(tpPredicate.isURI() && RDF.`type`.getURI().equals(tpPredicate.getURI()) 
-					&& (this.isIgnoreRDFTypeStatement())) {
-				result = null;
-			} else {
-				val alphaResultSet = super.getAlphaGenerator().calculateAlpha(tp, cm);
-				val betaResultSet = super.getBetaGenerator().calculateBeta(tp, cm, alphaResultSet);
-				if(alphaResultSet != null && alphaResultSet != null) {
-					if(alphaResultSet.size() != betaResultSet.size()) {
-						val errorMessage = "Number of alpha is not consistent with number of beta.";
-						logger.error(errorMessage);
-					}
 
-					var unionSQLQueries : List[SQLQuery] = Nil;
-
-					for(i <- 0 until betaResultSet.size()) {
-						val alphaResult = alphaResultSet.get(i);
-						val betaResult = betaResultSet.get(i);
-						try {
-							val sqlQuery : SQLQuery = this.trans(tp, alphaResult, betaResult, cm);
-							logger.debug("sqlQuery("+ i +") = " + sqlQuery);
-							if(sqlQuery != null) {
-								unionSQLQueries ::= sqlQuery;  
-							}
-							
-						} catch {
-							case e : Exception => e.printStackTrace();logger.warn("Insatisfiable expression : " + e.getMessage());							
-						}
-					}
-
-					if(!unionSQLQueries.isEmpty()) {
-						val it = unionSQLQueries.iterator(); 
-						result = it.next();
-						while(it.hasNext()) {
-							result.addUnionQuery(it.next());
-						}						
-					}
-				}
-
-			}
-		} catch {
-			case e : Exception => e.printStackTrace();logger.error("Error in transTP : " + tp);		  
-		}
-
-		return result;    
-}
-
-  
-	private def trans(tp : Triple , alphaResult : AlphaResult , betaResult : BetaResult 
-			, cm : AbstractConceptMapping ) : SQLQuery = {
-		var result = new SQLQuery();
-		//result.setComments("Query from TriplesMap : " + cm.toString() + " with predicate " + betaResult.getPredicateURI());
-
-		//alpha
-		val alphaSubject = alphaResult.getAlphaSubject();
-		result.addLogicalTable(alphaSubject);//alpha from subject
-		
-
-		//PRSQL
-		val selectItems = super.getPrSQLGenerator().genPRSQL(
-				tp, betaResult, super.getNameGenerator(), cm);
-		result.setSelectItems(selectItems);
-
-		//CondSQL
-		val condSQL = super.getCondSQLGenerator().genCondSQL(tp, alphaResult, betaResult, cm);
-		if(condSQL != null) {
-			result.addWhere(condSQL.getExpression());
-		}
-
-		//subquery elimination
-		val optimizer = super.getOptimizer();
-		if(optimizer != null && optimizer.isSubQueryElimination()) {
-			result = QueryTranslatorUtility.eliminateSubQuery(result);
-		}
-
-		logger.debug("transTP = " + result);
-		return result;
-	}  
 }
 
 

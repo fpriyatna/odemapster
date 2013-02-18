@@ -102,94 +102,93 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	}
 
 
-	private SQLQuery trans(Triple tp, AlphaResult alphaResult, BetaResult betaResult
-			, AbstractConceptMapping cm) throws Exception {
-		SQLQuery result = new SQLQuery();
-		//result.setComments("Query from TriplesMap : " + cm.toString() + " with predicate " + betaResult.getPredicateURI());
-		
-		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-		Collection<SQLQuery> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
-		logger.debug("alpha logicalTable = " + alphaSubject);
-		result.addLogicalTable(alphaSubject);//alpha from subject
-		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
-			for(SQLQuery alphaPredicateObject : alphaPredicateObjects) {
-				result.addJoinQuery(alphaPredicateObject);//alpha predicate object
-				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
-			}
-		}
+//	private SQLQuery trans2(Triple tp, AlphaResult alphaResult, BetaResult betaResult
+//			, AbstractConceptMapping cm) throws Exception {
+//		SQLQuery result = new SQLQuery();
+//		//result.setComments("Query from TriplesMap : " + cm.toString() + " with predicate " + betaResult.getPredicateURI());
+//		
+//		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
+//		Collection<SQLQuery> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
+//		logger.debug("alpha logicalTable = " + alphaSubject);
+//		result.addLogicalTable(alphaSubject);//alpha from subject
+//		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
+//			for(SQLQuery alphaPredicateObject : alphaPredicateObjects) {
+//				result.addJoinQuery(alphaPredicateObject);//alpha predicate object
+//				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
+//			}
+//		}
+//
+//
+//		//PRSQL
+//		Collection<ZSelectItem> selectItems = super.getPrSQLGenerator().genPRSQL(
+//				tp, betaResult, super.getNameGenerator(), cm);
+//		result.setSelectItems(selectItems);
+//
+//		//CondSQL
+//		CondSQLResult condSQL = super.getCondSQLGenerator().genCondSQL(tp, alphaResult, betaResult, cm);
+//		logger.debug("condSQL = " + condSQL);
+//		if(condSQL != null) {
+//			result.addWhere(condSQL.getExpression());
+//		}
+//
+//		//subquery elimination
+//		IQueryTranslationOptimizer optimizer = super.getOptimizer();
+//		if(optimizer != null && optimizer.isSubQueryElimination()) {
+//			result = QueryTranslatorUtility.eliminateSubQuery(result);
+//		}
+//
+//		logger.debug("transTP = " + result);
+//		return result;
+//	}
 
-
-		//PRSQL
-		Collection<ZSelectItem> selectItems = super.getPrSQLGenerator().genPRSQL(
-				tp, betaResult, super.getNameGenerator(), cm);
-		result.setSelectItems(selectItems);
-
-		//CondSQL
-		CondSQLResult condSQL = super.getCondSQLGenerator().genCondSQL(tp, alphaResult, betaResult, cm);
-		logger.debug("condSQL = " + condSQL);
-		if(condSQL != null) {
-			result.addWhere(condSQL.getExpression());
-		}
-
-		//subquery elimination
-		IQueryTranslationOptimizer optimizer = super.getOptimizer();
-		if(optimizer != null && optimizer.isSubQueryElimination()) {
-			result = QueryTranslatorUtility.eliminateSubQuery(result);
-		}
-
-		logger.debug("transTP = " + result);
-		return result;
-	}
-
-	@Override
-	protected SQLQuery trans(Triple tp, AbstractConceptMapping cm) throws QueryTranslationException {
-		SQLQuery result = null;
-		try {
-			Node tpPredicate = tp.getPredicate();
-
-			if(tpPredicate.isURI() && RDF.type.getURI().equals(tpPredicate.getURI()) 
-					&& (this.isIgnoreRDFTypeStatement())) {
-				result = null;
-			} else {
-				AlphaResultUnion alphaResultSet = super.getAlphaGenerator().calculateAlpha(tp, cm);
-				BetaResultSet betaResultSet = super.getBetaGenerator().calculateBeta(tp, cm, alphaResultSet);
-				if(alphaResultSet != null && alphaResultSet != null) {
-					if(alphaResultSet.size() != betaResultSet.size()) {
-						String errorMessage = "Number of alpha is not consistent with number of beta.";
-						throw new QueryTranslationException(errorMessage);
-					}
-
-					Collection<SQLQuery> unionSQLQueries = new Vector<SQLQuery>();
-					for(int i=0; i<betaResultSet.size(); i++) {
-						AlphaResult alphaResult = alphaResultSet.get(i);
-						BetaResult betaResult = betaResultSet.get(i);
-						try {
-							SQLQuery sqlQuery = this.trans(tp, alphaResult, betaResult, cm);
-							logger.debug("sqlQuery("+ i +") = " + sqlQuery);
-							unionSQLQueries.add(sqlQuery);							
-						} catch(InsatisfiableSQLExpression e) {
-							logger.warn("Insatisfiable expression : " + e.getMessage());
-						}
-					}
-
-					if(!unionSQLQueries.isEmpty()) {
-						Iterator<SQLQuery> it = unionSQLQueries.iterator(); 
-						result = it.next();
-						while(it.hasNext()) {
-							result.addUnionQuery(it.next());
-						}						
-					}
-				}
-
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Error in transTP : " + tp);
-			throw new QueryTranslationException(e.getMessage(), e);
-		}
-
-		return result;
-	}
+//	protected SQLQuery trans2(Triple tp, AbstractConceptMapping cm) throws QueryTranslationException {
+//		SQLQuery result = null;
+//		try {
+//			Node tpPredicate = tp.getPredicate();
+//
+//			if(tpPredicate.isURI() && RDF.type.getURI().equals(tpPredicate.getURI()) 
+//					&& (this.isIgnoreRDFTypeStatement())) {
+//				result = null;
+//			} else {
+//				AlphaResultUnion alphaResultSet = super.getAlphaGenerator().calculateAlpha(tp, cm);
+//				BetaResultSet betaResultSet = super.getBetaGenerator().calculateBeta(tp, cm, alphaResultSet);
+//				if(alphaResultSet != null && alphaResultSet != null) {
+//					if(alphaResultSet.size() != betaResultSet.size()) {
+//						String errorMessage = "Number of alpha is not consistent with number of beta.";
+//						throw new QueryTranslationException(errorMessage);
+//					}
+//
+//					Collection<SQLQuery> unionSQLQueries = new Vector<SQLQuery>();
+//					for(int i=0; i<betaResultSet.size(); i++) {
+//						AlphaResult alphaResult = alphaResultSet.get(i);
+//						BetaResult betaResult = betaResultSet.get(i);
+//						try {
+//							SQLQuery sqlQuery = this.trans(tp, alphaResult, betaResult, cm);
+//							logger.debug("sqlQuery("+ i +") = " + sqlQuery);
+//							unionSQLQueries.add(sqlQuery);							
+//						} catch(InsatisfiableSQLExpression e) {
+//							logger.warn("Insatisfiable expression : " + e.getMessage());
+//						}
+//					}
+//
+//					if(!unionSQLQueries.isEmpty()) {
+//						Iterator<SQLQuery> it = unionSQLQueries.iterator(); 
+//						result = it.next();
+//						while(it.hasNext()) {
+//							result.addUnionQuery(it.next());
+//						}						
+//					}
+//				}
+//
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			logger.error("Error in transTP : " + tp);
+//			throw new QueryTranslationException(e.getMessage(), e);
+//		}
+//
+//		return result;
+//	}
 
 
 	//	@Override
@@ -283,6 +282,57 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			logger.error("Error occured while translating result set!");
 		}
 		
+		return result;
+	}
+
+	@Override
+	protected SQLQuery trans(Triple tp, AbstractConceptMapping cm,
+			String predicateURI) throws QueryTranslationException {
+		SQLQuery result = new SQLQuery();
+
+		//alpha
+		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
+		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
+		Collection<SQLQuery> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
+		logger.debug("alpha logicalTable = " + alphaSubject);
+		result.addLogicalTable(alphaSubject);//alpha from subject
+		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
+			for(SQLQuery alphaPredicateObject : alphaPredicateObjects) {
+				result.addJoinQuery(alphaPredicateObject);//alpha predicate object
+				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
+			}
+		}
+
+		//beta
+		//BetaResult betaResult = super.getBetaGenerator().calculateBeta(tp, cm, predicateURI, alphaResult);
+				
+		//PRSQL
+		Collection<ZSelectItem> selectItems = 
+				super.getPrSQLGenerator().genPRSQL(
+				tp, alphaResult, super.getBetaGenerator(), 
+				super.getNameGenerator(), cm, predicateURI);
+		result.setSelectItems(selectItems);
+
+		//CondSQL
+		CondSQLResult condSQL = super.getCondSQLGenerator().genCondSQL(
+				tp, alphaResult, super.getBetaGenerator(), cm, predicateURI);
+		logger.debug("condSQL = " + condSQL);
+		if(condSQL != null) {
+			result.addWhere(condSQL.getExpression());
+		}
+
+		//subquery elimination
+		IQueryTranslationOptimizer optimizer = super.getOptimizer();
+		if(optimizer != null && optimizer.isSubQueryElimination()) {
+			try {
+				result = QueryTranslatorUtility.eliminateSubQuery(result);	
+			} catch(Exception e) {
+				throw new QueryTranslationException("error in eliminating subquery!", e);
+			}
+			
+		}
+
+		logger.debug("transTP = " + result);
 		return result;
 	}
 }

@@ -21,15 +21,11 @@ public interface IQueryTranslator {
 
 	void setUnfolder(AbstractUnfolder unfolder);
 
-	void setQueryFilePath(String queryFilePath);
-
 	void setIgnoreRDFTypeStatement(boolean b);
 
 	SQLQuery translateFromQueryFile(String queryFilePath) throws Exception;
 
 	IQueryTranslationOptimizer getOptimizer();
-
-	SQLQuery translateFromPropertyFile() throws Exception;
 
 	SQLQuery translateFromString(String queryString) throws Exception ;
 

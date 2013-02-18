@@ -58,6 +58,7 @@ import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
@@ -68,7 +69,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private static Logger logger = Logger.getLogger(AbstractQueryTranslator.class);
 	
-	protected String queryFilePath;
+	//protected String queryFilePath;
 	protected AbstractMappingDocument mappingDocument;
 	protected AbstractUnfolder unfolder;
 	private Connection connection;
@@ -160,9 +161,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return mappingDocument;
 	}
 
-	public String getQueryFilePath() {
-		return queryFilePath;
-	}
+//	public String getQueryFilePath() {
+//		return queryFilePath;
+//	}
 
 	//	public abstract AbstractQueryTranslator createQueryTranslator(
 	//			AbstractMappingDocument mappingDocument, AbstractUnfolder unfolder);
@@ -185,9 +186,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	
 
-	public void setQueryFilePath(String queryFilePath) {
-		this.queryFilePath = queryFilePath;
-	}
+//	public void setQueryFilePath(String queryFilePath) {
+//		this.queryFilePath = queryFilePath;
+//	}
 
 
 	public void setUnfolder(AbstractUnfolder unfolder) {
@@ -861,18 +862,6 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 
 
-	public SQLQuery translateFromPropertyFile() throws Exception {
-		//process SPARQL file
-		if(this.queryFilePath == null) {
-			throw new Exception("No query file defined");
-		}
-		
-		logger.info("Parsing query file : " + this.queryFilePath);
-		Query sparqlQuery = QueryFactory.read(this.queryFilePath);
-		logger.debug("sparqlQuery = " + sparqlQuery);
-
-		return this.translate(sparqlQuery);
-	}
 
 	public SQLQuery translateFromQueryFile(String queryFilePath) throws Exception {
 		//process SPARQL file
@@ -909,8 +898,34 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 
 
-	protected abstract SQLQuery trans(Triple tp, AbstractConceptMapping cm) throws QueryTranslationException;
-
+	protected SQLQuery trans(Triple tp, AbstractConceptMapping cm) 
+			throws QueryTranslationException {
+		SQLQuery result = null;
+		
+		Node tpPredicate = tp.getPredicate();
+		if(tpPredicate.isURI()) {
+			String predicateURI = tpPredicate.getURI();
+			result = this.trans(tp, cm, predicateURI);
+		} else if(tpPredicate.isVariable()) {
+			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
+			if(pms != null && pms.size() > 0) {
+				List<SQLQuery> sqlQueries = new Vector<SQLQuery>();
+				for(AbstractPropertyMapping pm : pms) {
+					String predicateURI = pm.getMappedPredicateName();
+					SQLQuery sqlQuery = this.trans(tp, cm, predicateURI);
+					sqlQueries.add(sqlQuery);
+				}
+				result = QueryTranslatorUtility.queriesToUnionQuery(sqlQueries);	
+			}
+		} else {
+			throw new QueryTranslationException("invalid tp.predicate : " + tpPredicate);
+		}
+		
+		return result;
+	}
+	
+	protected abstract SQLQuery trans(Triple tp, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException;
+	
 	protected SQLQuery trans(Triple tp) throws QueryTranslationException {
 		SQLQuery result = null;
 
@@ -989,12 +1004,13 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return result;
 	}
 
-	private SQLQuery transSTG(List<Triple> triples, AbstractConceptMapping cm) throws Exception {
+	private SQLQuery transSTG(List<Triple> stg
+			, AbstractConceptMapping cm) throws Exception {
 		SQLQuery result = new SQLQuery();
 
-
 		//AlphaSTG
-		List<AlphaResultUnion> alphaResultUnionList = this.alphaGenerator.calculateAlphaSTG(triples, cm);
+		List<AlphaResultUnion> alphaResultUnionList = 
+				this.alphaGenerator.calculateAlphaSTG(stg, cm);
 
 		//check if no union in each of alpha tp
 		boolean unionFree = true;
@@ -1004,13 +1020,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 		}
 
-
 		if(!unionFree) {
 			BasicPattern basicPatternHead = new BasicPattern();
-			basicPatternHead.add(triples.get(0));
+			basicPatternHead.add(stg.get(0));
 			OpBGP opBGPHead = new OpBGP(basicPatternHead);
 
-			List<Triple> triplesTail = triples.subList(1, triples.size());
+			List<Triple> triplesTail = stg.subList(1, stg.size());
 			BasicPattern basicPatternTail = BasicPattern.wrap(triplesTail);
 			OpBGP opBGPTail = new OpBGP(basicPatternTail);
 
@@ -1018,7 +1033,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			result = this.trans(opJoin);
 		} else {// no union in alpha
 			//alpha(stg) returns the same result for subject
-			SQLLogicalTable alphaSubject = alphaResultUnionList.get(0).get(0).getAlphaSubject();
+			AlphaResult alphaResult = alphaResultUnionList.get(0).get(0);
+			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
 
 			Collection<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
 			for(AlphaResultUnion alphaTP : alphaResultUnionList) {
@@ -1044,7 +1060,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 						Connection conn = this.getConnection();
 
-						String subQueryViewName = "sqa" + Math.abs(triples.hashCode());
+						String subQueryViewName = "sqa" + Math.abs(stg.hashCode());
 						String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
 						logger.info(dropViewSQL + ";\n");
 						boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
@@ -1066,17 +1082,18 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 			result.addLogicalTable(alphaSubject);//alpha subject
 
-			//BetaSTG
-			List<BetaResultSet> betaResultSetList = this.betaGenerator.calculateBetaSTG(triples, cm, alphaResultUnionList);
+//			//BetaSTG
+//			List<BetaResultSet> betaResultSetList = this.betaGenerator.calculateBetaSTG(stg, cm, alphaResultUnionList);
 
 			//PRSQLSTG
 			Collection<ZSelectItem> selectItems = 
-					this.prSQLGenerator.genPRSQLSTG(triples, betaResultSetList, nameGenerator, cm);
+					this.prSQLGenerator.genPRSQLSTG(stg, alphaResult
+							, betaGenerator, nameGenerator, cm);
 			result.setSelectItems(selectItems);
 
 			//CondSQLSTG
-			ZExpression condSQL = this.condSQLGenerator.genCondSQLSTG(triples
-					, alphaResultUnionList, betaResultSetList, cm);
+			ZExpression condSQL = this.condSQLGenerator.genCondSQLSTG(stg
+					, alphaResult, betaGenerator, cm);
 			if(condSQL != null) {
 				result.addWhere(condSQL);
 			}

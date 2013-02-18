@@ -606,6 +606,20 @@ public class QueryTranslatorUtility {
 		
 		return result;
 	}
-	
 
+	public static SQLQuery queriesToUnionQuery(List<SQLQuery> sqlQueries) {
+		SQLQuery result = null;
+		if(sqlQueries != null && sqlQueries.size() > 0) {
+			if(sqlQueries.size() == 1) {
+				return sqlQueries.get(0);
+			} else {
+				result = sqlQueries.get(0);
+				for(int i = 1; i <sqlQueries.size(); i++) {
+					result.addUnionQuery(sqlQueries.get(i));
+				}
+			}
+		}
+		
+		return result;
+	}
 }

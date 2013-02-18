@@ -234,7 +234,8 @@ public class NodeTypeInferrer {
 		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
 		
 		if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-			Set<AbstractConceptMapping> cms = this.mappingDocument.getConceptMappingByPropertyUri(predicateURI);
+			Set<AbstractConceptMapping> cms = 
+					this.mappingDocument.getConceptMappingByPropertyUri(predicateURI);
 			if(cms != null && cms.size() > 0) {
 				result.addAll(cms);
 			}

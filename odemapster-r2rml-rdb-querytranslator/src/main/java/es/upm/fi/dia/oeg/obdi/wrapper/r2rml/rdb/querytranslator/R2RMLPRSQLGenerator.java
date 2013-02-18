@@ -11,10 +11,15 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.BetaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
@@ -36,9 +41,13 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 //	}
 	
 	@Override
-	protected Collection<ZSelectItem> genPRSQLSubject(Node subject, Triple tp,
-			BetaResult betaResult, AbstractConceptMapping cmSubject
-			, NameGenerator nameGenerator) throws Exception {
+	protected Collection<ZSelectItem> genPRSQLSubject(Triple tp
+			, AlphaResult alphaResult
+			, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator
+			, AbstractConceptMapping cmSubject)
+					throws QueryTranslationException {
+		Node subject = tp.getSubject();
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cmSubject;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		if(subject.isVariable()) {
@@ -47,12 +56,18 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 		
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 		//ZSelectItem selectItemSubject = betaGenerator.calculateBetaSubject(cmSubject);
-		ZSelectItem selectItemSubject = betaResult.getBetaSub().clone();
-		result.add(selectItemSubject);
-		String selectItemSubjectAlias = nameGenerator.generateName(subject); 
-		selectItemSubject.setAlias(selectItemSubjectAlias);
-		logger.debug("genPRSQLSubject = " + result);
-		return result;
+		SQLSelectItem betaSub = betaGenerator.calculateBetaSubject(cmSubject, alphaResult);
+		try {
+			ZSelectItem selectItemSubject = betaSub.clone();
+			result.add(selectItemSubject);
+			String selectItemSubjectAlias = nameGenerator.generateName(subject); 
+			selectItemSubject.setAlias(selectItemSubjectAlias);
+			logger.debug("genPRSQLSubject = " + result);
+			return result;			
+		} catch(Exception e) {
+			throw new QueryTranslationException(e);
+		}
+
 	}
 	
 //	@Override

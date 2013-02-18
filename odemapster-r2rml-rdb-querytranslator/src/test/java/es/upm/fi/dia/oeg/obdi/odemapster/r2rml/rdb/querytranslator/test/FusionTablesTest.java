@@ -38,10 +38,8 @@ public class FusionTablesTest {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunnerFreddy(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-
-			SQLQuery query = queryTranslator.translateFromPropertyFile();
+			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
-			
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
 			logger.info("------" + testName + " Freddy DONE------");

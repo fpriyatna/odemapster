@@ -17,8 +17,6 @@ public class R2RMLRunner extends AbstractRunner {
 	public R2RMLRunner(String configurationDirectory, String configurationFile)
 			throws Exception {
 		super(configurationDirectory, configurationFile);
-//		AbstractParser r2rmlparser = new R2RMLParser();
-//		this.parser = r2rmlparser;
 	}
 
 	public static void main(String args[]) {

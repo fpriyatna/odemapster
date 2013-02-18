@@ -19,6 +19,7 @@ import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
@@ -44,32 +45,23 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 	@Override
 	protected ZExpression genCondSQLPredicateObject(Triple tp
-			, AlphaResult alphaResult, BetaResult betaResult
-			, AbstractConceptMapping cm) throws Exception {
+			, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
+			, AbstractConceptMapping cm, AbstractPropertyMapping pm) throws QueryTranslationException, InsatisfiableSQLExpression {
+
 		Node tpObject = tp.getObject();
-
 		ZExpression result;
-
-		ZExpression result1 = super.genCondSQLPredicateObject(tp, alphaResult, betaResult, cm);
-
-		//		String logicalTableAlias = cm.getAlias();
-		//String logicalTableAlias = cm.getLogicalTable().getAlias();
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 
-		String predicateURI = betaResult.getPredicateURI();
-		Collection<AbstractPropertyMapping> pms = 
-				cm.getPropertyMappings(predicateURI);
 		ZExpression result2 = null;
-		if(pms.size() > 1) {
-			String errorMessage = "Multiple mappings are not permitted for predicate " + predicateURI;
-			throw new QueryTranslationException(errorMessage);
-		}
 
-		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
-		this.checkTripleObject(tp, pm);
-		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
-		R2RMLObjectMap objectMap = pm.getObjectMap();
 
+
+
+		R2RMLPredicateObjectMap poMap = (R2RMLPredicateObjectMap) pm;
+		this.checkTripleObject(tp, poMap);
+
+		R2RMLRefObjectMap refObjectMap = poMap.getRefObjectMap();
+		R2RMLObjectMap objectMap = poMap.getObjectMap();
 
 		if(tpObject.isLiteral()) {
 			Object objectLiteralValue = tpObject.getLiteral().getValue();
@@ -81,7 +73,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 					if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
 						columnNameWithAlias = logicalTableAlias + "." + columnName;
 					}
-					
+
 					ZConstant columnConstant = new ZConstant(columnNameWithAlias,  ZConstant.COLUMNNAME);
 					ZConstant objectLiteral = new ZConstant(objectLiteralValue.toString(), ZConstant.STRING);
 					result2 = new ZExpression("=", columnConstant, objectLiteral);
@@ -147,9 +139,11 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 		}
 
-		result = (ZExpression) QueryTranslatorUtility.combineExpressions(
-				result1, result2);
-		return result;
+
+
+
+
+		return result2;
 	}
 
 	private boolean checkTripleObject(Triple tp, R2RMLPredicateObjectMap pm) throws InsatisfiableSQLExpression{
@@ -252,49 +246,49 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		return true;
 	}
 
-//	@Override
-//	protected ZExpression genCondSQLSubject(Triple tp, AlphaResult alphaResult, 
-//			BetaResult betaResult, AbstractConceptMapping abstractConceptMapping) throws Exception {
-//		Node tpSubject = tp.getSubject();
-//		//ZExp result1 = this.genCondSQLSubject(tp, betaGenerator, cmSubject);
-//		ZExpression result1 = super.genCondSQLSubject(tp, alphaResult, betaResult, abstractConceptMapping);
-//
-//		ZExpression result2 = null;
-//		if(tpSubject.isURI()) {
-//			String subjectURI = tpSubject.getURI();
-//			ZConstant subjectURIConstant = new ZConstant(subjectURI, ZConstant.STRING);
-//
-//			R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
-//			//			String logicalTableAlias = cm.getAlias();
-//			//String logicalTableAlias = cm.getLogicalTable().getAlias();
-//			String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
-//
-//			boolean hasWellDefinedURI = cm.hasWellDefinedURIExpression();
-//			logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
-//
-//			TermMapType subjectTermMapType = cm.getSubjectMap().getTermMapType();
-//			if(subjectTermMapType == TermMapType.TEMPLATE) {
-//				if(hasWellDefinedURI) {
-//					result2 = this.generateCondForWellDefinedURI(cm.getSubjectMap(), tpSubject.getURI(), logicalTableAlias);
-//				} else {
-//					//TODO Implement this!
-//				}
-//			} else if(subjectTermMapType == TermMapType.COLUMN){
-//				ZConstant subjectMapColumn = new ZConstant(cm.getSubjectMap().getColumnName(), ZConstant.COLUMNNAME);
-//				result2 = new ZExpression("=", subjectMapColumn, subjectURIConstant);
-//			} else { //subjectTermMapType == TermMapType.CONSTANT
-//				ZConstant subjectMapColumn = new ZConstant(cm.getSubjectMap().getConstantValue(), ZConstant.COLUMNNAME);
-//				result2 = new ZExpression("=", subjectMapColumn, subjectURIConstant);
-//			}
-//
-//		}
-//
-//
-//		ZExpression result = QueryTranslatorUtility.combineExpressions(
-//				result1, result2);
-//		return result;
-//
-//	}
+	//	@Override
+	//	protected ZExpression genCondSQLSubject(Triple tp, AlphaResult alphaResult, 
+	//			BetaResult betaResult, AbstractConceptMapping abstractConceptMapping) throws Exception {
+	//		Node tpSubject = tp.getSubject();
+	//		//ZExp result1 = this.genCondSQLSubject(tp, betaGenerator, cmSubject);
+	//		ZExpression result1 = super.genCondSQLSubject(tp, alphaResult, betaResult, abstractConceptMapping);
+	//
+	//		ZExpression result2 = null;
+	//		if(tpSubject.isURI()) {
+	//			String subjectURI = tpSubject.getURI();
+	//			ZConstant subjectURIConstant = new ZConstant(subjectURI, ZConstant.STRING);
+	//
+	//			R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
+	//			//			String logicalTableAlias = cm.getAlias();
+	//			//String logicalTableAlias = cm.getLogicalTable().getAlias();
+	//			String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
+	//
+	//			boolean hasWellDefinedURI = cm.hasWellDefinedURIExpression();
+	//			logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
+	//
+	//			TermMapType subjectTermMapType = cm.getSubjectMap().getTermMapType();
+	//			if(subjectTermMapType == TermMapType.TEMPLATE) {
+	//				if(hasWellDefinedURI) {
+	//					result2 = this.generateCondForWellDefinedURI(cm.getSubjectMap(), tpSubject.getURI(), logicalTableAlias);
+	//				} else {
+	//					//TODO Implement this!
+	//				}
+	//			} else if(subjectTermMapType == TermMapType.COLUMN){
+	//				ZConstant subjectMapColumn = new ZConstant(cm.getSubjectMap().getColumnName(), ZConstant.COLUMNNAME);
+	//				result2 = new ZExpression("=", subjectMapColumn, subjectURIConstant);
+	//			} else { //subjectTermMapType == TermMapType.CONSTANT
+	//				ZConstant subjectMapColumn = new ZConstant(cm.getSubjectMap().getConstantValue(), ZConstant.COLUMNNAME);
+	//				result2 = new ZExpression("=", subjectMapColumn, subjectURIConstant);
+	//			}
+	//
+	//		}
+	//
+	//
+	//		ZExpression result = QueryTranslatorUtility.combineExpressions(
+	//				result1, result2);
+	//		return result;
+	//
+	//	}
 
 	protected ZExpression generateCondForWellDefinedURI(R2RMLTermMap termMap, String uri, String alias) 
 			throws InsatisfiableSQLExpression {
@@ -328,7 +322,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 					}					
 				}
 
-				
+
 				result = new ZExpression("=", pkColumnConstant, pkValueConstant);				
 			}
 
@@ -340,15 +334,15 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 	@Override
 	protected ZExpression genCondSQLSubjectURI(Node tpSubject,
-			AlphaResult alphaResult, BetaResult betaResult,
-			AbstractConceptMapping abstractConceptMapping) throws Exception {
+			AlphaResult alphaResult, AbstractConceptMapping abstractConceptMapping) 
+					throws QueryTranslationException {
 		ZExpression result2 = null;
 		String subjectURI = tpSubject.getURI();
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
-		
+
 		ZConstant subjectURIConstant = new ZConstant(subjectURI, ZConstant.STRING);
 
-		
+
 		//			String logicalTableAlias = cm.getAlias();
 		//String logicalTableAlias = cm.getLogicalTable().getAlias();
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
@@ -359,8 +353,13 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		TermMapType subjectTermMapType = cm.getSubjectMap().getTermMapType();
 		if(subjectTermMapType == TermMapType.TEMPLATE) {
 			if(hasWellDefinedURI) {
-				result2 = this.generateCondForWellDefinedURI(
-						cm.getSubjectMap(), tpSubject.getURI(), logicalTableAlias);
+				try {
+					result2 = this.generateCondForWellDefinedURI(
+							cm.getSubjectMap(), tpSubject.getURI(), logicalTableAlias);					
+				} catch(Exception e) {
+					throw new QueryTranslationException(e);
+				}
+
 			} else {
 				//TODO Implement this!
 			}

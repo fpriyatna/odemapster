@@ -33,8 +33,9 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	protected SQLSelectItem calculateBetaObject(Triple tp, AbstractConceptMapping cm
-			, String predicateURI, AlphaResult alphaResult) throws QueryTranslationException {
+	public SQLSelectItem calculateBetaObject(Triple tp
+			, AbstractConceptMapping cm, String predicateURI
+			, AlphaResult alphaResult) throws QueryTranslationException {
 		SQLSelectItem selectItem = null;
 		Node object = tp.getObject();
 		
@@ -105,7 +106,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	protected SQLSelectItem calculateBetaSubject(Triple tp, AbstractConceptMapping cm, AlphaResult alphaResult) {
+	public SQLSelectItem calculateBetaSubject(
+			AbstractConceptMapping cm, AlphaResult alphaResult) {
 		SQLSelectItem selectItem = null;
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
