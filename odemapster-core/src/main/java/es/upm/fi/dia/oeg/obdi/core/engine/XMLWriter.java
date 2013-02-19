@@ -71,5 +71,10 @@ public class XMLWriter extends AbstractQueryResultWriter {
 		this.outputFileName = outputFileName;
 	}
 
+	@Override
+	public Object getOutput() throws Exception {
+		return this.xmlDoc;
+	}
+
 	
 }
