@@ -20,5 +20,8 @@ public abstract class AbstractQueryResultWriter {
 	void setQueryTranslator(IQueryTranslator queryTranslator) {
 		this.queryTranslator = queryTranslator;
 	}
+	public IQueryTranslator getQueryTranslator() {
+		return queryTranslator;
+	}
 
 }
