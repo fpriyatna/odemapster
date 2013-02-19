@@ -76,5 +76,11 @@ public class XMLWriter extends AbstractQueryResultWriter {
 		return this.xmlDoc;
 	}
 
+	@Override
+	public void setOutput(Object output) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }

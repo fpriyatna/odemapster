@@ -9,6 +9,7 @@ public abstract class AbstractQueryResultWriter {
 	public abstract void process() throws Exception;
 	public abstract void postProcess() throws Exception;
 	public abstract Object getOutput() throws Exception;
+	public abstract void setOutput(Object output) throws Exception;
 	
 	public void setResultSet(AbstractResultSet resultSet) {
 		this.abstractResultSet = resultSet;
