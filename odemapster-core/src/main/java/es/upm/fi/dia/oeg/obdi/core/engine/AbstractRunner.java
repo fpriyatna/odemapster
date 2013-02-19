@@ -392,4 +392,7 @@ public abstract class AbstractRunner {
 		this.queryResultWriterClassName = queryResultWriterClassName;
 	}
 
+	public AbstractQueryResultWriter getQueryResultWriter() {
+		return this.resultProcessor.queryResultWriter;
+	}
 }
