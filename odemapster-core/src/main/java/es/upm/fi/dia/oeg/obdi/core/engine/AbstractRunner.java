@@ -44,8 +44,8 @@ public abstract class AbstractRunner {
 
 	public AbstractRunner(String configurationDirectory, String configurationFile) 
 			throws Exception {
-		AbstractRunner.configurationProperties = new ConfigurationProperties(
-				configurationDirectory, configurationFile);
+		AbstractRunner.configurationProperties =new ConfigurationProperties
+				(configurationDirectory, configurationFile);
 	}
 
 	protected abstract AbstractDataTranslator createDataTranslator(
@@ -116,7 +116,7 @@ public abstract class AbstractRunner {
 		return this.queryTranslator;
 	}
 
-	public void buildQueryTranslator() throws Exception {
+	protected void buildQueryTranslator() throws Exception {
 		if(this.queryTranslatorClassName == null) {
 			this.queryTranslator = 
 					AbstractRunner.configurationProperties.getQueryTranslator();
@@ -152,7 +152,7 @@ public abstract class AbstractRunner {
 		}
 	}
 
-	protected void materializeMappingDocuments(String outputFileName
+	private void materializeMappingDocuments(String outputFileName
 			, AbstractMappingDocument translationResultMappingDocument) throws Exception {
 		long start = System.currentTimeMillis();
 
@@ -219,7 +219,8 @@ public abstract class AbstractRunner {
 		String mappingDocumentFile = AbstractRunner.configurationProperties
 				.getMappingDocumentFilePath();
 		this.mappingDocument = this.createMappingDocument(mappingDocumentFile);
-
+		logger.info("mapping document = " + this.mappingDocument);
+		
 		//query translator if exists sparql query
 		if(this.sparqQuery == null) {
 			String queryFilePath = AbstractRunner.configurationProperties.getQueryFilePath();
@@ -249,10 +250,6 @@ public abstract class AbstractRunner {
 		//loading ontology file
 		String ontologyFilePath = this.configurationProperties.getOntologyFilePath();
 
-		//		//parsing mapping document
-		String mappingDocumentPath = configurationProperties.getMappingDocumentFilePath();
-		//		mappingDocument = parser.parse(mappingDocumentPath);
-
 		//set output file
 		String outputFileName = configurationProperties.getOutputFilePath();
 
@@ -268,6 +265,8 @@ public abstract class AbstractRunner {
 		if(this.sparqQuery == null) {
 			this.materializeMappingDocuments(outputFileName, mappingDocument);
 		} else {
+			logger.info("sparql query = " + this.sparqQuery);
+			
 			//rewrite the SPARQL query if necessary
 			List<Query> queries = new ArrayList<Query>();
 			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
@@ -276,7 +275,7 @@ public abstract class AbstractRunner {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
 				Collection <String> mappedOntologyElements = 
-						MappingsExtractor.getMappedPredicatesFromR2O(mappingDocumentPath);
+						MappingsExtractor.getMappedPredicatesFromR2O(mappingDocumentFile);
 				String rewritterWrapperMode = RewriterWrapper.fullMode;
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
@@ -288,7 +287,8 @@ public abstract class AbstractRunner {
 
 
 			//translate sparql queries into sql queries
-			Collection<SQLQuery> sqlQueries = this.translateSPARQLQueriesIntoSQLQueries(queries);
+			Collection<SQLQuery> sqlQueries = 
+					this.translateSPARQLQueriesIntoSQLQueries(queries);
 			//this.generateSPARQLXMLBindingDocument(sqlQueries, outputFileName);
 
 			AbstractQueryEvaluator queryEvaluator = this.configurationProperties.getQueryEvaluator();		
@@ -310,7 +310,8 @@ public abstract class AbstractRunner {
 			if(queryResultWriter instanceof XMLWriter) {
 				((XMLWriter) queryResultWriter).setOutputFileName(outputFileName);
 			}
-
+			logger.info("queryResultWriter class = " + queryResultWriter.getClass().getName());
+			
 			this.resultProcessor = new DefaultResultProcessor(
 					this, queryEvaluator, queryResultWriter);
 
@@ -346,7 +347,7 @@ public abstract class AbstractRunner {
 		return this.run();
 	}
 
-	public void setDataTranslator(AbstractDataTranslator dataTranslator) {
+	private void setDataTranslator(AbstractDataTranslator dataTranslator) {
 		this.dataTranslator = dataTranslator;
 	}
 

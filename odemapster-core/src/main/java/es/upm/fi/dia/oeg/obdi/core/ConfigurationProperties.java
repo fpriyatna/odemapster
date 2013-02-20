@@ -71,23 +71,23 @@ public class ConfigurationProperties extends Properties {
 			String configurationDirectory, String configurationFile) 
 	throws Exception 
 	{
-		String absoluteR2OConfigurationFile = configurationFile;
+		String absoluteConfigurationFile = configurationFile;
 		if(configurationDirectory != null) {
 			if(!configurationDirectory.endsWith("/")) {
 				configurationDirectory = configurationDirectory + "/";
 			}
-			absoluteR2OConfigurationFile = configurationDirectory + configurationFile; 
+			absoluteConfigurationFile = configurationDirectory + configurationFile; 
 		}
-
+		logger.info("reading configuration file : " + absoluteConfigurationFile);
 		try {
-			this.load(new FileInputStream(absoluteR2OConfigurationFile));
+			this.load(new FileInputStream(absoluteConfigurationFile));
 		} catch (FileNotFoundException e) {
-			String errorMessage = "Configuration file " + absoluteR2OConfigurationFile + " is not found!";
+			String errorMessage = "Configuration file " + absoluteConfigurationFile + " is not found!";
 			logger.error(errorMessage);
 			e.printStackTrace();
 			throw e;
 		} catch (IOException e) {
-			String errorMessage = "Error reading configuration file " + absoluteR2OConfigurationFile;
+			String errorMessage = "Error reading configuration file " + absoluteConfigurationFile;
 			logger.error(errorMessage);
 			e.printStackTrace();
 			throw e;

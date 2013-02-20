@@ -15,7 +15,7 @@ public class R2RMLRunnerChebotko extends R2RMLRunner{
 	public R2RMLRunnerChebotko(String configurationDirectory,
 			String configurationFile) throws Exception {
 		super(configurationDirectory, configurationFile);
-		this.buildQueryTranslator();
+		super.buildQueryTranslator();
 		IQueryTranslator queryTranslator = this.getQueryTranslator();
 		IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
 		queryTranslationOptimizer.setSelfJoinElimination(false);
