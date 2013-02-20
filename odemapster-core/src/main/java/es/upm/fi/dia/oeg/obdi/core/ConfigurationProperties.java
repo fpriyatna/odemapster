@@ -32,11 +32,8 @@ public class ConfigurationProperties extends Properties {
 	private boolean subQueryElimination;
 	private boolean subQueryAsView;
 	private String queryTranslatorClassName;
-	private IQueryTranslator queryTranslator;
 	private String queryEvaluatorClassName;
-	private AbstractQueryEvaluator queryEvaluator;
-	private String queryTranslatorOutputWriterClassName;
-	private AbstractQueryResultWriter queryResultWriter;
+	private String queryResultWriterClassName;
 	
 	//batch upgrade
 	private boolean literalRemoveStrangeChars;
@@ -187,17 +184,13 @@ public class ConfigurationProperties extends Properties {
 		logger.debug("Subquery as view = " + this.subQueryAsView);
 
 		this.queryTranslatorClassName = this.readString(
-				Constants.QUERY_TRANSLATOR_CLASSNAME, Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT);
-		this.queryTranslator = (IQueryTranslator) Class.forName(this.queryTranslatorClassName).newInstance();
+				Constants.QUERY_TRANSLATOR_CLASSNAME, null);
 		
 		this.queryEvaluatorClassName = this.readString(
-				Constants.QUERY_EVALUATOR_CLASSNAME, Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT);
-		this.queryEvaluator = (AbstractQueryEvaluator) Class.forName(this.queryEvaluatorClassName).newInstance();
+				Constants.QUERY_EVALUATOR_CLASSNAME, null);
 		
-		this.queryTranslatorOutputWriterClassName = this.readString(
-				Constants.QUERY_RESULT_WRITER_CLASSNAME, Constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT);
-		this.queryResultWriter = (AbstractQueryResultWriter)
-				Class.forName(this.queryTranslatorOutputWriterClassName).newInstance();
+		this.queryResultWriterClassName = this.readString(
+				Constants.QUERY_RESULT_WRITER_CLASSNAME, null);
 		
 		this.literalRemoveStrangeChars = this.readBoolean(Constants.REMOVE_STRANGE_CHARS_FROM_LITERAL, true);
 		logger.debug("Remove Strange Chars From Literal Column = " + this.literalRemoveStrangeChars);
@@ -343,16 +336,16 @@ public class ConfigurationProperties extends Properties {
 		return noOfDatabase;
 	}
 
-	public AbstractQueryEvaluator getQueryEvaluator() {
-		return queryEvaluator;
+	public String getQueryResultWriterClassName() {
+		return queryResultWriterClassName;
 	}
 
-	public IQueryTranslator getQueryTranslator() {
-		return queryTranslator;
+	public String getQueryTranslatorClassName() {
+		return queryTranslatorClassName;
 	}
 
-	public AbstractQueryResultWriter getQueryResultWriter() {
-		return queryResultWriter;
+	public String getQueryEvaluatorClassName() {
+		return queryEvaluatorClassName;
 	}
 
 	
