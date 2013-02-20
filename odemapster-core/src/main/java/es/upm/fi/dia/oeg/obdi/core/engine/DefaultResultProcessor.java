@@ -11,16 +11,13 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public class DefaultResultProcessor {
 	private static Logger logger = Logger.getLogger(DefaultResultProcessor.class);
-	AbstractRunner runner;
+	//AbstractRunner runner;
 	AbstractQueryEvaluator queryEvaluator;
 	AbstractQueryResultWriter queryResultWriter;
 	
-	public DefaultResultProcessor(AbstractRunner runner
-			, AbstractQueryEvaluator queryEvaluator, AbstractQueryResultWriter queryResultWriter) {
-		this.runner = runner;
+	public DefaultResultProcessor(AbstractQueryEvaluator queryEvaluator, AbstractQueryResultWriter queryResultWriter) {
 		this.queryEvaluator = queryEvaluator;
 		this.queryResultWriter = queryResultWriter;
-		this.queryResultWriter.setQueryTranslator(runner.getQueryTranslator());
 	}
 
 	public void translateResult(Collection<SQLQuery> sqlQueries) throws Exception {

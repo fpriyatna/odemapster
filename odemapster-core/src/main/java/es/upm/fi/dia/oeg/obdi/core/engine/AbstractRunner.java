@@ -86,12 +86,10 @@ public abstract class AbstractRunner {
 				this.buildQueryEvaluator();
 			}
 
-			if(this.queryEvaluator != null && this.queryResultWriter != null) {
-				//result processor
-				this.resultProcessor = new DefaultResultProcessor(
-						this, queryEvaluator, queryResultWriter);				
-			}
-			
+			//result processor
+			this.resultProcessor = new DefaultResultProcessor(
+					queryEvaluator, queryResultWriter);				
+
 		}
 
 
@@ -107,7 +105,7 @@ public abstract class AbstractRunner {
 			this.materializeMappingDocuments(outputFileName, mappingDocument);
 		} else {
 			logger.info("sparql query = " + this.sparqQuery);
-			
+
 			//query translator
 			if(this.queryTranslator == null) {
 				if(this.queryTranslatorClassName == null) {
@@ -115,7 +113,7 @@ public abstract class AbstractRunner {
 				}
 				this.buildQueryTranslator();
 			}
-			
+
 			//query result writer
 			if(this.queryResultWriter == null) {
 				if(this.queryResultWriterClassName == null) {
@@ -123,7 +121,7 @@ public abstract class AbstractRunner {
 				}
 				this.buildQueryResultWriter();
 			}
-			
+
 			//query evaluator
 			if(this.queryEvaluator == null) {
 				if(this.queryEvaluatorClassName == null) {
@@ -131,13 +129,11 @@ public abstract class AbstractRunner {
 				}
 				this.buildQueryEvaluator();
 			}
-			
+
 			//result processor
-			if(this.queryEvaluator != null && this.queryResultWriter != null) {
-				this.resultProcessor = new DefaultResultProcessor(
-						this, queryEvaluator, queryResultWriter);				
-			}
-			
+			this.resultProcessor = new DefaultResultProcessor(
+					queryEvaluator, queryResultWriter);				
+
 			//loading ontology file
 			String ontologyFilePath = this.configurationProperties.getOntologyFilePath();
 
@@ -245,7 +241,7 @@ public abstract class AbstractRunner {
 		boolean subQueryAsView = AbstractRunner.configurationProperties.isSubQueryAsView();
 		queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
 		this.queryTranslator.setOptimizer(queryTranslationOptimizer);
-		
+
 		logger.info("query translator = " + this.queryTranslator);
 	}
 
@@ -388,7 +384,7 @@ public abstract class AbstractRunner {
 	}
 
 	public AbstractQueryResultWriter getQueryResultWriter() {
-		return this.resultProcessor.queryResultWriter;
+		return this.queryResultWriter;
 	}
 
 	private void buildQueryResultWriter() throws Exception {
@@ -399,16 +395,16 @@ public abstract class AbstractRunner {
 			this.buildQueryTranslator();
 		}
 		this.queryResultWriter.setQueryTranslator(this.queryTranslator);
-		
+
 		if(queryResultWriter instanceof XMLWriter) {
 			//set output file
 			String outputFileName = configurationProperties.getOutputFilePath();
 			((XMLWriter) queryResultWriter).setOutputFileName(outputFileName);
 		}
-		
+
 		logger.info("query result writer = " + this.queryResultWriter);
 	}
-	
+
 	private void buildQueryEvaluator() throws Exception {
 		this.queryEvaluator = (AbstractQueryEvaluator)
 				Class.forName(this.queryEvaluatorClassName).newInstance();
@@ -422,7 +418,7 @@ public abstract class AbstractRunner {
 			int timeout = this.configurationProperties.getDatabaseTimeout();
 			((RDBQueryEvaluator) queryEvaluator).setTimeout(timeout);
 		}
-		
+
 		logger.info("query evaluator = " + this.queryEvaluator);
 	}
 }
