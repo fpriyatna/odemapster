@@ -50,7 +50,6 @@ object R2RMLFusionQueryTranslatorTest {
 			val start = System.currentTimeMillis();
 			val runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			runner.setQueryResultWriterClassName("es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter");
-			logger.info("runner.getQueryResultWriter() = " + runner.getQueryResultWriter());
 			runner.run();
 			val end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");

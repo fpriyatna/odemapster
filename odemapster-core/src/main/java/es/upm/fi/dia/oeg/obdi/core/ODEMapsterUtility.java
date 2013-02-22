@@ -42,27 +42,13 @@ import com.hp.hpl.jena.shared.CannotEncodeCharacterException;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.sql.MonetDBColumn;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-
-
 
 public class ODEMapsterUtility {
 	private static Logger logger = Logger.getLogger(ODEMapsterUtility.class);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	//private ConfigurationProperties configurationProperties;
+	
 	public static boolean inArray(String[] delegableOperations, String operationId) {
 		boolean isDelegableOperation = false;
 
@@ -73,20 +59,7 @@ public class ODEMapsterUtility {
 		}
 
 		return isDelegableOperation;
-
 	}
-
-
-
-
-
-
-
-
-
-
-
-
 
 	public static String readFileAsString(String filePath) throws IOException{
 		byte[] buffer = new byte[(int) new File(filePath).length()];
@@ -525,15 +498,16 @@ public class ODEMapsterUtility {
 			return false;  
 		}  
 	}
-	public static ZSelectItem renameColumn(
-			ZSelectItem selectItem, String tableName, String alias, boolean matches) throws Exception {
+	public ZSelectItem renameColumn(ZSelectItem selectItem, String tableName, String alias
+			, boolean matches, String databaseType) throws Exception {
 
 		ZSelectItem result;
 
 		boolean isExpression = selectItem.isExpression();
 		if(isExpression) {
 			ZExp selectItemExp = selectItem.getExpression();
-			ZExpression newExpression = ODEMapsterUtility.renameColumns((ZExpression) selectItemExp, tableName, alias, matches);
+			ZExpression newExpression = this.renameColumns((ZExpression) selectItemExp
+					, tableName, alias, matches, databaseType);
 			selectItem.setExpression(newExpression);
 			result = selectItem;
 		} else {
@@ -556,19 +530,20 @@ public class ODEMapsterUtility {
 
 	}
 
-	public static Collection<ZSelectItem> renameColumns(
-			Collection<ZSelectItem> selectItems, String tableName, String alias, boolean matches) throws Exception {
+	public Collection<ZSelectItem> renameColumns(Collection<ZSelectItem> selectItems
+			, String tableName, String alias, boolean matches, String databaseType) throws Exception {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 
 		for(ZSelectItem selectItem :selectItems) {
-			result.add(ODEMapsterUtility.renameColumn(selectItem, tableName, alias, matches));
+			ZSelectItem renamedColumn = this.renameColumn(selectItem, tableName, alias, matches, databaseType);
+			result.add(renamedColumn);
 		}
 
 		return result;
 	}    
 
-	public static ZExpression renameColumns(
-			ZExpression zExpression, String oldName, String newName, boolean matchCondition) throws Exception 
+	public static ZExpression renameColumns(ZExpression zExpression, String oldName
+			, String newName, boolean matchCondition, String databaseType) throws Exception 
 			{
 		if(zExpression == null) {
 			return null;
@@ -594,7 +569,7 @@ public class ODEMapsterUtility {
 							new SQLSelectItem(operandConstantValue);
 					if(oldSelectItem.getSchema() == null && oldSelectItem.getTable() == null) {
 						if(operandConstantValue.equalsIgnoreCase(oldName) == matchCondition) {
-							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName);
+							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName, databaseType);
 						} else {
 							newOperandConstant = operandConstant;
 						}
@@ -604,7 +579,7 @@ public class ODEMapsterUtility {
 						if(oldTableName.equalsIgnoreCase(oldName) == matchCondition) {
 							//String newOperandConstantValue = operandConstantValue.replaceAll(oldName, newName);
 							//newOperandConstant = Utility.constructDatabaseColumn(newOperandConstantValue);
-							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName + "." + oldSelectItem.getColumn());
+							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName + "." + oldSelectItem.getColumn(), databaseType);
 						} else {
 							newOperandConstant = operandConstant;
 						}
@@ -635,7 +610,8 @@ public class ODEMapsterUtility {
 				result.addOperand(newOperandConstant);
 			} else if(operand instanceof ZExpression) {
 				ZExpression operandExpression  = (ZExpression) operand;
-				result.addOperand(ODEMapsterUtility.renameColumns(operandExpression, oldName, newName, matchCondition));
+				ZExpression renamedColumns = ODEMapsterUtility.renameColumns(operandExpression, oldName, newName, matchCondition, databaseType); 
+				result.addOperand(renamedColumns);
 			} else {
 				throw new Exception("Unsupported columns renaming operation!");
 			}
@@ -643,20 +619,12 @@ public class ODEMapsterUtility {
 		return result;
 			}
 
-	public static ZConstant constructDatabaseColumn(String columnName) {
-		String databaseType = null;
-
-		ConfigurationProperties configurationProperties = AbstractRunner.configurationProperties;
-		if(configurationProperties != null) {
-			databaseType = configurationProperties.getDatabaseType();
-		}
-		if(databaseType == null) {
-			databaseType = Constants.DATABASE_MYSQL;
-		}
+	public static ZConstant constructDatabaseColumn(String columnName, String databaseType) {
+		if(databaseType == null) { databaseType = Constants.DATABASE_MYSQL; }
 
 		ZConstant zColumn;
 		if(databaseType.equalsIgnoreCase(Constants.DATABASE_MONETDB)) {
-			zColumn = new es.upm.fi.dia.oeg.obdi.core.sql.MonetDBColumn(columnName, ZConstant.COLUMNNAME);
+			zColumn = new MonetDBColumn(columnName, ZConstant.COLUMNNAME);
 		} else if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
 			//			zColumn = new ZConstant("\'" + columnName + "\'", ZConstant.COLUMNNAME);
 			zColumn = new ZConstant(columnName, ZConstant.COLUMNNAME);
@@ -664,13 +632,12 @@ public class ODEMapsterUtility {
 			zColumn = new ZConstant(columnName, ZConstant.COLUMNNAME);
 		}
 
-
 		return zColumn;
-
 	}
 
-	public static ZConstant constructDatabaseColumn(String schema, String table, String column) {
-		return ODEMapsterUtility.constructDatabaseColumn(schema + "." + table + "." + column);
+	public ZConstant constructDatabaseColumn(String schema, String table, String column
+			, String databaseType) {
+		return this.constructDatabaseColumn(schema + "." + table + "." + column, databaseType);
 	}
 
 	public static String replaceNameWithSpaceChars(String tableName) {
@@ -761,7 +728,5 @@ public class ODEMapsterUtility {
 			return result.toString();
 		}
 	}
-
-
 
 }

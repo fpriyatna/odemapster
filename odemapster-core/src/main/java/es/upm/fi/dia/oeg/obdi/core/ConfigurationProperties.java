@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -151,17 +153,38 @@ public class ConfigurationProperties extends Properties {
 		}
 
 		this.mappingDocumentFilePath = this.getProperty(Constants.MAPPINGDOCUMENT_FILE_PATH);
-		this.ontologyFilePath = this.getProperty(Constants.ONTOFILE_PROP_NAME);
-		this.outputFilePath = this.getProperty(Constants.OUTPUTFILE_PROP_NAME);
-		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME);
-		
-
-		if(configurationDir != null) {
+		boolean isLocalMapping = true;
+		try {
+			URL mappingDocumentURL = new URL(this.mappingDocumentFilePath);
+			URLConnection conn = mappingDocumentURL.openConnection();
+			conn.connect();
+			isLocalMapping = false;
+		} catch (Exception e) { }
+		if(isLocalMapping && configurationDir != null) {
 			this.mappingDocumentFilePath = configurationDir + mappingDocumentFilePath;
-			this.outputFilePath = configurationDir + outputFilePath;
+		}
+
+		boolean isLocalQuery = true;
+		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME);
+		try {
+			URL queryURL = new URL(this.queryFilePath);
+			URLConnection conn = queryURL.openConnection();
+			conn.connect();
+			isLocalQuery = false;
+		} catch (Exception e) { }
+		if(isLocalQuery && configurationDir != null) {
 			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
 				this.queryFilePath = configurationDir + queryFilePath;
 			}
+		}
+		
+		this.ontologyFilePath = this.getProperty(Constants.ONTOFILE_PROP_NAME);
+		this.outputFilePath = this.getProperty(Constants.OUTPUTFILE_PROP_NAME);
+
+		if(configurationDir != null) {
+			
+			this.outputFilePath = configurationDir + outputFilePath;
+
 			if(this.ontologyFilePath != null && !this.ontologyFilePath.equals("")) {
 				this.ontologyFilePath = configurationDir + ontologyFilePath;
 			}

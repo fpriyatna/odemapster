@@ -18,6 +18,7 @@ import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZStatement;
 import Zql.ZqlParser;
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -33,6 +34,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLUtility {
 	private static Logger logger = Logger.getLogger(R2RMLUtility.class);
+
+	//private ConfigurationProperties configurationProperties;
 	
 	public static void main(String args[]) {
 		String template = "Hello {Name} Please find attached {Invoice Number} which is due on {Due Date}";
@@ -172,9 +175,7 @@ public class R2RMLUtility {
 	
 
 	
-	public static SQLSelectItem toSelectItem(String columnName, String tableAlias) {
-		String dbType = AbstractRunner.getConfigurationProperties().getDatabaseType();
-
+	public static SQLSelectItem toSelectItem(String columnName, String tableAlias, String dbType) {
 		SQLSelectItem result = null;
 		String columnNameSplit[] = columnName.split("\\.");
 		if(columnNameSplit.length == 1) {
@@ -186,12 +187,11 @@ public class R2RMLUtility {
 		}
 
 		return result;
-		
 	}
 	
-	public static ZExp generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions, String parentTableAlias, String joinQueryAlias) {
+	public static ZExp generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions
+			, String parentTableAlias, String joinQueryAlias, String dbType) {
 		ZExp onExpression = null;
-		String dbType = AbstractRunner.getConfigurationProperties().getDatabaseType();
 
 		
 		if(joinConditions != null) {
@@ -226,7 +226,5 @@ public class R2RMLUtility {
 		
 		return onExpression;
 	}
-	
 
-	
 }

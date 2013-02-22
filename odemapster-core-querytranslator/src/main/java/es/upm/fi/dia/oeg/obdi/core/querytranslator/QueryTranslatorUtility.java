@@ -262,7 +262,8 @@ public class QueryTranslatorUtility {
 	}
 	
 	public static SQLQuery eliminateSubQuery(Collection<ZSelectItem> newSelectItems
-			, SQLQuery query, ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions) 
+			, SQLQuery query, ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions
+			, String databaseType) 
 					throws Exception {
 		Map<String, String> mapOldNewAlias = new HashMap<String, String>();
 		SQLQuery result = null;
@@ -280,7 +281,8 @@ public class QueryTranslatorUtility {
 				for(ZSelectItem selectItem : oldSelectItems) {
 					String selectItemWithoutAlias = DBUtility.getValueWithoutAlias(selectItem);
 					String selectItemAlias = selectItem.getAlias();
-					newWhereCondition = ODEMapsterUtility.renameColumns(newWhereCondition, selectItemAlias, selectItemWithoutAlias, true); 
+					newWhereCondition = ODEMapsterUtility.renameColumns(newWhereCondition
+							, selectItemAlias, selectItemWithoutAlias, true, databaseType); 
 				}
 			} else {
 				String queryAlias = query.generateAlias();
@@ -307,7 +309,8 @@ public class QueryTranslatorUtility {
 						oldSelectItem.setAlias(newSelectItemAlias);
 						selectItems2.add(oldSelectItem);
 						if(newWhereCondition != null) {
-							newWhereCondition = ODEMapsterUtility.renameColumns(newWhereCondition, newSelectItemValue, oldSelectItemValue, true);
+							newWhereCondition = ODEMapsterUtility.renameColumns(newWhereCondition
+									, newSelectItemValue, oldSelectItemValue, true, databaseType);
 						}
 					}
 				}
@@ -319,10 +322,12 @@ public class QueryTranslatorUtility {
 			result = query;
 		} else {
 			query.setUnionQueries(null);
-			SQLQuery query2 = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, query, newWhereCondition, orderByConditions);
+			SQLQuery query2 = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, query
+					, newWhereCondition, orderByConditions, databaseType);
 			logger.debug("query2 = \n" + query2);
 			for(SQLQuery unionQuery : unionQueries) {
-				SQLQuery unionQuery2 = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, unionQuery, newWhereCondition, orderByConditions);
+				SQLQuery unionQuery2 = QueryTranslatorUtility.eliminateSubQuery(newSelectItems
+						, unionQuery, newWhereCondition, orderByConditions, databaseType);
 				logger.debug("unionQuery2 = \n" + unionQuery2);
 				query2.addUnionQuery(unionQuery2);
 			}
@@ -466,33 +471,39 @@ public class QueryTranslatorUtility {
 		return result;
 	}
 	
-	public static int getColumnType(ResultSetMetaData rsmd, String columnName) 
-			throws SQLException{
+	public static int getColumnType(ResultSetMetaData rsmd, String columnName) {
 		int result = -1;
 		
-		int columnCount = rsmd.getColumnCount();
-		for(int i=1; i<=columnCount; i++) {
-			String rsmdColumnName = rsmd.getColumnName(i);
-			if(columnName.equalsIgnoreCase(rsmdColumnName)) {
-				result = rsmd.getColumnType(i);
+		try {
+			int columnCount = rsmd.getColumnCount();
+			for(int i=1; i<=columnCount; i++) {
+				String rsmdColumnName = rsmd.getColumnName(i);
+				if(columnName.equalsIgnoreCase(rsmdColumnName)) {
+					result = rsmd.getColumnType(i);
+				}
 			}
+		} catch(Exception e) {
+			String errorMessage = "Can't determine column type of : " + columnName;
+			logger.warn(errorMessage);			
 		}
 		
 		return result;
 	}
 
-	public static String getColumnTypeName(ResultSetMetaData rsmd, String columnName) 
-			throws SQLException{
+	public static String getColumnTypeName(ResultSetMetaData rsmd, String columnName) {
 		String result = null;
-		
-		int columnCount = rsmd.getColumnCount();
-		for(int i=1; i<=columnCount; i++) {
-			String rsmdColumnName = rsmd.getColumnName(i);
-			if(columnName.equalsIgnoreCase(rsmdColumnName)) {
-				result = rsmd.getColumnTypeName(i);
-			}
+		try {
+			int columnCount = rsmd.getColumnCount();
+			for(int i=1; i<=columnCount; i++) {
+				String rsmdColumnName = rsmd.getColumnName(i);
+				if(columnName.equalsIgnoreCase(rsmdColumnName)) {
+					result = rsmd.getColumnTypeName(i);
+				}
+			}			
+		} catch(Exception e) {
+			String errorMessage = "Can't determine column type name of : " + columnName;
+			logger.warn(errorMessage);
 		}
-		
 		return result;
 	}
 

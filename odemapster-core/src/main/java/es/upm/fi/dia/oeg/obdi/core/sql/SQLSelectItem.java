@@ -114,13 +114,12 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		String result;
 		
 		String thisInString = super.toString();
-		String databaseType = AbstractRunner.configurationProperties.getDatabaseType();
-		if(databaseType == null) {
-			databaseType = Constants.DATABASE_MYSQL;
+		if(this.dbType == null) {
+			dbType = Constants.DATABASE_MYSQL;
 		}
 		
 		boolean isExpression = this.isExpression();
-		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
+		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType)) {
 			String table = "\"" + this.getTable() + "\"";
 			String column = "\"" + this.getColumn() + "\"";
 			

@@ -204,6 +204,7 @@ class FusionTablesUtility {
 
     try {
       val response = sql.execute();
+      
       System.out.println("response = " + response.toPrettyString());
     } catch {
       case e : IllegalArgumentException => e.printStackTrace();      // For google-api-services-fusiontables-v1-rev1-1.7.2-beta this exception will always

@@ -6,9 +6,12 @@ import java.sql.ResultSetMetaData;
 
 import org.apache.log4j.Logger;
 
+import scala.reflect.generic.Trees.This;
+
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
@@ -24,9 +27,38 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 	private String alias;
 	private R2RMLTriplesMap owner;
 	private ResultSetMetaData rsmd;
-
+	//private ConfigurationProperties configurationProperties;
+	
 	R2RMLLogicalTable(R2RMLTriplesMap owner) {}
 
+	public ResultSetMetaData buildResultSetMetaData(Connection conn) {
+		ResultSetMetaData result = null;
+		try {
+			if(conn != null) {
+				java.sql.Statement stmt = conn.createStatement();
+				String query = null;
+				
+				if(this instanceof R2RMLTable) {
+					R2RMLTable r2rmlTable = (R2RMLTable) this;
+					String tableName = r2rmlTable.getValue();
+					query = "SELECT * FROM " + tableName + " WHERE 1=0";
+				} else if (this instanceof R2RMLSQLQuery){
+					R2RMLSQLQuery r2rmlSQLQuery = (R2RMLSQLQuery) this;
+					query = r2rmlSQLQuery.getValue();
+				}
+
+				if(query != null) {
+					ResultSet rs = stmt.executeQuery(query);
+					result = rs.getMetaData();					
+				}
+			}
+		} catch(Exception e) {
+			logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
+		}
+		
+		return result;
+	}
+	
 	static R2RMLLogicalTable parse(Resource resource, R2RMLTriplesMap owner) throws Exception {
 
 		R2RMLLogicalTable logicalTable = null; 
@@ -37,18 +69,17 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 			String tableName = tableNameStatement.getObject().toString();
 			logicalTable = new R2RMLTable(tableName, owner);
 			
-			try {
-				//Connection conn = owner.getOwner().getConn();
-				Connection conn = AbstractRunner.configurationProperties.getConn();
-				if(conn != null) {
-					java.sql.Statement stmt = conn.createStatement();
-					String query = "SELECT * FROM " + tableName + " WHERE 1=0";
-					ResultSet rs = stmt.executeQuery(query);
-					logicalTable.rsmd = rs.getMetaData();
-				}
-			} catch(Exception e) {
-				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
-			}
+//			try {
+//				Connection conn = this.configurationProperties.getConn();
+//				if(conn != null) {
+//					java.sql.Statement stmt = conn.createStatement();
+//					String query = "SELECT * FROM " + tableName + " WHERE 1=0";
+//					ResultSet rs = stmt.executeQuery(query);
+//					logicalTable.rsmd = rs.getMetaData();
+//				}
+//			} catch(Exception e) {
+//				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
+//			}
 		} else {
 			Statement sqlQueryStatement = resource.getProperty(
 					R2RMLConstants.R2RML_SQLQUERY_PROPERTY);
@@ -58,16 +89,16 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 			String sqlQueryString = sqlQueryStatement.getObject().toString().trim();
 			logicalTable = new R2RMLSQLQuery(sqlQueryString, owner);
 			
-			try {
-				Connection conn = AbstractRunner.configurationProperties.getConn();
-				if(conn != null) {
-					java.sql.Statement stmt = conn.createStatement();
-					ResultSet rs = stmt.executeQuery(sqlQueryString);
-					logicalTable.rsmd = rs.getMetaData();
-				}
-			} catch(Exception e) {
-				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
-			}
+//			try {
+//				Connection conn = AbstractRunner.configurationProperties.getConn();
+//				if(conn != null) {
+//					java.sql.Statement stmt = conn.createStatement();
+//					ResultSet rs = stmt.executeQuery(sqlQueryString);
+//					logicalTable.rsmd = rs.getMetaData();
+//				}
+//			} catch(Exception e) {
+//				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
+//			}
 		}
 
 		return logicalTable;
@@ -106,6 +137,12 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 
 	public ResultSetMetaData getRsmd() {
 		return rsmd;
-	}	
+	}
+
+	public void setRsmd(ResultSetMetaData rsmd) {
+		this.rsmd = rsmd;
+	}
+
+
 
 }

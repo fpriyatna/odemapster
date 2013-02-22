@@ -29,7 +29,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
-	public static ConfigurationProperties configurationProperties;
+	public ConfigurationProperties configurationProperties;
 	protected Connection conn;
 	//protected AbstractParser parser;
 	protected AbstractDataTranslator dataTranslator;
@@ -45,17 +45,17 @@ public abstract class AbstractRunner {
 
 	public AbstractRunner(String configurationDirectory, String configurationFile) 
 			throws Exception {
-		AbstractRunner.configurationProperties =new ConfigurationProperties
+		this.configurationProperties = new ConfigurationProperties
 				(configurationDirectory, configurationFile);
 
 		//mapping document
 		String mappingDocumentFile = 
-				AbstractRunner.configurationProperties.getMappingDocumentFilePath();
+				this.configurationProperties.getMappingDocumentFilePath();
 		this.mappingDocument = this.createMappingDocument(mappingDocumentFile);
 		logger.info("mapping document = " + this.mappingDocument);
 
 		//sparql query
-		String queryFilePath = AbstractRunner.configurationProperties.getQueryFilePath();
+		String queryFilePath = this.configurationProperties.getQueryFilePath();
 		if(queryFilePath != null && !queryFilePath.equals("") ) {
 			logger.info("Parsing query file : " + queryFilePath);
 			this.sparqQuery = QueryFactory.read(queryFilePath);
@@ -63,25 +63,25 @@ public abstract class AbstractRunner {
 
 		if(this.sparqQuery == null) {
 			//data translator
-			this.dataTranslator = this.createDataTranslator(AbstractRunner.configurationProperties);
+			this.dataTranslator = this.createDataTranslator(this.configurationProperties);
 		} else {
 			//query translator
 			this.queryTranslatorClassName = 
-					AbstractRunner.configurationProperties.getQueryTranslatorClassName();
+					this.configurationProperties.getQueryTranslatorClassName();
 			if(this.queryTranslatorClassName != null) {
 				this.buildQueryTranslator();	
 			}
 
 			//query writer
 			this.queryResultWriterClassName = 
-					AbstractRunner.configurationProperties.getQueryResultWriterClassName();
+					this.configurationProperties.getQueryResultWriterClassName();
 			if(this.queryResultWriterClassName != null) {
 				this.buildQueryResultWriter();
 			}
 
 			//query evaluator
 			this.queryEvaluatorClassName = 
-					AbstractRunner.configurationProperties.getQueryEvaluatorClassName();
+					this.configurationProperties.getQueryEvaluatorClassName();
 			if(this.queryEvaluatorClassName == null) {
 				this.buildQueryEvaluator();
 			}
@@ -145,7 +145,7 @@ public abstract class AbstractRunner {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
 				String mappingDocumentFile = 
-						AbstractRunner.configurationProperties.getMappingDocumentFilePath();
+						this.configurationProperties.getMappingDocumentFilePath();
 				Collection <String> mappedOntologyElements = 
 						MappingsExtractor.getMappedPredicatesFromR2O(mappingDocumentFile);
 				String rewritterWrapperMode = RewriterWrapper.fullMode;
@@ -178,15 +178,15 @@ public abstract class AbstractRunner {
 
 	protected abstract AbstractMappingDocument createMappingDocument(String mappingDocumentFile) throws Exception;
 
-	public static ConfigurationProperties getConfigurationProperties() {
-		if(configurationProperties == null) {
-			configurationProperties = new ConfigurationProperties();
+	public ConfigurationProperties getConfigurationProperties() {
+		if(this.configurationProperties == null) {
+			this.configurationProperties = new ConfigurationProperties();
 		}
-		return configurationProperties;
+		return this.configurationProperties;
 	}
 
 	public ConfigurationProperties getConfigurationProperties2() {
-		return AbstractRunner.configurationProperties;
+		return this.configurationProperties;
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -225,7 +225,8 @@ public abstract class AbstractRunner {
 	protected void buildQueryTranslator() throws Exception {
 		this.queryTranslator = (IQueryTranslator) 
 				Class.forName(this.queryTranslatorClassName).newInstance();					
-
+		this.queryTranslator.setConfigurationProperties(configurationProperties);
+		
 		if(this.mappingDocument == null) {
 			String mappingDocumentFilePath = this.getMappingDocumentPath();
 			this.mappingDocument = this.createMappingDocument(mappingDocumentFilePath);
@@ -234,11 +235,11 @@ public abstract class AbstractRunner {
 
 		//query translation optimizer
 		IQueryTranslationOptimizer queryTranslationOptimizer = this.createQueryTranslationOptimizer();
-		boolean optimizeTriplesSameSubject = AbstractRunner.configurationProperties.isSelfJoinElimination();
+		boolean optimizeTriplesSameSubject = this.configurationProperties.isSelfJoinElimination();
 		queryTranslationOptimizer.setSelfJoinElimination(optimizeTriplesSameSubject);
-		boolean eliminateSubQuery = AbstractRunner.configurationProperties.isSubQueryElimination();
+		boolean eliminateSubQuery = this.configurationProperties.isSubQueryElimination();
 		queryTranslationOptimizer.setSubQueryElimination(eliminateSubQuery);
-		boolean subQueryAsView = AbstractRunner.configurationProperties.isSubQueryAsView();
+		boolean subQueryAsView = this.configurationProperties.isSubQueryAsView();
 		queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
 		this.queryTranslator.setOptimizer(queryTranslationOptimizer);
 
@@ -265,7 +266,7 @@ public abstract class AbstractRunner {
 			, AbstractMappingDocument translationResultMappingDocument) throws Exception {
 		long start = System.currentTimeMillis();
 
-		String rdfLanguage = AbstractRunner.configurationProperties.getRdfLanguage();
+		String rdfLanguage = this.configurationProperties.getRdfLanguage();
 		if(rdfLanguage == null) {
 			rdfLanguage = Constants.OUTPUT_FORMAT_RDFXML;
 		}
@@ -331,7 +332,7 @@ public abstract class AbstractRunner {
 	}
 
 	public String run(String mappingDirectory, String configurationFile) throws Exception {
-		AbstractRunner.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
+		this.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
 		return this.run();
 	}
 
@@ -356,7 +357,7 @@ public abstract class AbstractRunner {
 	}
 
 	public String getMappingDocumentPath() {
-		return AbstractRunner.configurationProperties.getMappingDocumentFilePath();
+		return this.configurationProperties.getMappingDocumentFilePath();
 	}
 
 	public AbstractMappingDocument getMappingDocument() {
@@ -410,7 +411,7 @@ public abstract class AbstractRunner {
 				Class.forName(this.queryEvaluatorClassName).newInstance();
 		if(queryEvaluator instanceof RDBQueryEvaluator) {
 			//database connection
-			if(AbstractRunner.configurationProperties.getNoOfDatabase() > 1) {
+			if(this.configurationProperties.getNoOfDatabase() > 1) {
 				try { conn = this.getConnection(); } catch(Exception e) { }				
 			}
 

@@ -43,7 +43,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator 
 implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
-	
 
 	public R2RMLElementDataTranslateVisitor(
 			ConfigurationProperties properties) {
@@ -142,8 +141,8 @@ implements R2RMLElementVisitor {
 				}
 				
 				objectMapUnfoldedValue = ODEMapsterUtility.encodeLiteral(objectMapUnfoldedValue);
-				if(AbstractRunner.configurationProperties != null) {
-					if(AbstractRunner.configurationProperties.isLiteralRemoveStrangeChars()) {
+				if(this.properties != null) {
+					if(this.properties.isLiteralRemoveStrangeChars()) {
 						objectMapUnfoldedValue = ODEMapsterUtility.removeStrangeChars(objectMapUnfoldedValue);
 					}
 				}
@@ -244,7 +243,8 @@ implements R2RMLElementVisitor {
 
 	public void translateData(R2RMLTriplesMap triplesMap, String sqlQuery) throws SQLException {
 		Connection conn = this.properties.openConnection();
-		ResultSet rs = RDBQueryEvaluator.evaluateQuery(sqlQuery, conn);
+		int timeout = this.properties.getDatabaseTimeout();
+		ResultSet rs = RDBQueryEvaluator.evaluateQuery(sqlQuery, conn, timeout);
 		this.translateData(triplesMap, rs);
 		rs.close();
 		conn.close();		

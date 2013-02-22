@@ -47,8 +47,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
 	private Map<R2RMLRefObjectMap, String> mapRefObjectMapAlias = new HashMap<R2RMLRefObjectMap, String>();
-
-
+	//private ConfigurationProperties configurationProperties;
+	
 	public Map<R2RMLRefObjectMap, String> getMapRefObjectMapAlias() {
 		return mapRefObjectMapAlias;
 	}
@@ -117,8 +117,11 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 		Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 		if(subjectMapColumnsString != null) {
+			R2RMLUtility utility = new R2RMLUtility();
+			
 			for(String subjectMapColumnString : subjectMapColumnsString) {
-				SQLSelectItem selectItem = R2RMLUtility.toSelectItem(subjectMapColumnString, logicalTableAlias);
+				SQLSelectItem selectItem = utility.toSelectItem(subjectMapColumnString
+						, logicalTableAlias, dbType);
 				if(selectItem != null) {
 					resultSelectItems.add(selectItem);
 				}
@@ -159,8 +162,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 	public SQLQuery visit(R2RMLTriplesMap triplesMap) {
 		logger.info("unfolding triplesMap : " + triplesMap);
-		String dbType = this.dbType;
-		
 
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		SQLQuery result = new SQLQuery();
@@ -184,8 +185,10 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				Collection<String> predicateMapColumnsString = predicateMap.getDatabaseColumnsString();
 				//if(predicateMapColumnsString != null && logicalTable instanceof R2RMLTable) {
 				if(predicateMapColumnsString != null) {
+					
 					for(String predicateMapColumnString : predicateMapColumnsString) {
-						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(predicateMapColumnString, logicalTableAlias);
+						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(predicateMapColumnString
+								, logicalTableAlias, dbType);
 						if(selectItem != null) {
 							resultSelectItems.add(selectItem);
 						}
@@ -200,7 +203,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					//if(objectMapColumnsString != null && logicalTable instanceof R2RMLTable) {
 					if(objectMapColumnsString != null) {
 						for(String objectMapColumnString : objectMapColumnsString) {
-							SQLSelectItem selectItem = R2RMLUtility.toSelectItem(objectMapColumnString, logicalTableAlias);
+							SQLSelectItem selectItem = R2RMLUtility.toSelectItem(
+									objectMapColumnString, logicalTableAlias, this.dbType);
 							if(selectItem != null) {
 								resultSelectItems.add(selectItem);
 							}
@@ -245,7 +249,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					Collection<R2RMLJoinCondition> joinConditions = 
 							refObjectMap.getJoinConditions();
 					if(joinConditions != null && joinConditions.size() > 0) {
-						onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, joinQueryAlias);
+						onExpression = R2RMLUtility.generateJoinCondition(joinConditions
+								, logicalTableAlias, joinQueryAlias, dbType);
 					} else {
 						ZConstant constantOne = new ZConstant("1", ZConstant.NUMBER);
 						onExpression = new ZExpression("=", constantOne, constantOne);
@@ -331,5 +336,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 }

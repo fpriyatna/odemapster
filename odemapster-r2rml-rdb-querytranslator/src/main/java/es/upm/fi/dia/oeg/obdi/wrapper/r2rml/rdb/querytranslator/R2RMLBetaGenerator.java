@@ -77,7 +77,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 						}
 						databaseColumnString = databaseColumnsString.iterator().next();
 					}
-					selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);							
+					selectItem = R2RMLUtility.toSelectItem(databaseColumnString
+							, logicalTableAlias, this.owner.getDatabaseType());							
 				}
 
 			} else {
@@ -95,7 +96,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 					}
 					databaseColumnString = databaseColumnsString.iterator().next();
 				}
-				selectItem = R2RMLUtility.toSelectItem(databaseColumnString, refObjectMapAlias);						
+				selectItem = R2RMLUtility.toSelectItem(databaseColumnString
+						, refObjectMapAlias, this.owner.getDatabaseType());						
 
 			}			
 		}
@@ -121,7 +123,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 			} 
 
 			String databaseColumnString = databaseColumnsString.iterator().next();
-			selectItem = R2RMLUtility.toSelectItem(databaseColumnString, logicalTableAlias);
+			selectItem = R2RMLUtility.toSelectItem(databaseColumnString
+					, logicalTableAlias, this.owner.getDatabaseType());
 		}
 
 		logger.debug("calculateBetaCMSubject = " + selectItem);

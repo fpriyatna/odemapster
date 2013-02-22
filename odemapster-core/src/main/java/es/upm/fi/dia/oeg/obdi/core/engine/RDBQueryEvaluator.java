@@ -11,12 +11,7 @@ public class RDBQueryEvaluator extends AbstractQueryEvaluator {
 	private Connection conn;
 	private int timeout;
 	
-	public static ResultSet evaluateQuery(String query, Connection conn) throws SQLException {
-		int timeout = 0;
-		ConfigurationProperties conf = AbstractRunner.getConfigurationProperties(); 
-		if(conf != null) {
-			timeout = conf.getDatabaseTimeout(); 
-		}
+	public static ResultSet evaluateQuery(String query, Connection conn, int timeout) throws SQLException {
 		return DBUtility.executeQuery(conn, query, timeout);
 	}
 	

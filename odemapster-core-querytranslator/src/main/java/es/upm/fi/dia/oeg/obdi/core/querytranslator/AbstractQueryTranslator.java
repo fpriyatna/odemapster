@@ -50,6 +50,7 @@ import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
@@ -85,12 +86,15 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private NameGenerator nameGenerator;
 	private AbstractPRSQLGenerator prSQLGenerator;
 	private AbstractCondSQLGenerator condSQLGenerator;
+	private ConfigurationProperties configurationProperties;
+	private String databaseType;
 	
 	public AbstractQueryTranslator() {
 		this.nameGenerator = new NameGenerator();
 		Optimize.setFactory(new QueryRewritterFactory());
 	}
 
+	 
 	protected abstract void buildAlphaGenerator();
 
 	protected abstract void buildBetaGenerator();
@@ -346,7 +350,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		newSelectItems.add(newSelectItem);
 
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, transGPSQL, newWhere, null);
+			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, transGPSQL
+					, newWhere, null, this.databaseType);
 		} else {
 			result = new SQLQuery();
 			result.setSelectItems(newSelectItems);
@@ -486,7 +491,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 		Vector<ZOrderBy> orderByConditions = gpSQL.getOrderBy();
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, gpSQL, null, orderByConditions);
+			result = QueryTranslatorUtility.eliminateSubQuery(newSelectItems, gpSQL
+					, null, orderByConditions, this.databaseType);
 		} else {
 			fromItem.setAlias(gpSQLAlias);
 			result.setSelectItems(newSelectItems);
@@ -567,14 +573,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private ZExp transFunction(Op op, ExprFunction exprFunction) {
 		ZExp result = null;
 
-		String databaseType = null;
-		if(AbstractRunner.configurationProperties != null) {
-			databaseType = AbstractRunner.configurationProperties.getDatabaseType();
-		}
-		if(databaseType == null) {
+		if(this.databaseType == null) {
 			databaseType = Constants.DATABASE_MYSQL;
 		}
-
 
 		List<Expr> args = exprFunction.getArgs();
 
@@ -1327,4 +1328,27 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 	
 	public abstract String translateResultSet(String columnLabel, String dbValue);
+
+
+
+
+	public String getDatabaseType() {
+		return databaseType;
+	}
+
+
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
+	}
+
+
+	public ConfigurationProperties getConfigurationProperties() {
+		return configurationProperties;
+	}
+
+
+	public void setConfigurationProperties(
+			ConfigurationProperties configurationProperties) {
+		this.configurationProperties = configurationProperties;
+	}
 }

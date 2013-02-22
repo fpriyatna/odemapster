@@ -58,7 +58,7 @@ public class R2RMLRunner extends AbstractRunner {
 	@Override
 	protected AbstractMappingDocument createMappingDocument(
 			String mappingDocumentFile) throws Exception {
-		return new R2RMLMappingDocument(mappingDocumentFile, super.getConnection());
+		return new R2RMLMappingDocument(mappingDocumentFile);
 	}
 
 	@Override

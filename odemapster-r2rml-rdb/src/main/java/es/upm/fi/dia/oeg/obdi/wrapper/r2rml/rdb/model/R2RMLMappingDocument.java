@@ -41,21 +41,19 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 	private String mappingDocumentPath;
 
 
-	public R2RMLMappingDocument(String mappingDocumentPath, Connection conn) 
+	public R2RMLMappingDocument(String mappingDocumentPath) 
 			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		super();
 		this.mappingDocumentPath = mappingDocumentPath;
 		
-		String inputFileName = this.getMappingDocumentPath();
-
 		Model model = ModelFactory.createDefaultModel();
 		// use the FileManager to find the input file
-		InputStream in = FileManager.get().open( inputFileName );
+		InputStream in = FileManager.get().open( this.mappingDocumentPath );
 		if (in == null) {
 			throw new IllegalArgumentException(
-					"Mapping File: " + inputFileName + " not found");
+					"Mapping File: " + this.mappingDocumentPath + " not found");
 		}
-		logger.info("Parsing mapping document " + inputFileName);
+		logger.info("Parsing mapping document " + this.mappingDocumentPath);
 		
 		// read the Turtle file
 		model.read(in, null, "TURTLE");
@@ -101,10 +99,6 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		
 	}
 	
-	public R2RMLMappingDocument(String mappingDocumentPath) 
-			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
-		this(mappingDocumentPath, null);
-	}
 
 	public Object accept(R2RMLElementVisitor visitor) throws Exception {
 		Object result = visitor.visit(this);

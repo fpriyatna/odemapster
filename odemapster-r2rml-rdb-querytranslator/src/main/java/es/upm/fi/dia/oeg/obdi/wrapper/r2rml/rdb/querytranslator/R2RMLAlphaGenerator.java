@@ -35,13 +35,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLAlphaGenerator.class);
-	
 
 	public R2RMLAlphaGenerator(AbstractQueryTranslator owner) {
 		super(owner);
 	}
-
-
 
 	@Override
 	protected SQLQuery calculateAlphaPredicateObject  (
@@ -95,7 +92,9 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			
 
 			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-			ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, joinQueryAlias);
+			R2RMLUtility utility = new R2RMLUtility();
+			ZExp onExpression = utility.generateJoinCondition(joinConditions
+					, logicalTableAlias, joinQueryAlias, this.owner.getConfigurationProperties().getDatabaseType());
 			if(onExpression != null) {
 				joinQuery.setOnExp(onExpression);
 			}
