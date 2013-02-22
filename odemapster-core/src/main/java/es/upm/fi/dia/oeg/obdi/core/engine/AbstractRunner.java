@@ -91,8 +91,6 @@ public abstract class AbstractRunner {
 					queryEvaluator, queryResultWriter);				
 
 		}
-
-
 	}
 
 	public String run()

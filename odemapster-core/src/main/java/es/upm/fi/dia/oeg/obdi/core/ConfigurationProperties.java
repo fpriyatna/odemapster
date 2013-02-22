@@ -57,14 +57,6 @@ public class ConfigurationProperties extends Properties {
 
 	public ConfigurationProperties() {}
 	
-	public ConfigurationProperties(String configurationAbsoluteFilePath) throws IOException {
-		File file = new File(configurationAbsoluteFilePath);
-		logger.info("file.getAbsolutePath() = " + file.getAbsolutePath());
-		logger.info("file.getName() = " + file.getName());
-		logger.info("file.getCanonicalPath() = " + file.getCanonicalPath());
-		logger.info("file.getParent() = " + file.getParent());
-		logger.info("file.getPath() = " + file.getPath());
-	}
 	
 	public ConfigurationProperties(
 			String configurationDirectory, String configurationFile) 
@@ -93,7 +85,6 @@ public class ConfigurationProperties extends Properties {
 		}
 
 		this.readConfigurationFile(configurationDirectory);
-
 	}
 	
 	public String getOutputFilePath() {
@@ -153,26 +144,14 @@ public class ConfigurationProperties extends Properties {
 		}
 
 		this.mappingDocumentFilePath = this.getProperty(Constants.MAPPINGDOCUMENT_FILE_PATH);
-		boolean isLocalMapping = true;
-		try {
-			URL mappingDocumentURL = new URL(this.mappingDocumentFilePath);
-			URLConnection conn = mappingDocumentURL.openConnection();
-			conn.connect();
-			isLocalMapping = false;
-		} catch (Exception e) { }
-		if(isLocalMapping && configurationDir != null) {
+		boolean isNetResourceMapping = ODEMapsterUtility.isNetResource(this.mappingDocumentFilePath);
+		if(!isNetResourceMapping && configurationDir != null) {
 			this.mappingDocumentFilePath = configurationDir + mappingDocumentFilePath;
 		}
 
-		boolean isLocalQuery = true;
 		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME);
-		try {
-			URL queryURL = new URL(this.queryFilePath);
-			URLConnection conn = queryURL.openConnection();
-			conn.connect();
-			isLocalQuery = false;
-		} catch (Exception e) { }
-		if(isLocalQuery && configurationDir != null) {
+		boolean isNetResourceQuery = ODEMapsterUtility.isNetResource(this.queryFilePath);
+		if(!isNetResourceQuery && configurationDir != null) {
 			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
 				this.queryFilePath = configurationDir + queryFilePath;
 			}
@@ -371,7 +350,5 @@ public class ConfigurationProperties extends Properties {
 		return queryEvaluatorClassName;
 	}
 
-	
-	
 
 }

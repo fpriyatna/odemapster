@@ -9,6 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -729,4 +731,17 @@ public class ODEMapsterUtility {
 		}
 	}
 
+	public static boolean isNetResource(String resourceAddress) {
+		boolean result = false;
+		try {
+			URL url = new URL(resourceAddress);
+			URLConnection conn = url.openConnection();
+			conn.connect();
+			result = true;			
+		} catch(Exception e) {
+			
+		}
+		
+		return result;
+	}
 }
