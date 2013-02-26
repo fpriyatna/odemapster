@@ -143,10 +143,12 @@ public class ConfigurationProperties extends Properties {
 			}
 		}
 
-		this.mappingDocumentFilePath = this.getProperty(Constants.MAPPINGDOCUMENT_FILE_PATH);
-		boolean isNetResourceMapping = ODEMapsterUtility.isNetResource(this.mappingDocumentFilePath);
-		if(!isNetResourceMapping && configurationDir != null) {
-			this.mappingDocumentFilePath = configurationDir + mappingDocumentFilePath;
+		this.mappingDocumentFilePath = this.readString(Constants.MAPPINGDOCUMENT_FILE_PATH, null);
+		if(this.mappingDocumentFilePath != null) {
+			boolean isNetResourceMapping = ODEMapsterUtility.isNetResource(this.mappingDocumentFilePath);
+			if(!isNetResourceMapping && configurationDir != null) {
+				this.mappingDocumentFilePath = configurationDir + mappingDocumentFilePath;
+			}
 		}
 
 		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME);

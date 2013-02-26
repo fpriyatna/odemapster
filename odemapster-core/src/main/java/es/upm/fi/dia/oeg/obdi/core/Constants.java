@@ -58,7 +58,7 @@ public class Constants {
 			"queryresult.writer.class.name";
 	public static final String QUERY_RESULT_WRITER_CLASSNAME_DEFAULT = 
 			"es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter";
-	
+	public static final String QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT = "output.rdf.xml";
 	
 	public static final String REMOVE_STRANGE_CHARS_FROM_LITERAL = "literal.removestrangechars";
 	public static final String ENCODE_UNSAFE_CHARS_IN_URI_COLUMN = "uricolumn.encodeunsafecharacters";

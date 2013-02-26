@@ -14,6 +14,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
 public class R2RMLRunner extends AbstractRunner {
 	private static Logger logger = Logger.getLogger(R2RMLRunner.class);
 	 	
+	public R2RMLRunner() {
+		super();
+	}
+	
 	public R2RMLRunner(String configurationDirectory, String configurationFile)
 			throws Exception {
 		super(configurationDirectory, configurationFile);
@@ -42,9 +46,9 @@ public class R2RMLRunner extends AbstractRunner {
 	}
 	
 	@Override
-	protected AbstractDataTranslator createDataTranslator(
+	protected void createDataTranslator(
 			ConfigurationProperties configurationProperties) {
-		return new R2RMLElementDataTranslateVisitor(
+		super.dataTranslator = new R2RMLElementDataTranslateVisitor(
 				configurationProperties);
 	}
 
@@ -56,13 +60,13 @@ public class R2RMLRunner extends AbstractRunner {
 	}
 
 	@Override
-	protected AbstractMappingDocument createMappingDocument(
+	public void readMappingDocumentFile(
 			String mappingDocumentFile) throws Exception {
-		return new R2RMLMappingDocument(mappingDocumentFile);
+		super.mappingDocument = new R2RMLMappingDocument(mappingDocumentFile); 
 	}
 
 	@Override
-	protected IQueryTranslationOptimizer createQueryTranslationOptimizer() {
+	protected IQueryTranslationOptimizer buildQueryTranslationOptimizer() {
 		return new QueryTranslationOptimizer();
 	}
 

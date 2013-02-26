@@ -48,8 +48,12 @@ object R2RMLFusionQueryTranslatorTest {
 		
 		try {
 			val start = System.currentTimeMillis();
-			val runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			val runner = new R2RMLRunner();
+			runner.readMappingDocumentFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1YDlqQzZHVMPxSadct1u5cBBiN341xOCMcO6kSkU/mapping.ttl");
+			runner.readSPARQLFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1YDlqQzZHVMPxSadct1u5cBBiN341xOCMcO6kSkU/query01.sparql");
+			runner.setQueryTranslatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.querytranslator.R2RMLFusionTablesQueryTranslator");
 			runner.setQueryResultWriterClassName("es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter");
+			runner.setQueryEvaluatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.engine.FusionTablesQueryEvaluator");
 			runner.run();
 			val end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
