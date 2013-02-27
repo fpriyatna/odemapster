@@ -43,7 +43,8 @@ public abstract class AbstractRunner {
 	private AbstractQueryResultWriter queryResultWriter = null;
 	private String queryEvaluatorClassName = null;
 	private AbstractQueryEvaluator queryEvaluator = null;
-
+	private Object queryResultWriterOutput = null;
+	
 	public AbstractRunner() {
 		
 	}
@@ -426,6 +427,10 @@ public abstract class AbstractRunner {
 		//this.buildQueryResultWriter();
 	}
 
+	public void setQueryResultWriterOutput(Object output) throws Exception {
+		this.queryResultWriterOutput = output;
+	}
+
 	public AbstractQueryResultWriter getQueryResultWriter() {
 		return this.queryResultWriter;
 	}
@@ -439,7 +444,7 @@ public abstract class AbstractRunner {
 		}
 		this.queryResultWriter.setQueryTranslator(this.queryTranslator);
 
-		if(queryResultWriter instanceof XMLWriter) {
+		if(queryResultWriter instanceof XMLWriter && this.queryResultWriterOutput == null) {
 			//set output file
 			String outputFileName = null;
 			if(this.configurationProperties != null) {
@@ -448,8 +453,9 @@ public abstract class AbstractRunner {
 			if(outputFileName == null) {
 				outputFileName = Constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT; 
 			}
-			((XMLWriter) queryResultWriter).setOutputFileName(outputFileName);
+			this.queryResultWriterOutput = outputFileName;
 		}
+		queryResultWriter.setOutput(this.queryResultWriterOutput);
 
 		logger.info("query result writer = " + this.queryResultWriter);
 	}

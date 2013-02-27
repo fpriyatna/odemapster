@@ -4,7 +4,7 @@ public abstract class AbstractQueryResultWriter {
 	AbstractResultSet abstractResultSet;
 	IQueryTranslator queryTranslator;
 	
-	public abstract void initalize() throws Exception;
+	public abstract void initialize() throws Exception;
 	public abstract void preProcess() throws Exception;
 	public abstract void process() throws Exception;
 	public abstract void postProcess() throws Exception;

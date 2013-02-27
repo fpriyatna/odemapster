@@ -53,6 +53,7 @@ object R2RMLFusionQueryTranslatorTest {
 			runner.readSPARQLFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1YDlqQzZHVMPxSadct1u5cBBiN341xOCMcO6kSkU/query01.sparql");
 			runner.setQueryTranslatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.querytranslator.R2RMLFusionTablesQueryTranslator");
 			runner.setQueryResultWriterClassName("es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter");
+			runner.setQueryResultWriterOutput("output.xml");
 			runner.setQueryEvaluatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.engine.FusionTablesQueryEvaluator");
 			runner.run();
 			val end = System.currentTimeMillis();

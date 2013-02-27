@@ -16,7 +16,7 @@ public class XMLWriter extends AbstractQueryResultWriter {
 	private String outputFileName;
 	
 
-	public void initalize() throws Exception {
+	public void initialize() throws Exception {
 		this.xmlDoc = XMLUtility.createNewXMLDocument();
 	}
 
@@ -67,9 +67,6 @@ public class XMLWriter extends AbstractQueryResultWriter {
 		XMLUtility.saveXMLDocument(xmlDoc, outputFileName);
 	}
 
-	public void setOutputFileName(String outputFileName) {
-		this.outputFileName = outputFileName;
-	}
 
 	@Override
 	public Object getOutput() throws Exception {
@@ -78,8 +75,7 @@ public class XMLWriter extends AbstractQueryResultWriter {
 
 	@Override
 	public void setOutput(Object output) throws Exception {
-		// TODO Auto-generated method stub
-		
+		this.outputFileName = (String) output;
 	}
 
 	

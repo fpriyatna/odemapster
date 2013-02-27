@@ -21,7 +21,7 @@ public class DefaultResultProcessor {
 	}
 
 	public void translateResult(Collection<SQLQuery> sqlQueries) throws Exception {
-		this.queryResultWriter.initalize();
+		this.queryResultWriter.initialize();
 		
 		int i=0;
 		for(SQLQuery sqlQuery : sqlQueries) {
