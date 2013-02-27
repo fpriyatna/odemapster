@@ -19,7 +19,7 @@ import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
-import es.upm.fi.dia.oeg.obdi.core.engine.RDBQueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.core.engine.RDBReader;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.exception.PostProcessorException;
 import es.upm.fi.dia.oeg.obdi.core.exception.QueryTranslatorException;
@@ -244,7 +244,7 @@ implements R2RMLElementVisitor {
 	public void translateData(R2RMLTriplesMap triplesMap, String sqlQuery) throws SQLException {
 		Connection conn = this.properties.openConnection();
 		int timeout = this.properties.getDatabaseTimeout();
-		ResultSet rs = RDBQueryEvaluator.evaluateQuery(sqlQuery, conn, timeout);
+		ResultSet rs = RDBReader.evaluateQuery(sqlQuery, conn, timeout);
 		this.translateData(triplesMap, rs);
 		rs.close();
 		conn.close();		

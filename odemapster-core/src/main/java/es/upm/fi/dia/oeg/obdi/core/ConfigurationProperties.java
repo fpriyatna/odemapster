@@ -12,7 +12,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractQueryEvaluator;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataSourceReader;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractQueryResultWriter;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
@@ -191,7 +191,7 @@ public class ConfigurationProperties extends Properties {
 				Constants.QUERY_TRANSLATOR_CLASSNAME, null);
 		
 		this.queryEvaluatorClassName = this.readString(
-				Constants.QUERY_EVALUATOR_CLASSNAME, null);
+				Constants.DATASOURCE_READER_CLASSNAME, null);
 		
 		this.queryResultWriterClassName = this.readString(
 				Constants.QUERY_RESULT_WRITER_CLASSNAME, null);

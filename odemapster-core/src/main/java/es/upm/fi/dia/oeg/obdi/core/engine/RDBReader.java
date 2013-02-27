@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 
-public class RDBQueryEvaluator extends AbstractQueryEvaluator {
+public class RDBReader extends AbstractDataSourceReader {
 	private Connection conn;
 	private int timeout;
 	

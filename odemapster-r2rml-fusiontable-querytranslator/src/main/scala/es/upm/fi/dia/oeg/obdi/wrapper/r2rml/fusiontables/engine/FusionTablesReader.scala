@@ -1,13 +1,13 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.engine
 
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractQueryEvaluator
 import scala.collection.JavaConversions._
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet
 import org.apache.log4j.Logger
 import com.google.api.services.fusiontables.Fusiontables
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataSourceReader
 
 
-class FusionTablesQueryEvaluator extends AbstractQueryEvaluator {
+class FusionTablesReader extends AbstractDataSourceReader{
 	val logger : Logger = Logger.getLogger("FusionTablesQueryEvaluator");
 	val fusionTablesUtility = new FusionTablesUtility();
     val credential = fusionTablesUtility.authorize();

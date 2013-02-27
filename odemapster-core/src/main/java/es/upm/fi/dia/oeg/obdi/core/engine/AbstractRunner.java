@@ -41,8 +41,8 @@ public abstract class AbstractRunner {
 	protected Query sparqQuery = null;
 	private String queryResultWriterClassName = null;
 	private AbstractQueryResultWriter queryResultWriter = null;
-	private String queryEvaluatorClassName = null;
-	private AbstractQueryEvaluator queryEvaluator = null;
+	private String dataSourceReaderClassName = null;
+	private AbstractDataSourceReader dataSourceReader = null;
 	private Object queryResultWriterOutput = null;
 	
 	public AbstractRunner() {
@@ -88,15 +88,15 @@ public abstract class AbstractRunner {
 			}
 
 			//query evaluator
-			this.queryEvaluatorClassName = 
+			this.dataSourceReaderClassName = 
 					this.configurationProperties.getQueryEvaluatorClassName();
-			if(this.queryEvaluatorClassName == null) {
-				this.buildQueryEvaluator();
+			if(this.dataSourceReaderClassName == null) {
+				this.buildDataSourceReader();
 			}
 
 			//result processor
 			this.resultProcessor = new DefaultResultProcessor(
-					queryEvaluator, queryResultWriter);				
+					dataSourceReader, queryResultWriter);				
 
 		}
 	}
@@ -129,16 +129,16 @@ public abstract class AbstractRunner {
 			}
 
 			//query evaluator
-			if(this.queryEvaluator == null) {
-				if(this.queryEvaluatorClassName == null) {
-					this.queryEvaluatorClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT;
+			if(this.dataSourceReader == null) {
+				if(this.dataSourceReaderClassName == null) {
+					this.dataSourceReaderClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT;
 				}
-				this.buildQueryEvaluator();
+				this.buildDataSourceReader();
 			}
 
 			//result processor
 			this.resultProcessor = new DefaultResultProcessor(
-					queryEvaluator, queryResultWriter);				
+					dataSourceReader, queryResultWriter);				
 
 			//loading ontology file
 			String ontologyFilePath = null;
@@ -460,26 +460,26 @@ public abstract class AbstractRunner {
 		logger.info("query result writer = " + this.queryResultWriter);
 	}
 
-	private void buildQueryEvaluator() throws Exception {
-		this.queryEvaluator = (AbstractQueryEvaluator)
-				Class.forName(this.queryEvaluatorClassName).newInstance();
-		if(queryEvaluator instanceof RDBQueryEvaluator) {
+	private void buildDataSourceReader() throws Exception {
+		this.dataSourceReader = (AbstractDataSourceReader)
+				Class.forName(this.dataSourceReaderClassName).newInstance();
+		if(dataSourceReader instanceof RDBReader) {
 			//database connection
 			if(this.configurationProperties != null) {
 				if(this.configurationProperties.getNoOfDatabase() > 1) {
 					try { conn = this.getConnection(); } catch(Exception e) { }				
 				}
-				((RDBQueryEvaluator) queryEvaluator).setConnection(conn);
+				((RDBReader) dataSourceReader).setConnection(conn);
 				int timeout = this.configurationProperties.getDatabaseTimeout();
-				((RDBQueryEvaluator) queryEvaluator).setTimeout(timeout);
+				((RDBReader) dataSourceReader).setTimeout(timeout);
 			}
 		}
 
-		logger.info("query evaluator = " + this.queryEvaluator);
+		logger.info("query evaluator = " + this.dataSourceReader);
 	}
 
-	public void setQueryEvaluatorClassName(String queryEvaluatorClassName) {
-		this.queryEvaluatorClassName = queryEvaluatorClassName;
+	public void setDataSourceReaderClassName(String queryEvaluatorClassName) {
+		this.dataSourceReaderClassName = queryEvaluatorClassName;
 	}
 	
 

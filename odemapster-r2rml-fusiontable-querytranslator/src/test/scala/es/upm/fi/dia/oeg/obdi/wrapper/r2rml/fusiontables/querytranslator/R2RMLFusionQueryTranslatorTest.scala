@@ -54,7 +54,7 @@ object R2RMLFusionQueryTranslatorTest {
 			runner.setQueryTranslatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.querytranslator.R2RMLFusionTablesQueryTranslator");
 			runner.setQueryResultWriterClassName("es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter");
 			runner.setQueryResultWriterOutput("output.xml");
-			runner.setQueryEvaluatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.engine.FusionTablesQueryEvaluator");
+			runner.setDataSourceReaderClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.engine.FusionTablesReader");
 			runner.run();
 			val end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");

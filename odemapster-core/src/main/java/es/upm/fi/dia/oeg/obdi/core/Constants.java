@@ -51,9 +51,9 @@ public class Constants {
 	public static final String QUERY_TRANSLATOR_CLASSNAME = "querytranslator.class.name";
 	public static final String QUERY_TRANSLATOR_CLASSNAME_DEFAULT = 
 			"es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator";
-	public static final String QUERY_EVALUATOR_CLASSNAME = "queryevaluator.class.name";
+	public static final String DATASOURCE_READER_CLASSNAME = "datasourcereader.class.name";
 	public static final String QUERY_EVALUATOR_CLASSNAME_DEFAULT = 
-			"es.upm.fi.dia.oeg.obdi.core.engine.RDBQueryEvaluator";
+			"es.upm.fi.dia.oeg.obdi.core.engine.RDBReader";
 	public static final String QUERY_RESULT_WRITER_CLASSNAME = 
 			"queryresult.writer.class.name";
 	public static final String QUERY_RESULT_WRITER_CLASSNAME_DEFAULT = 

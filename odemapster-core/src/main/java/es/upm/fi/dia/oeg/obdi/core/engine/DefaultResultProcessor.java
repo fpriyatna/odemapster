@@ -12,10 +12,10 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 public class DefaultResultProcessor {
 	private static Logger logger = Logger.getLogger(DefaultResultProcessor.class);
 	//AbstractRunner runner;
-	AbstractQueryEvaluator queryEvaluator;
+	AbstractDataSourceReader queryEvaluator;
 	AbstractQueryResultWriter queryResultWriter;
 	
-	public DefaultResultProcessor(AbstractQueryEvaluator queryEvaluator, AbstractQueryResultWriter queryResultWriter) {
+	public DefaultResultProcessor(AbstractDataSourceReader queryEvaluator, AbstractQueryResultWriter queryResultWriter) {
 		this.queryEvaluator = queryEvaluator;
 		this.queryResultWriter = queryResultWriter;
 	}
