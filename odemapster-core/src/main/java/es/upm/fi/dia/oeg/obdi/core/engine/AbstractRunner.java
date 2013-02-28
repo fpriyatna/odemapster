@@ -90,7 +90,7 @@ public abstract class AbstractRunner {
 			//query evaluator
 			this.dataSourceReaderClassName = 
 					this.configurationProperties.getQueryEvaluatorClassName();
-			if(this.dataSourceReaderClassName == null) {
+			if(this.dataSourceReaderClassName != null) {
 				this.buildDataSourceReader();
 			}
 
@@ -171,6 +171,8 @@ public abstract class AbstractRunner {
 			//translate sparql queries into sql queries
 			Collection<SQLQuery> sqlQueries = 
 					this.translateSPARQLQueriesIntoSQLQueries(queries);
+			
+			//translate result
 			this.resultProcessor.translateResult(sqlQueries);
 		}
 

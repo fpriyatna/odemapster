@@ -48,12 +48,13 @@ object R2RMLFusionQueryTranslatorTest {
 		
 		try {
 			val start = System.currentTimeMillis();
+//			val runner = new R2RMLRunner(configurationDirectory + "1pQBGUqR_g-j1WQavu-Fi1wGS7jsdRxomGc0DxMI", "oegmembers.r2rml.properties");
 			val runner = new R2RMLRunner();
-			runner.readMappingDocumentFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1YDlqQzZHVMPxSadct1u5cBBiN341xOCMcO6kSkU/mapping.ttl");
-			runner.readSPARQLFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1YDlqQzZHVMPxSadct1u5cBBiN341xOCMcO6kSkU/query01.sparql");
+			runner.readMappingDocumentFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1pQBGUqR_g-j1WQavu-Fi1wGS7jsdRxomGc0DxMI/oegmembers.ttl");
+			runner.readSPARQLFile("http://mappingpedia.linkeddata.es/mappings/fusiontables/1pQBGUqR_g-j1WQavu-Fi1wGS7jsdRxomGc0DxMI/oegmembers.sparql");
 			runner.setQueryTranslatorClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.querytranslator.R2RMLFusionTablesQueryTranslator");
 			runner.setQueryResultWriterClassName("es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter");
-			runner.setQueryResultWriterOutput("output.xml");
+//			runner.setQueryResultWriterOutput("output.xml");
 			runner.setDataSourceReaderClassName("es.upm.fi.dia.oeg.obdi.wrapper.r2rml.fusiontables.engine.FusionTablesReader");
 			runner.run();
 			val end = System.currentTimeMillis();

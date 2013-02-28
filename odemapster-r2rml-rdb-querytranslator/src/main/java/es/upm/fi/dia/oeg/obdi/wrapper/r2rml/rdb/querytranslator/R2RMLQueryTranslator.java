@@ -19,6 +19,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
@@ -276,6 +277,16 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 						result = R2RMLUtility.replaceTokens(template, replacements);
 					}					
 				}
+				
+				String termMapType = termMap.getTermType();
+				if(termMapType != null) {
+					if(termMapType.equals(R2RMLConstants.R2RML_IRI_URI)) {
+						result = ODEMapsterUtility.encodeURI(result);
+					} else if(termMapType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+						result = ODEMapsterUtility.encodeLiteral(result);
+					}
+				}
+				
 
 			}			
 		} catch(Exception e) {
