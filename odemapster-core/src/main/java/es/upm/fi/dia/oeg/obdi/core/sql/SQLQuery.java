@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -507,8 +508,8 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	}
 
 	 
-	public List<String> getSelectItemAliases() {
-		List<String> result = new Vector<String>();
+	public ArrayList<String> getSelectItemAliases() {
+		ArrayList<String> result = new ArrayList<String>();
 		for(ZSelectItem selectItem : this.getSelect()) {
 			result.add(selectItem.getAlias());
 		}

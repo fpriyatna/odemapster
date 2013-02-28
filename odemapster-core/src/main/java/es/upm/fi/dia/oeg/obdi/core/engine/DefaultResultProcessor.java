@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 
 //import java.sql.ResultSetMetaData;
 //import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class DefaultResultProcessor {
 		for(SQLQuery sqlQuery : sqlQueries) {
 			AbstractResultSet abstractResultSet = 
 					this.queryEvaluator.evaluateQuery(sqlQuery.toString());
-			List<String> columnNames = sqlQuery.getSelectItemAliases();
+			ArrayList<String> columnNames = sqlQuery.getSelectItemAliases();
 			abstractResultSet.setColumnNames(columnNames);
 			
 			this.queryResultWriter.setAbstractResultSet(abstractResultSet);
