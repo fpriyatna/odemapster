@@ -28,7 +28,7 @@ public class XMLWriter extends AbstractQueryResultWriter {
 		//create head element
 		Element headElement = xmlDoc.createElement("head");
 		rootElement.appendChild(headElement);
-		Collection<String> columnNames = super.abstractResultSet.getColumnNames();
+		Collection<String> columnNames = super.getResultSet().getColumnNames();
 		for(String columnName : columnNames) {
 			Element variableElement = xmlDoc.createElement("variable");
 			variableElement.setAttribute("name", columnName);
@@ -42,15 +42,16 @@ public class XMLWriter extends AbstractQueryResultWriter {
 
 	public void process() throws Exception {
 		int i=0;
-		while(this.abstractResultSet.next()) {
+		AbstractResultSet rs = super.getResultSet();
+		while(rs.next()) {
 			Element resultElement = xmlDoc.createElement("result");
 			resultsElement.appendChild(resultElement);
-			Collection<String> columnNames = this.abstractResultSet.getColumnNames(); 
+			Collection<String> columnNames = rs.getColumnNames(); 
 			for(String columnName : columnNames) {
 				Element bindingElement = xmlDoc.createElement("binding");
 				bindingElement.setAttribute("name", columnName);
-				String columnValue = this.abstractResultSet.getString(columnName);
-				String translatedColumnValue = super.queryTranslator.translateResultSet(
+				String columnValue = rs.getString(columnName);
+				String translatedColumnValue = super.getQueryTranslator().translateResultSet(
 						columnName, columnValue);
 				bindingElement.setTextContent(translatedColumnValue);
 				resultElement.appendChild(bindingElement);

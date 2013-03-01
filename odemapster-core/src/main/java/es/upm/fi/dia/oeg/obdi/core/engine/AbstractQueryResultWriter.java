@@ -1,8 +1,8 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
 public abstract class AbstractQueryResultWriter {
-	AbstractResultSet abstractResultSet;
-	IQueryTranslator queryTranslator;
+	private AbstractResultSet abstractResultSet;
+	private IQueryTranslator queryTranslator;
 	
 	public abstract void initialize() throws Exception;
 	public abstract void preProcess() throws Exception;
@@ -14,14 +14,14 @@ public abstract class AbstractQueryResultWriter {
 	public void setResultSet(AbstractResultSet resultSet) {
 		this.abstractResultSet = resultSet;
 	}
-	void setAbstractResultSet(AbstractResultSet abstractResultSet) {
-		this.abstractResultSet = abstractResultSet;
-	}
 	void setQueryTranslator(IQueryTranslator queryTranslator) {
 		this.queryTranslator = queryTranslator;
 	}
 	public IQueryTranslator getQueryTranslator() {
 		return queryTranslator;
+	}
+	public AbstractResultSet getResultSet() {
+		return abstractResultSet;
 	}
 
 }

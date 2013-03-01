@@ -31,7 +31,7 @@ public class DefaultResultProcessor {
 			ArrayList<String> columnNames = sqlQuery.getSelectItemAliases();
 			abstractResultSet.setColumnNames(columnNames);
 			
-			this.queryResultWriter.setAbstractResultSet(abstractResultSet);
+			this.queryResultWriter.setResultSet(abstractResultSet);
 			if(i==0) {
 				this.queryResultWriter.preProcess();	
 			}
