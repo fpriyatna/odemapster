@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
 <jardesc>
-    <jar path="C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/deployed/odemapster-2.9.9.jar"/>
+    <jar path="C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/deployed/odemapster-2.9.10.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/odemapster-r2rml-fusiontable-querytranslator/odemapsterfusiontable2jar.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>

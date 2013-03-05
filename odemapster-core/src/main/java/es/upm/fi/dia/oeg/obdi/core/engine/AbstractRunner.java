@@ -1,7 +1,5 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,8 +10,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZUtils;
-
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
@@ -22,8 +18,6 @@ import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
-import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
@@ -39,6 +33,10 @@ public abstract class AbstractRunner {
 	protected DefaultResultProcessor resultProcessor;
 	protected AbstractMappingDocument mappingDocument;
 	protected Query sparqQuery = null;
+	public Query getSparqQuery() {
+		return sparqQuery;
+	}
+
 	private String queryResultWriterClassName = null;
 	private AbstractQueryResultWriter queryResultWriter = null;
 	private String dataSourceReaderClassName = null;
