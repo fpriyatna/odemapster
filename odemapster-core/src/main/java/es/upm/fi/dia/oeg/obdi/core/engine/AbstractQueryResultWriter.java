@@ -26,7 +26,7 @@ public abstract class AbstractQueryResultWriter {
 	public AbstractResultSet getResultSet() {
 		return abstractResultSet;
 	}
-	Query getSparqQuery() {
+	public Query getSparqQuery() {
 		return sparqQuery;
 	}
 	void setSparqQuery(Query sparqQuery) {
