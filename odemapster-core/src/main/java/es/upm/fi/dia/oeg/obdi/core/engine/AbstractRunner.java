@@ -444,6 +444,10 @@ public abstract class AbstractRunner {
 		}
 		this.queryResultWriter.setQueryTranslator(this.queryTranslator);
 
+		if(this.sparqQuery != null) {
+			this.queryResultWriter.setSparqQuery(sparqQuery);
+		}
+		
 		if(queryResultWriter instanceof XMLWriter && this.queryResultWriterOutput == null) {
 			//set output file
 			String outputFileName = null;

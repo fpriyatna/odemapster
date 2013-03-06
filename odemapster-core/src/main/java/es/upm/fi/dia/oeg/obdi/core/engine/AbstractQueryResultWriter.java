@@ -1,8 +1,11 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
+import com.hp.hpl.jena.query.Query;
+
 public abstract class AbstractQueryResultWriter {
 	private AbstractResultSet abstractResultSet;
 	private IQueryTranslator queryTranslator;
+	private Query sparqQuery;
 	
 	public abstract void initialize() throws Exception;
 	public abstract void preProcess() throws Exception;
@@ -22,6 +25,12 @@ public abstract class AbstractQueryResultWriter {
 	}
 	public AbstractResultSet getResultSet() {
 		return abstractResultSet;
+	}
+	Query getSparqQuery() {
+		return sparqQuery;
+	}
+	void setSparqQuery(Query sparqQuery) {
+		this.sparqQuery = sparqQuery;
 	}
 
 }
