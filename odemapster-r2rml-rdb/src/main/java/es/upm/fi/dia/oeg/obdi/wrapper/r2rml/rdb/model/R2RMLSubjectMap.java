@@ -30,7 +30,8 @@ public class R2RMLSubjectMap extends R2RMLTermMap {
 			throw new R2RMLInvalidTermMapException("Literal is not permitted in the subject!");
 		}
 		
-		StmtIterator classStatements = resource.listProperties(R2RMLConstants.R2RML_CLASS_PROPERTY);
+		StmtIterator classStatements = resource.listProperties(
+				R2RMLConstants.R2RML_CLASS_PROPERTY);
 		if(classStatements != null) {
 			this.classURIs = new HashSet<String>();
 			

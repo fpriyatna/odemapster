@@ -3,83 +3,114 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
-
-import scala.reflect.generic.Trees.This;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
-import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
+import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
+import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
+//import scala.reflect.generic.Trees.This;
 
 public abstract class R2RMLLogicalTable implements R2RMLElement {
 	private static Logger logger = Logger.getLogger(R2RMLLogicalTable.class);
 
 	private String sqlVersionIdentifier;
-	//public enum LogicalTableType {TABLE, SQLQUERY};
 	LogicalTableType logicalTableType;
 	private String alias;
 	private R2RMLTriplesMap owner;
-	private ResultSetMetaData rsmd;
-	//private ConfigurationProperties configurationProperties;
+	private Map<String, ColumnMetaData> columnsMetaData;
+	private TableMetaData tableMetaData;
 	
-	R2RMLLogicalTable(R2RMLTriplesMap owner) {}
+	R2RMLLogicalTable(R2RMLTriplesMap owner) {this.owner = owner;}
 
-	public ResultSetMetaData buildResultSetMetaData(Connection conn) {
-		ResultSetMetaData result = null;
-		try {
-			if(conn != null) {
-				java.sql.Statement stmt = conn.createStatement();
-				String query = null;
-				
+	public void buildMetaData(Connection conn) throws Exception {
+		if(conn != null) {
+			try {
+				Map<String, TableMetaData> tablesMetaData = 
+						owner.getOwner().getTablesMetaData();
+
+				String tableName = null; 
 				if(this instanceof R2RMLTable) {
 					R2RMLTable r2rmlTable = (R2RMLTable) this;
-					String tableName = r2rmlTable.getValue();
-					query = "SELECT * FROM " + tableName + " WHERE 1=0";
+					tableName = r2rmlTable.getValue();
 				} else if (this instanceof R2RMLSQLQuery){
 					R2RMLSQLQuery r2rmlSQLQuery = (R2RMLSQLQuery) this;
+					tableName = "(" + r2rmlSQLQuery.getValue() + ")";
+				}
+				
+				TableMetaData tableMetaData = tablesMetaData.get(tableName);
+				if(tableMetaData == null) {
+					java.sql.Statement stmt = conn.createStatement();
+					String query = "SELECT COUNT(*) FROM " + tableName;
+					ResultSet rs = stmt.executeQuery(query);
+					rs.next();
+					long tableRows = rs.getLong(1);
+					tableMetaData = new TableMetaData(tableName, tableRows);
+					tablesMetaData.put(tableName, tableMetaData);					
+				}
+				this.tableMetaData = tableMetaData;
+			} catch(Exception e) {
+				logger.error("Error while getting size of logical table " + this);
+				throw e;
+			}
+
+			try {
+				Map<String, Map<String, ColumnMetaData>> mapTableColumnsMetaData = 
+						owner.getOwner().getColumnsMetaData();
+				
+				String mapTableColumnsMetaDataKey = null;
+				String query = null;
+				if(this instanceof R2RMLTable) {
+					R2RMLTable r2rmlTable = (R2RMLTable) this;
+					mapTableColumnsMetaDataKey = r2rmlTable.getValue();
+					query = "SELECT * FROM " + mapTableColumnsMetaDataKey + " WHERE 1=0";
+				} else if (this instanceof R2RMLSQLQuery){
+					R2RMLSQLQuery r2rmlSQLQuery = (R2RMLSQLQuery) this;
+					mapTableColumnsMetaDataKey = r2rmlSQLQuery.getValue();
 					query = r2rmlSQLQuery.getValue();
 				}
 
-				if(query != null) {
+				Map<String, ColumnMetaData> columnsMetaData = mapTableColumnsMetaData.get(mapTableColumnsMetaDataKey);
+				if(columnsMetaData == null) {
+					columnsMetaData = new HashMap<String, ColumnMetaData>();
+					mapTableColumnsMetaData.put(mapTableColumnsMetaDataKey, columnsMetaData);
+					
+					java.sql.Statement stmt = conn.createStatement();
 					ResultSet rs = stmt.executeQuery(query);
-					result = rs.getMetaData();					
+					ResultSetMetaData rsmd = rs.getMetaData();
+					int columnCount = rsmd.getColumnCount();
+					for(int i=1; i<=columnCount; i++) {
+						String columnName = rsmd.getColumnName(i);
+						String columnTypeName = rsmd.getColumnTypeName(i);
+						ColumnMetaData columnMetaData = new ColumnMetaData(
+								mapTableColumnsMetaDataKey, columnName, columnTypeName);
+						columnsMetaData.put(columnName, columnMetaData);
+					}
+					mapTableColumnsMetaData.put(mapTableColumnsMetaDataKey, columnsMetaData);
 				}
+				this.columnsMetaData = columnsMetaData;
+			} catch(Exception e) {
+				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
 			}
-		} catch(Exception e) {
-			logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
+
 		}
-		
-		return result;
 	}
-	
+
 	static R2RMLLogicalTable parse(Resource resource, R2RMLTriplesMap owner) throws Exception {
-
 		R2RMLLogicalTable logicalTable = null; 
-
 		Statement tableNameStatement = resource.getProperty(
 				R2RMLConstants.R2RML_TABLENAME_PROPERTY);
 		if(tableNameStatement != null) {
 			String tableName = tableNameStatement.getObject().toString();
 			logicalTable = new R2RMLTable(tableName, owner);
-			
-//			try {
-//				Connection conn = this.configurationProperties.getConn();
-//				if(conn != null) {
-//					java.sql.Statement stmt = conn.createStatement();
-//					String query = "SELECT * FROM " + tableName + " WHERE 1=0";
-//					ResultSet rs = stmt.executeQuery(query);
-//					logicalTable.rsmd = rs.getMetaData();
-//				}
-//			} catch(Exception e) {
-//				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
-//			}
 		} else {
 			Statement sqlQueryStatement = resource.getProperty(
 					R2RMLConstants.R2RML_SQLQUERY_PROPERTY);
@@ -88,17 +119,6 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 			}
 			String sqlQueryString = sqlQueryStatement.getObject().toString().trim();
 			logicalTable = new R2RMLSQLQuery(sqlQueryString, owner);
-			
-//			try {
-//				Connection conn = AbstractRunner.configurationProperties.getConn();
-//				if(conn != null) {
-//					java.sql.Statement stmt = conn.createStatement();
-//					ResultSet rs = stmt.executeQuery(sqlQueryString);
-//					logicalTable.rsmd = rs.getMetaData();
-//				}
-//			} catch(Exception e) {
-//				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
-//			}
 		}
 
 		return logicalTable;
@@ -135,12 +155,12 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 		this.alias = alias;
 	}
 
-	public ResultSetMetaData getRsmd() {
-		return rsmd;
+	public long getLogicalTableSize() {
+		return this.tableMetaData.getTableRows();
 	}
 
-	public void setRsmd(ResultSetMetaData rsmd) {
-		this.rsmd = rsmd;
+	public Map<String, ColumnMetaData> getColumnsMetaData() {
+		return columnsMetaData;
 	}
 
 

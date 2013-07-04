@@ -15,7 +15,6 @@ public class R2RMLObjectMap extends R2RMLTermMap {
 	
 	public R2RMLObjectMap(Resource resource, R2RMLTriplesMap owner) throws R2RMLInvalidTermMapException {
 		super(resource, TermMapPosition.OBJECT, owner);
-		
 	}
 	
 	public R2RMLObjectMap(String constantValue) {

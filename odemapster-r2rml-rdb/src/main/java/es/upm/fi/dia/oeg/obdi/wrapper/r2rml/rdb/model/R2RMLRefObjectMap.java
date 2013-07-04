@@ -17,26 +17,18 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectM
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLJoinConditionException;
 
 public class R2RMLRefObjectMap {
-	public static boolean isRefObjectMap(Resource resource) {
-		boolean hasParentTriplesMap = false;
-		Statement parentTriplesMapStatement = resource.getProperty(
-				R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
-		if(parentTriplesMapStatement != null)  {
-			hasParentTriplesMap = true;
-		}
-		return hasParentTriplesMap;
-	}
-
 	private R2RMLMappingDocument owner;
 	private static Logger logger = Logger.getLogger(R2RMLObjectMap.class);
 	private RDFNode parentTriplesMap;
+	private R2RMLPredicateObjectMap parentPredicateObjectMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
 	//private String alias;
 	
 	
-	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner) 
+	public R2RMLRefObjectMap(Resource resource, R2RMLMappingDocument owner, R2RMLPredicateObjectMap parentPredicateObjectMap) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException {
 		this.owner = owner;
+		this.parentPredicateObjectMap = parentPredicateObjectMap;
 		
 		Statement parentTriplesMapStatement = resource.getProperty(R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
 		if(parentTriplesMapStatement != null)  {
@@ -80,8 +72,19 @@ public class R2RMLRefObjectMap {
 		return result;
 	}
 	public R2RMLLogicalTable getParentLogicalTable() {
-		R2RMLTriplesMap triplesMap = this.getParentTriplesMap();
-		return triplesMap.getLogicalTable();
+		R2RMLLogicalTable result = null;
+		
+		try {
+			R2RMLTriplesMap triplesMap = this.getParentTriplesMap();
+			if(triplesMap != null) {
+				result = triplesMap.getLogicalTable();
+			}			
+		} catch(Exception e) {
+			String errorMessage = "Error while getting parent logical table!";
+			logger.warn(errorMessage);
+		}
+
+		return result;
 	}
 
 	public String getParentTripleMapName() {
@@ -105,4 +108,17 @@ public class R2RMLRefObjectMap {
 		return this.parentTriplesMap.toString();
 	}
 
+	public static boolean isRefObjectMap(Resource resource) {
+		boolean hasParentTriplesMap = false;
+		Statement parentTriplesMapStatement = resource.getProperty(
+				R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
+		if(parentTriplesMapStatement != null)  {
+			hasParentTriplesMap = true;
+		}
+		return hasParentTriplesMap;
+	}
+
+	public String getMappedPredicateName() {
+		return this.parentPredicateObjectMap.getMappedPredicateName();
+	}
 }

@@ -2,15 +2,19 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 
+import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.ResIterator;
@@ -18,12 +22,15 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.exception.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
@@ -31,51 +38,50 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectM
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTriplesMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLJoinConditionException;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
-	
-
 	private Collection<String> prefixes;
 	//private Collection<AbstractConceptMapping> triplesMaps;
-	private String mappingDocumentPath;
 
 
-	public R2RMLMappingDocument(String mappingDocumentPath) 
-			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
+	public R2RMLMappingDocument(String mappingDocumentPath
+			, ConfigurationProperties configurationProperties) 
+					throws Exception {
 		super();
 		this.mappingDocumentPath = mappingDocumentPath;
-		
+		super.configurationProperties = configurationProperties;
+
+		if(configurationProperties != null) {
+			Connection conn = configurationProperties.getConn();
+			if(conn != null) {
+				super.setConn(conn);
+				String databaseName = 
+						configurationProperties.getDatabaseName();
+				String databaseType = 
+						configurationProperties.getDatabaseType();
+				if(databaseName != null) {
+					super.tablesMetaData = 
+							TableMetaData.buildTablesMetaData(
+									conn, databaseName, databaseType);	
+				}
+			}
+		}
+
+
 		Model model = ModelFactory.createDefaultModel();
 		// use the FileManager to find the input file
 		InputStream in = FileManager.get().open( this.mappingDocumentPath );
 		if (in == null) {
 			throw new IllegalArgumentException(
-					"Mapping File: " + this.mappingDocumentPath + " not found");
+					"Mapping File not found: " + this.mappingDocumentPath);
 		}
 		logger.info("Parsing mapping document " + this.mappingDocumentPath);
-		
+
 		// read the Turtle file
 		model.read(in, null, "TURTLE");
 		super.setMappingDocumentPrefixMap(model.getNsPrefixMap());
-
-		//		//parsing ObjectMap resources
-		//		ResIterator objectMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_OBJECTSMAP_CLASS);
-		//		if(objectMapResources != null) {
-		//			this.objectMaps = new HashMap<String, R2RMLObjectMap>();
-		//			while(objectMapResources.hasNext()) {
-		//				Resource objectMapResource = objectMapResources.nextResource();
-		//				String objectMapKey = objectMapResource.getNameSpace() + objectMapResource.getLocalName();
-		//				R2RMLObjectMap om = new R2RMLObjectMap(objectMapResource);
-		//				this.objectMaps.put(objectMapKey, om);
-		//			}
-		//		}
-
-		//parsing TriplesMap resources
-		//		StmtIterator stmtIterator = model.listStatements();
-		//		while(stmtIterator.hasNext()) {
-		//			logger.info(stmtIterator.nextStatement());
-		//		}
 
 		ResIterator triplesMapResources = model.listResourcesWithProperty(
 				RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
@@ -91,14 +97,13 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 					this.classMappings.add(tm);					
 				} catch(Exception e) {
 					logger.error("Error occured during parsing TriplesMap " + triplesMapResource.getLocalName() + " because " + e.getMessage());
+					throw e;
 				}
 
 			}
 		}
-
-		
 	}
-	
+
 
 	public Object accept(R2RMLElementVisitor visitor) throws Exception {
 		Object result = visitor.visit(this);
@@ -136,13 +141,6 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		//model.write(System.out);		
 	}
 
-	public String getMappingDocumentPath() {
-		return mappingDocumentPath;
-	}
-
-	public Collection<AbstractConceptMapping> getTriplesMaps() {
-		return classMappings;
-	}
 
 	@Override
 	public void parse(Element xmlElement) throws ParseException {
@@ -156,39 +154,26 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		return null;
 	}
 
-	@Override
-	public List<String> getMappedConcepts() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 
-	@Override
-	public Set<AbstractConceptMapping> getConceptMappingsByConceptName(
-			String conceptURI) {
-		Set<AbstractConceptMapping> result = null;
 
-		if(this.classMappings != null && this.classMappings.size() > 0) {
-			result = new HashSet<AbstractConceptMapping>();
-			for(AbstractConceptMapping triplesMap : this.classMappings) {
-				R2RMLSubjectMap subjectMap = ((R2RMLTriplesMap)triplesMap).getSubjectMap();
-				Collection<String> classURIs = subjectMap.getClassURIs();
-				if(classURIs != null && classURIs.contains(conceptURI)) {
-					result.add(triplesMap);
-				}
-			}
-		}
-		return result;
-	}
 
 
 
 	@Override
 	public List<String> getMappedProperties() {
-		logger.warn("TODO: Implement getMappedProperties()");
-		// TODO Auto-generated method stub
-		return null;
+		List<String> result = new ArrayList<String>();
+
+		Collection<AbstractConceptMapping> cms = this.classMappings;
+		for(AbstractConceptMapping cm : cms) {
+			R2RMLTriplesMap tm = (R2RMLTriplesMap) cm;
+			Collection<AbstractPropertyMapping> pms = tm.getPropertyMappings();
+			for(AbstractPropertyMapping pm : pms) {
+				result.add(pm.getMappedPredicateName());
+			}
+		}
+		return result ;
 	}
 
 
@@ -259,6 +244,90 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 
 	public void setTriplesMaps(Collection<AbstractConceptMapping> triplesMaps) {
 		this.classMappings = triplesMaps;
+	}
+
+	public Map<Node, Set<AbstractConceptMapping>> inferByObject(
+			AbstractConceptMapping cm, String predicateURI, Node object) {
+		Map<Node, Set<AbstractConceptMapping>> result = new HashMap<Node, Set<AbstractConceptMapping>>();
+
+		if(object.isVariable()) {
+			Collection<AbstractPropertyMapping> apms = cm.getPropertyMappings(predicateURI);
+			for(AbstractPropertyMapping apm : apms) {
+				if(apm instanceof R2RMLPredicateObjectMap) {
+					R2RMLPredicateObjectMap pom = (R2RMLPredicateObjectMap) apm;
+					R2RMLObjectMap om = pom.getObjectMap();
+					if(om.getTermMapType() == TermMapType.TEMPLATE) {
+						String objectTemplateString = om.getTemplateString();
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public Set<AbstractConceptMapping> getPossibleRange(String predicateURI) {
+		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
+		Collection<AbstractPropertyMapping> pms = this.getPropertyMappingsByPropertyURI(predicateURI); 
+		for(AbstractPropertyMapping pm : pms) {
+			Set<AbstractConceptMapping> possibleRange = this.getPossibleRange(pm);
+			result.addAll(possibleRange);
+		}
+		return result;
+	}
+
+
+	@Override
+	public Set<AbstractConceptMapping> getPossibleRange(String predicateURI,
+			AbstractConceptMapping cm) {
+		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
+		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
+		for(AbstractPropertyMapping pm : pms) {
+			Set<AbstractConceptMapping> possibleRange = this.getPossibleRange(pm);
+			result.addAll(possibleRange);
+		}
+		return result;
+	}
+
+
+	@Override
+	public Set<AbstractConceptMapping> getPossibleRange(
+			AbstractPropertyMapping pm) {
+		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
+		
+		R2RMLPredicateObjectMap pom = (R2RMLPredicateObjectMap) pm;
+		R2RMLObjectMap om = pom.getObjectMap();
+		R2RMLRefObjectMap rom = pom.getRefObjectMap();
+		
+		if(om != null && rom == null) {
+			if(R2RMLConstants.R2RML_IRI_URI.equals(om.getTermType())) {
+				for(AbstractConceptMapping cm : this.getConceptMappings()) {
+					R2RMLTriplesMap tm = (R2RMLTriplesMap) cm;
+					R2RMLSubjectMap sm = tm.getSubjectMap();
+					if(TermMapType.TEMPLATE == om.getTermMapType()) {
+						String objectTemplateString = om.getTemplateString();
+						if(tm.isPossibleInstance(objectTemplateString)) {
+							result.add(cm);
+						}
+					}
+				}
+			}
+		} else if(rom != null && om == null) {
+			R2RMLTriplesMap tm = (R2RMLTriplesMap) rom.getParentTriplesMap();
+			String templateString = tm.getSubjectMap().getTemplateString();
+			for(AbstractConceptMapping cm : this.getConceptMappings()) {
+				if(cm.isPossibleInstance(templateString)) {
+					R2RMLTriplesMap tm2 = (R2RMLTriplesMap) cm;
+					Collection<String> classURIs = tm2.getSubjectMap().getClassURIs();
+					if(classURIs != null && !classURIs.isEmpty()) {
+						result.add(cm);	
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 

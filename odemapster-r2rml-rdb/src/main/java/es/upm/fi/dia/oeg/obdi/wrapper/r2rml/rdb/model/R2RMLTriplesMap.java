@@ -15,9 +15,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectMapException;
@@ -30,13 +28,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 public class R2RMLTriplesMap extends AbstractConceptMapping 
 implements R2RMLElement, IConceptMapping {
 	private static Logger logger = Logger.getLogger(R2RMLTriplesMap.class);
-
 	private String triplesMapName;
 	private R2RMLMappingDocument owner;
 	private R2RMLLogicalTable logicalTable;
 	private R2RMLSubjectMap subjectMap;
 	private Collection<R2RMLPredicateObjectMap> predicateObjectMaps;
-//	private String alias;
 	
 	public R2RMLTriplesMap(Resource triplesMap, R2RMLMappingDocument owner) 
 			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
@@ -47,11 +43,18 @@ implements R2RMLElement, IConceptMapping {
 			Statement logicalTableStatement = triplesMap.getProperty(
 					R2RMLConstants.R2RML_LOGICALTABLE_PROPERTY);
 			if(logicalTableStatement != null) {
-				RDFNode logicalTableStatementObject = logicalTableStatement.getObject();
+				RDFNode logicalTableStatementObject = 
+						logicalTableStatement.getObject();
 				Resource logicalTableStatementObjectResource = 
 						(Resource) logicalTableStatementObject;
 				this.logicalTable = R2RMLLogicalTable.parse(
 						logicalTableStatementObjectResource, this);
+				try {
+					this.logicalTable.buildMetaData(
+							this.owner.getConn());	
+				} catch(Exception e) {
+					logger.error(e.getMessage());
+				}
 			} else {
 				String errorMessage = "Missing rr:logicalTable";
 				logger.error(errorMessage);
@@ -59,21 +62,20 @@ implements R2RMLElement, IConceptMapping {
 			}
 			
 		} catch(Exception e) {
-			
 			throw new R2RMLInvalidTriplesMapException(e);
 		}
 
 
 		//rr:subjectMap
-		StmtIterator triplesMaps = triplesMap.listProperties(
+		StmtIterator subjectMaps = triplesMap.listProperties(
 				R2RMLConstants.R2RML_SUBJECTMAP_PROPERTY);
-		if(triplesMaps == null) {
+		if(subjectMaps == null) {
 			String errorMessage = "Missing rr:subjectMap";
 			logger.error(errorMessage);
 			throw new R2RMLInvalidTriplesMapException(errorMessage);
 		}
-		Collection<Statement> triplesMapsSet = triplesMaps.toSet();
-		if(triplesMapsSet.size() > 1) {
+		Collection<Statement> subjectMapsSet = subjectMaps.toSet();
+		if(subjectMapsSet.size() > 1) {
 			String errorMessage = "Multiple rr:subjectMap predicates are not allowed";
 			logger.error(errorMessage);
 			throw new R2RMLInvalidTriplesMapException(errorMessage);
@@ -81,7 +83,6 @@ implements R2RMLElement, IConceptMapping {
 		Statement subjectMapStatement = triplesMap.getProperty(
 				R2RMLConstants.R2RML_SUBJECTMAP_PROPERTY);
 		if(subjectMapStatement != null) {
-			//RDFNode subjectMapStatementObject = subjectMapStatement.getObject();
 			Resource subjectMapStatementObjectResource = (Resource) subjectMapStatement.getObject();
 			this.subjectMap = new R2RMLSubjectMap(subjectMapStatementObjectResource, this);
 		} else {
@@ -110,14 +111,10 @@ implements R2RMLElement, IConceptMapping {
 				this.predicateObjectMaps.add(predicateObjectMap);
 			}
 		}
-
-
-
 	}
 
 	public Object accept(R2RMLElementVisitor visitor) throws Exception {
 		return visitor.visit(this);
-
 	}
 
 	public R2RMLLogicalTable getLogicalTable() {
@@ -139,10 +136,17 @@ implements R2RMLElement, IConceptMapping {
 
 	@Override
 	public String getConceptName() {
-		if(this.subjectMap.getClassURIs().size() > 1) {
-			logger.warn("only one class URI is returned!");
+		String result = null;
+		
+		Collection<String> classURIs = this.subjectMap.getClassURIs();
+		if(classURIs != null) {
+			if(classURIs.size() > 1) {
+				logger.warn("only one class URI is returned!");
+			}
+			result = classURIs.iterator().next();
 		}
-		return this.subjectMap.getClassURIs().iterator().next();
+
+		return result;
 	}
 
 	public Collection<R2RMLRefObjectMap> getRefObjectMaps() {
@@ -158,7 +162,6 @@ implements R2RMLElement, IConceptMapping {
 				}
 			}
 		}
-
 		return result;
 	}
 
@@ -177,7 +180,6 @@ implements R2RMLElement, IConceptMapping {
 			}
 		}
 		return result;
-
 	}
 
 	@Override
@@ -205,65 +207,18 @@ implements R2RMLElement, IConceptMapping {
 		return result;
 	}
 
-//	public String getPKColumn() {
-//		TermMapValueType termMapValueType = this.subjectMap.getTermMapType();
-//		
-//		if(termMapValueType == TermMapValueType.COLUMN) {
-//			return this.subjectMap.getColumnName();
-//		} else if(termMapValueType == TermMapValueType.TEMPLATE) {
-//			String stringTemplate = this.subjectMap.getTemplate();
-//			Collection<String> attributes = 
-//					R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
-//
-//			return attributes.iterator().next();
-//		} else {
-//			return null;
-//		}
-//	}
-//
-//	public String getPKValue(String uri) {
-//		String result = null;
-//		
-//		TermMapValueType termMapValueType = this.subjectMap.getTermMapType();
-//		
-//		if(termMapValueType == TermMapValueType.TEMPLATE) {
-//			String stringTemplate = this.subjectMap.getTemplate();
-//			int beginIndex = stringTemplate.indexOf("{");
-//			int endIndex = stringTemplate.indexOf("}");
-//			
-//			result = uri.substring(beginIndex);
-//			//result = uri.substring(beginIndex -1 , uri.length());
-//		}
-//
-//		return result;
-//	}
-	
 	@Override
 	public boolean hasWellDefinedURIExpression() {
 		boolean result = this.subjectMap.hasWellDefinedURIExpression();
 		return result;
 	}
 
-//	public void setLogicalTable(R2RMLLogicalTable logicalTable) {
-//		this.logicalTable = logicalTable;
-//	}
-
 	public R2RMLMappingDocument getOwner() {
 		return owner;
 	}
 
-//	@Override
-//	public String getLogicalTableAlias() {
-//		return this.logicalTable.getAlias();
-//	}
-//
-//	@Override
-//	public void setLogicalTableAlias(String logicalTableAlias) {
-//		this.logicalTable.setAlias(logicalTableAlias);
-//	}
-
 	@Override
-	public boolean isPossibleInstance(String uri) throws Exception {
+	public boolean isPossibleInstance(String uri) {
 		boolean result = false;
 		
 		TermMapType subjectMapTermMapType = this.subjectMap.getTermMapType();
@@ -273,11 +228,23 @@ implements R2RMLElement, IConceptMapping {
 				result = true;
 			}
 		} else {
+			result = false;
 			String errorMessage = "Can't determine whether " + uri + " is a possible instance of " + this.toString();
-			throw new QueryTranslationException(errorMessage);
+			logger.warn(errorMessage);
 		}
 		
 		return result;
+	}
+
+	@Override
+	public long getLogicalTableSize() {
+		return this.logicalTable.getLogicalTableSize();
+	}
+
+	@Override
+	public Collection<String> getMappedClassURIs() {
+		Collection<String> classURIs = this.subjectMap.getClassURIs();
+		return classURIs;
 	}
 
 

@@ -51,7 +51,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 			Resource objectMapStatementObject = (Resource) objectMapStatement.getObject();
 			if(R2RMLRefObjectMap.isRefObjectMap(objectMapStatementObject)) {
 				this.objectMapType = ObjectMapType.RefObjectMap;
-				this.refObjectMap = new R2RMLRefObjectMap(objectMapStatementObject, mappingDocument);				
+				this.refObjectMap = new R2RMLRefObjectMap(objectMapStatementObject, mappingDocument, this);				
 			} else {
 				this.objectMapType = ObjectMapType.ObjectMap;
 				this.objectMap = new R2RMLObjectMap(objectMapStatementObject, parent);

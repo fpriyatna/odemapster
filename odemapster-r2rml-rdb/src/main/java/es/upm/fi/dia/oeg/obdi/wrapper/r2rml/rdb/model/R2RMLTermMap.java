@@ -1,8 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +15,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
+import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
@@ -25,26 +23,14 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 
-public abstract class R2RMLTermMap implements R2RMLElement {
-	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH}
-
-	//public enum TermType {IRI, BLANK_NODE, LITERAL};
-	public enum TermMapType {CONSTANT, COLUMN, TEMPLATE};
-	private TermMapType termMapType;
-
+public class R2RMLTermMap implements R2RMLElement
+, IConstantTermMap, IColumnTermMap, ITemplateTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);
-
-	private String constantValue;
-	private String columnName;
-	private int columnDataType;
-	private String columnTypeName;
+	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH}
 
 	private String termType;//IRI, BlankNode, or Literal
 	private String languageTag;
 	private String datatype;
-
-	private String template;
-	private String inverseExpression;
 
 	R2RMLTriplesMap owner;
 
@@ -53,11 +39,44 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 
 	private ConfigurationProperties configurationProperties;
 
+	//public enum TermType {IRI, BLANK_NODE, LITERAL};
+	public enum TermMapType {CONSTANT, COLUMN, TEMPLATE};
+	private TermMapType termMapType;
+
+	//for constant type TermMap
+	private String constantValue;
+	
+	//for column type TermMap
+	private String columnName;
+	private int columnDataType;
+	private String columnTypeName;
+
+	//for template type TermMap
+	private String templateString;
+	private String inverseExpression;
+
+
 	R2RMLTermMap(Resource resource, TermMapPosition termMapPosition, R2RMLTriplesMap owner) 
 			throws R2RMLInvalidTermMapException {
+		this.configurationProperties = owner.getOwner().getConfigurationProperties();
+		
 		this.termMapPosition = termMapPosition;
 		this.owner = owner;
 
+		R2RMLLogicalTable logicalTable = this.owner.getLogicalTable();
+//		ResultSetMetaData rsmd = logicalTable.getRsmd();
+		Map<String, ColumnMetaData> columnsMetaData = logicalTable.getColumnsMetaData();
+		
+		if(columnsMetaData == null) {
+			Connection conn = this.owner.getOwner().getConn();
+			try {
+				logicalTable.buildMetaData(conn);
+				columnsMetaData = logicalTable.getColumnsMetaData();				
+			} catch(Exception e) {
+				logger.error(e.getMessage());
+			}
+		}
+		
 		Statement constantStatement = resource.getProperty(R2RMLConstants.R2RML_CONSTANT_PROPERTY);
 		if(constantStatement != null) {
 			this.termMapType = TermMapType.CONSTANT;
@@ -67,14 +86,23 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 			if(columnStatement != null) {
 				this.termMapType = TermMapType.COLUMN;
 				this.columnName = columnStatement.getObject().toString();
-//				ResultSetMetaData rsmd = this.owner.getLogicalTable().getRsmd();
-//				this.columnTypeName = QueryTranslatorUtility.getColumnTypeName(rsmd, columnName);
-//				this.columnDataType = QueryTranslatorUtility.getColumnType(rsmd, columnName);
+				if(columnsMetaData != null) {
+					this.columnTypeName = columnsMetaData.get(this.columnName).getDataType();	
+				}
 			} else {
 				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);
 				if(templateStatement != null) {
 					this.termMapType = TermMapType.TEMPLATE;
-					this.template = templateStatement.getObject().toString();
+					this.templateString = templateStatement.getObject().toString();
+					String pkColumnString = this.getTemplateColumn();
+					if(columnsMetaData != null) {
+						ColumnMetaData cmd = columnsMetaData.get(pkColumnString);
+						if(cmd != null) {
+							this.columnTypeName = cmd.getDataType();	
+						} else {
+							logger.warn("metadata not found for: " + pkColumnString);
+						}
+					}
 				} else {
 					String termMapType;
 					if(this instanceof R2RMLSubjectMap) {
@@ -203,7 +231,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		} else if(this.termMapType == TermMapType.COLUMN) {
 			return this.columnName;
 		} else if(this.termMapType == TermMapType.TEMPLATE) {
-			return this.template;
+			return this.templateString;
 		} else {
 			return null;
 		}
@@ -239,8 +267,8 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		return result;
 	}
 
-	public String getTemplate() {
-		return template;
+	public String getTemplateString() {
+		return templateString;
 	}
 
 	public String getTemplateColumn() {
@@ -249,7 +277,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		if(termMapValueType == TermMapType.COLUMN) {
 			return this.getColumnName();
 		} else if(termMapValueType == TermMapType.TEMPLATE) {
-			String stringTemplate = this.getTemplate();
+			String stringTemplate = this.templateString;
 			Collection<String> attributes = 
 					R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
 
@@ -265,7 +293,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		TermMapType termMapValueType = this.getTermMapType();
 
 		if(termMapValueType == TermMapType.TEMPLATE) {
-			String stringTemplate = this.getTemplate();
+			String stringTemplate = this.templateString;
 			int beginIndex = stringTemplate.indexOf("{");
 			int endIndex = stringTemplate.indexOf("}");
 
@@ -366,7 +394,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 		if(columnName != null) {
 			result = true;
 		} else {
-			String stringTemplate = this.getTemplate();
+			String stringTemplate = this.templateString;
 			if(stringTemplate != null) {
 				Collection<String> attributes = 
 						R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
@@ -393,7 +421,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 	//		this.alias = alias;
 	//	}
 
-	void setConstantValue(String constantValue) {
+	public void setConstantValue(String constantValue) {
 		this.constantValue = constantValue;
 	}
 
@@ -439,9 +467,7 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 	//		return columnDataTypeName;
 	//	}
 
-	public ConfigurationProperties getConfigurationProperties() {
-		return configurationProperties;
-	}
+
 
 	public void setConfigurationProperties(
 			ConfigurationProperties configurationProperties) {
@@ -454,5 +480,8 @@ public abstract class R2RMLTermMap implements R2RMLElement {
 
 	public String getColumnTypeName() {
 		return columnTypeName;
-	}	
+	}
+
+
+	
 }
