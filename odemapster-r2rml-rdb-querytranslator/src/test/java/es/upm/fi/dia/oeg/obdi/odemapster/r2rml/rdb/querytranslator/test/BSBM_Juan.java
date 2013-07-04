@@ -29,7 +29,7 @@ public class BSBM_Juan {
 	}
 	
 	private IQueryTranslator getQueryTranslator(String testName) throws Exception {
-		logger.info("------ Running " + testName + " ------");
+		logger.info("------ Running " + testName + " ..... ------");
 		String configurationFile = testName + ".r2rml.properties";
 		
 		AbstractMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile, null);

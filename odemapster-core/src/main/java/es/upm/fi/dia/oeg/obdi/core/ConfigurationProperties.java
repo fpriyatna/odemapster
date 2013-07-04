@@ -18,6 +18,8 @@ import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 
 public class ConfigurationProperties extends Properties {
+	//change this to typesafe config
+	
 	private Logger logger = Logger.getLogger(ConfigurationProperties.class);
 
 	private Connection conn;
