@@ -19,22 +19,26 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator;
 
-public class BSBM100M_20Run_MySQL {
+public class BSBM100M_20Run_Postgresql {
 	private static Logger logger = Logger.getLogger(BSBM100M_MYSQL.class);
 
 	private static String mappingDirectory = TestUtility.getMappingDirectoryByOS();
 	private static String configurationDirectory = mappingDirectory + 
-			"r2rml-mappings/r2rml-bsbm-mysql-100m-20run/";
+			"r2rml-bsbm100m-postgresql-20run/";
 	private static String mappingDocumentFile = configurationDirectory + "bsbm.ttl";
 
 	private static IQueryTranslator queryTranslatorFreddy = null;
@@ -48,42 +52,52 @@ public class BSBM100M_20Run_MySQL {
 		PropertyConfigurator.configure("log4j.properties");
 
 		try {
-			String url = "jdbc:mysql://localhost:3306/dbname/bsbm100m";
 			Properties props = new Properties();
-			props.setProperty("user","root");
-			props.setProperty("password","");
-			Connection conn = DriverManager.getConnection(url, props);
+			
+			String url = "jdbc:mysql://localhost:3306/bsbm100m";
+			props.setProperty("user","root");props.setProperty("password","");
+			//String url = "jdbc:postgresql://denebola.dia.fi.upm.es:5432/bsbm100m";
+			//props.setProperty("user","fpriyatna");props.setProperty("password","password");
+			//props.setProperty("ssl","true");
 
+			Connection conn = null;
+			try {
+				conn = DriverManager.getConnection(url, props);	
+			} catch(Exception e) {
+				String errorMessage = "Error while trying to retrieve a connection: " + e.getMessage();
+				logger.warn(errorMessage);
+			}
+			
+			ConfigurationProperties properties = new ConfigurationProperties();
+			properties.setConn(conn);
+			properties.setDatabaseName("bsbm100m");
+			
+			AbstractMappingDocument mappingDocument = 
+					new R2RMLMappingDocument(mappingDocumentFile, properties);
+			
 			IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
 			queryTranslationOptimizer.setSelfJoinElimination(true);
 			queryTranslationOptimizer.setUnionQueryReduction(true);
 			queryTranslationOptimizer.setSubQueryElimination(true);
 			queryTranslationOptimizer.setSubQueryAsView(false);
 
-			queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocumentFile); 
+			queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn); 
 			queryTranslatorFreddy.setOptimizer(queryTranslationOptimizer);
+			queryTranslatorFreddy.setDatabaseType(Constants.DATABASE_POSTGRESQL);
 			queryTranslatorFreddy.setConnection(conn);
-
 			
-			queryTranslatorChebotko = R2RMLQueryTranslator.createQueryTranslator(mappingDocumentFile);
+			queryTranslatorChebotko = R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn);
+			queryTranslatorChebotko.setDatabaseType(Constants.DATABASE_POSTGRESQL);
 			queryTranslatorChebotko.setConnection(conn);
 		} catch(Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
-
 	}
 
 	private void testBSBM(String testName, String queryFile, int mode, 
 			IQueryTranslator queryTranslator, Map<String, String> mapVarFile, String outputFileName) 
 					throws Exception {
-
-		
 		logger.info("------" + testName + " Freddy STARTED------\n");
-
-		String outputString = "";
-		outputString += "SET PROFILING= 1;\n\n";
-
-		
 		String queryTemplate = ODEMapsterUtility.readFileAsString(queryFile);
 		
 		Collection<String> mapVarFileKeyset = mapVarFile.keySet();
@@ -96,10 +110,16 @@ public class BSBM100M_20Run_MySQL {
 		}
 		
 		for(int i=0; i<NO_OF_QUERIES; i++) {
-			outputString += "-- run " + (i+1) + " --\n";
-			if(mode == MODE_COLD) {
-				outputString += "RESET QUERY CACHE;\n";
+			String currentOutputFileName = "";
+			if(i<9) {
+				currentOutputFileName = outputFileName + "_r0" + (i+1);	
+			} else {
+				currentOutputFileName = outputFileName + "_r" + (i+1);
 			}
+			currentOutputFileName += ".sql";
+
+			String outputString = "";
+			outputString += "-- run " + (i+1) + " --\n";
 			
 			String queryString = queryTemplate;
 			Collection<String> mapVarLinesKeyset = mapVarLines.keySet();
@@ -110,32 +130,20 @@ public class BSBM100M_20Run_MySQL {
 			}
 
 			long start = System.currentTimeMillis();
-			IQuery query = queryTranslator.translateFromString(queryString);
+			IQuery query = queryTranslator.translateFromString(
+					queryString);
 			long end = System.currentTimeMillis();
 			long duration = end-start;
 			logger.info("test execution time was "+(end-start)+" ms.");
 			outputString += "-- Query translation time was " + duration + " ms.\n";
 			outputString += query + ";" + "\n\n";
 			
-			if((i+1) % 5 == 0) {
-				outputString += "SHOW PROFILES;\n";
-			}
+			FileWriter fstream = new FileWriter(currentOutputFileName);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(outputString);
+			//Close the output stream
+			out.close();
 		}
-
-		
-
-		
-		if(mode == MODE_COLD) {
-			outputFileName += "_cold";
-		} else if(mode == MODE_WARM) {
-			outputFileName += "_warm";
-		}
-		outputFileName += ".sql";
-		FileWriter fstream = new FileWriter(outputFileName);
-		BufferedWriter out = new BufferedWriter(fstream);
-		out.write(outputString);
-		//Close the output stream
-		out.close();
 
 		logger.info("------" + testName + " Freddy DONE------\n");
 	}
@@ -163,11 +171,12 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM01(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm01";
 		String queryFile = configurationDirectory + "bsbm01_template.sparql";
+		logger.info("queryFile = " + queryFile);
 		String outputFileName = null;
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q01";
+			outputFileName = "freddy_100m_q01";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q01";
+			outputFileName = "chebotko_100m_q01";
 		}
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("@ProductType@", configurationDirectory + "q1_producttypeid.txt");
@@ -180,11 +189,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM02(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm02";
 		String queryFile = configurationDirectory + "bsbm02_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q02";
+		String outputFileName = "freddy_100m_q02";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q02";
+			outputFileName = "freddy_100m_q02";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q02";
+			outputFileName = "chebotko_100m_q02";
 		}
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductXYZ%", configurationDirectory + "q2_pt.productID.txt");
@@ -216,11 +225,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM03(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm03";
 		String queryFile = configurationDirectory + "bsbm03_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q03";
+		String outputFileName = "freddy_100m_q03";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q03";
+			outputFileName = "freddy_100m_q03";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q03";
+			outputFileName = "chebotko_100m_q03";
 		}
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductType%", configurationDirectory + "q3_productTypeID.txt");
@@ -254,11 +263,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM04(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm04";
 		String queryFile = configurationDirectory + "bsbm04_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q04";
+		String outputFileName = "freddy_100m_q04";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q04";
+			outputFileName = "freddy_100m_q04";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q04";
+			outputFileName = "chebotko_100m_q04";
 		}		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductType%", configurationDirectory + "q4_productTypeID.txt");
 		mapVarFile.put("%ProductFeature1%", configurationDirectory + "q4_productFeatureID.txt");
@@ -291,11 +300,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM05(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm05";
 		String queryFile = configurationDirectory + "bsbm05_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q05";
+		String outputFileName = "freddy_100m_q05";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q05";
+			outputFileName = "freddy_100m_q05";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q05";
+			outputFileName = "chebotko_100m_q05";
 		}
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductXYZ%", configurationDirectory + "q5_productID.txt");
@@ -325,11 +334,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM06(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm06";
 		String queryFile = configurationDirectory + "bsbm06_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q06";
+		String outputFileName = "freddy_100m_q06";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q06";
+			outputFileName = "freddy_100m_q06";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q06";
+			outputFileName = "chebotko_100m_q06";
 		}
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%word1%", configurationDirectory + "q6_label.txt");
@@ -359,11 +368,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM07(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm07";
 		String queryFile = configurationDirectory + "bsbm07_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q07";
+		String outputFileName = "freddy_100m_q07";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q07";
+			outputFileName = "freddy_100m_q07";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q07";
+			outputFileName = "chebotko_100m_q07";
 		}		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductXYZ%", configurationDirectory + "q7_productID.txt");
 		this.testBSBM(testName, queryFile, mode, queryTranslator, mapVarFile, outputFileName);
@@ -392,11 +401,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM08(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm08";
 		String queryFile = configurationDirectory + "bsbm08_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q06";
+		String outputFileName = "postgresql_freddy_100m_q08";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q10";
+			outputFileName = "freddy_100m_q08";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q10";
+			outputFileName = "chebotko_100m_q08";
 		}		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductXYZ%", configurationDirectory + "q8_productID.txt");
 		this.testBSBM(testName, queryFile, mode, queryTranslator, mapVarFile, outputFileName);
@@ -425,11 +434,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM10(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm10";
 		String queryFile = configurationDirectory + "bsbm10_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q10";
+		String outputFileName = "postgresql_freddy_100m_q10";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q10";
+			outputFileName = "freddy_100m_q10";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q10";
+			outputFileName = "chebotko_100m_q10";
 		}
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%ProductXYZ%", configurationDirectory + "q10_productID.txt");
@@ -459,11 +468,11 @@ public class BSBM100M_20Run_MySQL {
 	private void testBSBM11(int mode, IQueryTranslator queryTranslator) throws Exception {
 		String testName = "bsbm11";
 		String queryFile = configurationDirectory + "bsbm11_template.sparql";
-		String outputFileName = "mysql_freddy_100m_q11";
+		String outputFileName = "freddy_100m_q11";
 		if(queryTranslator == queryTranslatorFreddy) {
-			outputFileName = "mysql_freddy_100m_q11";
+			outputFileName = "freddy_100m_q11";
 		} else {
-			outputFileName = "mysql_chebotko_100m_q11";
+			outputFileName = "chebotko_100m_q11";
 		}		
 		Map<String, String> mapVarFile = new HashMap<String, String>();
 		mapVarFile.put("%OfferXYZ%", configurationDirectory + "q11_offerID.txt");

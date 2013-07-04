@@ -1,13 +1,12 @@
 package es.upm.fi.dia.oeg.obdi.odemapster.r2rml.rdb.querytranslator.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.test.R2RMLRunnerFreddy;
 
 public class Example {
 	private static Logger logger = Logger.getLogger(Example.class);

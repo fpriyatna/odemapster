@@ -7,16 +7,13 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
+import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementDataTranslateVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.test.R2RMLRunnerFreddy;
 
 public class PSSA_MYSQL {
 	private static Logger logger = Logger.getLogger(PSSA_MYSQL.class);
@@ -32,7 +29,7 @@ public class PSSA_MYSQL {
 		logger.info("------ Running " + testName + " ------");
 		String configurationFile = testName + ".r2rml.properties";
 		
-		R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
+		R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile, null);
 //		R2RMLElementDataTranslateVisitor dataTranslator = 
 //				new R2RMLElementDataTranslateVisitor(configurationDirectory, configurationFile); 
 //		md.accept(dataTranslator);
@@ -60,7 +57,7 @@ public class PSSA_MYSQL {
 			queryTranslator.setIgnoreRDFTypeStatement(true);
 
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
+			IQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {
@@ -78,7 +75,7 @@ public class PSSA_MYSQL {
 			AbstractRunner runner = new R2RMLRunnerFreddy(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = this.getQueryTranslator(testName);
 			String queryFilePath = configurationDirectory + testName + ".sparql";
-			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
+			IQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			logger.info("------" + testName + " DONE------\n\n");
 		} catch(Exception e) {

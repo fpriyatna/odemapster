@@ -1,21 +1,16 @@
 package es.upm.fi.dia.oeg.obdi.odemapster.r2rml.rdb.querytranslator.test;
 
-import static org.junit.Assert.*;
-
-import java.sql.Connection;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
+import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.test.TestUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.test.R2RMLRunnerFreddy;
 
 public class FusionTablesTest {
 	private static Logger logger = Logger.getLogger(FusionTablesTest.class);
@@ -38,7 +33,7 @@ public class FusionTablesTest {
 			long start = System.currentTimeMillis();
 			AbstractRunner runner = new R2RMLRunnerFreddy(configurationDirectory, configurationFile);
 			IQueryTranslator queryTranslator = runner.getQueryTranslator();
-			SQLQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
+			IQuery query = queryTranslator.translateFromQueryFile(queryFilePath);
 			logger.info("query = \n" + query + "\n");
 			long end = System.currentTimeMillis();
 			logger.info("test execution time was "+(end-start)+" ms.");
