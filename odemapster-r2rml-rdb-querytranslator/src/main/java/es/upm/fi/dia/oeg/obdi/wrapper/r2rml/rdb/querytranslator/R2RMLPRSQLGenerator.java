@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -10,6 +11,7 @@ import Zql.ZSelectItem;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
@@ -56,12 +58,19 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 		
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 		//ZSelectItem selectItemSubject = betaGenerator.calculateBetaSubject(cmSubject);
-		SQLSelectItem betaSub = betaGenerator.calculateBetaSubject(cmSubject, alphaResult);
+		List<SQLSelectItem> betaSubSelectItems = betaGenerator.calculateBetaSubject(cmSubject, alphaResult);
 		try {
-			ZSelectItem selectItemSubject = betaSub.clone();
-			result.add(selectItemSubject);
-			String selectItemSubjectAlias = nameGenerator.generateName(subject); 
-			selectItemSubject.setAlias(selectItemSubjectAlias);
+			for(SQLSelectItem betaSub : betaSubSelectItems) {
+				SQLSelectItem selectItem = betaSub.clone();
+				String databaseType = this.owner.getDatabaseType();
+//				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
+//					selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
+//					selectItem.setColumnType("text");
+//				}			
+				String selectItemSubjectAlias = nameGenerator.generateName(subject); 
+				selectItem.setAlias(selectItemSubjectAlias);
+				result.add(selectItem);
+			}
 			logger.debug("genPRSQLSubject = " + result);
 			return result;			
 		} catch(Exception e) {

@@ -10,5 +10,5 @@
 <http://mappingpedia.linkeddata.es/resources/Person4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://mappingpedia.linkeddata.es/vocabulary/Person> .
 <http://mappingpedia.linkeddata.es/resources/Person4> <http://mappingpedia.linkeddata.es/vocabulary/name> "Ringo" .
 <http://mappingpedia.linkeddata.es/resources/Person4> <http://mappingpedia.linkeddata.es/vocabulary/webpage> "www.starr.edu" .
-<http://mappingpedia.linkeddata.es/resources/Person4> <http://mappingpedia.linkeddata.es/vocabulary/phone> "888-4537" .
 <http://mappingpedia.linkeddata.es/resources/Person4> <http://mappingpedia.linkeddata.es/vocabulary/email> "ringo@acd.edu" .
+<http://mappingpedia.linkeddata.es/resources/Person4> <http://mappingpedia.linkeddata.es/vocabulary/phone> "888-4537" .

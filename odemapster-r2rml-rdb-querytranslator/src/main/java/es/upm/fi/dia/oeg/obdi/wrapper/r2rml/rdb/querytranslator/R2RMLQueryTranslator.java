@@ -1,10 +1,11 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Vector;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,21 +18,24 @@ import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResultUnion;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.BetaResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.BetaResultSet;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.CondSQLResult;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
@@ -39,11 +43,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Logger logger = Logger.getLogger(R2RMLQueryTranslator.class);
@@ -60,16 +63,27 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 	public static AbstractQueryTranslator createQueryTranslator(
 			String mappingDocumentPath) throws Exception {
+		return R2RMLQueryTranslator.createQueryTranslator(
+				mappingDocumentPath, null);
+	}
+
+	public static AbstractQueryTranslator createQueryTranslator(
+			String mappingDocumentPath, Connection conn) throws Exception {
+		ConfigurationProperties properties = new ConfigurationProperties();
+		properties.setConn(conn);
 		AbstractMappingDocument mappingDocument = 
-				new R2RMLMappingDocument(mappingDocumentPath);
+				new R2RMLMappingDocument(mappingDocumentPath, properties);
+		return R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn);
+	}
+
+	public static AbstractQueryTranslator createQueryTranslator(
+			AbstractMappingDocument mappingDocument, Connection conn) throws Exception {
 		AbstractQueryTranslator queryTranslator = 
 				new R2RMLQueryTranslator();
 		queryTranslator.setMappingDocument(mappingDocument);
 		
 		return queryTranslator;
 	}
-
-
 
 	@Override
 	protected String generateTermCName(Node termC) {
@@ -259,7 +273,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				
 				if(termMap != null) {
 					if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
-						String template = termMap.getTemplate();
+						String template = termMap.getTemplateString();
 						Matcher matcher = this.mapTemplateMatcher.get(template);
 						if(matcher == null) {
 							Pattern pattern = Pattern.compile(R2RMLConstants.R2RML_TEMPLATE_PATTERN);
@@ -298,7 +312,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 	@Override
 	protected SQLQuery trans(Triple tp, AbstractConceptMapping cm,
-			String predicateURI) throws QueryTranslationException {
+			String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
 		SQLQuery result = new SQLQuery();
 
 		//alpha
@@ -316,17 +330,22 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 		//beta
 		//BetaResult betaResult = super.getBetaGenerator().calculateBeta(tp, cm, predicateURI, alphaResult);
-				
+		
+		AbstractBetaGenerator betaGenerator = super.getBetaGenerator();
+		
 		//PRSQL
-		Collection<ZSelectItem> selectItems = 
-				super.getPrSQLGenerator().genPRSQL(
-				tp, alphaResult, super.getBetaGenerator(), 
-				super.getNameGenerator(), cm, predicateURI);
+		AbstractPRSQLGenerator prSQLGenerator = super.getPrSQLGenerator();
+		NameGenerator nameGenerator = super.getNameGenerator(); 
+		Collection<ZSelectItem> selectItems = prSQLGenerator.genPRSQL(
+				tp, alphaResult, betaGenerator, nameGenerator
+				, cm, predicateURI);
 		result.setSelectItems(selectItems);
 
 		//CondSQL
-		CondSQLResult condSQL = super.getCondSQLGenerator().genCondSQL(
-				tp, alphaResult, super.getBetaGenerator(), cm, predicateURI);
+		AbstractCondSQLGenerator condSQLGenerator = 
+				super.getCondSQLGenerator();
+		CondSQLResult condSQL = condSQLGenerator.genCondSQL(
+				tp, alphaResult, betaGenerator, cm, predicateURI);
 		logger.debug("condSQL = " + condSQL);
 		if(condSQL != null) {
 			result.addWhere(condSQL.getExpression());
@@ -343,7 +362,48 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			
 		}
 
-		logger.debug("transTP = " + result);
+		logger.debug("transTP(tp, cm) = " + result);
 		return result;
 	}
+
+	public static AbstractQueryTranslator getQueryTranslatorFreddy(
+			String url, String username, String password
+			, String databaseType, String databaseName
+			, String mappingDocumentFile ) throws Exception {
+		
+		Properties props = new Properties();
+		props.setProperty("user",username);
+		props.setProperty("password",password);
+
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection(url, props);	
+		} catch(Exception e) {
+			String errorMessage = "Error while trying to retrieve a connection: " + e.getMessage();
+			logger.warn(errorMessage);
+		}
+		
+		ConfigurationProperties properties = new ConfigurationProperties();
+		properties.setConn(conn);
+		properties.setDatabaseName(databaseName);
+		
+		AbstractMappingDocument mappingDocument = 
+				new R2RMLMappingDocument(mappingDocumentFile, properties);
+		
+		IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
+		queryTranslationOptimizer.setSelfJoinElimination(true);
+		queryTranslationOptimizer.setUnionQueryReduction(true);
+		queryTranslationOptimizer.setSubQueryElimination(true);
+		queryTranslationOptimizer.setSubQueryAsView(false);
+
+		AbstractQueryTranslator queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn); 
+		queryTranslatorFreddy.setOptimizer(queryTranslationOptimizer);
+		queryTranslatorFreddy.setDatabaseType(databaseType);
+		queryTranslatorFreddy.setConnection(conn);
+		
+		return queryTranslatorFreddy;
+		
+	}
+	
+	
 }

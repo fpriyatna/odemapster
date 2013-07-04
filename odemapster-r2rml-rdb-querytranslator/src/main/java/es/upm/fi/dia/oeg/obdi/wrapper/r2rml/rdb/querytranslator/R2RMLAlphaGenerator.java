@@ -41,9 +41,10 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	}
 
 	@Override
-	protected SQLQuery calculateAlphaPredicateObject  (
-			Triple triple, AbstractConceptMapping abstractConceptMapping
-			, AbstractPropertyMapping abstractPropertyMapping, String logicalTableAlias) throws QueryTranslationException {
+	protected SQLQuery calculateAlphaPredicateObject  (Triple triple
+			, AbstractConceptMapping abstractConceptMapping
+			, AbstractPropertyMapping abstractPropertyMapping
+			, String logicalTableAlias) throws QueryTranslationException {
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
 		//String tripleMapAlias = cm.getAlias();
 		//String tripleMapAlias = cm.getLogicalTable().getAlias();
@@ -63,6 +64,10 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			
 			
 			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
+			if(parentLogicalTable == null) {
+				String errorMessage = "Parent logical table is not found for RefObjectMap : " + refObjectMap;
+				throw new QueryTranslationException(errorMessage);
+			}
 			//SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
 			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 			SQLLogicalTable sqlParentLogicalTable = unfolder.visit(parentLogicalTable);
@@ -92,9 +97,12 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			
 
 			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
+			//String databaseType = this.owner.getConfigurationProperties().getDatabaseType();
+			String databaseType = this.owner.getDatabaseType();
 			R2RMLUtility utility = new R2RMLUtility();
-			ZExp onExpression = utility.generateJoinCondition(joinConditions
-					, logicalTableAlias, joinQueryAlias, this.owner.getConfigurationProperties().getDatabaseType());
+			ZExp onExpression = utility.generateJoinCondition(
+					joinConditions, logicalTableAlias, joinQueryAlias
+					, databaseType);
 			if(onExpression != null) {
 				joinQuery.setOnExp(onExpression);
 			}
@@ -146,7 +154,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 
 
 	public List<SQLQuery> calculateAlphaPredicateObjectSTG(Triple tp
-			, AbstractConceptMapping cm, String tpPredicateURI, String logicalTableAlias) throws Exception {
+			, AbstractConceptMapping cm, String tpPredicateURI
+			, String logicalTableAlias) throws Exception {
 		List<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
 		
 		boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);

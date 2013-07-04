@@ -1,6 +1,8 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -33,10 +35,11 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public SQLSelectItem calculateBetaObject(Triple tp
+	public List<SQLSelectItem> calculateBetaObject(Triple tp
 			, AbstractConceptMapping cm, String predicateURI
 			, AlphaResult alphaResult) throws QueryTranslationException {
-		SQLSelectItem selectItem = null;
+		List<SQLSelectItem> result = new ArrayList<SQLSelectItem>();
+		
 		Node object = tp.getObject();
 		
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
@@ -55,62 +58,66 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 			AbstractPropertyMapping pm = pms.iterator().next();
 			R2RMLPredicateObjectMap predicateObjectMap =(R2RMLPredicateObjectMap) pm;
 			R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap(); 
-			String databaseColumnString = null;
-			Collection<String> databaseColumnsString = null;
 
 			if(refObjectMap == null) {
 				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
 				if(object.isVariable()) {
-					this.getOwner().getMapVarMapping().put(object.getName(), objectMap);
+					this.getOwner().getMapVarMapping().put(
+							object.getName(), objectMap);
 				}
 
 				if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
 					String constantValue = objectMap.getConstantValue();
-					selectItem = new SQLSelectItem();
+					SQLSelectItem selectItem = new SQLSelectItem();
 					ZConstant zConstant = new ZConstant(constantValue, ZConstant.STRING);
 					selectItem.setExpression(zConstant);
+					result.add(selectItem);
 				} else {
-					databaseColumnsString = objectMap.getDatabaseColumnsString();
-					if(databaseColumnsString != null) {
-						if(databaseColumnsString.size() > 1) {
-							logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
+					Collection<String> databaseColumnsString = objectMap.getDatabaseColumnsString();
+					for(String databaseColumnString : databaseColumnsString) {
+						String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
+						if(alphaSubjectAlias != null) {
+							databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
 						}
-						databaseColumnString = databaseColumnsString.iterator().next();
-					}
-					selectItem = R2RMLUtility.toSelectItem(databaseColumnString
-							, logicalTableAlias, this.owner.getDatabaseType());							
-				}
 
+						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(databaseColumnString
+								, logicalTableAlias, this.owner.getDatabaseType());
+						result.add(selectItem);
+					}
+				}
 			} else {
 				if(object.isVariable()) {
 					this.getOwner().getMapVarMapping().put(object.getName(), refObjectMap);
 				}
 				
-				databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
+				Collection<String> databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
 				//String refObjectMapAlias = refObjectMap.getAlias(); 
 				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
 
 				if(databaseColumnsString != null) {
-					if(databaseColumnsString.size() > 1) {
-						logger.warn("Multiple database columns in objectMap is not supported, result may be wrong!");
+					for(String databaseColumnString : databaseColumnsString) {
+						databaseColumnString = databaseColumnsString.iterator().next();
+						String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
+						if(alphaSubjectAlias != null) {
+							databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
+						}
+						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(databaseColumnString
+								, refObjectMapAlias, this.owner.getDatabaseType());
+						result.add(selectItem);
 					}
-					databaseColumnString = databaseColumnsString.iterator().next();
 				}
-				selectItem = R2RMLUtility.toSelectItem(databaseColumnString
-						, refObjectMapAlias, this.owner.getDatabaseType());						
-
 			}			
 		}
 
-
-		return selectItem;
+		return result;
 	}
 
 
 	@Override
-	public SQLSelectItem calculateBetaSubject(
+	public List<SQLSelectItem> calculateBetaSubject(
 			AbstractConceptMapping cm, AlphaResult alphaResult) {
-		SQLSelectItem selectItem = null;
+		List<SQLSelectItem> result = new ArrayList<SQLSelectItem>();
+		
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
@@ -118,17 +125,19 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 		
 		Collection<String> databaseColumnsString = subjectMap.getDatabaseColumnsString();
 		if(databaseColumnsString != null) {
-			if(databaseColumnsString.size() > 1) {
-				logger.warn("Multiple columns for subject maps is not supported, result might be wrong!");
-			} 
-
-			String databaseColumnString = databaseColumnsString.iterator().next();
-			selectItem = R2RMLUtility.toSelectItem(databaseColumnString
-					, logicalTableAlias, this.owner.getDatabaseType());
+			for(String databaseColumnString : databaseColumnsString) {
+				String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
+				if(alphaSubjectAlias != null) {
+					databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
+				}
+				
+				SQLSelectItem selectItem = R2RMLUtility.toSelectItem(databaseColumnString
+						, logicalTableAlias, this.owner.getDatabaseType());
+				result.add(selectItem);
+			}
 		}
 
-		logger.debug("calculateBetaCMSubject = " + selectItem);
-		return selectItem;
+		return result;
 	}
 
 	protected AbstractQueryTranslator getOwner() {
