@@ -11,7 +11,7 @@ public class RDBReader extends AbstractDataSourceReader {
 	private Connection conn;
 	private int timeout;
 	
-	public static ResultSet evaluateQuery(String query, Connection conn, int timeout) throws SQLException {
+	public static ResultSet evaluateQuery(String query, Connection conn, int timeout) throws Exception {
 		return DBUtility.executeQuery(conn, query, timeout);
 	}
 	

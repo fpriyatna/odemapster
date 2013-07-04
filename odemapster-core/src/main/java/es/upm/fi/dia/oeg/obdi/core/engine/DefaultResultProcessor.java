@@ -8,29 +8,30 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public class DefaultResultProcessor {
 	private static Logger logger = Logger.getLogger(DefaultResultProcessor.class);
 	//AbstractRunner runner;
-	AbstractDataSourceReader queryEvaluator;
+	AbstractDataSourceReader dataSourceReader;
 	AbstractQueryResultWriter queryResultWriter;
-	
-	public DefaultResultProcessor(AbstractDataSourceReader queryEvaluator, AbstractQueryResultWriter queryResultWriter) {
-		this.queryEvaluator = queryEvaluator;
+
+	public DefaultResultProcessor(AbstractDataSourceReader dataSourceReader, AbstractQueryResultWriter queryResultWriter) {
+		this.dataSourceReader = dataSourceReader;
 		this.queryResultWriter = queryResultWriter;
 	}
 
-	public void translateResult(Collection<SQLQuery> sqlQueries) throws Exception {
+	public void translateResult(Collection<IQuery> sqlQueries) throws Exception {
 		this.queryResultWriter.initialize();
-		
+
 		int i=0;
-		for(SQLQuery sqlQuery : sqlQueries) {
+		for(IQuery iQuery : sqlQueries) {
 			AbstractResultSet abstractResultSet = 
-					this.queryEvaluator.evaluateQuery(sqlQuery.toString());
-			ArrayList<String> columnNames = sqlQuery.getSelectItemAliases();
+					this.dataSourceReader.evaluateQuery(iQuery.toString());
+			ArrayList<String> columnNames = iQuery.getSelectItemAliases();
 			abstractResultSet.setColumnNames(columnNames);
-			
+
 			this.queryResultWriter.setResultSet(abstractResultSet);
 			if(i==0) {
 				this.queryResultWriter.preProcess();	
@@ -43,5 +44,5 @@ public class DefaultResultProcessor {
 			this.queryResultWriter.postProcess();	
 		}
 	}
-	
+
 }

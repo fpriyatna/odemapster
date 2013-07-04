@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.core.model;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +12,15 @@ import java.util.Vector;
 
 import org.w3c.dom.Element;
 
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.vocabulary.RDF;
+
+import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.IParseable;
 import es.upm.fi.dia.oeg.obdi.core.exception.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
+import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
+import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 
 
 public abstract class AbstractMappingDocument implements IParseable {
@@ -21,25 +28,42 @@ public abstract class AbstractMappingDocument implements IParseable {
 	private String title;
 	private String id;
 	private String purpose;
-	//private Connection conn;
-	
-	protected void setMappingDocumentPrefixMap(
-			Map<String, String> mappingDocumentPrefixMap) {
-		this.mappingDocumentPrefixMap = mappingDocumentPrefixMap;
-	}
-	
-	public Map<String, String> getMappingDocumentPrefixMap() {
-		return mappingDocumentPrefixMap;
-	}
+	protected ConfigurationProperties configurationProperties;
+	private Connection conn;
+	protected Map<String, TableMetaData> tablesMetaData = new HashMap<String, TableMetaData>(); // <tableName, TableMetaData>
+	protected Map<String, Map<String, ColumnMetaData>> columnsMetaData = new HashMap<String, Map<String,ColumnMetaData>>();//<tableName, <columnName, ColumnMetaData>> 
+	protected String mappingDocumentPath;
 
 	protected Collection<AbstractConceptMapping> classMappings;
 	
 	public abstract void parse(Element xmlElement) throws ParseException;
 	public abstract String getMappingDocumentID();
 	
-	public abstract List<String> getMappedConcepts();
-	public abstract Set<AbstractConceptMapping> getConceptMappingsByConceptName(String conceptURI);
+	public List<String> getMappedConcepts() {
+		List<String> result = new ArrayList<String>();
+		Collection<AbstractConceptMapping> cms = this.classMappings;
+		for(AbstractConceptMapping cm : cms) {
+			String cmName = cm.getConceptName();
+			result.add(cmName);
+		}
+		return result;
+	}
+	
+	public Set<AbstractConceptMapping> getConceptMappingsByConceptName(
+			String conceptURI) {
+		Set<AbstractConceptMapping> result = null;
 
+		if(this.classMappings != null && this.classMappings.size() > 0) {
+			result = new HashSet<AbstractConceptMapping>();
+			for(AbstractConceptMapping cm : this.classMappings) {
+				Collection<String> classURIs = cm.getMappedClassURIs();
+				if(classURIs != null && classURIs.contains(conceptURI)) {
+					result.add(cm);
+				}
+			}
+		}
+		return result;
+	}
 	
 	public abstract List<String> getMappedProperties();
 	
@@ -78,6 +102,26 @@ public abstract class AbstractMappingDocument implements IParseable {
 		return result;
 	}
 
+	public Set<AbstractConceptMapping> getConceptMappingByPropertyURIs(Collection<String> propertyURIs) {
+		
+		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
+		
+		for(AbstractConceptMapping conceptMapping : this.classMappings) {
+			Collection<AbstractPropertyMapping> pms = conceptMapping.getPropertyMappings();
+			Collection<String> pmsString = new Vector<String>();
+			
+			for(AbstractPropertyMapping pm : pms ) {
+				pmsString.add(pm.getMappedPredicateName());
+			}
+			
+			if(pmsString.containsAll(propertyURIs)) {
+				result.add(conceptMapping);
+			}
+		}
+
+		return result;
+	}
+	
 	public Collection<AbstractConceptMapping> getConceptMappings() {
 //		Collection<AbstractConceptMapping> result = new ArrayList<AbstractConceptMapping>();
 //		if(this.classMappings != null) {
@@ -275,12 +319,50 @@ public abstract class AbstractMappingDocument implements IParseable {
 		this.classMappings = classMappings;
 	}
 
-//	public Connection getConn() {
-//		return conn;
-//	}
-//
-//	protected void setConn(Connection conn) {
-//		this.conn = conn;
-//	}
+	public ConfigurationProperties getConfigurationProperties() {
+		return configurationProperties;
+	}
+
+	public void setConfigurationProperties(
+			ConfigurationProperties configurationProperties) {
+		this.configurationProperties = configurationProperties;
+	}
+
+	public Connection getConn() {
+		return conn;
+	}
+
+	public void setConn(Connection conn) {
+		this.conn = conn;
+	}
+
+	public Map<String, TableMetaData> getTablesMetaData() {
+		return tablesMetaData;
+	}
+
+	public Map<String, Map<String, ColumnMetaData>> getColumnsMetaData() {
+		return columnsMetaData;
+	}
+
+	protected void setMappingDocumentPrefixMap(
+			Map<String, String> mappingDocumentPrefixMap) {
+		this.mappingDocumentPrefixMap = mappingDocumentPrefixMap;
+	}
 	
+	public Map<String, String> getMappingDocumentPrefixMap() {
+		return mappingDocumentPrefixMap;
+	}
+
+	public String getMappingDocumentPath() {
+		return mappingDocumentPath;
+	}
+
+	public abstract Map<Node, Set<AbstractConceptMapping>> inferByObject(
+			AbstractConceptMapping cm, String predicateURI, Node object);
+	
+	public abstract Set<AbstractConceptMapping> getPossibleRange(String predicateURI, AbstractConceptMapping cm);
+	
+	public abstract Set<AbstractConceptMapping> getPossibleRange(String predicateURI);
+	
+	public abstract Set<AbstractConceptMapping> getPossibleRange(AbstractPropertyMapping pm);
 }

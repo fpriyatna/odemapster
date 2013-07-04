@@ -14,7 +14,7 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	private String schema;
 	private String table;
 	private String column;
-	
+	private String columnType;
 	
 	public static SQLSelectItem createSQLItem(String dbType) {
 		SQLSelectItem selectItem = new SQLSelectItem();
@@ -133,6 +133,20 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 				}
 				//result = super.toString();
 			}
+		} else if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
+			if(this.columnType == null) {
+				result = super.toString();
+			} else {
+				//String expString = this.getExpression().toString();
+				String expString = super.toString();
+				expString += "::" + this.columnType; 
+				result = expString;
+				
+				String alias = this.getAlias();  
+				if(alias != null && !alias.equals("")) {
+					result += " AS " + alias;
+				}
+			}
 		} else {
 			if(this.isExpression()) {
 				result = this.getExpression().toString(); 
@@ -217,21 +231,41 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	}
 
 	@Override
-	public ZSelectItem clone() throws CloneNotSupportedException {
-		ZSelectItem selectItem;
+	public SQLSelectItem clone() throws CloneNotSupportedException {
+		SQLSelectItem selectItem;
 		if(this.isExpression()) {
-			selectItem = new ZSelectItem();
+			selectItem = new SQLSelectItem();
 			selectItem.setExpression(this.getExpression());
 		} else {
 			String alias = this.getAlias();
 			this.setAlias("");
-			selectItem = new ZSelectItem(this.toString());
+			selectItem = new SQLSelectItem(this.toString());
 			if(alias != null) {
 				this.setAlias(alias);	
 			}
 		}
 		
+		if(this.dbType != null) {
+			selectItem.setDbType(this.dbType);
+		}
+		
 		return selectItem;
+	}
+
+	public void setColumnType(String columnType) {
+		this.columnType = columnType;
+	}
+
+	public String getDbType() {
+		return dbType;
+	}
+
+	public void setDbType(String dbType) {
+		this.dbType = dbType;
+	}
+
+	public String getColumnType() {
+		return columnType;
 	}
 
 	

@@ -11,12 +11,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,22 +25,11 @@ import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZSelectItem;
 
-import com.hp.hpl.jena.db.DBConnection;
-import com.hp.hpl.jena.db.IDBConnection;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.shared.CannotEncodeCharacterException;
-import com.hp.hpl.jena.tdb.TDBFactory;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.sql.MonetDBColumn;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
@@ -69,6 +55,9 @@ public class ODEMapsterUtility {
 		try {
 			f = new BufferedInputStream(new FileInputStream(filePath));
 			f.read(buffer);
+		} catch(IOException e) {
+			logger.error(e.getMessage());
+			throw e;
 		} finally {
 			if (f != null) try { f.close(); } catch (IOException ignored) { }
 		}
@@ -234,14 +223,19 @@ public class ODEMapsterUtility {
 	public static String encodeURI(String originalURI)  throws Exception {
 		String uri = originalURI;
 		try {
-			uri = ODEMapsterUtility.removeStrangeChars(uri);
+			uri = uri.trim();
+			
+			//uri = uri.replaceAll(" ", "%20");
+			uri = uri.replaceAll(" ", "_");
+			
+			//uri = ODEMapsterUtility.removeStrangeChars(uri);
 
-			uri = ODEMapsterUtility.preEncoding(uri);
+			//uri = ODEMapsterUtility.preEncoding(uri);
 
 			//	uri = new URI(uri).toASCIIString();
-			uri = new URI(null, uri, null).toASCIIString();
+			//uri = new URI(null, uri, null).toASCIIString();
 
-			uri = ODEMapsterUtility.postEncoding(uri);
+			//uri = ODEMapsterUtility.postEncoding(uri);
 
 		} catch(Exception e) {
 			logger.error("Error encoding uri for uri = " + originalURI + " because of " + e.getMessage());
@@ -742,6 +736,58 @@ public class ODEMapsterUtility {
 			
 		}
 		
+		return result;
+	}
+
+	public static ZSelectItem getSelectItemByAlias(String alias, Collection<ZSelectItem> selectItems, String prefix) {
+		if(selectItems != null) {
+			for(ZSelectItem selectItem : selectItems) {
+				String selectItemAlias = selectItem.getAlias();
+				if(alias.equals(selectItemAlias) || alias.equals(prefix + "." + selectItemAlias)) {
+					return selectItem;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static ZExp replaceColumnNames(ZExp exp, Map<String, String> mapOldNewAlias) {
+		ZExp result = exp;
+		
+		for(String oldName : mapOldNewAlias.keySet()) {
+			String newName = mapOldNewAlias.get(oldName);
+			result = ODEMapsterUtility.replaceColumnNames(result, oldName, newName);
+		}
+		
+		return result;
+	}
+	
+	
+	public static ZExp replaceColumnNames(ZExp exp, String oldName, String newName) {
+		ZExp result = exp;
+
+		if(exp instanceof ZExpression) {
+			ZExpression expression = (ZExpression) exp;
+			Vector<ZExp> operands = expression.getOperands();
+			ZExpression newExpression = new ZExpression(expression.getOperator());
+			for(ZExp operand : operands) {
+				ZExp newOperand = ODEMapsterUtility.replaceColumnNames(operand, oldName, newName);
+				newExpression.addOperand(newOperand);
+			}
+			result = newExpression;
+		} else if(exp instanceof ZConstant) {
+			ZConstant constant = (ZConstant) exp;
+			if(constant.getType() == ZConstant.COLUMNNAME) {
+				String oldColumnName = constant.getValue();
+				if(oldName.equals(oldColumnName)) {
+					ZConstant newConstant = new ZConstant(newName, ZConstant.COLUMNNAME);
+					result = newConstant;
+				}
+			}
+		} else {
+			result = exp;
+		}
+
 		return result;
 	}
 }

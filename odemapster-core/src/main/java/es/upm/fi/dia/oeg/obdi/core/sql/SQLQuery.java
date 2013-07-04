@@ -2,9 +2,11 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
@@ -21,9 +23,10 @@ import Zql.ZUtils;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
+import es.upm.fi.dia.oeg.obdi.core.exception.QueryTranslatorException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 
-public class SQLQuery extends ZQuery implements SQLLogicalTable {
+public class SQLQuery extends ZQuery implements IQuery {
 	private static Logger logger = Logger.getLogger(SQLQuery.class);
 	private String joinType;
 	private ZExp onExp;
@@ -31,9 +34,15 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 	private Collection<SQLLogicalTable> logicalTables;
 	private Collection<SQLJoinQuery> joinQueries;
 	private Collection<SQLQuery> joinQueries2;
-	private Collection<SQLQuery> unionQueries;
+	//private Collection<SQLQuery> unionQueries;
 	private String alias;
 	private long slice = -1;
+	private long offset = -1;
+			
+	public void setOffset(long offset) {
+		this.offset = offset;
+	}
+
 	private boolean distinct = false;
 
 	private String comments;
@@ -73,6 +82,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		this.getFrom().add(fromItem);
 	}
 
+	
 	public void addLogicalTable(SQLLogicalTable logicalTable) {
 		if(this.logicalTables == null) {
 			this.logicalTables = new HashSet<SQLLogicalTable>();
@@ -130,13 +140,13 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 
 	}
 
-	public void addUnionQuery(SQLQuery unionQuery) {
-		if(this.unionQueries == null) {
-			this.unionQueries = new Vector<SQLQuery>();
-		}
-
-		this.unionQueries.add(unionQuery);
-	}
+//	public void addUnionQuery(SQLQuery unionQuery) {
+//		if(this.unionQueries == null) {
+//			this.unionQueries = new Vector<SQLQuery>();
+//		}
+//
+//		this.unionQueries.add(unionQuery);
+//	}
 
 	public void addWhere(Collection<ZExp> newWheres) {
 		for(ZExp newWhere : newWheres) {
@@ -228,9 +238,9 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		return null;
 	}
 
-	public Collection<SQLQuery> getUnionQueries() {
-		return unionQueries;
-	}
+//	public Collection<SQLQuery> getUnionQueries() {
+//		return unionQueries;
+//	}
 
 	public void setDistinct(boolean distinct) {
 		this.distinct = distinct;
@@ -328,7 +338,7 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 					if (logicalTable instanceof SQLFromItem) {
 						fromSQL += logicalTable.toString() + ", ";
 					} else {
-						fromSQL += "(" + logicalTable.toString() + ") " + logicalTableAlias + ", ";
+						fromSQL += " (" + logicalTable.toString() + ") " + logicalTableAlias + ", ";
 					}
 				}
 			}
@@ -446,13 +456,13 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			result += "ON " + this.onExp + "\n";
 		}
 
-		String unionSQL = "\nUNION\n";
-		if(this.unionQueries != null) {
-			for(SQLQuery unionQuery : this.unionQueries) {
-				String unionQueryString = unionQuery.toString(); 
-				result += unionSQL + unionQueryString; 
-			}
-		}
+//		String unionSQL = "\nUNION\n";
+//		if(this.unionQueries != null) {
+//			for(SQLQuery unionQuery : this.unionQueries) {
+//				String unionQueryString = unionQuery.toString(); 
+//				result += unionSQL + unionQueryString; 
+//			}
+//		}
 
 		Vector<ZOrderBy> orderByConditions = this.getOrderBy(); 
 		if(orderByConditions != null) {
@@ -463,17 +473,21 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		if(groupBy != null) {
 			result += groupBy + "\n";
 		}
-		
-		if(this.slice != -1) {
-			result += "LIMIT " + this.slice;
+
+		if(this.offset != -1) {
+			result += "OFFSET " + this.offset + " ";
 		}
+		if(this.slice != -1) {
+			result += "LIMIT " + this.slice + " ";
+		}
+		
 		return result.trim();
 
 	}
 
-	public void setUnionQueries(Collection<SQLQuery> unionQueries) {
-		this.unionQueries = unionQueries;
-	}
+//	public void setUnionQueries(Collection<SQLQuery> unionQueries) {
+//		this.unionQueries = unionQueries;
+//	}
 
 	public void setAlias(String alias) {
 		this.alias = alias;
@@ -503,6 +517,11 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 		this.logicalTables = logicalTables;
 	}
 
+	public void setLogicalTable(SQLLogicalTable logicalTable) {
+		this.logicalTables = new Vector<SQLLogicalTable>();
+		this.logicalTables.add(logicalTable);
+	}
+
 	public void setComments(String comments) {
 		this.comments = comments;
 	}
@@ -526,5 +545,116 @@ public class SQLQuery extends ZQuery implements SQLLogicalTable {
 			}
 		}
 		return super.getSelect();
+	}
+
+	public void cleanupPrefixes() {
+		Vector<ZSelectItem> selectItems = this.getSelect();
+		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
+		for(ZSelectItem selectItem : selectItems) {
+			String selectItemAlias = selectItem.getAlias();
+			if(selectItemAlias != null) {
+				if(selectItemAlias.startsWith(Constants.PREFIX_VAR)) {
+					String newSelectItemAlias = 
+							selectItemAlias.substring(Constants.PREFIX_VAR.length(), selectItemAlias.length());
+					selectItem.setAlias(newSelectItemAlias);
+					selectItems2.add(selectItem);					
+				} else if(selectItemAlias.startsWith(Constants.PREFIX_LIT)) {
+					//do nothing
+				} else if(selectItemAlias.startsWith(Constants.PREFIX_URI)) {
+					//do nothing
+				} else {
+					selectItems2.add(selectItem);
+				}
+			}
+		}
+		this.setSelectItems(selectItems2);
+	}
+
+	public SQLQuery setOrderBy(Vector<ZOrderBy> orderByConditions) {
+		if(this.getOrderBy() != null) {
+			this.getOrderBy().removeAllElements();	
+		}
+		
+		this.addOrderBy(orderByConditions);
+		return this;
+	}
+
+	public SQLQuery eliminateSubQuery(Collection<ZSelectItem> newSelectItems,
+			ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions,
+			String databaseType) throws Exception {
+		SQLQuery result = this;
+		
+		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
+		Collection<SQLLogicalTable> logicalTables = this.getLogicalTables();
+		if(logicalTables != null && logicalTables.size() == 1) {
+			SQLLogicalTable logicalTable = logicalTables.iterator().next();
+			if(logicalTable instanceof SQLQuery) {
+				SQLQuery logicalTableSQLQuery = (SQLQuery) logicalTable; 
+				Vector<ZSelectItem> oldSelectItems = logicalTableSQLQuery.getSelect();	
+				//SELECT *
+				if(newSelectItems.size() == 1 
+						&& newSelectItems.iterator().next().toString().equals(("*"))) {
+					selectItems2 = new Vector<ZSelectItem>(oldSelectItems);
+
+					for(ZSelectItem selectItem : oldSelectItems) {
+						String selectItemWithoutAlias = 
+								DBUtility.getValueWithoutAlias(selectItem);
+						String selectItemAlias = selectItem.getAlias();
+						newWhereCondition = ODEMapsterUtility.renameColumns(newWhereCondition
+								, selectItemAlias, selectItemWithoutAlias, true, databaseType); 
+					}
+				} else {
+					String queryAlias = this.generateAlias();
+					Map<String, String> mapOldNewAlias = new HashMap<String, String>();
+					
+					for(ZSelectItem newSelectItem : newSelectItems) {
+						String newSelectItemAlias = newSelectItem.getAlias();
+
+						String newSelectItemValue = DBUtility.getValueWithoutAlias(newSelectItem);
+
+						//					String newSelectItemValue2 = queryAlias + "." + newSelectItemValue;
+						//					newSelectItem = new ZSelectItem(newSelectItemValue2);
+						//					newSelectItem.setAlias(newSelectItemAlias);
+						//							
+						ZSelectItem oldSelectItem = ODEMapsterUtility.getSelectItemByAlias(newSelectItemValue, oldSelectItems, queryAlias);
+
+						if(oldSelectItem == null) {
+							selectItems2.add(newSelectItem);
+						} else {
+							String oldSelectItemAlias = oldSelectItem.getAlias();
+
+							mapOldNewAlias.put(oldSelectItemAlias, newSelectItemAlias);
+
+							String oldSelectItemValue = DBUtility.getValueWithoutAlias(oldSelectItem);
+							oldSelectItem.setAlias(newSelectItemAlias);
+							selectItems2.add(oldSelectItem);
+							if(newWhereCondition != null) {
+								newWhereCondition = ODEMapsterUtility.renameColumns(newWhereCondition
+										, newSelectItemValue, oldSelectItemValue, true, databaseType);
+							}
+						}
+					}
+					logicalTableSQLQuery.setSelectItems(selectItems2);
+					
+					if(orderByConditions != null) {
+						Vector<ZOrderBy> newOrderByConditions = new Vector<ZOrderBy>();
+						for(ZOrderBy orderByCondition : orderByConditions) {
+							ZExp oldExp = orderByCondition.getExpression();
+							ZExp newExp = ODEMapsterUtility.replaceColumnNames(oldExp, mapOldNewAlias);
+							ZOrderBy newOrderBy = new ZOrderBy(newExp);
+							newOrderBy.setAscOrder(orderByCondition.getAscOrder());
+							newOrderByConditions.add(newOrderBy);
+						}
+						logicalTableSQLQuery.setOrderBy(newOrderByConditions);
+					}
+				}
+
+				logicalTableSQLQuery.setLogicalTables(logicalTableSQLQuery.getLogicalTables());
+				
+				logicalTableSQLQuery.addWhere(newWhereCondition);
+				result = logicalTableSQLQuery; 
+			}
+		}
+		return result;
 	}
 }

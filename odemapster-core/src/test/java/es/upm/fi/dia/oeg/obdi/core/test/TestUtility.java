@@ -11,9 +11,8 @@ import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 public class TestUtility {
 	private static Logger logger = Logger.getLogger(TestUtility.class);
 	
-	private static String MAPPING_DIRECTORY_WINDOWS = "C:/Users/Freddy/Dropbox/Documents/oeg/odemapster2/mappings/";
-	private static String MAPPING_DIRECTORY_LINUX = "/home/fpriyatna/Dropbox/Documents/oeg/odemapster2/mappings/";
-	private static String MAPPING_DIRECTORY_MAC = "/Users/freddypriyatna/Dropbox/Documents/oeg/odemapster2/mappings/";
+	private static String MAPPING_DIRECTORY_WINDOWS = "C:/Users/Freddy Priyatna/Dropbox/Documents/oeg/r2rml-mappings/";
+	private static String MAPPING_DIRECTORY_LINUX = "/home/fpriyatna/Dropbox/Documents/oeg/r2rml-mappings/";
 
 	public static String getMappingDirectoryByOS() {
 		String osName = System.getProperty("os.name");
@@ -21,8 +20,6 @@ public class TestUtility {
 			return MAPPING_DIRECTORY_LINUX;
 		} else if(osName.startsWith("Windows")) {
 			return MAPPING_DIRECTORY_WINDOWS; 
-		} else if (osName.equalsIgnoreCase("Mac OS X")) {
-			return MAPPING_DIRECTORY_MAC;
 		} else {
 			return null;
 		}

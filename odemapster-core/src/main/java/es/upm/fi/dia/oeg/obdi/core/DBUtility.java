@@ -1,23 +1,28 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import jena.dbcreate;
+
 import org.apache.log4j.Logger;
+
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 import Zql.ZSelectItem;
 
 
 public class DBUtility {
 	private static Logger logger = Logger.getLogger(DBUtility.class);
-	
+
 	public static boolean execute(Connection conn, String query) throws SQLException {
 		Statement stmt = conn.createStatement();
-		
+
 		try  {
 			stmt.setQueryTimeout(60);
 			stmt.setFetchSize(Integer.MIN_VALUE);
@@ -41,22 +46,34 @@ public class DBUtility {
 		}
 
 	}
-	
-	public static ResultSet executeQuery(Connection conn, String query, int timeout) throws SQLException {
+
+	public static ResultSet executeQuery(Connection conn, String query, int timeout) throws Exception {
 		//		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 		//				ResultSet.CONCUR_READ_ONLY);
 
 		//st.setFetchSize(1000);
 		//		Statement st = conn.createStatement();
-		
 
-		Statement stmt = conn.createStatement(
-				java.sql.ResultSet.TYPE_FORWARD_ONLY,
-				java.sql.ResultSet.CONCUR_READ_ONLY);
-		stmt.setFetchSize(Integer.MIN_VALUE);
-		
+		Statement stmt = null;
+		try {
+			stmt = conn.createStatement(
+					java.sql.ResultSet.TYPE_FORWARD_ONLY,
+					java.sql.ResultSet.CONCUR_READ_ONLY);
+			
+			DatabaseMetaData dbmd = conn.getMetaData();
+			String dbProductName = dbmd.getDatabaseProductName();
+			if(Constants.DATABASE_MYSQL.equalsIgnoreCase(dbProductName)) {
+				stmt.setFetchSize(Integer.MIN_VALUE);	
+			}
+		} catch(Exception e) {
+			//e.printStackTrace();
+			logger.error("Error creating statement object, error message = "+ e.getMessage());
+			throw e;
+		}
+
+
 		//Statement stmt = conn.createStatement();//outofmemory error:Java heap space
-				
+
 		try  {
 			if(timeout > 0) {
 				stmt.setQueryTimeout(timeout);
@@ -82,7 +99,7 @@ public class DBUtility {
 		}
 
 	}
-	
+
 	public static void closeConnection(Connection conn, String requester) {
 		try {
 			if(conn != null) {
@@ -113,19 +130,19 @@ public class DBUtility {
 			logger.error("Error closing statement! Error message = " + e.getMessage());
 		}
 	}
-	
-    public static int getRowCount(ResultSet set) throws SQLException  
-    {  
-       int rowCount;  
-       int currentRow = set.getRow();            // Get current row  
-       rowCount = set.last() ? set.getRow() : 0; // Determine number of rows  
-       if (currentRow == 0)                      // If there was no current row  
-          set.beforeFirst();                     // We want next() to go to first row  
-       else                                      // If there WAS a current row  
-          set.absolute(currentRow);              // Restore it  
-       return rowCount;  
-    }
-    
+
+	public static int getRowCount(ResultSet set) throws SQLException  
+	{  
+		int rowCount;  
+		int currentRow = set.getRow();            // Get current row  
+		rowCount = set.last() ? set.getRow() : 0; // Determine number of rows  
+		if (currentRow == 0)                      // If there was no current row  
+			set.beforeFirst();                     // We want next() to go to first row  
+		else                                      // If there WAS a current row  
+			set.absolute(currentRow);              // Restore it  
+		return rowCount;  
+	}
+
 	public static String getValueWithoutAlias(ZSelectItem selectItem) {
 		String result;
 
@@ -135,30 +152,19 @@ public class DBUtility {
 			result = selectItemString;
 		} else {
 			selectItem.setAlias("");
-			//result = selectItemString.substring(0, selectItemString.length() - alias.length());
 			result = selectItem.toString();
 			selectItem.setAlias(alias);
 		}
 
-		//		selectItem.setAlias("");
-		//		result = selectItem.toString();
-		//
-		//		
-		//		if(alias != null) {
-		//			selectItem.setAlias(alias);
-		//		} else {
-		//			if(selectItem.isExpression()) {
-		//				ZExp selectItemExpression = selectItem.getExpression();
-		//				selectItem = new R2OSelectItem();
-		//				selectItem.setExpression(selectItemExpression);
-		//			} else {
-		//				selectItem = new R2OSelectItem(result);
-		//			}
-		//		}
+		if(selectItem instanceof SQLSelectItem) {
+			SQLSelectItem sqlSelectItem = (SQLSelectItem) selectItem;
+			String columnType = sqlSelectItem.getColumnType();
+			result = result.replaceAll("::" + columnType, "");
+		}
 
 		return result.trim();
 	}
-	
+
 	public static Connection getLocalConnection(
 			String username, String databaseName, String password, String driverString, String url, String requester) 
 					throws SQLException {

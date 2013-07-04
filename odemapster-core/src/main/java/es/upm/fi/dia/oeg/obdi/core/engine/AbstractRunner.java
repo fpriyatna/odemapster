@@ -20,6 +20,7 @@ import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public abstract class AbstractRunner {
@@ -57,7 +58,6 @@ public abstract class AbstractRunner {
 				this.configurationProperties.getMappingDocumentFilePath();
 		if(mappingDocumentFile != null) {
 			this.readMappingDocumentFile(mappingDocumentFile);
-			logger.info("mapping document = " + this.mappingDocument);
 		}
 
 		//sparql query
@@ -108,7 +108,7 @@ public abstract class AbstractRunner {
 			String outputFileName = configurationProperties.getOutputFilePath();
 			this.materializeMappingDocuments(outputFileName, mappingDocument);
 		} else {
-			logger.info("sparql query = " + this.sparqQuery);
+			logger.debug("sparql query = " + this.sparqQuery);
 
 			//query translator
 			if(this.queryTranslator == null) {
@@ -154,8 +154,12 @@ public abstract class AbstractRunner {
 				logger.info("Rewriting query...");
 				String mappingDocumentFile = 
 						this.configurationProperties.getMappingDocumentFilePath();
-				Collection <String> mappedOntologyElements = 
-						MappingsExtractor.getMappedPredicatesFromR2O(mappingDocumentFile);
+//				Collection <String> mappedOntologyElements = MappingsExtractor.getMappedPredcatesFromR2O(mappingDocumentFile);
+				Collection <String> mappedOntologyElements = this.mappingDocument.getMappedConcepts();
+				Collection <String> mappedOntologyElements2 = this.mappingDocument.getMappedProperties();
+				mappedOntologyElements.addAll(mappedOntologyElements2);
+				
+				
 				String rewritterWrapperMode = RewriterWrapper.fullMode;
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
@@ -167,7 +171,7 @@ public abstract class AbstractRunner {
 
 
 			//translate sparql queries into sql queries
-			Collection<SQLQuery> sqlQueries = 
+			Collection<IQuery> sqlQueries = 
 					this.translateSPARQLQueriesIntoSQLQueries(queries);
 			
 			//translate result
@@ -182,7 +186,18 @@ public abstract class AbstractRunner {
 	protected abstract void createDataTranslator(
 			ConfigurationProperties configurationProperties);
 
-	protected abstract IQueryTranslationOptimizer buildQueryTranslationOptimizer();
+	protected IQueryTranslationOptimizer buildQueryTranslationOptimizer() {
+		String defaultQueryTranslatorClassName =  
+				"es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer";
+		
+		try {
+			return (IQueryTranslationOptimizer) Class.forName(defaultQueryTranslatorClassName).newInstance();
+		} catch (Exception e) {
+			String errorMessage = "error while building query optimizer instance!";
+			logger.warn(errorMessage);
+		}
+		return null;
+	}
 
 	protected abstract AbstractUnfolder createUnfolder();
 
@@ -236,6 +251,10 @@ public abstract class AbstractRunner {
 		this.queryTranslator = (IQueryTranslator) 
 				Class.forName(this.queryTranslatorClassName).newInstance();					
 		this.queryTranslator.setConfigurationProperties(configurationProperties);
+		String databaseType = configurationProperties.getDatabaseType();
+		if(databaseType != null && !databaseType.equals("")) {
+			this.queryTranslator.setDatabaseType(databaseType);
+		}
 		
 		if(this.mappingDocument == null) {
 			String mappingDocumentFilePath = this.getMappingDocumentPath();
@@ -256,7 +275,7 @@ public abstract class AbstractRunner {
 		queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
 		this.queryTranslator.setOptimizer(queryTranslationOptimizer);
 
-		logger.info("query translator = " + this.queryTranslator);
+		logger.debug("query translator = " + this.queryTranslator);
 	}
 
 	private boolean isSelfJoinElimination() {
@@ -355,12 +374,12 @@ public abstract class AbstractRunner {
 	}
 
 
-	private Collection<SQLQuery> translateSPARQLQueriesIntoSQLQueries(
+	private Collection<IQuery> translateSPARQLQueriesIntoSQLQueries(
 			Collection<Query> sparqlQueries) throws Exception {
-		Collection<SQLQuery> sqlQueries = new Vector<SQLQuery>();
+		Collection<IQuery> sqlQueries = new Vector<IQuery>();
 		for(Query sparqlQuery : sparqlQueries) {
 			logger.debug("SPARQL Query = \n" + sparqlQuery);
-			SQLQuery sqlQuery = 
+			IQuery sqlQuery = 
 					this.queryTranslator.translate(sparqlQuery);
 			logger.debug("SQL Query = \n" + sqlQuery);
 			sqlQueries.add(sqlQuery);
@@ -461,7 +480,7 @@ public abstract class AbstractRunner {
 		}
 		queryResultWriter.setOutput(this.queryResultWriterOutput);
 
-		logger.info("query result writer = " + this.queryResultWriter);
+		logger.debug("query result writer = " + this.queryResultWriter);
 	}
 
 	private void buildDataSourceReader() throws Exception {
@@ -470,7 +489,7 @@ public abstract class AbstractRunner {
 		if(dataSourceReader instanceof RDBReader) {
 			//database connection
 			if(this.configurationProperties != null) {
-				if(this.configurationProperties.getNoOfDatabase() > 1) {
+				if(this.configurationProperties.getNoOfDatabase() == 1) {
 					try { conn = this.getConnection(); } catch(Exception e) { }				
 				}
 				((RDBReader) dataSourceReader).setConnection(conn);
@@ -479,7 +498,7 @@ public abstract class AbstractRunner {
 			}
 		}
 
-		logger.info("query evaluator = " + this.dataSourceReader);
+		logger.debug("query evaluator = " + this.dataSourceReader);
 	}
 
 	public void setDataSourceReaderClassName(String queryEvaluatorClassName) {

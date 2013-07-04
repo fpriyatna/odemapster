@@ -8,6 +8,9 @@ public class Constants {
 	public static final String DATABASE_ORACLE = "Oracle";
 	public static final String DATABASE_MYSQL = "MySQL";
 	public static final String DATABASE_SQLSERVER = "SQLServer";
+	public static final String DATABASE_POSTGRESQL = "PostgreSQL";
+	
+	public static final String COLUMN_TYPE_TEXT = "text";
 	
 	//jena specific properties
 	public static final String JENA_MODE_TYPE = "jena.mode.type";
@@ -69,6 +72,12 @@ public class Constants {
 	public static final String RANGE_TABLE_ALIAS="rt_";
 	public static final String VIEW_ALIAS="v_";
 	public static final String TABLE_ALIAS_PREFIX="t_";
+
+	//prefixes and suffixes
+	public static final String PREFIX_URI = "uri_";
+	public static final String PREFIX_VAR = "var_";
+	public static final String PREFIX_LIT = "lit_";
 	public static final String KEY_SUFFIX = "_key";
-	
+
+
 }

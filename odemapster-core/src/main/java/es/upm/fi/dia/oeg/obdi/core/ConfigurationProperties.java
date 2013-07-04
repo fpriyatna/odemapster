@@ -28,7 +28,7 @@ public class ConfigurationProperties extends Properties {
 	private String rdfLanguage;
 	private String jenaMode;
 	private String databaseType;
-	
+
 	//query translator
 	private boolean selfJoinElimination;
 	private boolean subQueryElimination;
@@ -36,12 +36,12 @@ public class ConfigurationProperties extends Properties {
 	private String queryTranslatorClassName;
 	private String queryEvaluatorClassName;
 	private String queryResultWriterClassName;
-	
+
 	//batch upgrade
 	private boolean literalRemoveStrangeChars;
 	private boolean encodeUnsafeChars;
 	private boolean encodeReservedChars;
-	
+
 	//database
 	private int noOfDatabase;
 	private String databaseDriver; 
@@ -50,18 +50,18 @@ public class ConfigurationProperties extends Properties {
 	private String databaseUser;
 	private String databasePassword;
 	private int databaseTimeout = 0;
-	
+
 	public boolean isSelfJoinElimination() {
 		return selfJoinElimination;
 	}
 
 	public ConfigurationProperties() {}
-	
-	
+
+
 	public ConfigurationProperties(
 			String configurationDirectory, String configurationFile) 
-	throws Exception 
-	{
+					throws Exception 
+					{
 		String absoluteConfigurationFile = configurationFile;
 		if(configurationDirectory != null) {
 			if(!configurationDirectory.endsWith("/")) {
@@ -85,8 +85,8 @@ public class ConfigurationProperties extends Properties {
 		}
 
 		this.readConfigurationFile(configurationDirectory);
-	}
-	
+					}
+
 	public String getOutputFilePath() {
 		return outputFilePath;
 	}
@@ -128,13 +128,16 @@ public class ConfigurationProperties extends Properties {
 			if(timeoutPropertyString != null && !timeoutPropertyString.equals("")) {
 				this.databaseTimeout = Integer.parseInt(timeoutPropertyString.trim());
 			}
-			
-			logger.info("Getting database connection...");
+
+			logger.info("Obtaining database connection...");
 			try {
 				this.conn = DBUtility.getLocalConnection(
 						databaseUser, databaseName, databasePassword, 
 						databaseDriver, 
 						databaseURL, "Configuration Properties");
+				if(this.conn != null) {
+					logger.info("Connection obtained.");
+				}
 			} catch (SQLException e) {
 				String errorMessage = "Error loading database, error message = " + e.getMessage();
 				logger.error(errorMessage);
@@ -158,18 +161,18 @@ public class ConfigurationProperties extends Properties {
 				this.queryFilePath = configurationDir + queryFilePath;
 			}
 		}
-		
+
 		this.ontologyFilePath = this.getProperty(Constants.ONTOFILE_PROP_NAME);
 		this.outputFilePath = this.getProperty(Constants.OUTPUTFILE_PROP_NAME);
 
 		if(configurationDir != null) {
-			
+
 			this.outputFilePath = configurationDir + outputFilePath;
 
 			if(this.ontologyFilePath != null && !this.ontologyFilePath.equals("")) {
 				this.ontologyFilePath = configurationDir + ontologyFilePath;
 			}
-			
+
 		}
 
 		this.rdfLanguage = this.readString(Constants.OUTPUTFILE_RDF_LANGUAGE, Constants.OUTPUT_FORMAT_NTRIPLE);
@@ -189,13 +192,13 @@ public class ConfigurationProperties extends Properties {
 
 		this.queryTranslatorClassName = this.readString(
 				Constants.QUERY_TRANSLATOR_CLASSNAME, null);
-		
+
 		this.queryEvaluatorClassName = this.readString(
 				Constants.DATASOURCE_READER_CLASSNAME, null);
-		
+
 		this.queryResultWriterClassName = this.readString(
 				Constants.QUERY_RESULT_WRITER_CLASSNAME, null);
-		
+
 		this.literalRemoveStrangeChars = this.readBoolean(Constants.REMOVE_STRANGE_CHARS_FROM_LITERAL, true);
 		logger.debug("Remove Strange Chars From Literal Column = " + this.literalRemoveStrangeChars);
 
@@ -244,20 +247,22 @@ public class ConfigurationProperties extends Properties {
 	public boolean isLiteralRemoveStrangeChars() {
 		return literalRemoveStrangeChars;
 	}
-	
+
 	public Connection openConnection() throws SQLException {
-		try {
-			this.conn = DBUtility.getLocalConnection(
-					databaseUser, databaseName, databasePassword, 
-					databaseDriver, 
-					databaseURL, "R2ORunner");
-			return this.conn;
-		} catch (SQLException e) {
-			String errorMessage = "Error loading database, error message = " + e.getMessage();
-			logger.error(errorMessage);
-			//e.printStackTrace();
-			throw e;
+		if(this.conn == null) {
+			try {
+				this.conn = DBUtility.getLocalConnection(
+						databaseUser, databaseName, databasePassword, 
+						databaseDriver, 
+						databaseURL, "R2ORunner");
+			} catch (SQLException e) {
+				String errorMessage = "Error loading database, error message = " + e.getMessage();
+				logger.error(errorMessage);
+				//e.printStackTrace();
+				throw e;
+			}			
 		}
+		return this.conn;
 	}
 
 	public int getDatabaseTimeout() {
@@ -294,7 +299,7 @@ public class ConfigurationProperties extends Properties {
 
 		return result;
 	}
-	
+
 	private int readInteger(String property, int defaultValue) {
 		int result = defaultValue;
 
@@ -302,13 +307,13 @@ public class ConfigurationProperties extends Properties {
 		if(propertyString != null && !propertyString.equals("")) {
 			result = Integer.parseInt(propertyString);
 		} 
-		
+
 		return result;
 	}
-	
+
 	private String readString(String property, String defaultValue) {
 		String result = defaultValue;
-		
+
 		String propertyString = this.getProperty(property);
 		if(propertyString != null && !propertyString.equals("")) {
 			result = propertyString;
@@ -350,6 +355,14 @@ public class ConfigurationProperties extends Properties {
 
 	public String getQueryEvaluatorClassName() {
 		return queryEvaluatorClassName;
+	}
+
+	public void setConn(Connection conn) {
+		this.conn = conn;
+	}
+
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
 	}
 
 
