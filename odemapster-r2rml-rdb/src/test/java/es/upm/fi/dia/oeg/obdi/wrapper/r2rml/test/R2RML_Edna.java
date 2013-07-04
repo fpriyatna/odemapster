@@ -89,4 +89,22 @@ public class R2RML_Edna {
 			assertTrue(e.getMessage(), false);
 		} 
 	}
+	
+	@Test
+	public void testEdna05() throws Exception {
+		try {
+			String configurationDirectory = TestUtility.getMappingDirectoryByOS() 
+					+ "r2rml-mappings/edna05/";
+			String configurationFile = "batch01.r2rml.properties";
+			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			runner.run();
+			logger.info("------testEdna05 DONE------\n\n");
+			assertTrue(true);
+		} catch(Exception e) {
+			e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("------testEdna05() FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		} 
+	}	
 }

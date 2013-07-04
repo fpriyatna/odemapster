@@ -25,7 +25,7 @@ public class R2RML_Atlashp {
 	public void run(String configurationDirectory, String configurationFile, String mappingDocumentFile, String testName) {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
+			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile, runner.getConfigurationProperties());
 			R2RMLElementVisitor dataTranslateVisitor = new R2RMLElementDataTranslateVisitor(configurationDirectory
 					, configurationFile); 
 			md.accept(dataTranslateVisitor);

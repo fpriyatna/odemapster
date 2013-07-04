@@ -42,7 +42,7 @@ public class R2RMLTC {
 	public void run(String configurationFile, String mappingDocumentFile, String testName) {
 		try {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
-			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile);
+			R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentFile, runner.getConfigurationProperties());
 			md.accept(new R2RMLElementDataTranslateVisitor(configurationDirectory
 					, configurationFile));
 			logger.info("------" + testName + " DONE------\n\n");

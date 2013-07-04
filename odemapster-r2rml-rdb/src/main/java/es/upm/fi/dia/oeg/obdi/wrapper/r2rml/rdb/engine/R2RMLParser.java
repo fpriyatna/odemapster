@@ -21,7 +21,7 @@ public class R2RMLParser extends AbstractParser {
 	@Override
 	public AbstractMappingDocument parse(Object mappingResource) throws Exception {
 		String mappingDocumentPath = (String) mappingResource;
-		R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentPath); 
+		R2RMLMappingDocument md = new R2RMLMappingDocument(mappingDocumentPath, null); 
 		return md;
 	}
 

@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.DatatypeMapper;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
@@ -76,6 +77,8 @@ implements R2RMLElementVisitor {
 	@Override
 	public void translateData(AbstractMappingDocument mappingDocument)
 			throws Exception {
+		Connection conn = this.properties.getConn();
+		
 		Collection<AbstractConceptMapping> triplesMaps = 
 				mappingDocument.getConceptMappings();
 		if(triplesMaps != null) {
@@ -92,6 +95,8 @@ implements R2RMLElementVisitor {
 					throw new QueryTranslatorException(e.getMessage(), e);
 				}
 			}
+			
+			DBUtility.closeConnection(conn, R2RMLElementDataTranslateVisitor.class.getName());
 		}
 		//this.materializer.materialize();
 	}
@@ -241,13 +246,13 @@ implements R2RMLElementVisitor {
 		return null;
 	}
 
-	public void translateData(R2RMLTriplesMap triplesMap, String sqlQuery) throws SQLException {
+	public void translateData(R2RMLTriplesMap triplesMap, String sqlQuery) throws Exception {
 		Connection conn = this.properties.openConnection();
 		int timeout = this.properties.getDatabaseTimeout();
 		ResultSet rs = RDBReader.evaluateQuery(sqlQuery, conn, timeout);
 		this.translateData(triplesMap, rs);
 		rs.close();
-		conn.close();		
+		//conn.close();		
 	}
 
 	public void translateData(R2RMLTriplesMap triplesMap, ResultSet rs) throws SQLException {
@@ -345,6 +350,9 @@ implements R2RMLElementVisitor {
 						if(objectMap != null) {
 							//retrieve the alias from predicateObjectMap, not triplesMap!
 							String alias = predicateObjectMap.getAlias();
+							if(alias == null) {
+								alias = logicalTableAlias;
+							}
 							//String alias = triplesMap.getLogicalTable().getAlias();
 							
 							String objectMapUnfoldedValue = 

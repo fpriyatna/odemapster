@@ -3,12 +3,10 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine;
 import org.apache.log4j.Logger;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractQueryResultWriter;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
 
 public class R2RMLRunner extends AbstractRunner {
@@ -62,13 +60,9 @@ public class R2RMLRunner extends AbstractRunner {
 	@Override
 	public void readMappingDocumentFile(
 			String mappingDocumentFile) throws Exception {
-		super.mappingDocument = new R2RMLMappingDocument(mappingDocumentFile); 
+		super.mappingDocument = new R2RMLMappingDocument(mappingDocumentFile, configurationProperties);
 	}
 
-	@Override
-	protected IQueryTranslationOptimizer buildQueryTranslationOptimizer() {
-		return new QueryTranslationOptimizer();
-	}
 
 //	@Override
 //	public String getQueryTranslatorClassName() {
