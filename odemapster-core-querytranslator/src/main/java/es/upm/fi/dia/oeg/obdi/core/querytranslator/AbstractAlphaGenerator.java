@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
@@ -74,7 +75,8 @@ public abstract class AbstractAlphaGenerator {
 	protected abstract SQLLogicalTable calculateAlphaSubject(
 			Node subject, AbstractConceptMapping abstractConceptMapping) throws Exception;
 	
-	public List<AlphaResultUnion> calculateAlphaSTG(Collection<Triple> triples, AbstractConceptMapping cm)
+	public List<AlphaResultUnion> calculateAlphaSTG(
+			Collection<Triple> triples, AbstractConceptMapping cm)
 			throws Exception {
 		List<AlphaResultUnion> alphaResultUnionList = new Vector<AlphaResultUnion>();
 		
@@ -94,15 +96,27 @@ public abstract class AbstractAlphaGenerator {
 			List<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
 			if(tpPredicate.isURI()) {
 				String tpPredicateURI = tpPredicate.getURI();
-				List<SQLQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
-						tp, cm, tpPredicateURI,logicalTableAlias);
-				if(alphaPredicateObjectAux != null) {
-					alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
+
+				Collection<String> mappedClassURIs = cm.getMappedClassURIs();
+				boolean processableTriplePattern = true;
+				if(tp.getObject().isURI()) {
+					String objectURI = tp.getObject().getURI();
+					if(RDF.type.getURI().equals(tpPredicateURI) && mappedClassURIs.contains(objectURI)) {
+						processableTriplePattern = false;
+					}
 				}
-				AlphaResult alphaResult = new AlphaResult(alphaSubject
-						, alphaPredicateObjects, tpPredicateURI);
-				AlphaResultUnion alphaTP = new AlphaResultUnion(alphaResult);
-				alphaResultUnionList.add(alphaTP);
+				
+				if(processableTriplePattern) {
+					List<SQLQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+							tp, cm, tpPredicateURI,logicalTableAlias);
+					if(alphaPredicateObjectAux != null) {
+						alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
+					}
+					AlphaResult alphaResult = new AlphaResult(alphaSubject
+							, alphaPredicateObjects, tpPredicateURI);
+					AlphaResultUnion alphaTP = new AlphaResultUnion(alphaResult);
+					alphaResultUnionList.add(alphaTP);					
+				}
 			} else if(tpPredicate.isVariable()){
 				Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
 				AlphaResultUnion alphaTP = new AlphaResultUnion();

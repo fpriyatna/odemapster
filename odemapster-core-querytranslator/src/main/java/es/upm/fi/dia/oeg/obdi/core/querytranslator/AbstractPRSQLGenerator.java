@@ -7,12 +7,14 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZConstant;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -61,11 +63,16 @@ public abstract class AbstractPRSQLGenerator {
 		}
 
 		if(object != subject && object != predicate) {
+			String columnType = null;
+			if(predicate.isVariable()) {
+				columnType = Constants.COLUMN_TYPE_TEXT;
+			}
+			
 			//line 23
-			Collection<ZSelectItem> selectItems = this.genPRSQLObject(
+			Collection<ZSelectItem> objectSelectItems = this.genPRSQLObject(
 					tp, alphaResult, betaGenerator, nameGenerator,
-					cmSubject, predicateURI);
-			prList.addAll(selectItems);
+					cmSubject, predicateURI, columnType);
+			prList.addAll(objectSelectItems);
 		}
 
 		logger.debug("genPRSQL = " + prList);
@@ -77,22 +84,31 @@ public abstract class AbstractPRSQLGenerator {
 			, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
 			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject
 			, String predicateURI
+			, String columnType
 			) throws QueryTranslationException {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
 
 		try {
-			SQLSelectItem betaObj = betaGenerator.calculateBetaObject(
+			List<SQLSelectItem> betaObjSelectItems = betaGenerator.calculateBetaObject(
 					tp, cmSubject, predicateURI, alphaResult);
-			ZSelectItem selectItem = betaObj.clone();
-			String selectItemAlias = nameGenerator.generateName(
-					tp.getObject());
-			if(selectItemAlias != null) {
-				selectItem.setAlias(selectItemAlias);
-			}
-			selectItems.add(selectItem); //line 23
+			for(SQLSelectItem betaObjSelectItem : betaObjSelectItems) {
+				SQLSelectItem selectItem = betaObjSelectItem.clone();
+				String selectItemAlias = nameGenerator.generateName(
+						tp.getObject());
+				if(selectItemAlias != null) {
+					selectItem.setAlias(selectItemAlias);
+				}
+				selectItems.add(selectItem); //line 23
 
-			logger.debug("genPRSQLObject = " + selectItem);
-			return selectItems;			
+				String dbType = owner.getDatabaseType();
+				if(dbType != null && !dbType.equals("")) {
+					selectItem.setDbType(dbType);
+				}
+				if(columnType != null) {
+					selectItem.setColumnType(columnType);	
+				}
+			}
+			return selectItems;
 		} catch (Exception e) {
 			throw new QueryTranslationException(e);
 		}
@@ -107,10 +123,14 @@ public abstract class AbstractPRSQLGenerator {
 		try {
 			SQLSelectItem betaPre = 
 					betaGenerator.calculateBetaPredicate(predicateURI);
-			ZSelectItem selectItem = betaPre.clone();
+			SQLSelectItem selectItem = betaPre.clone();
+			String databaseType = this.owner.getDatabaseType();
+//			if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
+//				selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
+//				selectItem.setColumnType("text");
+//			}
 			String alias = nameGenerator.generateName(tp.getPredicate());
 			selectItem.setAlias(alias);
-			logger.debug("genPRSQLPredicate = " + selectItem);
 			return selectItem;			
 		} catch (Exception e) {
 			throw new QueryTranslationException(e);
@@ -171,7 +191,7 @@ public abstract class AbstractPRSQLGenerator {
 					Collection<ZSelectItem> selectItemsObject = 
 							this.genPRSQLObject(tp, alphaResult,
 									betaGenerator, nameGenerator,
-									cmSubject, predicateURI);
+									cmSubject, predicateURI, null);
 					prList.addAll(selectItemsObject);
 				}				
 			}

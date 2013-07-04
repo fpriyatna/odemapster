@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -23,20 +24,33 @@ import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.algebra.optimize.Optimize;
 import com.hp.hpl.jena.sparql.algebra.optimize.Rewrite;
 import com.hp.hpl.jena.sparql.algebra.optimize.TransformFilterConjunction;
-import com.hp.hpl.jena.sparql.algebra.optimize.TransformFilterPlacement;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
-import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.sparql.expr.ExprList;
+
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 
 public class QueryRewritter implements Rewrite {
 	private static Logger logger = Logger.getLogger(QueryRewritter.class);
+	private Map<Node, Set<AbstractConceptMapping>> mapInferredTypes;
 
 	public Op rewrite(Op op) {
 		Op result = null;
 		
 		if(op instanceof OpBGP) { //triple or bgp pattern
 			OpBGP bgp = (OpBGP) op;
-			result = QueryTranslatorUtility.reorderTriplesBySubject(bgp);
+			OpBGP bgpGrouped = QueryTranslatorUtility.groupTriplesBySubject(bgp);
+			List<Triple> triplesGrouped = bgpGrouped.getPattern().getList();
+			
+			List<Triple> triplesReordered;
+			try {
+				triplesReordered = this.reorderSTGs(triplesGrouped);	
+			} catch(Exception e) {
+				logger.warn("Error occured when reordering STGs!");
+				triplesReordered = triplesGrouped;
+			}
+			
+			BasicPattern basicPattern = BasicPattern.wrap(triplesReordered);
+			result = new OpBGP(basicPattern);
 			
 //			List<OpBGP> bgpSplitted = QueryTranslatorUtility.splitBGP(bgp2.getPattern().getList());
 //			if(bgpSplitted.size() > 1) {
@@ -90,7 +104,19 @@ public class QueryRewritter implements Rewrite {
 						BasicPattern leftChildRewrittenPattern = leftChildRewrittenBGP.getPattern();
 						leftChildRewrittenPattern.add(rightEtp);
 						logger.debug("leftChildRewrittenPattern = " + leftChildRewrittenPattern);
-						result = leftChildRewrittenBGP;
+						//result = leftChildRewrittenBGP;
+						OpBGP bgpGrouped = QueryTranslatorUtility.groupTriplesBySubject(leftChildRewrittenBGP);
+						List<Triple> triplesGrouped = bgpGrouped.getPattern().getList();
+						
+						try {
+							List<Triple> triplesReordered = this.reorderSTGs(triplesGrouped);
+							BasicPattern basicPattern = BasicPattern.wrap(triplesReordered);
+							result = new OpBGP(basicPattern);
+						} catch(Exception e) {
+							String errorMesssage = "error occured while reodering STG.";
+							logger.warn(errorMesssage);
+							result = bgpGrouped;
+						}
 					} else {
 						result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
 					}
@@ -153,5 +179,59 @@ public class QueryRewritter implements Rewrite {
 
 		return result;
 	}
+
+	public void setMapInferredTypes(
+			Map<Node, Set<AbstractConceptMapping>> mapInferredTypes) {
+		this.mapInferredTypes = mapInferredTypes;
+	}
+	
+	public List<Triple> reorderSTGs(List<Triple> triples) {
+		if(triples == null) {
+			return null;
+		} else if(triples.size() == 1) {
+			return triples;
+		} else {
+			List<Triple> result = new Vector<Triple>();
+			Map<Node, List<Triple>> mapNodeTriples = new HashMap<Node, List<Triple>>();
+			Map<Node, Long> mapNodeTableSize = new HashMap<Node, Long>();
+			
+			for(Triple tp : triples) {
+				Node tpSubject = tp.getSubject();
+				Collection<AbstractConceptMapping> cms = this.mapInferredTypes.get(tpSubject);
+				if(cms == null) {
+					logger.warn("No inferred types for " + tpSubject);
+				} else {
+					AbstractConceptMapping cm = cms.iterator().next();
+					long logicalTableSize = cm.getLogicalTableSize();
+					if(tpSubject.isURI()) {
+						logicalTableSize = logicalTableSize - 1;
+					}
+					
+					List<Triple> mappedTriples = mapNodeTriples.get(tpSubject);
+					if(mappedTriples == null) {
+						mappedTriples = new Vector<Triple>();
+						mapNodeTriples.put(tpSubject, mappedTriples);
+					}
+					mappedTriples.add(tp);
+					
+					Long mappedTableSize = mapNodeTableSize.get(tpSubject);
+					if(mappedTableSize == null) {
+						mappedTableSize = new Long(logicalTableSize);
+						mapNodeTableSize.put(tpSubject, mappedTableSize);
+					}					
+				}
+
+			}
+			
+			Map<Node, Long> mapNodeTableSizeResorted = QueryTranslatorUtility.sortByValue(mapNodeTableSize);
+			Set<Node> nodeTableSizeResorted = mapNodeTableSizeResorted.keySet();
+			for(Node node : nodeTableSizeResorted) {
+				result.addAll(mapNodeTriples.get(node));
+			}
+			
+			return result;
+		}
+	}
+
 
 }

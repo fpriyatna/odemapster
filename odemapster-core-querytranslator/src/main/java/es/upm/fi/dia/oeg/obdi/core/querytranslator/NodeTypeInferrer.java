@@ -102,14 +102,50 @@ public class NodeTypeInferrer {
 	
 	private Map<Node, Set<AbstractConceptMapping>> infer(Op opQueryPattern) {
 		if(this.mapInferredTypes == null) {
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesByRdfType = this.inferByRDFType(opQueryPattern);
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesBySubject = this.inferBySubject(opQueryPattern);
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesByUri = this.inferByURI(opQueryPattern);
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesByRdfType = 
+					this.inferByRDFType(opQueryPattern);
+			logger.info("mapNodeTypesByRdfType = " + mapNodeTypesByRdfType);
+
+//			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesBySubject = 
+//					this.inferBySubject(opQueryPattern);
+//			logger.info("mapNodeTypesBySubject = " + mapNodeTypesBySubject);
+
+			Map<Node, Set<AbstractConceptMapping>> mapSubjectTypesByPredicatesURIs = 
+					this.inferSubjectTypesByPredicatesURIs(opQueryPattern);
+			logger.info("mapSubjectTypesByPredicatesURIs = " + mapSubjectTypesByPredicatesURIs);
+
+			Map<Node, Set<AbstractConceptMapping>> mapSubjectTypesBySubjectUri = 
+					this.inferSubjectTypesBySubjectURI(opQueryPattern);
+			logger.info("mapSubjectTypesBySubjectUri = " + mapSubjectTypesBySubjectUri);
+
+			Map<Node, Set<AbstractConceptMapping>> mapObjectTypesByObjectsURIs = 
+					this.inferObjectTypesByObjectURI(opQueryPattern);
+			logger.info("mapObjectTypesByObjectsURIs = " + mapObjectTypesByObjectsURIs);
+			for(Node mapNodeTypesByUriKey : mapObjectTypesByObjectsURIs.keySet()) {
+				Set<AbstractConceptMapping> mapNodeTypesByUriValue = mapObjectTypesByObjectsURIs.get(mapNodeTypesByUriKey);
+				Set<AbstractConceptMapping> setConceptMappingsWithoutClassURI = new HashSet<AbstractConceptMapping>();
+				for(AbstractConceptMapping cm : mapNodeTypesByUriValue) {
+					Collection<String> mappedClassURIs = cm.getMappedClassURIs(); 
+					if(mappedClassURIs == null || mappedClassURIs.isEmpty()) {
+						setConceptMappingsWithoutClassURI.add(cm);
+					}
+				}
+				mapNodeTypesByUriValue.removeAll(setConceptMappingsWithoutClassURI);
+			}
+			logger.info("mapObjectTypesByObjectsURIs updated = " + mapObjectTypesByObjectsURIs);
+
+			Map<Node, Set<AbstractConceptMapping>> mapObjectTypesByPredicateURI = 
+			this.inferObjectTypesByPredicateURI(opQueryPattern);
+			logger.info("mapObjectTypesByPredicateURI = " + mapObjectTypesByPredicateURI);
+
 			
 			List<Map<Node, Set<AbstractConceptMapping>>> listMapNodes = new Vector<Map<Node,Set<AbstractConceptMapping>>>();
 			listMapNodes.add(mapNodeTypesByRdfType);
-			listMapNodes.add(mapNodeTypesBySubject);
-			listMapNodes.add(mapNodeTypesByUri);
+//			listMapNodes.add(mapNodeTypesBySubject);
+			listMapNodes.add(mapSubjectTypesBySubjectUri);
+			listMapNodes.add(mapSubjectTypesByPredicatesURIs);
+			listMapNodes.add(mapObjectTypesByObjectsURIs);
+			listMapNodes.add(mapObjectTypesByPredicateURI);
 			
 			Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = 
 					QueryTranslatorUtility.mergeMaps(listMapNodes);
@@ -137,10 +173,13 @@ public class NodeTypeInferrer {
 						String subjectType = object.getURI();
 						Set<AbstractConceptMapping> cms = 
 								this.mappingDocument.getConceptMappingsByConceptName(subjectType);
+						
 						if(cms != null && cms.size() > 0) {
 							this.addToInferredTypes(mapNodeTypes, subject, cms);
 							//this.mapNodeConceptMapping.put(subject, cm);
-
+						} else {
+							String errorMessage = "No rdf:type mapping for: " + subjectType;
+							logger.debug(errorMessage);
 						}
 					}					
 				}
@@ -158,8 +197,10 @@ public class NodeTypeInferrer {
 			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
 		} else if(op instanceof OpJoin) {
 			OpJoin opJoin = (OpJoin) op;
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferByRDFType(opJoin.getLeft());
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferByRDFType(opJoin.getRight());
+			Op opJoinLeft = opJoin.getLeft();
+			Op opJoinRight = opJoin.getRight();
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferByRDFType(opJoinLeft);
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferByRDFType(opJoinRight);
 			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
 		} else if(op instanceof OpFilter) {
 			OpFilter opFilter = (OpFilter) op;
@@ -169,6 +210,7 @@ public class NodeTypeInferrer {
 		return mapNodeTypes;
 	}
 
+	
 	private Map<Node, Set<AbstractConceptMapping>> inferBySubject(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
 		Map<Node,List<Set<AbstractConceptMapping>>> mapNodeListNodeTypes = new HashMap<Node, List<Set<AbstractConceptMapping>>>();
@@ -204,8 +246,6 @@ public class NodeTypeInferrer {
 				}
 				nodeTypes.addAll(cms);
 			}
-			
-			
 		} else if(op instanceof OpLeftJoin) {
 			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
 			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferByRDFType(opLeftJoin.getLeft());
@@ -230,88 +270,240 @@ public class NodeTypeInferrer {
 	}
 
 	
-	private Set<AbstractConceptMapping> inferByPredicateURI(String predicateURI) {
-		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
-		
-		if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-			Set<AbstractConceptMapping> cms = 
-					this.mappingDocument.getConceptMappingByPropertyUri(predicateURI);
-			if(cms != null && cms.size() > 0) {
-				result.addAll(cms);
+//	private Set<AbstractConceptMapping> inferSubjectTypesByPredicateURI(
+//			String predicateURI) {
+//		Set<AbstractConceptMapping> result = 
+//				new HashSet<AbstractConceptMapping>();
+//		
+//		if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
+//			Set<AbstractConceptMapping> cms = 
+//					this.mappingDocument.getConceptMappingByPropertyUri(
+//							predicateURI);
+//			if(cms != null && cms.size() > 0) {
+//				result.addAll(cms);
+//				
+//
+//			}
+//		}
+//		
+//		return result;
+//	}
+	
+	private Map<Node, Set<AbstractConceptMapping>> inferSubjectsTypesByPredicateURIs(Map<Node, Set<Triple>> mapSubjectSTGs) {
+		Map<Node, Set<AbstractConceptMapping>> result = new HashMap<Node, Set<AbstractConceptMapping>>();
+		for(Node subject : mapSubjectSTGs.keySet()) {
+			Set<Triple> stg = mapSubjectSTGs.get(subject);
+			Set<String> predicateURIs = new HashSet<String>();
+			for(Triple tp : stg) {
+				Node tpPredicate = tp.getPredicate();
+				if(tpPredicate.isURI()) {
+					String predicateURI = tpPredicate.getURI();
+					if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
+						predicateURIs.add(predicateURI);
+					}
+				}
 			}
+			Set<AbstractConceptMapping> subjectTypes = 
+					this.mappingDocument.getConceptMappingByPropertyURIs(
+							predicateURIs);
+			result.put(subject, subjectTypes);
 		}
 		
 		return result;
 	}
 	
-	private Map<Node, Set<AbstractConceptMapping>> inferByURI(Op op) {
+	private Map<Node, Set<Triple>> bgpToSTGs(List<Triple> triples) {
+		Map<Node, Set<Triple>> result = new HashMap<Node, Set<Triple>>();
+		
+		for(Triple tp : triples) {
+			Node tpSubject = tp.getSubject();
+			Set<Triple> stg = result.get(tpSubject);
+			if(stg == null) {
+				stg = new HashSet<Triple>();
+				result.put(tpSubject, stg);
+			}
+			stg.add(tp);
+		}
+		
+		return result;
+	}
+	
+
+	
+	private Map<Node, Set<AbstractConceptMapping>> inferSubjectTypesBySubjectURI(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
 		
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
 			BasicPattern bp = bgp.getPattern();
 			List<Triple> bpTriples = bp.getList();
+			Map<Node, Set<Triple>> mapSubjectSTGs = this.bgpToSTGs(bpTriples);
+			
+			
 			for(Triple tp : bpTriples) {
 				Node subject = tp.getSubject();
-				Node tpPredicate = tp.getPredicate();
 				
-//				if(subject.isURI()) {
-//					String subjectURI = subject.getURI();
-//					Set<AbstractConceptMapping> nodeTypes = this.inferBySubjectURI(subjectURI);
-//					if(nodeTypes != null && nodeTypes.size() > 0) {
-//						this.addToInferredTypes(mapNodeTypes, subject, nodeTypes);
-//					}
-//					
-//				}
-				
-				
-				if(tpPredicate.isURI()) {
-					String predicateURI = tpPredicate.getURI();
-					Set<AbstractConceptMapping> nodeTypes = this.inferByPredicateURI(predicateURI);
-					if(nodeTypes != null && nodeTypes.size() > 0) {
-						this.addToInferredTypes(mapNodeTypes, subject, nodeTypes);
+				if(subject.isURI()) {
+					String subjectURI = subject.getURI();
+					Set<AbstractConceptMapping> subjectTypes = 
+							this.inferByURI(subjectURI);
+					if(subjectTypes != null && subjectTypes.size() > 0) {
+						this.addToInferredTypes(
+								mapNodeTypes, subject, subjectTypes);
 					}
-					
-//					if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-//						Set<AbstractConceptMapping> cms = this.mappingDocument.getConceptMappingByPropertyUri(predicateURI);
-//						if(cms != null && cms.size() > 0) {
-//							this.addToInferredTypes(mapNodeTypes, subject, cms);
-//						}
-//					}					
 				}
-				
-//				Node tpObject = tp.getObject();
-//				if(tpObject.isURI()) {
-//					String objectURI = tpObject.getURI();
-//					Set<AbstractConceptMapping> nodeTypes = this.inferBySubjectURI(objectURI);
-//					if(nodeTypes != null && nodeTypes.size() > 0) {
-//						this.addToInferredTypes(mapNodeTypes, tpObject, nodeTypes);
-//					}
-//				}				
 			}
 		} else if(op instanceof OpLeftJoin) {
 			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferByURI(opLeftJoin.getLeft());
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferByURI(opLeftJoin.getRight());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferSubjectTypesBySubjectURI(opLeftJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferSubjectTypesBySubjectURI(opLeftJoin.getRight());
 			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
 		} else if(op instanceof OpUnion) {
 			OpUnion opUnion = (OpUnion) op;
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferByURI(opUnion.getLeft());
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferByURI(opUnion.getRight());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferSubjectTypesBySubjectURI(opUnion.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferSubjectTypesBySubjectURI(opUnion.getRight());
 			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
 		} else if(op instanceof OpJoin) {
 			OpJoin opJoin = (OpJoin) op;
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferByURI(opJoin.getLeft());
-			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferByURI(opJoin.getRight());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferSubjectTypesBySubjectURI(opJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferSubjectTypesBySubjectURI(opJoin.getRight());
 			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
 		} else if(op instanceof OpFilter) {
 			OpFilter opFilter = (OpFilter) op;
-			mapNodeTypes = this.inferByURI(opFilter.getSubOp());
+			mapNodeTypes = this.inferSubjectTypesBySubjectURI(opFilter.getSubOp());
 		}
 		
 		return mapNodeTypes;
 	}
 
+	private Map<Node, Set<AbstractConceptMapping>> inferObjectTypesByObjectURI(Op op) {
+		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
+		
+		if(op instanceof OpBGP) {
+			OpBGP bgp = (OpBGP) op;
+			
+			for(Triple tp : bgp.getPattern().getList()) {
+				Node tpObject = tp.getObject();
+				if(tpObject.isURI()) {
+					String objectURI = tpObject.getURI();
+					Set<AbstractConceptMapping> nodeTypes = 
+							this.inferByURI(objectURI);
+					if(nodeTypes != null && nodeTypes.size() > 0) {
+						this.addToInferredTypes(mapNodeTypes, tpObject, nodeTypes);
+					}
+				}
+			}
+		} else if(op instanceof OpLeftJoin) {
+			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferObjectTypesByObjectURI(opLeftJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferObjectTypesByObjectURI(opLeftJoin.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpUnion) {
+			OpUnion opUnion = (OpUnion) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferObjectTypesByObjectURI(opUnion.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferObjectTypesByObjectURI(opUnion.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpJoin) {
+			OpJoin opJoin = (OpJoin) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferObjectTypesByObjectURI(opJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferObjectTypesByObjectURI(opJoin.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			mapNodeTypes = this.inferObjectTypesByObjectURI(opFilter.getSubOp());
+		}
+		
+		return mapNodeTypes;
+	}
+
+	private Map<Node, Set<AbstractConceptMapping>> inferObjectTypesByPredicateURI(Op op) {
+		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
+		
+		if(op instanceof OpBGP) {
+			OpBGP bgp = (OpBGP) op;
+			
+			for(Triple tp : bgp.getPattern().getList()) {
+				Node tpPredicate = tp.getPredicate();
+				Node tpObject = tp.getObject();
+				if(tpPredicate.isURI()) {
+					String predicateURI = tpPredicate.getURI();
+					if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
+						Set<AbstractConceptMapping> nodeTypes = 
+								this.mappingDocument.getPossibleRange(predicateURI);
+						//this.addToInferredTypes(mapNodeTypes, tp.getObject(), nodeTypes);
+						Set<AbstractConceptMapping> inferredTypes = mapNodeTypes.get(tpObject);
+						if(inferredTypes == null) { 
+							inferredTypes = new HashSet<AbstractConceptMapping>(); 
+						}
+						inferredTypes.addAll(nodeTypes);
+						mapNodeTypes.put(tpObject, inferredTypes);
+					}
+				}
+			}
+		} else if(op instanceof OpLeftJoin) {
+			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferObjectTypesByPredicateURI(opLeftJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferObjectTypesByPredicateURI(opLeftJoin.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpUnion) {
+			OpUnion opUnion = (OpUnion) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferObjectTypesByPredicateURI(opUnion.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferObjectTypesByPredicateURI(opUnion.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpJoin) {
+			OpJoin opJoin = (OpJoin) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferObjectTypesByPredicateURI(opJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferObjectTypesByPredicateURI(opJoin.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			mapNodeTypes = this.inferObjectTypesByPredicateURI(opFilter.getSubOp());
+		}
+		
+		return mapNodeTypes;
+	}
+	
+	private Map<Node, Set<AbstractConceptMapping>> inferSubjectTypesByPredicatesURIs(Op op) {
+		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
+		
+		if(op instanceof OpBGP) {
+			OpBGP bgp = (OpBGP) op;
+			BasicPattern bp = bgp.getPattern();
+			List<Triple> bpTriples = bp.getList();
+			Map<Node, Set<Triple>> mapSubjectSTGs = this.bgpToSTGs(bpTriples);
+			
+			//get subject types by all the predicate URIs of the STGs
+			Map<Node, Set<AbstractConceptMapping>> subjectsTypesByPredicateURIs = 
+					this.inferSubjectsTypesByPredicateURIs(mapSubjectSTGs);
+			for(Node subject : subjectsTypesByPredicateURIs.keySet()) {
+				Set<AbstractConceptMapping> subjectTypes = subjectsTypesByPredicateURIs.get(subject);
+				if(subjectTypes != null && subjectTypes.size() > 0) {
+					this.addToInferredTypes(
+							mapNodeTypes, subject, subjectTypes);
+				}
+			}
+		} else if(op instanceof OpLeftJoin) {
+			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferSubjectTypesByPredicatesURIs(opLeftJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferSubjectTypesByPredicatesURIs(opLeftJoin.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpUnion) {
+			OpUnion opUnion = (OpUnion) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferSubjectTypesByPredicatesURIs(opUnion.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferSubjectTypesByPredicatesURIs(opUnion.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpJoin) {
+			OpJoin opJoin = (OpJoin) op;
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesLeft = this.inferSubjectTypesByPredicatesURIs(opJoin.getLeft());
+			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesRight = this.inferSubjectTypesByPredicatesURIs(opJoin.getRight());
+			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesLeft, mapNodeTypesRight);
+		} else if(op instanceof OpFilter) {
+			OpFilter opFilter = (OpFilter) op;
+			mapNodeTypes = this.inferSubjectTypesByPredicatesURIs(opFilter.getSubOp());
+		}
+		
+		return mapNodeTypes;
+	}
 	
 
 
@@ -322,10 +514,12 @@ public class NodeTypeInferrer {
 		return this.mapInferredTypes.get(node);
 	}
 	
-	public Set<AbstractConceptMapping> inferBySubjectURI(String uri) {
+	public Set<AbstractConceptMapping> inferByURI(
+			String uri) {
 		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
 		
-		Collection<AbstractConceptMapping> cms = this.mappingDocument.getConceptMappings();
+		Collection<AbstractConceptMapping> cms = 
+				this.mappingDocument.getConceptMappings();
 		for(AbstractConceptMapping cm : cms) {
 			try {
 				if(cm.isPossibleInstance(uri)) {
@@ -338,5 +532,15 @@ public class NodeTypeInferrer {
 		
 		return result;
 	}
+
+	public String printInferredTypes() {
+		StringBuffer result = new StringBuffer();
+		for(Node key : this.mapInferredTypes.keySet()) {
+			result.append(key + " : " + this.mapInferredTypes.get(key));
+			result.append("\n");
+		}
+		return result.toString();
+	}
+	
 
 }
