@@ -6,10 +6,12 @@ import java.util.HashSet;
 import Zql.ZExp;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
-import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 
 public class SQLSelectItem extends ZSelectItem implements Cloneable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String dbType;
 	private String schema;
 	private String table;
@@ -22,11 +24,23 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		return selectItem;
 	}
 	
+	
 	public SQLSelectItem() {
 		super();
 	}
 
 	
+	private SQLSelectItem(String dbType, String schema, String table,
+			String column, String columnType) {
+		super();
+		this.dbType = dbType;
+		this.schema = schema;
+		this.table = table;
+		this.column = column;
+		this.columnType = columnType;
+	}
+
+
 	public static SQLSelectItem createSQLItem(String dbType, String inputColumnName, String tableAlias) {
 		if(tableAlias != null && !tableAlias.equals("")) {
 			inputColumnName = tableAlias + "." + inputColumnName;
@@ -42,31 +56,22 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		
 		String[] splitColumns = arg0.split("\\.");
 		if(splitColumns.length == 1) {//nr
-			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
-			this.column = splitColumns[0];
 		} else if(splitColumns.length == 2) { //product.nr
-			//String tableName = Utility.replaceNameWithSpaceChars(splitColumns[0]);			
 			this.table = splitColumns[0];
-			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[1]);
-			this.column = splitColumns[1];
 		} else if(splitColumns.length == 3) { //benchmark.product.nr
-			//String schemaName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
 			this.schema = splitColumns[0];
-			//String tableName = Utility.replaceNameWithSpaceChars(splitColumns[1]);
 			this.table = splitColumns[1];
-			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[2]);
-			this.column = splitColumns[2];
 		} else if(splitColumns.length == 4) {//benchmark.dbo.product.nr			
-			//String schemaName = Utility.replaceNameWithSpaceChars(splitColumns[0]);
 			this.schema = splitColumns[0];
-
-			//String tableName1 = Utility.replaceNameWithSpaceChars(splitColumns[1]);
-			//String tableName2 = Utility.replaceNameWithSpaceChars(splitColumns[2]);
 			this.table = splitColumns[1] + "." + splitColumns[2];
-			
-			//String columnName = Utility.replaceNameWithSpaceChars(splitColumns[3]);
-			this.column = splitColumns[3];
 		}
+		String[] splitColumnType = splitColumns[splitColumns.length - 1].split("::");
+		this.column = splitColumnType[0];
+		if(splitColumnType.length > 1) {
+			this.columnType = splitColumnType[1];	
+		}
+		
+
 	}
 
 	@Override
@@ -113,62 +118,29 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	public String toString() {
 		String result;
 		
-		String thisInString = super.toString();
 		if(this.dbType == null) {
 			dbType = Constants.DATABASE_MYSQL;
 		}
 		
-		boolean isExpression = this.isExpression();
+		this.isExpression();
+		String enclosedCharacter = "\"";
+
 		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType)) {
-			String table = "\"" + this.getTable() + "\"";
-			String column = "\"" + this.getColumn() + "\"";
-			
-			if(this.isExpression()) {
-				result = this.getExpression().toString();
-			} else {
-				if(this.getTable() == null) {
-					result = column;
-				} else {
-					result = table + "." + column;
-				}
-				//result = super.toString();
-			}
+			enclosedCharacter = "\"";
 		} else if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
-			if(this.columnType == null) {
-				result = super.toString();
-			} else {
-				//String expString = this.getExpression().toString();
-				String expString = super.toString();
-				expString += "::" + this.columnType; 
-				result = expString;
-				
-				String alias = this.getAlias();  
-				if(alias != null && !alias.equals("")) {
-					result += " AS " + alias;
-				}
-			}
+			enclosedCharacter = "\"";
 		} else {
-			if(this.isExpression()) {
-				result = this.getExpression().toString(); 
-			} else {
-				result = "";
-				if(this.schema != null) {
-					//result += R2RMLUtility.replaceNameWithSpaceChars(this.schema) + ".";
-					result += this.schema + ".";
-				}
-				if(this.table != null) {
-//					result += R2RMLUtility.replaceNameWithSpaceChars(this.table) + ".";
-					result += this.table + ".";
-				}
-				if(this.column != null) {
-					//result += R2RMLUtility.replaceNameWithSpaceChars(this.column) + ".";
-					result += this.column + ".";
-				}
-				//remove the last dot and space
-				result = result.substring(0, result.length() - 1);
-				
-			}
-			//result = super.toString();
+			enclosedCharacter = "\\`";
+		}
+
+		if(this.isExpression()) {
+			result = this.getExpression().toString();
+		} else {
+			result = this.getFullyQualifiedName(enclosedCharacter);
+		}
+
+		if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType) && this.columnType != null) {
+			result += "::" + this.columnType; 
 		}
 		
 		String alias = this.getAlias();
@@ -239,7 +211,8 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		} else {
 			String alias = this.getAlias();
 			this.setAlias("");
-			selectItem = new SQLSelectItem(this.toString());
+			
+			selectItem = new SQLSelectItem(this.dbType, this.schema, this.table, this.column, null);
 			if(alias != null) {
 				this.setAlias(alias);	
 			}
@@ -268,7 +241,23 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		return columnType;
 	}
 
-	
-	
+	public String getFullyQualifiedName(String enclosedCharacter) {
+		String result = "";
+		
+		if(this.schema != null) {
+			result += enclosedCharacter + this.schema + enclosedCharacter + ".";
+		}
+		if(this.table != null) {
+			result += enclosedCharacter + this.table + enclosedCharacter + ".";
+		}
+		if(this.column != null) {
+			result += enclosedCharacter + this.column + enclosedCharacter + ".";
+		}
+		
+		//remove the last dot and space
+		result = result.substring(0, result.length() - 1);
+
+		return result;
+	}
 	
 }

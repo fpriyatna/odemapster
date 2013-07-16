@@ -1,7 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import es.upm.fi.dia.oeg.obdi.core.exception.ResultSetException;
 

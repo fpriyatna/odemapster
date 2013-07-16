@@ -2,8 +2,6 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-
 import es.upm.fi.dia.oeg.obdi.core.exception.ResultSetException;
 
 public class RDBResultSet extends AbstractResultSet {

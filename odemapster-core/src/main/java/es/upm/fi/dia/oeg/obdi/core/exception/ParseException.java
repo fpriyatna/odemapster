@@ -2,6 +2,11 @@ package es.upm.fi.dia.oeg.obdi.core.exception;
 
 public class ParseException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public ParseException() {
 		super();
 		// TODO Auto-generated constructor stub

@@ -1,25 +1,24 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataSourceReader;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractQueryResultWriter;
-import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 
 public class ConfigurationProperties extends Properties {
 	//change this to typesafe config
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private Logger logger = Logger.getLogger(ConfigurationProperties.class);
 
 	private Connection conn;
@@ -141,10 +140,10 @@ public class ConfigurationProperties extends Properties {
 					logger.info("Connection obtained.");
 				}
 			} catch (SQLException e) {
+				this.conn = null;
 				String errorMessage = "Error loading database, error message = " + e.getMessage();
 				logger.error(errorMessage);
 				//e.printStackTrace();
-				throw e;
 			}
 		}
 

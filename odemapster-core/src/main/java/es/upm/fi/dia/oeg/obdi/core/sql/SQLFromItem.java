@@ -6,6 +6,11 @@ import Zql.ZFromItem;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 
 public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public enum LogicalTableType {TABLE_NAME, QUERY_STRING};
 	
 //	public static int FORM_TABLE = ZAliasedName.FORM_TABLE;

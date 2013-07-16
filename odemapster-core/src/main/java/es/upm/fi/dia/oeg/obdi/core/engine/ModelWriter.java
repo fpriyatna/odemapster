@@ -2,8 +2,6 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.OutputStream;
 
 import org.apache.log4j.Logger;
 

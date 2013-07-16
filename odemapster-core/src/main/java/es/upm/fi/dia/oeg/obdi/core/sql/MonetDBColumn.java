@@ -7,6 +7,11 @@ import Zql.ZSelectItem;
 public class MonetDBColumn extends ZConstant {
 
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public MonetDBColumn(String arg0, int arg1) {
 		super(arg0, arg1);
 		// TODO Auto-generated constructor stub

@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
-import es.upm.fi.dia.oeg.newrqr.MappingsExtractor;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
@@ -21,7 +20,6 @@ import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
@@ -37,7 +35,8 @@ public abstract class AbstractRunner {
 	public Query getSparqQuery() {
 		return sparqQuery;
 	}
-
+	private Collection<IQuery> sqlQueries;
+	
 	private String queryResultWriterClassName = null;
 	private AbstractQueryResultWriter queryResultWriter = null;
 	private String dataSourceReaderClassName = null;
@@ -152,15 +151,13 @@ public abstract class AbstractRunner {
 			} else {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
-				String mappingDocumentFile = 
-						this.configurationProperties.getMappingDocumentFilePath();
+				this.configurationProperties.getMappingDocumentFilePath();
 //				Collection <String> mappedOntologyElements = MappingsExtractor.getMappedPredcatesFromR2O(mappingDocumentFile);
 				Collection <String> mappedOntologyElements = this.mappingDocument.getMappedConcepts();
 				Collection <String> mappedOntologyElements2 = this.mappingDocument.getMappedProperties();
 				mappedOntologyElements.addAll(mappedOntologyElements2);
 				
 				
-				String rewritterWrapperMode = RewriterWrapper.fullMode;
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
 				queries = RewriterWrapper.rewrite(this.sparqQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
@@ -171,11 +168,13 @@ public abstract class AbstractRunner {
 
 
 			//translate sparql queries into sql queries
-			Collection<IQuery> sqlQueries = 
+			this.sqlQueries = 
 					this.translateSPARQLQueriesIntoSQLQueries(queries);
 			
 			//translate result
-			this.resultProcessor.translateResult(sqlQueries);
+			if (this.conn != null) {
+				this.resultProcessor.translateResult(this.sqlQueries);	
+			}
 		}
 
 		logger.info("**********************DONE****************************");
@@ -503,6 +502,10 @@ public abstract class AbstractRunner {
 
 	public void setDataSourceReaderClassName(String queryEvaluatorClassName) {
 		this.dataSourceReaderClassName = queryEvaluatorClassName;
+	}
+
+	public Collection<IQuery> getSqlQueries() {
+		return sqlQueries;
 	}
 	
 

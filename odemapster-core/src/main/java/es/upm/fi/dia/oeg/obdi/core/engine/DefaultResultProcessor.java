@@ -4,15 +4,10 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 //import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
-import org.apache.log4j.Logger;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public class DefaultResultProcessor {
-	private static Logger logger = Logger.getLogger(DefaultResultProcessor.class);
 	//AbstractRunner runner;
 	AbstractDataSourceReader dataSourceReader;
 	AbstractQueryResultWriter queryResultWriter;

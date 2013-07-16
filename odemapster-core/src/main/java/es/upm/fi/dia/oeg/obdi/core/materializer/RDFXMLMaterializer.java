@@ -14,9 +14,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
-
 
 public class RDFXMLMaterializer extends AbstractMaterializer {
 	private static Logger logger = Logger.getLogger(RDFXMLMaterializer.class);

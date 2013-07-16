@@ -1,16 +1,12 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.sql.Connection;
-import java.util.Map;
 
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.exception.QueryTranslatorException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public interface IQueryTranslator {
 	Connection getConnection();

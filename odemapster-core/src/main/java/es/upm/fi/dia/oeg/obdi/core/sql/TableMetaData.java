@@ -2,10 +2,8 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 

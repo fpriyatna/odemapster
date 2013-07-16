@@ -6,6 +6,11 @@ import Zql.ZExp;
 import Zql.ZExpression;
 
 public class SQLExpression extends ZExpression {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public enum OPERATOR_PLACE {PREFIX, INFIX, SUFFIX};
 	private OPERATOR_PLACE operatorPlace;
 	

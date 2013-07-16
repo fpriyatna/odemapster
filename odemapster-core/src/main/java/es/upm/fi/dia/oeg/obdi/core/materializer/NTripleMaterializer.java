@@ -1,21 +1,17 @@
 package es.upm.fi.dia.oeg.obdi.core.materializer;
 
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.apache.log4j.Logger;
-import org.apache.xerces.util.URI;
 
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 
 
 public class NTripleMaterializer extends AbstractMaterializer {
@@ -122,13 +118,11 @@ public class NTripleMaterializer extends AbstractMaterializer {
 
 	@Override
 	public String createSubject(boolean isBlankNode, String subjectURI) {
-		Resource subjectResouce;
-
 		if(isBlankNode) {
 			AnonId anonId = new AnonId(subjectURI);
-			subjectResouce = model.createResource(anonId);		
+			model.createResource(anonId);		
 		} else {
-			subjectResouce = model.createResource(subjectURI);
+			model.createResource(subjectURI);
 		}
 
 		if(isBlankNode) {

@@ -2,9 +2,7 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
-import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 
 public class RDBReader extends AbstractDataSourceReader {

@@ -83,15 +83,11 @@ public class XMLUtility {
 	public static Document loadXMLFile(String fileAbsolutePath) throws ParserConfigurationException, SAXException, IOException
 	{
 		try {
-			long startParsingXMLFile = System.currentTimeMillis();
+			System.currentTimeMillis();
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			Document xmlDocument = docBuilder.parse(fileAbsolutePath);
-			//Document xmlDocument = docBuilder.parse(new InputSource(new InputStreamReader(new FileInputStream(fileAbsolutePath), "UTF8")));
-			long endParsingXMLFile = System.currentTimeMillis();
-			long durationParsingXMLFile = (endParsingXMLFile-startParsingXMLFile) / 1000;
-			//logger.info("Parsing XML file time was "+(durationParsingXMLFile)+" s.");
-
+			System.currentTimeMillis();
 			return xmlDocument;			
 		} catch(FileNotFoundException fnfe) {
 			logger.error("File " + fileAbsolutePath + " can not be found!");
@@ -106,15 +102,12 @@ public class XMLUtility {
 
 	public static Document convertToXMLDocument(String xmlString) throws ParserConfigurationException, SAXException, IOException
 	{
-		long startParsingXMLFile = System.currentTimeMillis();
+		System.currentTimeMillis();
 		
 		DOMParser parser = new DOMParser();
 		parser.parse(new InputSource(new java.io.StringReader(xmlString)));
 		Document xmlDocument = parser.getDocument();
-		long endParsingXMLFile = System.currentTimeMillis();
-		long durationParsingXMLFile = (endParsingXMLFile-startParsingXMLFile) / 1000;
-		//logger.info("Converting String to XML Document time was "+(durationParsingXMLFile)+" s.");
-
+		System.currentTimeMillis();
 		return xmlDocument;
 	}
 	

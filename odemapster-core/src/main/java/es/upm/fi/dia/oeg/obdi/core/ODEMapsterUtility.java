@@ -298,7 +298,6 @@ public class ODEMapsterUtility {
 		String uri8 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÃ�LISIS%20E%20INVESTIGACIÃ“N%20DE%20ACELERACIÃ“N%20DE\n%20VALORACIÃ“N%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
 		System.out.println("uri8Encoded = " + ODEMapsterUtility.encodeURI(uri8));
 
-		String uri9 = "http://edu_linkeddata_es/UPM/resource/Actividad/10013_ANÃ�LISIS%20E%20INVESTIGACIÃ“N%20DE%20ACELERACIÃ“N%20DE\n%20VALORACIÃ“N%20FINANCIERA%20MEDIANTE%20PLATAFORMAS%20RECONFIGURABLES";
 		System.out.println("uri8Encoded = " + ODEMapsterUtility.encodeURI(uri8));
 
 
@@ -502,7 +501,7 @@ public class ODEMapsterUtility {
 		boolean isExpression = selectItem.isExpression();
 		if(isExpression) {
 			ZExp selectItemExp = selectItem.getExpression();
-			ZExpression newExpression = this.renameColumns((ZExpression) selectItemExp
+			ZExpression newExpression = ODEMapsterUtility.renameColumns((ZExpression) selectItemExp
 					, tableName, alias, matches, databaseType);
 			selectItem.setExpression(newExpression);
 			result = selectItem;
@@ -538,8 +537,9 @@ public class ODEMapsterUtility {
 		return result;
 	}    
 
-	public static ZExpression renameColumns(ZExpression zExpression, String oldName
-			, String newName, boolean matchCondition, String databaseType) throws Exception 
+	public static ZExpression renameColumns(ZExpression zExpression
+			, String oldName, String newName
+			, boolean matchCondition, String databaseType) throws Exception 
 			{
 		if(zExpression == null) {
 			return null;
@@ -633,7 +633,7 @@ public class ODEMapsterUtility {
 
 	public ZConstant constructDatabaseColumn(String schema, String table, String column
 			, String databaseType) {
-		return this.constructDatabaseColumn(schema + "." + table + "." + column, databaseType);
+		return ODEMapsterUtility.constructDatabaseColumn(schema + "." + table + "." + column, databaseType);
 	}
 
 	public static String replaceNameWithSpaceChars(String tableName) {

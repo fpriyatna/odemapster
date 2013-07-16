@@ -13,7 +13,6 @@ import java.util.Vector;
 import org.w3c.dom.Element;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.IParseable;
@@ -25,7 +24,6 @@ import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 
 public abstract class AbstractMappingDocument implements IParseable {
 	private Map<String, String> mappingDocumentPrefixMap;
-	private String title;
 	private String id;
 	private String purpose;
 	protected ConfigurationProperties configurationProperties;

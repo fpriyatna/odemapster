@@ -2,19 +2,24 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
+import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
 import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.oeg.obdi.core.utility.CollectionUtility;
 
 public class UnionSQLQuery implements IQuery {
 	String alias;
+	private String databaseType;
 	private Collection<SQLQuery> unionQueries = new Vector<SQLQuery>();
-
+	private Vector<ZOrderBy> orderByConditions;
+	
 	public UnionSQLQuery() { 
 		this.unionQueries = new Vector<SQLQuery>();
 	}
@@ -51,19 +56,34 @@ public class UnionSQLQuery implements IQuery {
 	@Override
 	public String toString() {
 		String result = null;
+		String unionString = "\n" + Constants.SQL_KEYWORD_UNION + "\n" ;
 		
-		String unionSQL = "\nUNION\n";
+		CollectionUtility collectionUtility = new CollectionUtility();
 		if(this.unionQueries != null) {
+			Collection<Object> unionQueriesCollection = new Vector<Object>();
 			StringBuffer stringBuffer = new StringBuffer();
 			for(IQuery sqlQuery : this.unionQueries) {
+				unionQueriesCollection.add(sqlQuery);
 				String sqlQueryString = sqlQuery.toString(); 
 				stringBuffer.append(sqlQueryString);
-				stringBuffer.append(unionSQL); 
+				stringBuffer.append(unionString);
 			}
-			result = stringBuffer.toString();
-			result = result.substring(0, result.length() - unionSQL.length());
+			result = collectionUtility.mkString(unionQueriesCollection, 
+					"\n" + Constants.SQL_KEYWORD_UNION + "\n", "", "\n");
 		}
 		
+		if(this.orderByConditions != null && this.orderByConditions.size() > 0) {
+			Collection<Object> orderByConditionsCollection = new Vector<Object>();
+			for(ZOrderBy orderBy : this.orderByConditions) {
+				orderByConditionsCollection.add(orderBy);
+			}
+			
+			
+			String orderByString = collectionUtility.mkString(orderByConditionsCollection, 
+					", ", Constants.SQL_KEYWORD_ORDER_BY + " ", " ");
+			result = result + orderByString;
+		}
+			
 		return result;
 	}
 
@@ -78,40 +98,17 @@ public class UnionSQLQuery implements IQuery {
 		return this.unionQueries.iterator().next().getSelectItemAliases();
 	}
 
-	public void cleanupPrefixes() {
+	public void cleanupSelectItems() {
 		if(this.unionQueries != null) {
 			for(SQLQuery sqlQuery : this.unionQueries) {
-				sqlQuery.cleanupPrefixes();
+				sqlQuery.cleanupSelectItems();
 			}
 		}
 		
 	}
 
-	public SQLQuery setOrderBy(Vector<ZOrderBy> orderByConditions) {
-		SQLQuery result;
-		
-		if(this.unionQueries == null || this.unionQueries.isEmpty()) {
-			result = null;
-		} else if(this.unionQueries.size() == 1) {
-			result = this.unionQueries.iterator().next();
-			result.setOrderBy(orderByConditions);
-		} else {
-			SQLQuery firstQuery = this.unionQueries.iterator().next();
-			Vector<ZSelectItem> oldSelectItems = firstQuery.getSelect();
-			Vector<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
-			for(ZSelectItem oldSelectItem : oldSelectItems) {
-				SQLSelectItem newSelectItem = new SQLSelectItem(oldSelectItem.getAlias());
-				newSelectItems.add(newSelectItem);
-			}
-			SQLQuery newQuery = new SQLQuery();
-			newQuery.setSelectItems(newSelectItems);
-			this.generateAlias();
-			newQuery.setLogicalTable(this);
-			newQuery.setOrderBy(orderByConditions);
-			result = newQuery;
-		}
-		
-		return result;
+	public void setOrderBy(Vector<ZOrderBy> orderByConditions) {
+		this.orderByConditions = orderByConditions;
 	}
 
 	public void setAlias(String alias) {
@@ -131,18 +128,73 @@ public class UnionSQLQuery implements IQuery {
 		return result;
 	}
 
-	public IQuery eliminateSubQuery(Collection<ZSelectItem> newSelectItems,
+	public IQuery eliminateSubQuery2(Collection<ZSelectItem> newSelectItems,
 			ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions,
 			String databaseType) throws Exception {
 		UnionSQLQuery result = new UnionSQLQuery();
-		
-		for(SQLQuery sqlQuery : this.unionQueries) {
-			SQLQuery resultAux = sqlQuery.eliminateSubQuery(newSelectItems, newWhereCondition, orderByConditions, databaseType);
+		Iterator<SQLQuery> it = this.unionQueries.iterator();
+		while(it.hasNext()) {
+			IQuery sqlQuery = it.next();
+			IQuery resultAux;
+			if(it.hasNext()) {
+				resultAux = sqlQuery.eliminateSubQuery2(
+						newSelectItems, newWhereCondition, null, databaseType);				
+			} else {
+				resultAux = sqlQuery.eliminateSubQuery2(
+						newSelectItems, newWhereCondition, orderByConditions, databaseType);				
+			}
+
 			result.add(resultAux);
 		}
 		
 		return result;
 		
+	}
+
+	public Collection<ZSelectItem> getSelectItems() {
+		return this.unionQueries.iterator().next().getSelectItems();
+	}
+
+	public void setSelectItems(Collection<ZSelectItem> newSelectItems) {
+		for(SQLQuery query : this.unionQueries) {
+			query.setSelectItems(newSelectItems);
+		}		
+	}
+
+	public void addWhere(ZExp newWhere) {
+		for(SQLQuery query : this.unionQueries) {
+			query.addWhere(newWhere);
+		}		
+	}
+
+	public void cleanupOrderBy() {
+		for(SQLQuery query : this.unionQueries) {
+			query.cleanupOrderBy();
+		}
+	}
+
+	public IQuery eliminateSubQuery() throws Exception {
+		UnionSQLQuery result = new UnionSQLQuery();
+		Iterator<SQLQuery> it = this.unionQueries.iterator();
+		while(it.hasNext()) {
+			SQLQuery query = it.next();
+			IQuery resultAux = query.eliminateSubQuery();
+//			if(!it.hasNext()) {
+//				resultAux.setOrderBy(this.orderByConditions);
+//			}
+			result.add(resultAux);
+		}
+
+		result.setOrderBy(this.orderByConditions);
+		return result;
+	}
+
+	public String getDatabaseType() {
+		return databaseType;
+	}
+
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
 	}
 
 

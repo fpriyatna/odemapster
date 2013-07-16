@@ -6,10 +6,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.db.DBConnection;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelMaker;
 import com.hp.hpl.jena.tdb.TDBFactory;
 
 import es.upm.fi.dia.oeg.obdi.core.Constants;

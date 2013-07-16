@@ -3,6 +3,10 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import Zql.ZSelectItem;
 
 public class PostgreSQLSelectItem extends ZSelectItem {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String datatype = null;
 	
 	public PostgreSQLSelectItem() {

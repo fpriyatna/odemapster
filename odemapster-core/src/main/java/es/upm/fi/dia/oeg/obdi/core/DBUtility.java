@@ -8,13 +8,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import jena.dbcreate;
-
 import org.apache.log4j.Logger;
 
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-
 import Zql.ZSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 
 public class DBUtility {
@@ -169,7 +166,6 @@ public class DBUtility {
 			String username, String databaseName, String password, String driverString, String url, String requester) 
 					throws SQLException {
 
-		Connection conn;
 		try {
 			Properties prop = new Properties();
 			prop.put("ResultSetMetaDataOptions", "1");

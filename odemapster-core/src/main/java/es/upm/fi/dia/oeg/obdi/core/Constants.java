@@ -1,8 +1,19 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
+import Zql.ZConstant;
+import Zql.ZExpression;
+
 public class Constants {
 	public static final String JOINS_TYPE_INNER = "INNER";
 	public static final String JOINS_TYPE_LEFT = "LEFT";
+	
+	public static final String SQL_LOGICAL_OPERATOR_AND = "AND";
+	public static final String SQL_LOGICAL_OPERATOR_OR = "OR";
+	public static final String SQL_KEYWORD_UNION = "UNION";
+	public static final String SQL_KEYWORD_ORDER_BY = "ORDER BY";
+	
+	public static final ZExpression SQL_EXPRESSION_TRUE = new ZExpression(
+			"=", new ZConstant("1", ZConstant.NUMBER), new ZConstant("1", ZConstant.NUMBER));
 	
 	public static final String DATABASE_MONETDB = "MonetDB";
 	public static final String DATABASE_ORACLE = "Oracle";
