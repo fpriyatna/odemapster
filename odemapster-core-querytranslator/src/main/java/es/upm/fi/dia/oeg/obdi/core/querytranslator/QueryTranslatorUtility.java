@@ -1,7 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,11 +17,9 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZFromItem;
-import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -37,16 +34,13 @@ import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.core.DBUtility;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.sql.UnionSQLQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 
 
 public class QueryTranslatorUtility {
@@ -228,8 +222,9 @@ public class QueryTranslatorUtility {
 				}
 				ZExpression newOuterWhereConditionExpression = (ZExpression) newOuterWhereCondition;
 				ZExpression innerWhereCondition = (ZExpression) fromItemSQLQuery.getWhere();
-				ZExp newWhereCondition = QueryTranslatorUtility.combineExpressions(
-						innerWhereCondition, newOuterWhereConditionExpression);
+				ZExp newWhereCondition = SQLUtility.combineExpressions(
+						innerWhereCondition, newOuterWhereConditionExpression, 
+						Constants.SQL_LOGICAL_OPERATOR_AND);
 				//result.set
 				result.setWhere(newWhereCondition);
 
@@ -390,34 +385,6 @@ public class QueryTranslatorUtility {
 		return result;
 	}
 
-	public static ZExpression combineExpresions(Collection<ZExpression> exps) {
-		Iterator<ZExpression> it = exps.iterator();
-		ZExpression result = null;
-		int expsSize = exps.size();
-
-		if(exps.size() == 1) {
-			result = it.next();
-		} else if(exps.size() > 1) {
-			result = new ZExpression("AND");
-			while(it.hasNext()) {
-				result.addOperand(it.next());
-			}
-		}
-
-		return result;
-	}
-
-
-	public static ZExpression combineExpressions(ZExpression exp1, ZExpression exp2) {
-		if(exp1 == null) {
-			return exp2;
-		} 
-		if(exp2 == null) {
-			return exp1;
-		}
-
-		return new ZExpression("AND", exp1, exp2);
-	}
 
 	public static Collection<Node> getSubjects(Collection<Triple> triples) {
 		Collection<Node> result = new ArrayList<Node>();

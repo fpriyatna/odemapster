@@ -10,17 +10,17 @@ import org.apache.log4j.Logger;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
-import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 
 public abstract class AbstractCondSQLGenerator {
 	private static Logger logger = Logger.getLogger(AbstractCondSQLGenerator.class);
@@ -128,7 +128,7 @@ public abstract class AbstractCondSQLGenerator {
 		
 
 		if(!predicate.isVariable()) { //line 08
-				ZExp exp = new ZExpression("="
+				new ZExpression("="
 						, betaPredicateExpression
 						, new ZConstant(predicate.toString(), ZConstant.STRING));				
 		}
@@ -226,7 +226,8 @@ public abstract class AbstractCondSQLGenerator {
 			}
 		}
 
-		ZExpression resultFinal = QueryTranslatorUtility.combineExpresions(exps);
+		ZExpression resultFinal = SQLUtility.combineExpresions(
+				exps, Constants.SQL_LOGICAL_OPERATOR_AND);
 		return resultFinal;
 	}
 
@@ -342,7 +343,8 @@ public abstract class AbstractCondSQLGenerator {
 			}
 		}
 
-		ZExpression result = QueryTranslatorUtility.combineExpresions(exps);
+		ZExpression result = SQLUtility.combineExpresions(
+				exps, Constants.SQL_LOGICAL_OPERATOR_AND);
 		logger.debug("genCondSQLTB = " + result);
 		return result;
 
@@ -455,7 +457,8 @@ public abstract class AbstractCondSQLGenerator {
 		}
 
 
-		ZExpression result = QueryTranslatorUtility.combineExpresions(exps);
+		ZExpression result = SQLUtility.combineExpresions(
+				exps, Constants.SQL_LOGICAL_OPERATOR_AND);
 		return result;
 	}
 

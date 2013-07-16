@@ -25,88 +25,6 @@ public abstract class AbstractBetaGenerator {
 		this.owner = owner;
 	}
 
-	
-//	private BetaResult calculateBeta(Triple tp, String predicateURI) throws Exception {
-//		Node tpSubject = tp.getSubject();
-//		Node tpObject = tp.getObject();
-//		
-//		Collection<AbstractConceptMapping> cms = 
-//				this.mapNodeConceptMapping.get(tpSubject);
-//		if(cms == null) {
-//			String errorMessage = "No maps found for subject " + tpSubject;
-//			throw new QueryTranslationException(errorMessage);				
-//		}
-//		if(cms.size() > 1) {
-//			String errorMessage = "Multiple maps is not supported for for subject ";
-//			throw new QueryTranslationException(errorMessage);				
-//		}
-//		AbstractConceptMapping cm = cms.iterator().next();
-//		
-//
-//		
-//		BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI);
-//		return betaResult;
-//	}
-	
-//	List<BetaResultSet> calculateBetaSTG(List<Triple> stg, AbstractConceptMapping cm, List<AlphaResultUnion> listofAlphaResultUnion) throws Exception {
-//		List<BetaResultSet> result = new Vector<BetaResultSet>();
-//		for(int i=0; i<stg.size(); i++) {
-//			Triple tp = stg.get(i);
-//			AlphaResultUnion alphaResultUnion = listofAlphaResultUnion.get(i);
-//			BetaResultSet betaResult = this.calculateBeta(tp, cm, alphaResultUnion);
-//			result.add(betaResult);
-//		}
-//		return result;
-//	}
-	
-//	public BetaResultSet calculateBeta(Triple tp, AbstractConceptMapping cm, AlphaResultUnion alphaResultSet) throws Exception {
-//		BetaResultSet result = null;
-//		Node tpSubject = tp.getSubject();
-//		Node tpPredicate = tp.getPredicate();
-//		Node tpObject = tp.getObject();
-//		
-//		if(tpPredicate.isURI()) {
-//			String predicateURI = tp.getPredicate().getURI();
-//			AlphaResult alphaResult = alphaResultSet.get(0);
-//			BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI, alphaResult);
-//			result = new BetaResultSet(betaResult);
-//		} else if(tpPredicate.isVariable()) {
-//			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
-//			Iterator<AbstractPropertyMapping> pmsIterator = pms.iterator();
-//			List<BetaResult> betaResults = new Vector<BetaResult>();
-//			while(pmsIterator.hasNext()) {
-//				AbstractPropertyMapping pm = pmsIterator.next();
-//				String predicateURI = pm.getMappedPredicateName();
-//				AlphaResult alphaResult = alphaResultSet.get(predicateURI);
-//				BetaResult betaResult = this.calculateBeta(tp, cm, predicateURI, alphaResult);
-//				betaResults.add(betaResult);
-//			}
-//			result = new BetaResultSet(betaResults);
-//			
-//		} else {
-//			String errorMessage = "Predicate has to be either an URI or a variable";
-//			throw new QueryTranslationException(errorMessage);
-//		}
-//		
-//		return result;
-//	}
-	
-//	public BetaResult calculateBeta2(Triple tp, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult) throws QueryTranslationException {
-//		SQLSelectItem betaSubject = this.calculateBetaSubject(tp, cm, alphaResult);
-//		SQLSelectItem betaPredicate = this.calculateBetaPredicate(predicateURI);
-//		SQLSelectItem betaObject;
-//		boolean predicateIsRDFSType = RDF.type.getURI().equals(predicateURI);
-//		if(predicateIsRDFSType) {
-//			ZConstant className = new ZConstant(cm.getConceptName(), ZConstant.STRING);
-//			betaObject = new SQLSelectItem();betaObject.setExpression(className);
-//		} else {
-//			betaObject = this.calculateBetaObject(tp, cm, predicateURI, alphaResult);	
-//		}
-//		
-//		BetaResult betaResult = new BetaResult(betaSubject, betaPredicate, betaObject, predicateURI);
-//		return betaResult;
-//	}
-
 	public List<SQLSelectItem> calculateBeta(Triple tp, POS pos
 			, AbstractConceptMapping cm, String predicateURI
 			, AlphaResult alphaResult) throws QueryTranslationException {
@@ -134,49 +52,9 @@ public abstract class AbstractBetaGenerator {
 			throw new QueryTranslationException("invalid Pos value in beta!");
 		}
 		
+		logger.debug("beta = " + result);
 		return result;
 	}
-
-	
-//	public List<ZSelectItem> calculateBeta(Triple tp, POS pos) throws Exception {
-//		List<ZSelectItem> result = new Vector<ZSelectItem>();
-//		
-//		Node tpSubject = tp.getSubject();
-//		Collection<AbstractConceptMapping> cms = 
-//				this.mapNodeConceptMapping.get(tpSubject);
-//		AbstractConceptMapping cm = cms.iterator().next();
-//		result = this.calculateBeta(tp, pos, cm);
-//		
-//		return result;
-//	}
-	
-//	private List<ZSelectItem> calculateBeta(Triple tp, POS pos
-//			, AbstractConceptMapping cm)
-//	throws Exception {
-//		List<ZSelectItem> result = new Vector<ZSelectItem>();
-//		
-//		Node tpPredicate = tp.getPredicate();
-//		if(tpPredicate.isURI()) {
-//			String predicateURI = tp.getPredicate().getURI();
-//		} else if(tpPredicate.isVariable()) {
-//			
-//		} else {
-//			String errorMessage = "Predicate has to be either an URI or a variable";
-//			throw new QueryTranslationException(errorMessage);
-//		}
-//		
-//		
-//		if(pos == POS.sub) {
-//			result = this.calculateBetaSubject(tp, cm);
-//		} else if(pos == POS.pre) {
-//			result = this.calculateBetaPredicate(tp, cm);
-//		} else if(pos == POS.obj) {
-//			result = this.calculateBetaObject(tp, cm);
-//		}
-//		
-//		logger.debug("beta " + pos + " = " + result);
-//		return result;
-//	}
 
 	public abstract List<SQLSelectItem> calculateBetaObject(Triple triple
 			, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult)

@@ -1,7 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Var;
 
 import es.upm.fi.dia.oeg.obdi.core.Constants;

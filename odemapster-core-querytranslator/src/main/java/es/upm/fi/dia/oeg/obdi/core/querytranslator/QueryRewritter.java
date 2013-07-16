@@ -28,6 +28,7 @@ import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 
 public class QueryRewritter implements Rewrite {
 	private static Logger logger = Logger.getLogger(QueryRewritter.class);
@@ -141,8 +142,7 @@ public class QueryRewritter implements Rewrite {
 			Op subOp = opFilter.getSubOp();
 			
 			TransformFilterConjunction tfc = new TransformFilterConjunction();
-			Op op2 = Optimize.apply("test", tfc , opFilter);
-			//Op op2 = tfc.transform(opFilter, subOp);
+			Optimize.apply("test", tfc , opFilter);
 			
 			
 //			Op op2 = null;
@@ -186,12 +186,13 @@ public class QueryRewritter implements Rewrite {
 	}
 	
 	public List<Triple> reorderSTGs(List<Triple> triples) {
+		List<Triple> result = new Vector<Triple>();
+		
 		if(triples == null) {
-			return null;
+			result = null;
 		} else if(triples.size() == 1) {
-			return triples;
+			result = triples;
 		} else {
-			List<Triple> result = new Vector<Triple>();
 			Map<Node, List<Triple>> mapNodeTriples = new HashMap<Node, List<Triple>>();
 			Map<Node, Long> mapNodeTableSize = new HashMap<Node, Long>();
 			
@@ -202,35 +203,42 @@ public class QueryRewritter implements Rewrite {
 					logger.warn("No inferred types for " + tpSubject);
 				} else {
 					AbstractConceptMapping cm = cms.iterator().next();
-					long logicalTableSize = cm.getLogicalTableSize();
-					if(tpSubject.isURI()) {
-						logicalTableSize = logicalTableSize - 1;
+					TableMetaData tableMetaData = cm.getTableMetaData();
+					if(tableMetaData != null) {
+						long logicalTableSize = cm.getLogicalTableSize();
+						if(tpSubject.isURI()) {
+							logicalTableSize = logicalTableSize - 1;
+						}
+						
+						List<Triple> mappedTriples = mapNodeTriples.get(tpSubject);
+						if(mappedTriples == null) {
+							mappedTriples = new Vector<Triple>();
+							mapNodeTriples.put(tpSubject, mappedTriples);
+						}
+						mappedTriples.add(tp);
+						
+						Long mappedTableSize = mapNodeTableSize.get(tpSubject);
+						if(mappedTableSize == null) {
+							mappedTableSize = new Long(logicalTableSize);
+							mapNodeTableSize.put(tpSubject, mappedTableSize);
+						}						
 					}
-					
-					List<Triple> mappedTriples = mapNodeTriples.get(tpSubject);
-					if(mappedTriples == null) {
-						mappedTriples = new Vector<Triple>();
-						mapNodeTriples.put(tpSubject, mappedTriples);
-					}
-					mappedTriples.add(tp);
-					
-					Long mappedTableSize = mapNodeTableSize.get(tpSubject);
-					if(mappedTableSize == null) {
-						mappedTableSize = new Long(logicalTableSize);
-						mapNodeTableSize.put(tpSubject, mappedTableSize);
-					}					
 				}
 
 			}
 			
-			Map<Node, Long> mapNodeTableSizeResorted = QueryTranslatorUtility.sortByValue(mapNodeTableSize);
-			Set<Node> nodeTableSizeResorted = mapNodeTableSizeResorted.keySet();
-			for(Node node : nodeTableSizeResorted) {
-				result.addAll(mapNodeTriples.get(node));
+			if(mapNodeTableSize != null && mapNodeTableSize.size() == triples.size()) {
+				Map<Node, Long> mapNodeTableSizeResorted = QueryTranslatorUtility.sortByValue(mapNodeTableSize);
+				Set<Node> nodeTableSizeResorted = mapNodeTableSizeResorted.keySet();
+				for(Node node : nodeTableSizeResorted) {
+					result.addAll(mapNodeTriples.get(node));
+				}				
+			} else {
+				result = triples;
 			}
-			
-			return result;
 		}
+		
+		return result;
 	}
 
 

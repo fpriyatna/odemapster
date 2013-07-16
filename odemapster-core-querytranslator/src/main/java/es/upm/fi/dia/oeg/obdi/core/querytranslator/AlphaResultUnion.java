@@ -3,12 +3,8 @@ package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 import java.util.List;
 import java.util.Vector;
 
-import com.hp.hpl.jena.graph.Triple;
-
 public class AlphaResultUnion {
 	private List<AlphaResult> alphaResultUnion;
-	private Triple tp;
-	
 	public AlphaResultUnion() {
 		this.alphaResultUnion = new Vector<AlphaResult>();
 	}

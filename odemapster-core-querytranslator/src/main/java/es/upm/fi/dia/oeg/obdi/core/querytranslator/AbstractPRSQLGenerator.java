@@ -7,7 +7,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZConstant;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -16,7 +15,6 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 public abstract class AbstractPRSQLGenerator {
@@ -87,20 +85,23 @@ public abstract class AbstractPRSQLGenerator {
 			, String columnType
 			) throws QueryTranslationException {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
-
 		try {
+			String dbType = owner.getDatabaseType();
+			
 			List<SQLSelectItem> betaObjSelectItems = betaGenerator.calculateBetaObject(
 					tp, cmSubject, predicateURI, alphaResult);
-			for(SQLSelectItem betaObjSelectItem : betaObjSelectItems) {
+			for(int i=0; i<betaObjSelectItems.size(); i++) {
+				SQLSelectItem betaObjSelectItem = betaObjSelectItems.get(i); 
 				SQLSelectItem selectItem = betaObjSelectItem.clone();
 				String selectItemAlias = nameGenerator.generateName(
 						tp.getObject());
 				if(selectItemAlias != null) {
+					if(betaObjSelectItems.size() > 1) {
+						selectItemAlias += "_" + i;
+					}
 					selectItem.setAlias(selectItemAlias);
 				}
 				selectItems.add(selectItem); //line 23
-
-				String dbType = owner.getDatabaseType();
 				if(dbType != null && !dbType.equals("")) {
 					selectItem.setDbType(dbType);
 				}
@@ -112,7 +113,6 @@ public abstract class AbstractPRSQLGenerator {
 		} catch (Exception e) {
 			throw new QueryTranslationException(e);
 		}
-
 	}
 
 	protected ZSelectItem genPRSQLPredicate(Triple tp
@@ -124,14 +124,17 @@ public abstract class AbstractPRSQLGenerator {
 			SQLSelectItem betaPre = 
 					betaGenerator.calculateBetaPredicate(predicateURI);
 			SQLSelectItem selectItem = betaPre.clone();
-			String databaseType = this.owner.getDatabaseType();
+			String dbType = this.owner.getDatabaseType();
+			selectItem.setDbType(dbType);
+			selectItem.setColumnType("text");
 //			if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
 //				selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
 //				selectItem.setColumnType("text");
 //			}
 			String alias = nameGenerator.generateName(tp.getPredicate());
 			selectItem.setAlias(alias);
-			return selectItem;			
+			String selectItemString = selectItem.toString(); 
+			return selectItem;
 		} catch (Exception e) {
 			throw new QueryTranslationException(e);
 		}

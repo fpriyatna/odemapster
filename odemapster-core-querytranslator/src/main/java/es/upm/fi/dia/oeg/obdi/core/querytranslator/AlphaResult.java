@@ -1,6 +1,5 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
-import java.util.Collection;
 import java.util.List;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;

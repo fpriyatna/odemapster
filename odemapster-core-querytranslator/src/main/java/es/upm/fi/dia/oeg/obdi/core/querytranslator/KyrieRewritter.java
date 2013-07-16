@@ -139,7 +139,7 @@ public class KyrieRewritter implements Rewrite {
 
 		if (op instanceof OpBGP) { // triple or bgp pattern
 			OpBGP bgp = (OpBGP) op;
-			result = QueryTranslatorUtility.reorderTriplesBySubject(bgp);
+			result = QueryTranslatorUtility.groupTriplesBySubject(bgp);
 
 			// List<OpBGP> bgpSplitted = QueryTranslatorUtility.splitBGP(bgp2.getPattern().getList());
 			// if(bgpSplitted.size() > 1) {
