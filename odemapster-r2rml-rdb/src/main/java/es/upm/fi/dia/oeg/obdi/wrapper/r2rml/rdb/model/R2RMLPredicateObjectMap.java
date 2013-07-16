@@ -12,13 +12,10 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLJoinConditionException;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapPosition;
 
 public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements IRelationMapping, IAttributeMapping{
 	public enum ObjectMapType {ObjectMap, RefObjectMap}
 	private static Logger logger = Logger.getLogger(R2RMLPredicateObjectMap.class);
-	private R2RMLMappingDocument mappingDocument;;
-
 	private R2RMLPredicateMap predicateMap;
 	private R2RMLObjectMap objectMap;
 	private R2RMLGraphMap graphMap;
@@ -30,7 +27,6 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 	public R2RMLPredicateObjectMap(Resource resource, R2RMLMappingDocument mappingDocument
 			, R2RMLTriplesMap parent) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
-		this.mappingDocument = mappingDocument;
 		this.parent = parent;
 		
 		Statement predicateMapStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATEMAP_PROPERTY);

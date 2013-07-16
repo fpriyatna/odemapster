@@ -109,10 +109,10 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 		Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 		if(subjectMapColumnsString != null) {
-			R2RMLUtility utility = new R2RMLUtility();
+			new R2RMLUtility();
 			
 			for(String subjectMapColumnString : subjectMapColumnsString) {
-				SQLSelectItem selectItem = utility.toSelectItem(subjectMapColumnString
+				SQLSelectItem selectItem = R2RMLUtility.toSelectItem(subjectMapColumnString
 						, logicalTableAlias, dbType);
 				if(selectItem != null) {
 					if(selectItem.getAlias() == null) {

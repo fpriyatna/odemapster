@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -15,6 +16,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
@@ -207,11 +209,6 @@ implements R2RMLElement, IConceptMapping {
 		return result;
 	}
 
-	@Override
-	public boolean hasWellDefinedURIExpression() {
-		boolean result = this.subjectMap.hasWellDefinedURIExpression();
-		return result;
-	}
 
 	public R2RMLMappingDocument getOwner() {
 		return owner;
@@ -223,9 +220,14 @@ implements R2RMLElement, IConceptMapping {
 		
 		TermMapType subjectMapTermMapType = this.subjectMap.getTermMapType();
 		if(subjectMapTermMapType == TermMapType.TEMPLATE) {
-			String pkValue = this.subjectMap.getTemplateValue(uri);
-			if(pkValue != null) {
+			Map<String, String> templateValues = this.subjectMap.getTemplateValues(uri);
+			if(templateValues != null && templateValues.size() > 0) {
 				result = true;
+				for(String value : templateValues.values()) {
+					if(value.contains("/")) {
+						result = false;
+					}
+				}
 			}
 		} else {
 			result = false;
@@ -245,6 +247,11 @@ implements R2RMLElement, IConceptMapping {
 	public Collection<String> getMappedClassURIs() {
 		Collection<String> classURIs = this.subjectMap.getClassURIs();
 		return classURIs;
+	}
+
+	@Override
+	public TableMetaData getTableMetaData() {
+		return this.logicalTable.getTableMetaData();
 	}
 
 

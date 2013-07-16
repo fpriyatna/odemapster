@@ -42,10 +42,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
-	private Collection<String> prefixes;
-	//private Collection<AbstractConceptMapping> triplesMaps;
-
-
 	public R2RMLMappingDocument(String mappingDocumentPath
 			, ConfigurationProperties configurationProperties) 
 					throws Exception {
@@ -129,7 +125,6 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
 				Resource triplesMapResource = triplesMapResources.nextResource();
-				String triplesMapKey = triplesMapResource.getNameSpace() + triplesMapResource.getLocalName();
 				R2RMLTriplesMap tm = new R2RMLTriplesMap(triplesMapResource, this);
 				this.classMappings.add(tm);
 			}
@@ -257,7 +252,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 					R2RMLPredicateObjectMap pom = (R2RMLPredicateObjectMap) apm;
 					R2RMLObjectMap om = pom.getObjectMap();
 					if(om.getTermMapType() == TermMapType.TEMPLATE) {
-						String objectTemplateString = om.getTemplateString();
+						om.getTemplateString();
 					}
 				}
 			}
@@ -304,7 +299,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 			if(R2RMLConstants.R2RML_IRI_URI.equals(om.getTermType())) {
 				for(AbstractConceptMapping cm : this.getConceptMappings()) {
 					R2RMLTriplesMap tm = (R2RMLTriplesMap) cm;
-					R2RMLSubjectMap sm = tm.getSubjectMap();
+					tm.getSubjectMap();
 					if(TermMapType.TEMPLATE == om.getTermMapType()) {
 						String objectTemplateString = om.getTemplateString();
 						if(tm.isPossibleInstance(objectTemplateString)) {

@@ -1,7 +1,5 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine;
 
-import java.sql.SQLException;
-
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLObjectMap;

@@ -22,7 +22,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 public abstract class R2RMLLogicalTable implements R2RMLElement {
 	private static Logger logger = Logger.getLogger(R2RMLLogicalTable.class);
 
-	private String sqlVersionIdentifier;
 	LogicalTableType logicalTableType;
 	private String alias;
 	private R2RMLTriplesMap owner;
@@ -161,6 +160,10 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 
 	public Map<String, ColumnMetaData> getColumnsMetaData() {
 		return columnsMetaData;
+	}
+
+	public TableMetaData getTableMetaData() {
+		return tableMetaData;
 	}
 
 

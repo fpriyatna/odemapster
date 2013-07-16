@@ -18,8 +18,6 @@ import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZStatement;
 import Zql.ZqlParser;
-import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLJoinCondition;
@@ -29,8 +27,9 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
+import es.upm.fi.oeg.obdi.core.utility.RegexUtility;
 
 public class R2RMLUtility {
 	private static Logger logger = Logger.getLogger(R2RMLUtility.class);
@@ -44,8 +43,8 @@ public class R2RMLUtility {
 		replacements.put("Name", "Freddy");
 		replacements.put("Invoice Number", "INV0001");
 		
-		Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
-		System.out.println("attributes = " + attributes);
+		RegexUtility regexUtility = new RegexUtility();
+		Collection<String> attributes = regexUtility.getTemplateColumns(template, true);
 
 		String template2 = R2RMLUtility.replaceTokens(template, replacements);
 		System.out.println("template2 = " + template2);
@@ -53,7 +52,7 @@ public class R2RMLUtility {
 	}
 	
 	
-	public static Collection<String> getAttributesFromStringTemplate(String text) {
+	public static Collection<String> getAttributesFromStringTemplate2(String text) {
 		Collection<String> attributes = new HashSet<String>();
 		
 		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
@@ -161,7 +160,9 @@ public class R2RMLUtility {
 			result.add(selectItem);
 		} else if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
 			String template = termMap.getOriginalValue();
-			Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
+			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
+			RegexUtility regexUtility = new RegexUtility();
+			Collection<String> attributes = regexUtility.getTemplateColumns(template, true);
 			if(attributes != null) {
 				for(String attribute : attributes) {
 					ZSelectItem selectItem = new ZSelectItem(attribute);
