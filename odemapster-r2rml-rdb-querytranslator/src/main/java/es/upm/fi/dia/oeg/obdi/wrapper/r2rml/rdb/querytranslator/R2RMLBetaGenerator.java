@@ -42,7 +42,6 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 		
 		Node object = tp.getObject();
 		
-		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 		
@@ -123,7 +122,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 		
-		Collection<String> databaseColumnsString = subjectMap.getDatabaseColumnsString();
+		Collection<String> databaseColumnsString = 
+				subjectMap.getDatabaseColumnsString();
 		if(databaseColumnsString != null) {
 			for(String databaseColumnString : databaseColumnsString) {
 				String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();

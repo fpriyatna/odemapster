@@ -11,14 +11,11 @@ import Zql.ZSelectItem;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.BetaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -60,19 +57,24 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 		//ZSelectItem selectItemSubject = betaGenerator.calculateBetaSubject(cmSubject);
 		List<SQLSelectItem> betaSubSelectItems = betaGenerator.calculateBetaSubject(cmSubject, alphaResult);
 		try {
+			byte i = 0;
 			for(SQLSelectItem betaSub : betaSubSelectItems) {
 				SQLSelectItem selectItem = betaSub.clone();
-				String databaseType = this.owner.getDatabaseType();
+				this.owner.getDatabaseType();
 //				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
 //					selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
 //					selectItem.setColumnType("text");
 //				}			
-				String selectItemSubjectAlias = nameGenerator.generateName(subject); 
+				String selectItemSubjectAlias = nameGenerator.generateName(subject);
+				if(betaSubSelectItems.size() > 1) {
+					selectItemSubjectAlias += "_" + i;
+				}
+				i++;
 				selectItem.setAlias(selectItemSubjectAlias);
 				result.add(selectItem);
 			}
 			logger.debug("genPRSQLSubject = " + result);
-			return result;			
+			return result;
 		} catch(Exception e) {
 			throw new QueryTranslationException(e);
 		}

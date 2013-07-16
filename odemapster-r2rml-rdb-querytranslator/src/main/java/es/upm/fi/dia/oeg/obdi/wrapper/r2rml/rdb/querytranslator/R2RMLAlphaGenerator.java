@@ -19,7 +19,6 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResultUnion;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
@@ -45,10 +44,6 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			, AbstractConceptMapping abstractConceptMapping
 			, AbstractPropertyMapping abstractPropertyMapping
 			, String logicalTableAlias) throws QueryTranslationException {
-		R2RMLTriplesMap cm = (R2RMLTriplesMap) abstractConceptMapping;
-		//String tripleMapAlias = cm.getAlias();
-		//String tripleMapAlias = cm.getLogicalTable().getAlias();
-		
 		SQLQuery joinQuery = null;
 		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
 		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
@@ -78,11 +73,11 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 					String subQueryViewName = "sa" + Math.abs(triple.hashCode());
 					String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
 					logger.info(dropViewSQL + ";\n");
-					boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+					DBUtility.execute(conn, dropViewSQL);
 					
 					String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlParentLogicalTable;
 					logger.info(createViewSQL + ";\n");
-					boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+					DBUtility.execute(conn, createViewSQL);
 
 					SQLFromItem alphaPredicateObject2 = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
 					joinQuery.addLogicalTable(alphaPredicateObject2);					
@@ -99,8 +94,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
 			//String databaseType = this.owner.getConfigurationProperties().getDatabaseType();
 			String databaseType = this.owner.getDatabaseType();
-			R2RMLUtility utility = new R2RMLUtility();
-			ZExp onExpression = utility.generateJoinCondition(
+			new R2RMLUtility();
+			ZExp onExpression = R2RMLUtility.generateJoinCondition(
 					joinConditions, logicalTableAlias, joinQueryAlias
 					, databaseType);
 			if(onExpression != null) {
@@ -128,11 +123,11 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 				String subQueryViewName = "sa" + Math.abs(subject.hashCode());
 				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
 				logger.info(dropViewSQL + ";\n");
-				boolean dropViewSQLResult = DBUtility.execute(conn, dropViewSQL);
+				DBUtility.execute(conn, dropViewSQL);
 				
 				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlLogicalTable;
 				logger.info(createViewSQL + ";\n");
-				boolean createViewSQLResult = DBUtility.execute(conn, createViewSQL);
+				DBUtility.execute(conn, createViewSQL);
 				
 				sqlLogicalTable = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);				
 			} catch(Exception e) {
@@ -162,7 +157,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
 			//do nothing
 		} else {
-			Node tpObject = tp.getObject();
+			tp.getObject();
 			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(tpPredicateURI);
 			if(pms != null && !pms.isEmpty()) {
 				R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();

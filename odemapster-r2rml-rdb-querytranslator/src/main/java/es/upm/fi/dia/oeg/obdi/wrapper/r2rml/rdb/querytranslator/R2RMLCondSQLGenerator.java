@@ -1,23 +1,22 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator;
 
 import java.sql.Connection;
-import java.sql.ResultSetMetaData;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
 import Zql.ZExpression;
 
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -26,20 +25,19 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.BetaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLDataType;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLCondSQLGenerator.class);
@@ -54,7 +52,6 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 			, AbstractConceptMapping cm, AbstractPropertyMapping pm) throws QueryTranslationException, InsatisfiableSQLExpression {
 
 		Node tpObject = tp.getObject();
-		ZExpression result;
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 		ZExpression result2 = null;
 		R2RMLPredicateObjectMap poMap = (R2RMLPredicateObjectMap) pm;
@@ -74,9 +71,8 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 			}
 		}
 
-		boolean tripleObjectCheckResult = true;
 		if(columnsMetaData != null) {
-			tripleObjectCheckResult = this.checkTripleObject(tp, poMap, columnsMetaData);			
+			this.checkTripleObject(tp, poMap, columnsMetaData);			
 		}
 
 
@@ -121,7 +117,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 					ZConstant zConstantObjectColumn = new ZConstant(columnNameWithAlias,  ZConstant.COLUMNNAME);
 					ZConstant zConstantObjectURI = new ZConstant(uri.toString(), ZConstant.STRING);
 					result2 = new ZExpression("=", zConstantObjectColumn, zConstantObjectURI);
-				} else if(termMapType == termMapType.CONSTANT) {
+				} else if(termMapType == TermMapType.CONSTANT) {
 					//TODO
 				}					
 			}
@@ -138,19 +134,12 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 				ZExpression uriCondition = null;
 				R2RMLTriplesMap parentTriplesMap = 
 						refObjectMap.getParentTriplesMap();
-				boolean hasWellDefinedURI = 
-						parentTriplesMap.hasWellDefinedURIExpression();
-				logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
-				if(hasWellDefinedURI) {
-					uriCondition = this.generateCondForWellDefinedURI(
-							parentTriplesMap.getSubjectMap(), tpObject.getURI(),
-							refObjectMapAlias, columnsMetaData);
-				} else {
-					//TODO
-				}
+				uriCondition = this.generateCondForWellDefinedURI(
+						parentTriplesMap.getSubjectMap(), tpObject.getURI(),
+						refObjectMapAlias, columnsMetaData);
 
-				result2 = (ZExpression) QueryTranslatorUtility.combineExpressions(
-						onExpression, uriCondition);				
+				result2 = (ZExpression) SQLUtility.combineExpressions(
+						onExpression, uriCondition, Constants.SQL_LOGICAL_OPERATOR_AND);				
 			}
 
 			if(objectMap != null && refObjectMap != null) {
@@ -177,7 +166,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 		if(tpObject.isLiteral()) {
 			Object objectLiteralValue = tpObject.getLiteral().getValue();
-			RDFDatatype objectLiteralDatatype = tpObject.getLiteral().getDatatype();
+			tpObject.getLiteral().getDatatype();
 
 			//			if(refObjectMap != null) {
 			//				String errorMessage = "triple.object is a literal, but RefObjectMap is specified instead of ObjectMap";
@@ -207,7 +196,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 					if("INT".equals(columnTypeName)) {
 						try {
-							int objectIntValue = Integer.parseInt(objectLiteralValue.toString());
+							Integer.parseInt(objectLiteralValue.toString());
 						} catch(Exception e) {
 							String errorMessage = "triple.object " + tp + " not an integer, but the mapping " + pm + " specified mapped column is integer";
 							logger.warn(errorMessage);
@@ -217,7 +206,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 						}
 					} else if ("DOUBLE".equals(columnTypeName)) {
 						try {
-							double objectDoubleValue = Double.parseDouble(objectLiteralValue.toString());
+							Double.parseDouble(objectLiteralValue.toString());
 						} catch(Exception e) {
 							String errorMessage = "triple.object " + tp + " not a double, but the mapping " + pm + " specified mapped column is double";
 							logger.warn(errorMessage);
@@ -227,9 +216,9 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 						}
 					} else if("DATETIME".equals(columnTypeName)) {
 						SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-						Date convertedDate = new Date();
+						new Date();
 						try {
-							convertedDate = dateFormat.parse(objectLiteralValue.toString());
+							dateFormat.parse(objectLiteralValue.toString());
 						} catch (Exception e) {
 							String errorMessage = "triple.object " + tp + " not a datetime, but the mapping " + pm + " specified mapped column is datetime";
 							logger.warn(errorMessage);
@@ -329,45 +318,51 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 					throws InsatisfiableSQLExpression {
 		ZExpression result = null;
 
-		boolean hasWellDefinedURI = termMap.hasWellDefinedURIExpression();
-		logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
+		if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
 
-		if(hasWellDefinedURI && termMap.getTermMapType() == TermMapType.TEMPLATE) {
-
-			String pkValue = termMap.getTemplateValue(uri);
-			if(pkValue == null) {
+			Map<String, String> matchedColValues = termMap.getTemplateValues(uri);
+			if(matchedColValues == null || matchedColValues.size() == 0) {
 				String errorMessage = "uri " + uri + " doesn't match the template : " + termMap.getTemplateString();
-				//logger.warn(errorMessage);
+				logger.error(errorMessage);
 				throw new InsatisfiableSQLExpression(errorMessage);	
 			} else {
-				String dbType = this.owner.getDatabaseType();
-				String pkColumnString = termMap.getTemplateColumn();
+				Collection<ZExpression> exprs = new Vector<ZExpression>();
+				for(String pkColumnString : matchedColValues.keySet()) {
+					String value = matchedColValues.get(pkColumnString);
 
-				SQLSelectItem pkColumnSelectItem = SQLSelectItem.createSQLItem(
-						dbType, pkColumnString, alias);
+					String dbType = this.owner.getDatabaseType();
+					//String pkColumnString = termMap.getTemplateColumn();
 
-				String columnTypeName = termMap.getColumnTypeName();
-				if(columnTypeName == null && columnsMetaData != null) {
-					//					columnTypeName = QueryTranslatorUtility.getColumnTypeName(
-					//							rsmd, pkColumnString);
-					if(columnsMetaData.get(pkColumnString) != null) {
-						columnTypeName = columnsMetaData.get(pkColumnString).getDataType();
-						termMap.setColumnTypeName(columnTypeName);						
+					SQLSelectItem pkColumnSelectItem = SQLSelectItem.createSQLItem(
+							dbType, pkColumnString, alias);
+
+					String columnTypeName = termMap.getColumnTypeName();
+					if(columnTypeName == null && columnsMetaData != null) {
+						//					columnTypeName = QueryTranslatorUtility.getColumnTypeName(
+						//							rsmd, pkColumnString);
+						if(columnsMetaData.get(pkColumnString) != null) {
+							columnTypeName = columnsMetaData.get(pkColumnString).getDataType();
+							termMap.setColumnTypeName(columnTypeName);						
+						}
 					}
+
+					ZConstant pkColumnConstant = new ZConstant(
+							pkColumnSelectItem.toString(), ZConstant.COLUMNNAME);
+					ZConstant pkValueConstant = new ZConstant(value, ZConstant.STRING);
+					if(columnTypeName != null) {
+						if(Arrays.asList(SQLDataType.datatypeNumber).contains(columnTypeName)) {
+							pkValueConstant = new ZConstant(value, ZConstant.NUMBER);
+						} else if(Arrays.asList(SQLDataType.datatypeString).contains(columnTypeName)) {
+							pkValueConstant = new ZConstant(value, ZConstant.STRING);
+						}					
+					}
+					ZExpression expr = new ZExpression("=", pkColumnConstant, pkValueConstant);
+					exprs.add(expr);
 				}
 
-				ZConstant pkColumnConstant = new ZConstant(
-						pkColumnSelectItem.toString(), ZConstant.COLUMNNAME);
-				ZConstant pkValueConstant = new ZConstant(pkValue, ZConstant.STRING);
-				if(columnTypeName != null) {
-					if(Arrays.asList(SQLDataType.datatypeNumber).contains(columnTypeName)) {
-						pkValueConstant = new ZConstant(pkValue, ZConstant.NUMBER);
-					} else if(Arrays.asList(SQLDataType.datatypeString).contains(columnTypeName)) {
-						pkValueConstant = new ZConstant(pkValue, ZConstant.STRING);
-					}					
-				}
 
-				result = new ZExpression("=", pkColumnConstant, pkValueConstant);				
+				result = SQLUtility.combineExpresions(
+						exprs, Constants.SQL_LOGICAL_OPERATOR_AND);				
 			}
 
 		}
@@ -391,31 +386,23 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		//String logicalTableAlias = cm.getLogicalTable().getAlias();
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 
-		boolean hasWellDefinedURI = tm.hasWellDefinedURIExpression();
-		logger.debug("hasWellDefinedURI = " + hasWellDefinedURI);
-
 		TermMapType subjectTermMapType = tm.getSubjectMap().getTermMapType();
 		if(subjectTermMapType == TermMapType.TEMPLATE) {
-			if(hasWellDefinedURI) {
-				try {
-					R2RMLLogicalTable logicalTable = ((R2RMLTriplesMap) cm).getLogicalTable();
-					//ResultSetMetaData rsmd = logicalTable.getRsmd();
-					Map<String, ColumnMetaData> columnsMetaData = logicalTable.getColumnsMetaData();
+			try {
+				R2RMLLogicalTable logicalTable = ((R2RMLTriplesMap) cm).getLogicalTable();
+				//ResultSetMetaData rsmd = logicalTable.getRsmd();
+				Map<String, ColumnMetaData> columnsMetaData = logicalTable.getColumnsMetaData();
 
-					if(columnsMetaData == null) {
-						Connection conn = this.owner.getConnection();
-						logicalTable.buildMetaData(conn);
-						columnsMetaData = logicalTable.getColumnsMetaData();
-					}
-
-					result2 = this.generateCondForWellDefinedURI(tm.getSubjectMap(), 
-							tpSubject.getURI(), logicalTableAlias, columnsMetaData);					
-				} catch(Exception e) {
-					throw new QueryTranslationException(e);
+				if(columnsMetaData == null) {
+					Connection conn = this.owner.getConnection();
+					logicalTable.buildMetaData(conn);
+					columnsMetaData = logicalTable.getColumnsMetaData();
 				}
 
-			} else {
-				//TODO Implement this!
+				result2 = this.generateCondForWellDefinedURI(tm.getSubjectMap(), 
+						tpSubject.getURI(), logicalTableAlias, columnsMetaData);					
+			} catch(Exception e) {
+				throw new QueryTranslationException(e);
 			}
 		} else if(subjectTermMapType == TermMapType.COLUMN){
 			ZConstant subjectMapColumn = new ZConstant(tm.getSubjectMap().getColumnName(), ZConstant.COLUMNNAME);
