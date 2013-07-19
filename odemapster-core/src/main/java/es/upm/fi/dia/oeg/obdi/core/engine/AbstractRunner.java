@@ -36,17 +36,17 @@ public abstract class AbstractRunner {
 		return sparqQuery;
 	}
 	private Collection<IQuery> sqlQueries;
-	
+
 	private String queryResultWriterClassName = null;
 	private AbstractQueryResultWriter queryResultWriter = null;
 	private String dataSourceReaderClassName = null;
 	private AbstractDataSourceReader dataSourceReader = null;
 	private Object queryResultWriterOutput = null;
-	
+
 	public AbstractRunner() {
-		
+
 	}
-	
+
 	public AbstractRunner(String configurationDirectory, String configurationFile) 
 			throws Exception {
 		this.configurationProperties = new ConfigurationProperties
@@ -142,7 +142,7 @@ public abstract class AbstractRunner {
 			if(this.configurationProperties != null) {
 				ontologyFilePath = this.configurationProperties.getOntologyFilePath();
 			}
-			
+
 
 			//rewrite the SPARQL query if necessary
 			List<Query> queries = new ArrayList<Query>();
@@ -152,12 +152,12 @@ public abstract class AbstractRunner {
 				//rewrite the query based on the mappings and ontology
 				logger.info("Rewriting query...");
 				this.configurationProperties.getMappingDocumentFilePath();
-//				Collection <String> mappedOntologyElements = MappingsExtractor.getMappedPredcatesFromR2O(mappingDocumentFile);
+				//				Collection <String> mappedOntologyElements = MappingsExtractor.getMappedPredcatesFromR2O(mappingDocumentFile);
 				Collection <String> mappedOntologyElements = this.mappingDocument.getMappedConcepts();
 				Collection <String> mappedOntologyElements2 = this.mappingDocument.getMappedProperties();
 				mappedOntologyElements.addAll(mappedOntologyElements2);
-				
-				
+
+
 				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
 				//queries = rewritterWapper.rewrite(originalQuery);
 				queries = RewriterWrapper.rewrite(this.sparqQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
@@ -170,7 +170,7 @@ public abstract class AbstractRunner {
 			//translate sparql queries into sql queries
 			this.sqlQueries = 
 					this.translateSPARQLQueriesIntoSQLQueries(queries);
-			
+
 			//translate result
 			if (this.conn != null) {
 				this.resultProcessor.translateResult(this.sqlQueries);	
@@ -188,7 +188,7 @@ public abstract class AbstractRunner {
 	protected IQueryTranslationOptimizer buildQueryTranslationOptimizer() {
 		String defaultQueryTranslatorClassName =  
 				"es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer";
-		
+
 		try {
 			return (IQueryTranslationOptimizer) Class.forName(defaultQueryTranslatorClassName).newInstance();
 		} catch (Exception e) {
@@ -247,6 +247,10 @@ public abstract class AbstractRunner {
 	}
 
 	protected void buildQueryTranslator() throws Exception {
+		if(this.queryTranslatorClassName == null) {
+			this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT;					
+		}
+		
 		this.queryTranslator = (IQueryTranslator) 
 				Class.forName(this.queryTranslatorClassName).newInstance();					
 		this.queryTranslator.setConfigurationProperties(configurationProperties);
@@ -254,7 +258,7 @@ public abstract class AbstractRunner {
 		if(databaseType != null && !databaseType.equals("")) {
 			this.queryTranslator.setDatabaseType(databaseType);
 		}
-		
+
 		if(this.mappingDocument == null) {
 			String mappingDocumentFilePath = this.getMappingDocumentPath();
 			if(mappingDocumentFilePath == null) {
@@ -284,7 +288,7 @@ public abstract class AbstractRunner {
 		}
 		return result;
 	}
-	
+
 	private boolean isSubQueryElimination() {
 		boolean result = true;
 		if(this.configurationProperties != null) {
@@ -301,7 +305,7 @@ public abstract class AbstractRunner {
 		return result;
 	}
 
-	
+
 	protected ConfigurationProperties loadConfigurationFile(
 			String mappingDirectory, String configurationFile) 
 					throws Exception {
@@ -416,7 +420,7 @@ public abstract class AbstractRunner {
 		this.sparqQuery = QueryFactory.read(sparqQueryFileURL);
 	}
 
-	
+
 	public String getMappingDocumentPath() {
 		return this.configurationProperties.getMappingDocumentFilePath();
 	}
@@ -465,7 +469,7 @@ public abstract class AbstractRunner {
 		if(this.sparqQuery != null) {
 			this.queryResultWriter.setSparqQuery(sparqQuery);
 		}
-		
+
 		if(queryResultWriter instanceof XMLWriter && this.queryResultWriterOutput == null) {
 			//set output file
 			String outputFileName = null;
@@ -507,6 +511,6 @@ public abstract class AbstractRunner {
 	public Collection<IQuery> getSqlQueries() {
 		return sqlQueries;
 	}
-	
+
 
 }

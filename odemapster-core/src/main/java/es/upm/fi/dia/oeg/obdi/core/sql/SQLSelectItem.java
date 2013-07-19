@@ -130,7 +130,7 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		} else if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
 			enclosedCharacter = "\"";
 		} else {
-			enclosedCharacter = "\\`";
+			enclosedCharacter = "`";
 		}
 
 		if(this.isExpression()) {

@@ -24,6 +24,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -44,6 +45,7 @@ import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalNot;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.E_NotEquals;
+import com.hp.hpl.jena.sparql.expr.E_OneOf;
 import com.hp.hpl.jena.sparql.expr.E_Regex;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
@@ -54,6 +56,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
@@ -83,17 +86,19 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected boolean ignoreRDFTypeStatement = false;
 	protected Map<Op, Collection<Node>> mapTermsC = new HashMap<Op, Collection<Node>>();
 	protected Map<Op, String> mapTransGP1Alias = new HashMap<Op, String>();
-	private Map<String, Object> mapVarMapping = new HashMap<String, Object>();
+	private Map<String, Object> mapVarMapping2 = new HashMap<String, Object>();
 	public enum POS {sub, pre, obj}
+	private ConfigurationProperties configurationProperties;
+	private String databaseType = Constants.DATABASE_MYSQL;
+	private Map<String, String> functionsMap = new HashMap<String, String>();
+
+	//chebotko functions
 	private AbstractAlphaGenerator alphaGenerator;
 	private AbstractBetaGenerator betaGenerator;
 	private NameGenerator nameGenerator;
 	private AbstractPRSQLGenerator prSQLGenerator;
 	private AbstractCondSQLGenerator condSQLGenerator;
-	private ConfigurationProperties configurationProperties;
-	private String databaseType = Constants.DATABASE_MYSQL;
-
-	private Map<String, String> functionsMap = new HashMap<String, String>();
+	
 
 	public AbstractQueryTranslator() {
 		this.nameGenerator = new NameGenerator();
@@ -104,6 +109,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		functionsMap.put(E_LogicalOr.class.toString(), "OR");
 		functionsMap.put(E_LogicalAnd.class.toString(), "AND");
 		functionsMap.put(E_Regex.class.toString(), "LIKE");
+		functionsMap.put(E_OneOf.class.toString(), "IN");
 	}
 
 
@@ -766,7 +772,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				functionSymbol = "!=";
 			}
 		} else if(exprFunction instanceof E_Regex) {
-			functionSymbol = "LIKE";
+			//functionSymbol = "LIKE";
+			functionSymbol = functionsMap.get(E_Regex.class.toString());
+		} else if(exprFunction instanceof E_OneOf) {
+			//functionSymbol = "IN";
+			functionSymbol = functionsMap.get(E_OneOf.class.toString());
 		} else {
 			functionSymbol = exprFunction.getOpName();
 		}
@@ -887,6 +897,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			selectItems.addAll(selectItemsB);
 			Collection<ZSelectItem> selectItemsC = this.generateSelectItems(
 					termsC, transGP1Alias + ".", gp1SelectItems, false);
+			for(ZSelectItem selectItemC : selectItemsC) {
+				selectItemC.setAlias(selectItemC.getColumn());
+			}
 			selectItems.addAll(selectItemsC);
 
 			logger.debug("selectItems = " + selectItems);
@@ -994,6 +1007,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		long end = System.currentTimeMillis();
 		logger.debug("Query translation time = "+ (end-start)+" ms.");
 
+		logger.info("result = " + result);
 		return result;
 	}
 
@@ -1346,14 +1360,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return nameGenerator;
 	}
 
-	public Map<String, Object> getMapVarMapping() {
-		return this.mapVarMapping;
+	public Map<String, Object> getMapVarMapping2() {
+		return this.mapVarMapping2;
 	}
-
-	public abstract String translateResultSet(String columnLabel, String dbValue);
-
-
-
 
 	public String getDatabaseType() {
 		return databaseType;
@@ -1374,6 +1383,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			ConfigurationProperties configurationProperties) {
 		this.configurationProperties = configurationProperties;
 	}
+
+
+	public abstract String translateResultSet(String varName, AbstractResultSet rs);
 
 
 }

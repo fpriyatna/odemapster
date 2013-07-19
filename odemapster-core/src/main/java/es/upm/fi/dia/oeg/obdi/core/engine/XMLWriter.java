@@ -1,10 +1,13 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.hp.hpl.jena.sparql.core.Var;
 
 import es.upm.fi.dia.oeg.obdi.core.XMLUtility;
 
@@ -21,6 +24,7 @@ public class XMLWriter extends AbstractQueryResultWriter {
 	}
 
 	public void preProcess() throws Exception {
+		
 		//create root element
 		Element rootElement = xmlDoc.createElement("sparql");
 		xmlDoc.appendChild(rootElement);
@@ -28,10 +32,10 @@ public class XMLWriter extends AbstractQueryResultWriter {
 		//create head element
 		Element headElement = xmlDoc.createElement("head");
 		rootElement.appendChild(headElement);
-		Collection<String> columnNames = super.getResultSet().getColumnNames();
-		for(String columnName : columnNames) {
+		Collection<String> varNames = this.sparqQuery.getResultVars();
+		for(String varName : varNames) {
 			Element variableElement = xmlDoc.createElement("variable");
-			variableElement.setAttribute("name", columnName);
+			variableElement.setAttribute("name", varName);
 			headElement.appendChild(variableElement);
 		}
 		
@@ -41,18 +45,21 @@ public class XMLWriter extends AbstractQueryResultWriter {
 	}
 
 	public void process() throws Exception {
+		Collection<String> varNames = this.sparqQuery.getResultVars();
+		
 		int i=0;
 		AbstractResultSet rs = super.getResultSet();
 		while(rs.next()) {
 			Element resultElement = xmlDoc.createElement("result");
 			resultsElement.appendChild(resultElement);
-			Collection<String> columnNames = rs.getColumnNames(); 
-			for(String columnName : columnNames) {
+			
+			for(String varName : varNames) {
 				Element bindingElement = xmlDoc.createElement("binding");
-				bindingElement.setAttribute("name", columnName);
-				String columnValue = rs.getString(columnName);
-				String translatedColumnValue = super.getQueryTranslator().translateResultSet(
-						columnName, columnValue);
+				bindingElement.setAttribute("name", varName);
+				IQueryTranslator queryTranslator = super.getQueryTranslator();
+				String translatedColumnValue = 
+						queryTranslator.translateResultSet(
+								varName, rs);
 				bindingElement.setTextContent(translatedColumnValue);
 				resultElement.appendChild(bindingElement);
 			}

@@ -21,10 +21,12 @@ import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.query.ResultSet;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
+import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
@@ -137,15 +139,16 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	protected void buildPRSQLGenerator() {
 		super.setPrSQLGenerator(new R2RMLPRSQLGenerator(this));
 	}
-
+	
 	@Override
-	public String translateResultSet(String columnLabel, String dbValue) {
-		String result = dbValue;
+	public String translateResultSet(String varName, AbstractResultSet rs) {
+		String result = null;
 
 		try {
-			if(dbValue != null) {
-				Map<String, Object> mapNodeMapping = this.getMapVarMapping();
-				Object mapValue = mapNodeMapping.get(columnLabel);;
+			if(rs != null) {
+				List<String> rsColumnNames = rs.getColumnNames();
+				Map<String, Object> mapNodeMapping = this.getMapVarMapping2();
+				Object mapValue = mapNodeMapping.get(varName);
 				R2RMLTermMap termMap = null;
 
 				if(mapValue instanceof R2RMLTermMap) {
@@ -158,27 +161,44 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				}
 
 				if(termMap != null) {
-					if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
-						String template = termMap.getTemplateString();
-						Matcher matcher = this.mapTemplateMatcher.get(template);
+					TermMapType termMapType = termMap.getTermMapType();
+					
+					if(termMapType == TermMapType.TEMPLATE) {
+						String templateString = termMap.getTemplateString();
+						List<String> templateColumns = termMap.getTemplateColumns();
+						Matcher matcher = this.mapTemplateMatcher.get(templateString);
 						if(matcher == null) {
 							Pattern pattern = Pattern.compile(R2RMLConstants.R2RML_TEMPLATE_PATTERN);
-							matcher = pattern.matcher(template);
-							this.mapTemplateMatcher.put(template, matcher);
+							matcher = pattern.matcher(templateString);
+							this.mapTemplateMatcher.put(templateString, matcher);
 						}
-						Collection<String> attributes = this.mapTemplateAttributes.get(template);
-						if(attributes == null) {
+						Collection<String> templateAttributes = this.mapTemplateAttributes.get(templateString);
+						if(templateAttributes == null) {
 							//attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
 							RegexUtility regexUtility = new RegexUtility();
-							attributes = regexUtility.getTemplateColumns(template, true);
-							
-							this.mapTemplateAttributes.put(template, attributes);
+							templateAttributes = regexUtility.getTemplateColumns(templateString, true);
+							this.mapTemplateAttributes.put(templateString, templateAttributes);
 						}
 
 						Map<String, String> replacements = new HashMap<String, String>();
-						replacements.put(attributes.iterator().next(), dbValue);
-						result = R2RMLUtility.replaceTokens(template, replacements);
-					}					
+						
+						int i=0;
+						for(String templateAttribute : templateAttributes) {
+							String columnName = rsColumnNames.get(i);
+							String dbValue = rs.getString(columnName);
+							replacements.put(templateAttribute, dbValue);
+							i++;
+						}
+						
+						result = R2RMLUtility.replaceTokens(templateString, replacements);
+					} else if(termMapType == TermMapType.COLUMN) {
+						String columnName = termMap.getColumnName();
+						result = rs.getString(columnName);
+					} else if (termMapType == TermMapType.CONSTANT) {
+						result = termMap.getConstantValue();
+					} else {
+						logger.warn("Unsupported term map type!");
+					}
 				}
 
 				String termMapType = termMap.getTermType();
@@ -294,4 +314,6 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		return queryTranslatorFreddy;
 
 	}
+
+
 }

@@ -5,7 +5,7 @@ import com.hp.hpl.jena.query.Query;
 public abstract class AbstractQueryResultWriter {
 	private AbstractResultSet abstractResultSet;
 	private IQueryTranslator queryTranslator;
-	private Query sparqQuery;
+	Query sparqQuery;
 	
 	public abstract void initialize() throws Exception;
 	public abstract void preProcess() throws Exception;

@@ -3,6 +3,8 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 import java.sql.Connection;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
@@ -29,7 +31,9 @@ public interface IQueryTranslator {
 
 	IQuery translateFromString(String queryString) throws Exception ;
 
-	String translateResultSet(String columnLabel, String dbValue);
+	//String translateResultSet(String columnLabel, String dbValue);
+	
+	String translateResultSet(String varName, AbstractResultSet rs);
 	
 	void setConfigurationProperties(ConfigurationProperties configurationProperties);
 

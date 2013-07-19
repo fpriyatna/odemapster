@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -62,11 +63,10 @@ public class R2RMLRefObjectMap {
 		return joinConditions;
 	}
 
-	public Collection<String> getParentDatabaseColumnsString() {
-		Collection<String> result = new HashSet<String>();
-		
+	public List<String> getParentDatabaseColumnsString() {
+		List<String> result;
 		R2RMLSubjectMap parentSubjectMap = this.getParentTriplesMap().getSubjectMap();
-		result.addAll(parentSubjectMap.getDatabaseColumnsString());
+		result = parentSubjectMap.getDatabaseColumnsString();
 		return result;
 	}
 	public R2RMLLogicalTable getParentLogicalTable() {

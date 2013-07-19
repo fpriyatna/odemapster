@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -193,10 +195,11 @@ public class R2RMLTermMap implements R2RMLElement
 		return columnName;
 	}
 
-	public Collection<String> getDatabaseColumnsString() {
-		Collection<String> result = new HashSet<String>();
+	public List<String> getDatabaseColumnsString() {
+		List<String> result = new LinkedList<String>();
 
 		if(this.termMapType == TermMapType.COLUMN) {
+			result = new LinkedList<String>();
 			result.add(this.getOriginalValue());
 		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			String template = this.getOriginalValue();
@@ -264,8 +267,8 @@ public class R2RMLTermMap implements R2RMLElement
 		return templateString;
 	}
 
-	public Collection<String> getTemplateColumns() {
-		Collection<String> result = new Vector<String>();
+	public List<String> getTemplateColumns() {
+		List<String> result = new Vector<String>();
 		
 		TermMapType termMapValueType = this.getTermMapType();
 
@@ -423,11 +426,11 @@ public class R2RMLTermMap implements R2RMLElement
 	public String toString() {
 		String result = "";
 		if(this.termMapType == TermMapType.CONSTANT) {
-			result = "Constant";
+			result = "rr:constant";
 		} else if(this.termMapType == TermMapType.COLUMN) {
-			result = "Column";
+			result = "rr:column";
 		} else if(this.termMapType == TermMapType.TEMPLATE) {
-			result = "Template";
+			result = "rr:template";
 		}
 
 		result += "::" + this.getOriginalValue();

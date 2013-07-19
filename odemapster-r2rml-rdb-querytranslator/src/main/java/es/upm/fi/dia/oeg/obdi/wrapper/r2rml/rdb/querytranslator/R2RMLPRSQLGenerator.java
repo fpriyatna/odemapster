@@ -50,7 +50,7 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cmSubject;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		if(subject.isVariable()) {
-			this.getOwner().getMapVarMapping().put(subject.getName(), subjectMap);
+			this.getOwner().getMapVarMapping2().put(subject.getName(), subjectMap);
 		}
 		
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();

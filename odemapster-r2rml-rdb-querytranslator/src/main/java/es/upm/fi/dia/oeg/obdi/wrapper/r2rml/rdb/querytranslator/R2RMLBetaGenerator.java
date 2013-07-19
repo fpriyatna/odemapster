@@ -10,6 +10,7 @@ import Zql.ZConstant;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Var;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
@@ -61,7 +62,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 			if(refObjectMap == null) {
 				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
 				if(object.isVariable()) {
-					this.getOwner().getMapVarMapping().put(
+					this.getOwner().getMapVarMapping2().put(
 							object.getName(), objectMap);
 				}
 
@@ -86,16 +87,15 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 				}
 			} else {
 				if(object.isVariable()) {
-					this.getOwner().getMapVarMapping().put(object.getName(), refObjectMap);
+					this.getOwner().getMapVarMapping2().put(object.getName(), refObjectMap);
 				}
 				
-				Collection<String> databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
+				List<String> databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
 				//String refObjectMapAlias = refObjectMap.getAlias(); 
 				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
 
 				if(databaseColumnsString != null) {
 					for(String databaseColumnString : databaseColumnsString) {
-						databaseColumnString = databaseColumnsString.iterator().next();
 						String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
 						if(alphaSubjectAlias != null) {
 							databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
