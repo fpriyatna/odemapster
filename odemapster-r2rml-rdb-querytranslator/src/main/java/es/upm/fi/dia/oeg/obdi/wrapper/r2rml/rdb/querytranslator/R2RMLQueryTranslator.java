@@ -192,8 +192,8 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 						
 						result = R2RMLUtility.replaceTokens(templateString, replacements);
 					} else if(termMapType == TermMapType.COLUMN) {
-						String columnName = termMap.getColumnName();
-						result = rs.getString(columnName);
+						//String columnName = termMap.getColumnName();
+						result = rs.getString(varName);
 					} else if (termMapType == TermMapType.CONSTANT) {
 						result = termMap.getConstantValue();
 					} else {
@@ -213,7 +213,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 			}			
 		} catch(Exception e) {
-			logger.error("Error occured while translating result set!");
+			logger.error("Error occured while translating result set : " + e.getMessage());
 		}
 
 		return result;
