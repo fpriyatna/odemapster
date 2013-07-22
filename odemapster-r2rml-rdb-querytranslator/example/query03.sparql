@@ -3,9 +3,9 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 SELECT ?a ?n ?e ?w
 WHERE { 
-	?a <http://mappingpedia.linkeddata.es/vocabulary/name> ?n .
-	OPTIONAL {
-		?a <http://mappingpedia.linkeddata.es/vocabulary/email> ?e .
-		OPTIONAL {?a <http://mappingpedia.linkeddata.es/vocabulary/webpage> ?w .}
-	}
+   ?a <http://mappingpedia.linkeddata.es/vocabulary/name> ?n .
+   OPTIONAL {
+      ?a <http://mappingpedia.linkeddata.es/vocabulary/email> ?e .
+      OPTIONAL {?a <http://mappingpedia.linkeddata.es/vocabulary/webpage> ?w .}
+   }
 }

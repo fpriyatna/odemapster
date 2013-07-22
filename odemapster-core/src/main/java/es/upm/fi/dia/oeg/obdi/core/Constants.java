@@ -1,5 +1,8 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import Zql.ZConstant;
 import Zql.ZExpression;
 
@@ -18,8 +21,10 @@ public class Constants {
 	public static final String DATABASE_MONETDB = "MonetDB";
 	public static final String DATABASE_ORACLE = "Oracle";
 	public static final String DATABASE_MYSQL = "MySQL";
+	public static final String DATABASE_MYSQL_ENCLOSED_CHARACTER = "`";
 	public static final String DATABASE_SQLSERVER = "SQLServer";
 	public static final String DATABASE_POSTGRESQL = "PostgreSQL";
+	public static final String DATABASE_POSTGRESQL_ENCLOSED_CHARACTER = "\"";
 	
 	public static final String COLUMN_TYPE_TEXT = "text";
 	

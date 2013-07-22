@@ -240,9 +240,7 @@ public class R2RMLTermMap implements R2RMLElement
 			String dbType = this.configurationProperties.getDatabaseType();
 			//SQLSelectItem selectItem = new SQLSelectItem(columnName);
 			SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName, null);
-			columnName = selectItem.getColumn();
-			if(columnName.startsWith("")) {columnName.substring(1);}
-			if(columnName.endsWith("")) {columnName.subSequence(0, columnName.length()-1);}
+			columnName = selectItem.columnToString();
 			if(selectItem.getTable() != null) {
 				columnName = selectItem.getTable() + "." + columnName;
 			}
@@ -256,8 +254,7 @@ public class R2RMLTermMap implements R2RMLElement
 			}			
 		} catch(Exception e) {
 			//e.printStackTrace();
-			logger.error("error occured when translating result, check your database values for " + columnName);
-			logger.error("error message = " + e.getMessage());
+			logger.error("error occured when translating result: " + e.getMessage());
 		}
 
 		return result;

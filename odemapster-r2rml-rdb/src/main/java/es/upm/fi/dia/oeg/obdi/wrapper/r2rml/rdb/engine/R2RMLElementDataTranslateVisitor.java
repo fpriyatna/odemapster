@@ -63,8 +63,6 @@ implements R2RMLElementVisitor {
 		return null;
 	}
 
-
-
 	@Override
 	public void setMaterializer(AbstractMaterializer materializer) {
 		this.materializer = materializer;
@@ -97,8 +95,6 @@ implements R2RMLElementVisitor {
 		}
 		//this.materializer.materialize();
 	}
-
-
 
 	public void translateObjectMap(R2RMLTermMap objectMap, ResultSet rs
 			, Map<String, String> mapColumnType, String subjectGraphName, String predicateobjectGraphName
@@ -262,10 +258,6 @@ implements R2RMLElementVisitor {
 			for (int i=0; i<columnCount; i++) {
 				String columnName = rsmd.getColumnName(i+1);
 				int columnType= rsmd.getColumnType(i+1);
-				
-				//logger.info("rsmd.getColumnClassName(i+1) = " + rsmd.getColumnClassName(i+1));
-				//logger.info("rsmd.getColumnTypeName(i+1) = " + rsmd.getColumnTypeName(i+1));
-				
 				String mappedDatatype = DatatypeMapper.getMappedType(columnType);
 				mapXMLDatatype.put(columnName, mappedDatatype);
 				mapDBDatatype.put(columnName, new Integer(columnType));
@@ -275,7 +267,9 @@ implements R2RMLElementVisitor {
 			logger.warn("Unable to detect database columns!");
 		}
 
+		int i=0;
 		while(rs.next()) {
+			i++;
 			//translate subject map
 			R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 			String subjectGraphName = null;
@@ -380,30 +374,13 @@ implements R2RMLElementVisitor {
 								this.translateObjectMap(parentSubjectMap, rs, mapXMLDatatype, subjectGraphName
 										, predicateobjectGraphName, predicateMapUnfoldedValue, parentSubjectValue
 										);
-								
 							}
-
-
-							//					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(parentSubjectMap.getTermType())) {
-							//						try {
-							//							parentSubjectValue = Utility.encodeURI(parentSubjectValue);
-							//							logger.info("parentSubjectValue = " + parentSubjectValue);
-							//						} catch(Exception e) {
-							//							logger.warn("Error encoding subject value : " + parentSubjectValue);
-							//						}
-							//					}
-
 						}
-
-
 					}					
 				}
-				
 			}
-
-
-
 		}
+		logger.info(i + " instances of " + triplesMap.getConceptName() + " retrieved.");
 
 	}
 	

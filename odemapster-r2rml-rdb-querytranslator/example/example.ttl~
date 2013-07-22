@@ -17,7 +17,7 @@
 	
     rr:subjectMap [    
 		a rr:Subject;
-		rr:template "http://mappingpedia.linkeddata.es/resources/Person/{ID}";
+		rr:template "http://mappingpedia.linkeddata.es/resources/Person{ID}";
 		rr:termType rr:IRI;
 		rr:class <http://mappingpedia.linkeddata.es/vocabulary/Person>;
 	];

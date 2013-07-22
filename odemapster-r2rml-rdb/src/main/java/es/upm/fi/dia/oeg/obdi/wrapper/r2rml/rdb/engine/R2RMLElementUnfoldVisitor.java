@@ -60,11 +60,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				}
 			}
 		}
-
 		return result;
-
 	}
-
 
 	private SQLQuery unfoldSubjectMap(R2RMLLogicalTable logicalTable
 			, R2RMLSubjectMap subjectMap
@@ -82,26 +79,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 			} else if(logicalTableAux instanceof SQLFromItem) {
 				logicalTableUnfolded = (SQLFromItem) logicalTableAux;
 			}
-
-
-			//			if(result.getFrom().size() == 1) {
-			//				ZFromItem fromItem = (ZFromItem) result.getFrom().iterator().next();
-			//				if(fromItem.getAlias() != null) {
-			//					logicalTableAlias = fromItem.getAlias(); 
-			//				} else {
-			//					logicalTableAlias = result.generateAlias();
-			//					Vector<ZSelectItem> selectItems = result.getSelect();
-			//					for(ZSelectItem selectItem : selectItems) {
-			//						if(!selectItem.isWildcard()) {
-			//							String selectItemAlias = selectItem.getAlias(); 
-			//							if(selectItemAlias != null && !selectItemAlias.equals("")) {
-			//							} else {
-			//							}							
-			//						}
-			//					}
-			//				}
-
-
 		}
 		logicalTableAlias = logicalTableUnfolded.generateAlias();
 		logicalTable.setAlias(logicalTableAlias);
@@ -116,44 +93,15 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 						, logicalTableAlias, dbType);
 				if(selectItem != null) {
 					if(selectItem.getAlias() == null) {
-						selectItem.setAlias("\"" + selectItem.toString() + "\"");
+						String alias = "\"" + selectItem.toString() + "\"";
+						//selectItem.setAlias(alias);
 					}
 					resultSelectItems.add(selectItem);
 				}
 			}
 		}
-
-		//logicalTableAlias = result.generateAlias();
-		//			if(logicalTableAlias != null) {
-		//				result.setAlias(logicalTableAlias);
-		//				subjectMap.setAlias(logicalTableAlias);
-		//			}
-
-
-
-
-		//
-		//			Collection<ZSelectItem> selectItems = result.getSelect();
-		//			for(ZSelectItem selectItem : selectItems) {
-		//				String selectItemAlias = selectItem.getAlias();
-		//				if(selectItemAlias != null && selectItemAlias != "") {
-		//					selectItemAlias = logicalTableAlias + "." + selectItemAlias;
-		//					selectItem.setAlias(selectItemAlias);
-		//				} else {
-		//						selectItemAlias = logicalTableAlias + "." + selectItem.toString();
-		//						selectItem.setAlias(selectItemAlias);
-		//				}
-		//				
-		//			}
-
-
-		//			logicalTableAlias = R2RMLSQLQuery.generateAlias();
-		//			result = (ZQuery) logicalTable.accept(this);
-
 		return result;
 	}
-
-
 
 	public SQLQuery visit(R2RMLTriplesMap triplesMap) throws Exception {
 		logger.info("unfolding triplesMap : " + triplesMap);
@@ -202,14 +150,14 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 									objectMapColumnString, logicalTableAlias, this.dbType);
 							if(selectItem != null) {
 								if(selectItem.getAlias() == null) {
-									selectItem.setAlias("\"" + selectItem.toString() + "\"");
+									String alias = "\"" + selectItem.toString() + "\"";
+									//selectItem.setAlias(alias);
 								}
 								resultSelectItems.add(selectItem);
 							}
 						}
 					}
 				}
-
 
 				//unfold refObjectMap
 				R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap();
@@ -240,13 +188,11 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 							String selectItemColumn = selectItem.getColumn();
 							SQLSelectItem selectItem2 = SQLSelectItem.createSQLItem(dbType, selectItemColumn, joinQueryAlias);
 							if(selectItem2.getAlias() == null) {
-								selectItem2.setAlias("\"" + selectItem2.toString() + "\"");
+								String alias = "\"" + selectItem2.toString() + "\"";
+								//selectItem2.setAlias(alias);
 							}
 
 							resultSelectItems.add(selectItem2);
-							
-							//String selectItemAlias = joinQueryAlias + "_" + refObjectMapColumnString;
-							
 						}
 					}
 
@@ -267,8 +213,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 			}
 		}
-
-
 
 		if(resultSelectItems != null) {
 			for(ZSelectItem selectItem : resultSelectItems) {

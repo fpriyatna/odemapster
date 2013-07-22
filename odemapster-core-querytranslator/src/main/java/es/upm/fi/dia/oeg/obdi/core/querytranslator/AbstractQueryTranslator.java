@@ -499,7 +499,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		opProjectSubOpSQL.generateAlias();
 		logger.debug("opProjectSubOpSQL = " + opProjectSubOpSQL.toString());
 
-		Collection<ZSelectItem> newSelectItems = new HashSet<ZSelectItem>();
+		Collection<ZSelectItem> newSelectItems = new LinkedList<ZSelectItem>();
 		List<Var> selectVars = opProject.getVars();
 		for(Var selectVar : selectVars) {
 			Collection<ZSelectItem> selectItemByVars = this.generateSelectItem(
@@ -1007,7 +1007,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		long end = System.currentTimeMillis();
 		logger.debug("Query translation time = "+ (end-start)+" ms.");
 
-		logger.info("result = " + result);
+		logger.info("result = \n" + result + "\n");
 		return result;
 	}
 

@@ -19,7 +19,7 @@ public class R2RMLRunner extends AbstractRunner {
 		super(configurationDirectory, configurationFile);
 	}
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Exception {
 		try {
 			if(args == null || args.length == 0 || args.length != 2) {
 				logger.info("usage R2RMLRunner propertiesDirectory propertiesFile");
@@ -36,8 +36,8 @@ public class R2RMLRunner extends AbstractRunner {
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			runner.run();
 		} catch(Exception e) {
-			logger.error("Exception occured!");
-			logger.error("Error message = " + e.getMessage());
+			logger.error("Exception occured: " + e.getMessage());
+			throw e;
 		}
 	}
 	

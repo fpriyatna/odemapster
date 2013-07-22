@@ -24,8 +24,6 @@ public abstract class AbstractUnfolder {
 		ZUtils.addCustomFunction("TRIM", 1);
 	}
 	
-
-	
 	protected abstract Collection<String> unfold(Set<ILogicalQuery> logicalQueries, AbstractMappingDocument mapping) throws Exception;
 
 	public abstract String unfoldConceptMapping(AbstractConceptMapping mapping) throws Exception;

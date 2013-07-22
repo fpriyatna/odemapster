@@ -13,7 +13,7 @@ import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesExcep
 
 public class ConfigurationProperties extends Properties {
 	//change this to typesafe config
-	
+
 	/**
 	 * 
 	 */
@@ -74,12 +74,12 @@ public class ConfigurationProperties extends Properties {
 		try {
 			this.load(new FileInputStream(absoluteConfigurationFile));
 		} catch (FileNotFoundException e) {
-			String errorMessage = "Configuration file " + absoluteConfigurationFile + " is not found!";
+			String errorMessage = "Configuration file not found: " + absoluteConfigurationFile;
 			logger.error(errorMessage);
 			e.printStackTrace();
 			throw e;
 		} catch (IOException e) {
-			String errorMessage = "Error reading configuration file " + absoluteConfigurationFile;
+			String errorMessage = "Error reading configuration file: " + absoluteConfigurationFile;
 			logger.error(errorMessage);
 			e.printStackTrace();
 			throw e;
