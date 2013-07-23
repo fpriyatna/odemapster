@@ -192,7 +192,7 @@ public class QueryTranslatorUtility {
 				result.setSelectItems(newSelectItems);
 
 				Collection<ZFromItem> subQueryFromItems = fromItemSQLQuery.getFrom();
-				Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+				List<SQLLogicalTable> logicalTables = new LinkedList<SQLLogicalTable>();
 				for(ZFromItem subQueryFromItem : subQueryFromItems) {
 					SQLLogicalTable logicalTable = new SQLFromItem(
 							subQueryFromItem.toString(), LogicalTableType.TABLE_NAME);

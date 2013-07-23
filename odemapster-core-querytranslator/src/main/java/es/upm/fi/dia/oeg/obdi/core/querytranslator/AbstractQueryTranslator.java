@@ -876,6 +876,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 			transGP2FromItem.setAlias(transGP2Alias);
 
+			
 			SQLJoinQuery joinQuery = new SQLJoinQuery();
 			joinQuery.setJoinType(joinType);
 			joinQuery.setJoinSource(transGP2FromItem);
@@ -1199,6 +1200,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			AlphaResult alphaResult = alphaResultUnionList.get(0).get(0);
 			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
 
+			//put this before alpha predicate object, as this is the main table and the order is important
+			resultAux.addLogicalTable(alphaSubject);//alpha subject
+			
 			Collection<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
 			for(AlphaResultUnion alphaTP : alphaResultUnionList) {
 				Collection<SQLQuery> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
@@ -1239,11 +1243,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				}
 			} else {
 				for(SQLQuery alphaPredicateObject : alphaPredicateObjects) {
-					resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
+					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
+					resultAux.addLogicalTable(alphaPredicateObject);//alpha predicate object
 				}
 			}
 
-			resultAux.addLogicalTable(alphaSubject);//alpha subject
+			
 
 			//			//BetaSTG
 			//			List<BetaResultSet> betaResultSetList = this.betaGenerator.calculateBetaSTG(stg, cm, alphaResultUnionList);

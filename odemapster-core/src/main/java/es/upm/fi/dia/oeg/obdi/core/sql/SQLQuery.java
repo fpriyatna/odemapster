@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -33,9 +35,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 	private String joinType;
 	private ZExp onExp;
 
-	private Collection<SQLLogicalTable> logicalTables;
+	private List<SQLLogicalTable> logicalTables = new LinkedList<SQLLogicalTable>();
 	private Collection<SQLJoinQuery> joinQueries;
-	private Collection<SQLQuery> joinQueries2;
+	//private Collection<SQLQuery> joinQueries2;
 	//private Collection<SQLQuery> unionQueries;
 	private String alias;
 	private long slice = -1;
@@ -87,7 +89,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void addLogicalTable(SQLLogicalTable logicalTable) {
 		if(this.logicalTables == null) {
-			this.logicalTables = new HashSet<SQLLogicalTable>();
+			this.logicalTables = new LinkedList<SQLLogicalTable>();
 		}
 
 		this.logicalTables.add(logicalTable);
@@ -102,13 +104,13 @@ public class SQLQuery extends ZQuery implements IQuery {
 		this.joinQueries.add(joinQuery);
 	}
 
-	public void addJoinQuery(SQLQuery joinQuery) {
-		if(this.joinQueries2 == null) {
-			this.joinQueries2 = new Vector<SQLQuery>();
-		}
-
-		this.joinQueries2.add(joinQuery);
-	}
+//	public void addJoinQuery(SQLQuery joinQuery) {
+//		if(this.joinQueries2 == null) {
+//			this.joinQueries2 = new Vector<SQLQuery>();
+//		}
+//
+//		this.joinQueries2.add(joinQuery);
+//	}
 
 	public void addSelect(ZSelectItem newSelectItem) {
 		Collection<ZSelectItem> selectItems = this.getSelect();
@@ -330,20 +332,40 @@ public class SQLQuery extends ZQuery implements IQuery {
 		}
 
 		if(this.logicalTables != null) {
-			for(SQLLogicalTable logicalTable : this.logicalTables) {
-				String logicalTableAlias = logicalTable.getAlias();
-				if(logicalTableAlias == null) {
-					fromSQL += logicalTable.toString() + ", ";
-				} else {
-					if (logicalTable instanceof SQLFromItem) {
-						fromSQL += logicalTable.toString() + ", ";
-					} else {
-						fromSQL += " (" + logicalTable.toString() + ") " + logicalTableAlias + ", ";
+			
+			for(int i=0; i<this.logicalTables.size();i++) {
+				SQLLogicalTable logicalTable = this.logicalTables.get(i);
+				
+				String separator = "";
+				if(i > 0) {
+					if(logicalTable instanceof SQLFromItem) {
+						separator = ", ";
 					}
 				}
+
+				if(logicalTable instanceof UnionSQLQuery) {
+					fromSQL +=  "( "+ logicalTable.toString() + ") " + logicalTable.getAlias();
+				} else {
+					fromSQL += separator + logicalTable.toString();	
+				}
+				
+
+				if(i < this.logicalTables.size() - 1) {
+					fromSQL += "\n";
+				}
+				
+//				String logicalTableAlias = logicalTable.getAlias();
+//				
+//				if(logicalTableAlias == null) {
+//					fromSQL += logicalTable.toString() + ", ";
+//				} else {
+//					if (logicalTable instanceof SQLQuery) {
+//						//remove coma before the join keyword
+//						//fromSQL = fromSQL.substring(0, fromSQL.length() - 2) + "\n";
+//					}
+//					fromSQL += logicalTable.toString() + ", ";
+//				}
 			}
-			//remove the last coma and space
-			fromSQL = fromSQL.substring(0, fromSQL.length() - 2);
 		}
 
 		return fromSQL;
@@ -395,12 +417,12 @@ public class SQLQuery extends ZQuery implements IQuery {
 			}				
 		}
 
-		//print join queries
-		if(this.joinQueries2 != null) {
-			for(SQLQuery joinQuery : this.joinQueries2) {
-				result += joinQuery.toString() + "\n";
-			}				
-		}
+//		//print join queries
+//		if(this.joinQueries2 != null) {
+//			for(SQLQuery joinQuery : this.joinQueries2) {
+//				result += joinQuery.toString() + "\n";
+//			}				
+//		}
 
 
 		//		if(this.joinQueries2 != null) {
@@ -513,7 +535,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		return logicalTables;
 	}
 
-	public void setLogicalTables(Collection<SQLLogicalTable> logicalTables) {
+	public void setLogicalTables(List<SQLLogicalTable> logicalTables) {
 		this.logicalTables = logicalTables;
 	}
 

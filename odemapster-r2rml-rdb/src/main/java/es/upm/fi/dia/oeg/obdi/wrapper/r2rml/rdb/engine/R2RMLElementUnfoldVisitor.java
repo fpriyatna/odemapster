@@ -208,7 +208,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 						onExpression = new ZExpression("=", constantOne, constantOne);
 					}
 					joinQuery.setOnExp(onExpression);
-					result.addJoinQuery(joinQuery);					
+					//result.addJoinQuery(joinQuery);		
+					result.addLogicalTable(joinQuery);
 				}
 
 			}

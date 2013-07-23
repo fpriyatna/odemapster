@@ -232,7 +232,8 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		result.addLogicalTable(alphaSubject);//alpha from subject
 		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
 			for(SQLQuery alphaPredicateObject : alphaPredicateObjects) {
-				result.addJoinQuery(alphaPredicateObject);//alpha predicate object
+				//result.addJoinQuery(alphaPredicateObject);//alpha predicate object
+				result.addLogicalTable(alphaPredicateObject);
 				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
 			}
 		}
