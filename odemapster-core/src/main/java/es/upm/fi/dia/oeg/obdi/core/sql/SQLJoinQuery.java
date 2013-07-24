@@ -3,8 +3,9 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import org.apache.log4j.Logger;
 
 import Zql.ZExpression;
+import Zql.ZFromItem;
 
-public class SQLJoinQuery {
+public class SQLJoinQuery extends ZFromItem {
 	private static Logger logger = Logger.getLogger(SQLJoinQuery.class);
 
 	private SQLLogicalTable joinSource;
