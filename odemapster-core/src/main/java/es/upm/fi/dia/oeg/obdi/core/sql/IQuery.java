@@ -25,4 +25,5 @@ public interface IQuery extends SQLLogicalTable {
 	public IQuery eliminateSubQuery() throws Exception;
 	public String getDatabaseType();
 	public void setDatabaseType(String dbType);
+	
 }

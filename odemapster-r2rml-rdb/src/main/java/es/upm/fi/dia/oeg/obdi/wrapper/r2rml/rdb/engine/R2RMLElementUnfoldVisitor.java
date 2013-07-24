@@ -82,7 +82,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		}
 		logicalTableAlias = logicalTableUnfolded.generateAlias();
 		logicalTable.setAlias(logicalTableAlias);
-		result.addFrom(logicalTableUnfolded);
+		//result.addFrom(logicalTableUnfolded);
+		result.addLogicalTable(logicalTableUnfolded);
 
 		Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 		if(subjectMapColumnsString != null) {

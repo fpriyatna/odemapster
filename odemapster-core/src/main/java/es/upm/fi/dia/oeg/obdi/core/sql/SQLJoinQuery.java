@@ -8,37 +8,23 @@ import Zql.ZExpression;
 
 public class SQLJoinQuery {
 	private static Logger logger = Logger.getLogger(SQLJoinQuery.class);
-	
+
 	private String joinType;
-	//private ZExp joinSource;
-	//private String joinSourceAlias;
-	
-	private SQLFromItem joinSource;
-	
-	private ZExp onExp;
-	
-	public void setOnExpression(ZExp onExp) {
-		if(onExp instanceof ZConstant ||
-				onExp instanceof ZExpression) {
-			this.onExp = onExp;
-		} else {
-			logger.error("Invalid join on expression");
-		}
-		
+	private SQLLogicalTable joinSource;
+	private ZExpression onExp;
+
+	public void setOnExpression(ZExpression onExp) {
+		this.onExp = onExp;
 	}
 
 	public void setJoinType(String joinType) {
 		this.joinType = joinType;
 	}
-	
-//	public void setJoinSource(ZExp joinSource) {
-//		this.joinSource = joinSource;
-//	}
-	
+
 	public void setJoinSource(SQLFromItem fromItem) {
-	this.joinSource = fromItem;
-}
-	
+		this.joinSource = fromItem;
+	}
+
 	@Override
 	public String toString() {
 		StringBuffer result = new StringBuffer();
@@ -47,10 +33,4 @@ public class SQLJoinQuery {
 		result.append(" ON " + this.onExp);
 		return result.toString();
 	}
-
-//	public void setJoinSourceAlias(String joinSourceAlias) {
-//		this.joinSourceAlias = joinSourceAlias;
-//	}
-//	
-	
 }

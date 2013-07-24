@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.Random;
 
+import Zql.ZExp;
 import Zql.ZFromItem;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 
@@ -19,6 +20,8 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	
 	//private String alias;
 	private LogicalTableType form;
+	private String joinType;
+	private ZExp onExp;
 	
 	public LogicalTableType getForm() {
 		return form;
@@ -62,6 +65,36 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 		return result;
 	}
 	
+	public void setJoinType(String joinType) {
+		this.joinType = joinType;
+	}
+
+	public void setOnExp(ZExp onExp) {
+		this.onExp = onExp;
+	}
 	
+	public ZExp getOnExp() {
+		return this.onExp;
+	}
 	
+	public String getJoinType() {
+		return joinType;
+	}
+
+	public String print(boolean withAlias) {
+		String result;
+		if(withAlias) {
+			result = this.toString();
+		} else {
+			String alias = this.getAlias();
+			if(alias == null || alias.equals("")) {
+				result = this.toString();
+			} else {
+				this.setAlias("");
+				result = this.toString();
+				this.setAlias(alias);
+			}
+		}
+		return result;
+	}
 }

@@ -17,6 +17,8 @@ public class Constants {
 	
 	public static final ZExpression SQL_EXPRESSION_TRUE = new ZExpression(
 			"=", new ZConstant("1", ZConstant.NUMBER), new ZConstant("1", ZConstant.NUMBER));
+	public static final ZExpression SQL_EXPRESSION_FALSE = new ZExpression(
+			"=", new ZConstant("1", ZConstant.NUMBER), new ZConstant("0", ZConstant.NUMBER));
 	
 	public static final String DATABASE_MONETDB = "MonetDB";
 	public static final String DATABASE_ORACLE = "Oracle";

@@ -64,13 +64,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 		if(zQuery.getFrom() != null) { this.addFrom(zQuery.getFrom());}
 		if(zQuery.getWhere() != null) { this.addWhere(zQuery.getWhere());}
 		if(zQuery.getGroupBy() != null) {this.addGroupBy(zQuery.getGroupBy());}
-
-		if(this.getFrom().size() == 1) {
-
-
-		}
-
-
 	}
 
 	public SQLQuery() {
@@ -79,7 +72,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		this.addFrom(new Vector<ZFromItem>()); 
 	}
 
-	public void addFrom(ZFromItem fromItem) {
+	private void addFrom(ZFromItem fromItem) {
 		if(this.getFrom() == null) {
 			this.addFrom(new Vector<ZFromItem>());
 		}
@@ -96,21 +89,13 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 
-	public void addJoinQuery(SQLJoinQuery joinQuery) {
+	private void addJoinQuery(SQLJoinQuery joinQuery) {
 		if(this.joinQueries == null) {
 			this.joinQueries = new Vector<SQLJoinQuery>();
 		}
 
 		this.joinQueries.add(joinQuery);
 	}
-
-//	public void addJoinQuery(SQLQuery joinQuery) {
-//		if(this.joinQueries2 == null) {
-//			this.joinQueries2 = new Vector<SQLQuery>();
-//		}
-//
-//		this.joinQueries2.add(joinQuery);
-//	}
 
 	public void addSelect(ZSelectItem newSelectItem) {
 		Collection<ZSelectItem> selectItems = this.getSelect();
@@ -144,19 +129,10 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	}
 
-	//	public void addUnionQuery(SQLQuery unionQuery) {
-	//		if(this.unionQueries == null) {
-	//			this.unionQueries = new Vector<SQLQuery>();
-	//		}
-	//
-	//		this.unionQueries.add(unionQuery);
-	//	}
-
 	public void addWhere(Collection<ZExp> newWheres) {
 		for(ZExp newWhere : newWheres) {
 			this.addWhere(newWhere);
 		}
-
 	}
 
 	public void addWhere(ZExp newWhere) {
@@ -329,27 +305,34 @@ public class SQLQuery extends ZQuery implements IQuery {
 			}
 			//remove the last coma and space
 			fromSQL = fromSQL.substring(0, fromSQL.length() - 2);
+			fromSQL += "\n";
 		}
 
 		if(this.logicalTables != null) {
-			
 			for(int i=0; i<this.logicalTables.size();i++) {
 				SQLLogicalTable logicalTable = this.logicalTables.get(i);
 				
 				String separator = "";
-				if(i > 0) {
-					if(logicalTable instanceof SQLFromItem) {
-						separator = ", ";
+				String logicalTableJoinType = logicalTable.getJoinType();
+				if(logicalTableJoinType != null && !logicalTableJoinType.equals("")) {
+					separator = logicalTableJoinType + " JOIN ";
+				} else {
+					if(i > 0) {
+						separator = ", ";	
 					}
 				}
-
-				if(logicalTable instanceof UnionSQLQuery) {
-					fromSQL +=  "( "+ logicalTable.toString() + ") " + logicalTable.getAlias();
-				} else {
-					fromSQL += separator + logicalTable.toString();	
+				
+				if(logicalTable instanceof SQLFromItem) {
+					fromSQL += separator + logicalTable.toString();
+				} else if(logicalTable instanceof IQuery) {
+					fromSQL +=  separator + " ( "+ logicalTable.print(false) + " ) " + logicalTable.getAlias();	
+				}
+			
+				ZExp joinExp = logicalTable.getOnExp();
+				if(joinExp != null) {
+					fromSQL += " ON " + joinExp;
 				}
 				
-
 				if(i < this.logicalTables.size() - 1) {
 					fromSQL += "\n";
 				}
@@ -462,21 +445,14 @@ public class SQLQuery extends ZQuery implements IQuery {
 			//join query has only one logical table
 			SQLLogicalTable logicalTable = this.logicalTables.iterator().next();
 			if(logicalTable instanceof SQLQuery) {
-				result = "(" + logicalTable + ") AS " + this.alias + "\n";
+				result = "(" + result + ") AS " + this.alias + "\n";
 			} else {
-				result = logicalTable + " " + this.alias + "\n";
+				result = result + " " + this.alias + "\n";
 			}
 
 		}
 
 
-		if(this.joinType != null && !this.joinType.equals("")) {
-			result = this.joinType + " JOIN " + result;
-		}
-
-		if(this.onExp != null) {
-			result += "ON " + this.onExp + "\n";
-		}
 
 		//		String unionSQL = "\nUNION\n";
 		//		if(this.unionQueries != null) {
@@ -812,10 +788,25 @@ public class SQLQuery extends ZQuery implements IQuery {
 		this.databaseType = databaseType;
 	}
 
-	public String setDatabaseType() {
-		// TODO Auto-generated method stub
-		return null;
+	public ZExp getOnExp() {
+		return this.onExp;
 	}
 
+	public String print(boolean withAlias) {
+		String result;
+		if(withAlias) {
+			result = this.toString();
+		} else {
+			String alias = this.getAlias();
+			if(alias == null || alias.equals("")) {
+				result = this.toString();
+			} else {
+				this.setAlias("");
+				result = this.toString();
+				this.setAlias(alias);
+			}
+		}
+		return result;
+	}
 
 }

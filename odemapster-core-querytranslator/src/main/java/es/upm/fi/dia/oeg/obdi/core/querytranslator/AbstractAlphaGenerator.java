@@ -93,7 +93,7 @@ public abstract class AbstractAlphaGenerator {
 		
 		for(Triple tp : triples) {
 			Node tpPredicate = tp.getPredicate();
-			List<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
+			List<SQLLogicalTable> alphaPredicateObjects = new Vector<SQLLogicalTable>();
 			if(tpPredicate.isURI()) {
 				String tpPredicateURI = tpPredicate.getURI();
 
@@ -107,7 +107,7 @@ public abstract class AbstractAlphaGenerator {
 				}
 				
 				if(processableTriplePattern) {
-					List<SQLQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+					List<SQLLogicalTable> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
 							tp, cm, tpPredicateURI,logicalTableAlias);
 					if(alphaPredicateObjectAux != null) {
 						alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
@@ -122,7 +122,7 @@ public abstract class AbstractAlphaGenerator {
 				AlphaResultUnion alphaTP = new AlphaResultUnion();
 				for(AbstractPropertyMapping pm : pms) {
 					String tpPredicateURI = pm.getMappedPredicateName();
-					List<SQLQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+					List<SQLLogicalTable> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
 							tp, cm, tpPredicateURI,logicalTableAlias);
 					alphaPredicateObjects.addAll(alphaPredicateObjectAux);
 					AlphaResult alphaResult = new AlphaResult(alphaSubject
@@ -141,14 +141,13 @@ public abstract class AbstractAlphaGenerator {
 
 		}
 
-		logger.debug("alphaSTG = " + alphaResultUnionList);
 		return alphaResultUnionList;
 	}
 	
 //	public abstract AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception;
 //	public abstract AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples) throws Exception;
 
-	public abstract List<SQLQuery> calculateAlphaPredicateObjectSTG(Triple tp,
+	public abstract List<SQLLogicalTable> calculateAlphaPredicateObjectSTG(Triple tp,
 			AbstractConceptMapping cm, String tpPredicateURI,
 			String logicalTableAlias) throws Exception;
 

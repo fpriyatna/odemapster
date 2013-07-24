@@ -424,7 +424,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		} else {
 			SQLQuery resultAux = new SQLQuery();
 			resultAux.setSelectItems(newSelectItems);
-			resultAux.addFrom(resultFrom);
+			//resultAux.addFrom(resultFrom);
+			resultAux.addLogicalTable(subOpSQL);
 			resultAux.addWhere(newWhere);
 			result = resultAux;
 		}
@@ -549,68 +550,47 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		Op gp2 = opUnion.getRight();
 
 		IQuery transGP1 = this.trans(gp1);
-		Collection<ZSelectItem> gp1SelectItems = transGP1.getSelectItems();
 		IQuery transGP2 = this.trans(gp2);
-		Collection<ZSelectItem> gp2SelectItems = transGP2.getSelectItems();
 
-		Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
-		Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
-		Set<Node> termsA = new LinkedHashSet<Node>(termsGP1);termsA.removeAll(termsGP2);
-		Set<Node> termsB = new LinkedHashSet<Node>(termsGP2);termsB.removeAll(termsGP1);
-		Set<Node> termsC = new LinkedHashSet<Node>(termsGP1);termsC.retainAll(termsGP2);
-
-		Collection<ZSelectItem> selectItemsA = this.generateSelectItems(
-				termsA, null, gp1SelectItems, false);
-		Vector<ZSelectItem> selectItemsAList = new Vector<ZSelectItem>(selectItemsA);
-		Collection<ZSelectItem> selectItemsB = this.generateSelectItems(
-				termsB, null, gp2SelectItems, false);
-		Vector<ZSelectItem> selectItemsBList = new Vector<ZSelectItem>(selectItemsB);
-		Vector<Node> termsCList = new Vector<Node>(termsC);
-
-
-		SQLQuery query1 = new SQLQuery();
-
-
-		String transGP1Alias = transGP1.generateAlias() + "R1";;
+		String transGP1Alias = transGP1.generateAlias() + "R1";
+		transGP1.setAlias(transGP1Alias);
+		
 		//SQLFromItem transGP1FromItem = new SQLFromItem(transGP1.toString(), SQLFromItem.FORM_QUERY);
 		SQLFromItem transGP1FromItem;
 		String subQueryGP1ViewName = "sql" + Math.abs(gp1.hashCode());
 		if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
 			Connection conn = this.getConnection();
-
 			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryGP1ViewName;
 			logger.info(dropViewSQL);
 			DBUtility.execute(conn, dropViewSQL);
-
 			String createViewSQL = "CREATE VIEW " + subQueryGP1ViewName + " AS " + transGP1;
 			logger.info(createViewSQL);
 			DBUtility.execute(conn, createViewSQL);
-
 			transGP1FromItem = new SQLFromItem(subQueryGP1ViewName, LogicalTableType.TABLE_NAME);
 		} else {
 			//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
 			transGP1FromItem = new SQLFromItem(transGP1.toString(), LogicalTableType.QUERY_STRING);
 		}
 
-
+		SQLQuery query1 = new SQLQuery();
 		transGP1FromItem.setAlias(transGP1Alias);
-		query1.addFrom(transGP1FromItem);
+		//query1.addFrom(transGP1FromItem);
+		query1.addLogicalTable(transGP1);
 
 		String transGP2Alias = transGP2.generateAlias() + "R2";
+		transGP2.setAlias(transGP2Alias);
+		
 		//SQLFromItem transGP2FromItem = new SQLFromItem(transGP2.toString(), SQLFromItem.FORM_QUERY);
 		SQLFromItem transGP2FromItem;
 		String subQueryGP2ViewName = "sqr" + Math.abs(gp2.hashCode());
 		if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
 			Connection conn = this.getConnection();
-
 			String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryGP2ViewName;
 			logger.info(dropViewSQL);
 			DBUtility.execute(conn, dropViewSQL);
-
 			String createViewSQL = "CREATE VIEW " + subQueryGP2ViewName + " AS " + transGP2;
 			logger.info(createViewSQL);
 			DBUtility.execute(conn, createViewSQL);
-
 			transGP2FromItem = new SQLFromItem(subQueryGP2ViewName, LogicalTableType.TABLE_NAME);
 		} else {
 			//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
@@ -622,10 +602,27 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		joinQuery1.setJoinType(Constants.JOINS_TYPE_LEFT);
 		joinQuery1.setJoinSource(transGP2FromItem);
 		//joinQuery1.setOnExpression(new ZConstant("FALSE", ZConstant.UNKNOWN));
-		joinQuery1.setOnExpression(new ZExpression("=", new ZConstant("1", ZConstant.NUMBER), new ZConstant("0", ZConstant.NUMBER)));
+		joinQuery1.setOnExpression(Constants.SQL_EXPRESSION_FALSE);
 
-		query1.addJoinQuery(joinQuery1);			
-
+		//query1.addJoinQuery(joinQuery1);
+		transGP2.setJoinType(Constants.JOINS_TYPE_LEFT);
+		transGP2.setOnExp(Constants.SQL_EXPRESSION_FALSE);
+		query1.addLogicalTable(transGP2);
+		
+		Collection<ZSelectItem> gp1SelectItems = transGP1.getSelectItems();
+		Collection<ZSelectItem> gp2SelectItems = transGP2.getSelectItems();
+		Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
+		Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
+		Set<Node> termsA = new LinkedHashSet<Node>(termsGP1);termsA.removeAll(termsGP2);
+		Set<Node> termsB = new LinkedHashSet<Node>(termsGP2);termsB.removeAll(termsGP1);
+		Set<Node> termsC = new LinkedHashSet<Node>(termsGP1);termsC.retainAll(termsGP2);
+		Collection<ZSelectItem> selectItemsA = this.generateSelectItems(
+				termsA, null, gp1SelectItems, false);
+		Vector<ZSelectItem> selectItemsAList = new Vector<ZSelectItem>(selectItemsA);
+		Collection<ZSelectItem> selectItemsB = this.generateSelectItems(
+				termsB, null, gp2SelectItems, false);
+		Vector<ZSelectItem> selectItemsBList = new Vector<ZSelectItem>(selectItemsB);
+		Vector<Node> termsCList = new Vector<Node>(termsC);
 
 		Vector<ZSelectItem> selectItems1 = new Vector<ZSelectItem>();
 		query1.addSelect(selectItems1);
@@ -650,7 +647,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		IQuery transR3 = this.trans(gp2);
 		Collection<ZSelectItem> r3SelectItems = transR3.getSelectItems();
 
-		String transR3Alias = transR3.generateAlias() + "R3";;
+		String transR3Alias = transR3.generateAlias() + "R3";
+		transR3.setAlias(transR3Alias);
 		//SQLFromItem transR3FromItem = new SQLFromItem(transR3.toString(), SQLFromItem.FORM_QUERY);
 		SQLFromItem transR3FromItem;
 		if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
@@ -659,8 +657,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			transR3FromItem = new SQLFromItem(transR3.toString(), LogicalTableType.QUERY_STRING);
 		}
 		transR3FromItem.setAlias(transR3Alias);
-		query2.addFrom(transR3FromItem);
-
+		//query2.addFrom(transR3FromItem);
+		query2.addLogicalTable(transR3);
+		
 		IQuery transR4 = this.trans(gp1);
 		String transR4Alias = transR4.generateAlias() + "R4";
 		//SQLFromItem transR4FromItem = new SQLFromItem(transR4.toString(), SQLFromItem.FORM_QUERY);
@@ -674,10 +673,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 		SQLJoinQuery joinQuery2 = new SQLJoinQuery();
 		joinQuery2.setJoinType(Constants.JOINS_TYPE_LEFT);
+		transR4.setJoinType(Constants.JOINS_TYPE_LEFT);
 		joinQuery2.setJoinSource(transR4FromItem);
 		//joinQuery2.setOnExpression(new ZConstant("FALSE", ZConstant.UNKNOWN));
-		joinQuery2.setOnExpression(new ZExpression("=", new ZConstant("1", ZConstant.NUMBER), new ZConstant("0", ZConstant.NUMBER)));
-		query2.addJoinQuery(joinQuery2);
+		joinQuery2.setOnExpression(Constants.SQL_EXPRESSION_FALSE);
+		transR4.setOnExp(Constants.SQL_EXPRESSION_FALSE);
+		query2.addLogicalTable(transR4);
 
 		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
 		query2.addSelect(selectItems2);
@@ -856,8 +857,6 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 			transGP1FromItem.setAlias(transGP1Alias);
 
-			SQLQuery transJoin = new SQLQuery();
-			transJoin.addFrom(transGP1FromItem);
 
 			String transGP2Alias = transGP2SQL.generateAlias();
 			SQLFromItem transGP2FromItem;
@@ -877,9 +876,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			transGP2FromItem.setAlias(transGP2Alias);
 
 			
-			SQLJoinQuery joinQuery = new SQLJoinQuery();
-			joinQuery.setJoinType(joinType);
-			joinQuery.setJoinSource(transGP2FromItem);
+//			SQLJoinQuery joinQuery2 = new SQLJoinQuery();
+//			joinQuery2.setJoinType(joinType);
+//			joinQuery2.setJoinSource(transGP2FromItem);
+			transGP2SQL.setJoinType(joinType);
+			//joinQuery.addLogicalTable(transGP2FromItem);
+			
 
 			Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
 			Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
@@ -902,9 +904,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				selectItemC.setAlias(selectItemC.getColumn());
 			}
 			selectItems.addAll(selectItemsC);
-
 			logger.debug("selectItems = " + selectItems);
-			transJoin.setSelectItems(selectItems);
+
 
 			//.... JOIN ... ON <joinOnExpression>
 			Collection<ZExpression> joinOnExps = new HashSet<ZExpression>();
@@ -952,11 +953,14 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				}				
 			}
 			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps, Constants.SQL_LOGICAL_OPERATOR_AND);
-			joinQuery.setOnExpression(joinOnExpression);
+			transGP2SQL.setOnExp(joinOnExpression);
 
-			transJoin.addJoinQuery(joinQuery);			
+			SQLQuery transJoin = new SQLQuery();
+			transJoin.addLogicalTable(transGP1SQL);
+			transJoin.setSelectItems(selectItems);
+			transJoin.addLogicalTable(transGP2SQL);			
 
-			//logger.info("transJoin = \n" + transJoin + "\n");
+			logger.debug("transJoin = \n" + transJoin.toString() + "\n");
 			return transJoin;
 		}
 	}
@@ -1008,7 +1012,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		long end = System.currentTimeMillis();
 		logger.debug("Query translation time = "+ (end-start)+" ms.");
 
-		logger.info("result = \n" + result + "\n");
+		logger.info("sql = \n" + result + "\n");
 		return result;
 	}
 
@@ -1203,9 +1207,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			//put this before alpha predicate object, as this is the main table and the order is important
 			resultAux.addLogicalTable(alphaSubject);//alpha subject
 			
-			Collection<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
+			Collection<SQLLogicalTable> alphaPredicateObjects = new Vector<SQLLogicalTable>();
 			for(AlphaResultUnion alphaTP : alphaResultUnionList) {
-				Collection<SQLQuery> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
+				Collection<SQLLogicalTable> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
 				alphaPredicateObjects.addAll(tpAlphaPredicateObjects);
 			}
 
@@ -1220,31 +1224,27 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					if(alphaSubject instanceof SQLQuery) {
 						condition2 = true;
 					}
-
 					if(condition1 || condition2) {
 						String logicalTableAlias = alphaSubject.getAlias();
 						alphaSubject.setAlias("");
-
 						Connection conn = this.getConnection();
-
 						String subQueryViewName = "sqa" + Math.abs(stg.hashCode());
 						String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
 						logger.info(dropViewSQL + ";\n");
 						DBUtility.execute(conn, dropViewSQL);
-
 						String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + alphaSubject;
 						logger.info(createViewSQL + ";\n");
 						DBUtility.execute(conn, createViewSQL);
-
-
 						alphaSubject = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
 						alphaSubject.setAlias(logicalTableAlias);					
 					}
 				}
 			} else {
-				for(SQLQuery alphaPredicateObject : alphaPredicateObjects) {
+				for(SQLLogicalTable alphaPredicateObject : alphaPredicateObjects) {
 					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
 					resultAux.addLogicalTable(alphaPredicateObject);//alpha predicate object
+					resultAux.toString();
+
 				}
 			}
 
@@ -1274,22 +1274,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 
 
-
-
-		if(alphaResultUnionList.size() == 1) {
-			AlphaResultUnion alphaResultUnion = alphaResultUnionList.get(0);
-			if(alphaResultUnion.size() > 1) {
-
-			} else {
-
-			}
-		} else if(alphaResultUnionList.size() > 1) {
-
-		}
-
-
-
-		logger.debug("transTSS = " + result);
+		logger.debug("transSTG = " + result);
 		return result;
 	}
 

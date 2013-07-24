@@ -7,11 +7,11 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public class AlphaResult {
 	private SQLLogicalTable alphaSubject;
-	private List<SQLQuery> alphaPredicateObjects;
+	private List<SQLLogicalTable> alphaPredicateObjects;
 	private String predicateURI;
 	
 	public AlphaResult(SQLLogicalTable alphaSubject
-			, List<SQLQuery> alphaPredicateObjects, String predicateURI) {
+			, List<SQLLogicalTable> alphaPredicateObjects, String predicateURI) {
 		super();
 		this.alphaSubject = alphaSubject;
 		this.alphaPredicateObjects = alphaPredicateObjects;
@@ -22,7 +22,7 @@ public class AlphaResult {
 		return alphaSubject;
 	}
 
-	public List<SQLQuery> getAlphaPredicateObjects() {
+	public List<SQLLogicalTable> getAlphaPredicateObjects() {
 		return alphaPredicateObjects;
 	}
 

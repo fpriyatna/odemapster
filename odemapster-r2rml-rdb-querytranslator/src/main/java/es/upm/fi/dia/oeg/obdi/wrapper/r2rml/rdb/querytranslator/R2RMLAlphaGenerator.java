@@ -13,6 +13,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
@@ -40,70 +41,42 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	}
 
 	@Override
-	protected SQLQuery calculateAlphaPredicateObject  (Triple triple
+	protected SQLLogicalTable calculateAlphaPredicateObject  (Triple triple
 			, AbstractConceptMapping abstractConceptMapping
 			, AbstractPropertyMapping abstractPropertyMapping
 			, String logicalTableAlias) throws QueryTranslationException {
-		SQLQuery joinQuery = null;
 		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
 		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 		if(refObjectMap != null) { 
-			joinQuery = new SQLQuery();
-			joinQuery.setJoinType("INNER");
-			String joinQueryAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
-			if(joinQueryAlias == null) {
-				joinQueryAlias = joinQuery.generateAlias();
-				R2RMLQueryTranslator.mapTripleAlias.put(triple, joinQueryAlias);
-			}
-			joinQuery.setAlias(joinQueryAlias);
-			
-			
 			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
 			if(parentLogicalTable == null) {
 				String errorMessage = "Parent logical table is not found for RefObjectMap : " + refObjectMap;
 				throw new QueryTranslationException(errorMessage);
 			}
-			//SQLLogicalTable sqlParentLogicalTable = new R2RMLElementUnfoldVisitor().visit(parentLogicalTable);
 			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 			SQLLogicalTable sqlParentLogicalTable = unfolder.visit(parentLogicalTable);
-			if(this.subqueryAsView && sqlParentLogicalTable instanceof SQLQuery) {
-				try {
-					Connection conn = this.owner.getConnection();
-					
-					String subQueryViewName = "sa" + Math.abs(triple.hashCode());
-					String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
-					logger.info(dropViewSQL + ";\n");
-					DBUtility.execute(conn, dropViewSQL);
-					
-					String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlParentLogicalTable;
-					logger.info(createViewSQL + ";\n");
-					DBUtility.execute(conn, createViewSQL);
-
-					SQLFromItem alphaPredicateObject2 = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
-					joinQuery.addLogicalTable(alphaPredicateObject2);					
-				} catch(Exception e) {
-					throw new QueryTranslationException(e);
-				}
-			} else {
-				joinQuery.addLogicalTable(sqlParentLogicalTable);
+			sqlParentLogicalTable.setJoinType(Constants.JOINS_TYPE_INNER);
+			String joinQueryAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
+			if(joinQueryAlias == null) {
+				joinQueryAlias = sqlParentLogicalTable.generateAlias();
+				R2RMLQueryTranslator.mapTripleAlias.put(triple, joinQueryAlias);
 			}
-			
-			
-			
+			sqlParentLogicalTable.setAlias(joinQueryAlias);
 
 			Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
-			//String databaseType = this.owner.getConfigurationProperties().getDatabaseType();
 			String databaseType = this.owner.getDatabaseType();
-			new R2RMLUtility();
 			ZExp onExpression = R2RMLUtility.generateJoinCondition(
 					joinConditions, logicalTableAlias, joinQueryAlias
 					, databaseType);
 			if(onExpression != null) {
-				joinQuery.setOnExp(onExpression);
+				sqlParentLogicalTable.setOnExp(onExpression);
 			}
+			return sqlParentLogicalTable;
+		} else {
+			return null;
 		}
 
-		return joinQuery;
+		
 	}
 
 
@@ -148,10 +121,10 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 
 
 
-	public List<SQLQuery> calculateAlphaPredicateObjectSTG(Triple tp
+	public List<SQLLogicalTable> calculateAlphaPredicateObjectSTG(Triple tp
 			, AbstractConceptMapping cm, String tpPredicateURI
 			, String logicalTableAlias) throws Exception {
-		List<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
+		List<SQLLogicalTable> alphaPredicateObjects = new Vector<SQLLogicalTable>();
 		
 		boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
 		if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
@@ -164,9 +137,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 				logger.debug("pm = " + pm);
 				R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 				if(refObjectMap != null) { 
-					SQLQuery alphaPredicateObject = 
+					SQLLogicalTable alphaPredicateObject = 
 							this.calculateAlphaPredicateObject(tp, cm, pm, logicalTableAlias);
-					
 					alphaPredicateObjects.add(alphaPredicateObject);
 				}
 			} else {
@@ -190,7 +162,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		
 		//alpha predicate object
 		Collection<AbstractPropertyMapping> pms = abstractConceptMapping.getPropertyMappings(predicateURI);
-		List<SQLQuery> alphaPredicateObjects = new Vector<SQLQuery>();
+		List<SQLLogicalTable> alphaPredicateObjects = new Vector<SQLLogicalTable>();
 		if(pms != null) {
 			if(pms.size() > 1) {
 				String errorMessage = "Multiple mappings of a predicate is not supported.";
@@ -200,7 +172,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
 			R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 			if(refObjectMap != null) { 
-				SQLQuery alphaPredicateObject = this.calculateAlphaPredicateObject(
+				SQLLogicalTable alphaPredicateObject = this.calculateAlphaPredicateObject(
 						tp, abstractConceptMapping, pm, logicalTableAlias);
 				alphaPredicateObjects.add(alphaPredicateObject);
 			}

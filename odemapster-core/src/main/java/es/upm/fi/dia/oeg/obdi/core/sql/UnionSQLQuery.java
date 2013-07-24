@@ -10,7 +10,6 @@ import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
-
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.oeg.obdi.core.utility.CollectionUtility;
 
@@ -19,6 +18,8 @@ public class UnionSQLQuery implements IQuery {
 	private String databaseType;
 	private Collection<SQLQuery> unionQueries = new Vector<SQLQuery>();
 	private Vector<ZOrderBy> orderByConditions;
+	private String joinType;
+	private ZExp onExp;
 	
 	public UnionSQLQuery() { 
 		this.unionQueries = new Vector<SQLQuery>();
@@ -197,5 +198,37 @@ public class UnionSQLQuery implements IQuery {
 		this.databaseType = databaseType;
 	}
 
+	public void setJoinType(String joinType) {
+		this.joinType = joinType;		
+	}
+
+	public void setOnExp(ZExp onExp) {
+		this.onExp = onExp;
+	}
+
+	public String getJoinType() {
+		return this.joinType;
+	}
+
+	public ZExp getOnExp() {
+		return this.onExp;
+	}
+
+	public String print(boolean withAlias) {
+		String result;
+		if(withAlias) {
+			result = this.toString();
+		} else {
+			String alias = this.getAlias();
+			if(alias == null || alias.equals("")) {
+				result = this.toString();
+			} else {
+				this.setAlias("");
+				result = this.toString();
+				this.setAlias(alias);
+			}
+		}
+		return result;
+	}
 
 }
