@@ -32,7 +32,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(SQLQuery.class);
 
-	//private List<SQLJoinQuery> logicalTables = new LinkedList<SQLJoinQuery>();
 	private String alias;
 	private long slice = -1;
 	private long offset = -1;
@@ -47,7 +46,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 	public SQLQuery(SQLLogicalTable logicalTable) {
-		SQLJoinQuery joinQuery = new SQLJoinQuery(logicalTable);
+		SQLJoinTable joinQuery = new SQLJoinTable(logicalTable);
 		this.addFrom(joinQuery);
 	}
 	
@@ -220,8 +219,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 			
 			if(fromItem instanceof SQLFromItem) {
 				result = this;
-			} else if(fromItem instanceof SQLJoinQuery) {
-				SQLJoinQuery joinQuery = (SQLJoinQuery) fromItem;
+			} else if(fromItem instanceof SQLJoinTable) {
+				SQLJoinTable joinQuery = (SQLJoinTable) fromItem;
 				SQLLogicalTable logicalTable = joinQuery.getJoinSource();
 				Collection<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
 				if(logicalTable instanceof SQLFromItem) {
@@ -300,8 +299,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 			ZFromItem fromItem = logicalTables.iterator().next();
 			Collection<ZSelectItem> oldSelectItems;
 			
-			if(fromItem instanceof SQLJoinQuery) {
-				SQLJoinQuery joinQuery = (SQLJoinQuery) fromItem; 
+			if(fromItem instanceof SQLJoinTable) {
+				SQLJoinTable joinQuery = (SQLJoinTable) fromItem; 
 				SQLLogicalTable logicalTable = joinQuery.getJoinSource();
 				
 
@@ -508,8 +507,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 			for(ZFromItem mainQueryFromItem : fromItems) {
 				if(mainQueryFromItem instanceof SQLFromItem) {
 					fromSQL += mainQueryFromItem.toString() + ", ";
-				} else if(mainQueryFromItem instanceof SQLJoinQuery) {
-					SQLJoinQuery joinQuery = (SQLJoinQuery) mainQueryFromItem;
+				} else if(mainQueryFromItem instanceof SQLJoinTable) {
+					SQLJoinTable joinQuery = (SQLJoinTable) mainQueryFromItem;
 					SQLLogicalTable logicalTable = joinQuery.getJoinSource();
 					
 					String separator = "";

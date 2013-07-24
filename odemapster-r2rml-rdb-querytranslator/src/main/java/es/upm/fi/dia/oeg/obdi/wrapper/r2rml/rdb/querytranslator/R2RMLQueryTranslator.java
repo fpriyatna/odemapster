@@ -38,7 +38,7 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
@@ -225,10 +225,10 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		logger.debug("alpha logicalTable = " + alphaSubject);
 		SQLQuery resultAux = new SQLQuery(alphaSubject);
 		
-		Collection<SQLJoinQuery> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
+		Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
 		
 		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
-			for(SQLJoinQuery alphaPredicateObject : alphaPredicateObjects) {
+			for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 				//result.addJoinQuery(alphaPredicateObject);//alpha predicate object
 				resultAux.addLogicalTable(alphaPredicateObject);
 				logger.debug("alphaPredicateObject = " + alphaPredicateObject);

@@ -5,21 +5,21 @@ import org.apache.log4j.Logger;
 import Zql.ZExpression;
 import Zql.ZFromItem;
 
-public class SQLJoinQuery extends ZFromItem {
-	private static Logger logger = Logger.getLogger(SQLJoinQuery.class);
+public class SQLJoinTable extends ZFromItem {
+	private static Logger logger = Logger.getLogger(SQLJoinTable.class);
 
 	private SQLLogicalTable joinSource;
 	private String joinType;
 	private ZExpression onExpression;
 
-	public SQLJoinQuery(SQLLogicalTable joinSource,String joinType, ZExpression onExp) {
+	public SQLJoinTable(SQLLogicalTable joinSource,String joinType, ZExpression onExp) {
 		super();
 		this.joinType = joinType;
 		this.joinSource = joinSource;
 		this.onExpression = onExp;
 	}
 
-	public SQLJoinQuery(SQLLogicalTable joinSource) {
+	public SQLJoinTable(SQLLogicalTable joinSource) {
 		this(joinSource, null, null);
 	}
 	

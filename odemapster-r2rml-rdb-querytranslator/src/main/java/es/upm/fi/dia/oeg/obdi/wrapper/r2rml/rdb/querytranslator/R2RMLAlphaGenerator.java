@@ -23,7 +23,7 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
@@ -42,11 +42,11 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	}
 
 	@Override
-	protected SQLJoinQuery calculateAlphaPredicateObject  (Triple triple
+	protected SQLJoinTable calculateAlphaPredicateObject  (Triple triple
 			, AbstractConceptMapping abstractConceptMapping
 			, AbstractPropertyMapping abstractPropertyMapping
 			, String logicalTableAlias) throws QueryTranslationException {
-		SQLJoinQuery result = null;
+		SQLJoinTable result = null;
 		
 		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
 		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
@@ -59,7 +59,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			}
 			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 			SQLLogicalTable sqlParentLogicalTableAux = unfolder.visit(parentLogicalTable);
-			SQLJoinQuery sqlParentLogicalTable = new SQLJoinQuery(
+			SQLJoinTable sqlParentLogicalTable = new SQLJoinTable(
 					sqlParentLogicalTableAux, Constants.JOINS_TYPE_INNER, null); 
 			String joinQueryAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
 			if(joinQueryAlias == null) {
@@ -125,10 +125,10 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 
 
 
-	public List<SQLJoinQuery> calculateAlphaPredicateObjectSTG(Triple tp
+	public List<SQLJoinTable> calculateAlphaPredicateObjectSTG(Triple tp
 			, AbstractConceptMapping cm, String tpPredicateURI
 			, String logicalTableAlias) throws Exception {
-		List<SQLJoinQuery> alphaPredicateObjects = new Vector<SQLJoinQuery>();
+		List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
 		
 		boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
 		if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
@@ -141,7 +141,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 				logger.debug("pm = " + pm);
 				R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 				if(refObjectMap != null) { 
-					SQLJoinQuery alphaPredicateObject = 
+					SQLJoinTable alphaPredicateObject = 
 							this.calculateAlphaPredicateObject(tp, cm, pm, logicalTableAlias);
 					alphaPredicateObjects.add(alphaPredicateObject);
 				}
@@ -166,7 +166,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		
 		//alpha predicate object
 		Collection<AbstractPropertyMapping> pms = abstractConceptMapping.getPropertyMappings(predicateURI);
-		List<SQLJoinQuery> alphaPredicateObjects = new Vector<SQLJoinQuery>();
+		List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
 		if(pms != null) {
 			if(pms.size() > 1) {
 				String errorMessage = "Multiple mappings of a predicate is not supported.";
@@ -176,7 +176,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
 			R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
 			if(refObjectMap != null) { 
-				SQLJoinQuery alphaPredicateObject = this.calculateAlphaPredicateObject(
+				SQLJoinTable alphaPredicateObject = this.calculateAlphaPredicateObject(
 						tp, abstractConceptMapping, pm, logicalTableAlias);
 				alphaPredicateObjects.add(alphaPredicateObject);
 			}

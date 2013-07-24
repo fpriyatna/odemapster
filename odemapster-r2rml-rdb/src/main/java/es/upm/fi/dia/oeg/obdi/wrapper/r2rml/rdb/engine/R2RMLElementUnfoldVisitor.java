@@ -18,7 +18,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -83,7 +83,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		logicalTableAlias = logicalTableUnfolded.generateAlias();
 		logicalTable.setAlias(logicalTableAlias);
 		//result.addFrom(logicalTableUnfolded);
-		result.addLogicalTable(new SQLJoinQuery(logicalTableUnfolded, null, null));
+		result.addLogicalTable(new SQLJoinTable(logicalTableUnfolded, null, null));
 
 		Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 		if(subjectMapColumnsString != null) {
@@ -171,7 +171,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					SQLLogicalTable sqlParentLogicalTable = 
 							(SQLLogicalTable) parentLogicalTable.accept(this);
 					
-					SQLJoinQuery joinQuery = new SQLJoinQuery(sqlParentLogicalTable);
+					SQLJoinTable joinQuery = new SQLJoinTable(sqlParentLogicalTable);
 					joinQuery.setJoinType("LEFT");
 					String joinQueryAlias = sqlParentLogicalTable.generateAlias();
 					sqlParentLogicalTable.setAlias(joinQueryAlias);

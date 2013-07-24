@@ -12,7 +12,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 
 public abstract class AbstractAlphaGenerator {
@@ -93,7 +93,7 @@ public abstract class AbstractAlphaGenerator {
 		
 		for(Triple tp : triples) {
 			Node tpPredicate = tp.getPredicate();
-			List<SQLJoinQuery> alphaPredicateObjects = new Vector<SQLJoinQuery>();
+			List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
 			if(tpPredicate.isURI()) {
 				String tpPredicateURI = tpPredicate.getURI();
 
@@ -107,7 +107,7 @@ public abstract class AbstractAlphaGenerator {
 				}
 				
 				if(processableTriplePattern) {
-					List<SQLJoinQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+					List<SQLJoinTable> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
 							tp, cm, tpPredicateURI,logicalTableAlias);
 					if(alphaPredicateObjectAux != null) {
 						alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
@@ -122,7 +122,7 @@ public abstract class AbstractAlphaGenerator {
 				AlphaResultUnion alphaTP = new AlphaResultUnion();
 				for(AbstractPropertyMapping pm : pms) {
 					String tpPredicateURI = pm.getMappedPredicateName();
-					List<SQLJoinQuery> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
+					List<SQLJoinTable> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
 							tp, cm, tpPredicateURI,logicalTableAlias);
 					alphaPredicateObjects.addAll(alphaPredicateObjectAux);
 					AlphaResult alphaResult = new AlphaResult(alphaSubject
@@ -147,7 +147,7 @@ public abstract class AbstractAlphaGenerator {
 //	public abstract AbstractConceptMapping calculateAlphaCM(Triple tp) throws Exception;
 //	public abstract AbstractConceptMapping calculateAlphaCMTB(Collection<Triple> triples) throws Exception;
 
-	public abstract List<SQLJoinQuery> calculateAlphaPredicateObjectSTG(Triple tp,
+	public abstract List<SQLJoinTable> calculateAlphaPredicateObjectSTG(Triple tp,
 			AbstractConceptMapping cm, String tpPredicateURI,
 			String logicalTableAlias) throws Exception;
 

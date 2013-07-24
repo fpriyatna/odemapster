@@ -66,7 +66,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -414,17 +414,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		newSelectItems.add(newSelectItem);
 
 		IQuery result = null;
+		SQLQuery resultAux = new SQLQuery(subOpSQL);
+		resultAux.setSelectItems(newSelectItems);
+		resultAux.addWhere(newWhere);
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			SQLQuery resultAux = new SQLQuery(subOpSQL);
-			resultAux.setSelectItems(newSelectItems);
-			resultAux.addWhere(newWhere);
 			result = resultAux.eliminateSubQuery();
 		} else {
-			SQLQuery resultAux = new SQLQuery();
-			resultAux.setSelectItems(newSelectItems);
-			//resultAux.addFrom(resultFrom);
-			resultAux.addLogicalTable(new SQLJoinQuery(subOpSQL, null, null));
-			resultAux.addWhere(newWhere);
 			result = resultAux;
 		}
 
@@ -573,7 +568,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		SQLQuery query1 = new SQLQuery();
 		transGP1FromItem.setAlias(transGP1Alias);
 		//query1.addFrom(transGP1FromItem);
-		query1.addLogicalTable(new SQLJoinQuery(transGP1, null, null));
+		query1.addLogicalTable(new SQLJoinTable(transGP1, null, null));
 
 		String transGP2Alias = transGP2.generateAlias() + "R2";
 		transGP2.setAlias(transGP2Alias);
@@ -596,7 +591,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		transGP2FromItem.setAlias(transGP2Alias);
 
-		query1.addLogicalTable(new SQLJoinQuery(transGP2, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
+		query1.addLogicalTable(new SQLJoinTable(transGP2, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
 		
 		Collection<ZSelectItem> gp1SelectItems = transGP1.getSelectItems();
 		Collection<ZSelectItem> gp2SelectItems = transGP2.getSelectItems();
@@ -647,7 +642,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		transR3FromItem.setAlias(transR3Alias);
 		//query2.addFrom(transR3FromItem);
-		query2.addLogicalTable(new SQLJoinQuery(transR3, null, null));
+		query2.addLogicalTable(new SQLJoinTable(transR3, null, null));
 		
 		IQuery transR4 = this.trans(gp1);
 		String transR4Alias = transR4.generateAlias() + "R4";
@@ -660,7 +655,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		transR4FromItem.setAlias(transR4Alias);
 
-		query2.addLogicalTable(new SQLJoinQuery(transR4, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
+		query2.addLogicalTable(new SQLJoinTable(transR4, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
 
 		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
 		query2.addSelect(selectItems2);
@@ -936,9 +931,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps, Constants.SQL_LOGICAL_OPERATOR_AND);
 
 			SQLQuery transJoin = new SQLQuery();
-			transJoin.addLogicalTable(new SQLJoinQuery(transGP1SQL, null, null));
+			transJoin.addLogicalTable(new SQLJoinTable(transGP1SQL, null, null));
 			transJoin.setSelectItems(selectItems);
-			transJoin.addLogicalTable(new SQLJoinQuery(transGP2SQL, joinType, joinOnExpression));		
+			transJoin.addLogicalTable(new SQLJoinTable(transGP2SQL, joinType, joinOnExpression));		
 
 			logger.debug("transJoin = \n" + transJoin.toString() + "\n");
 			return transJoin;
@@ -1184,11 +1179,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
 
 			//put this before alpha predicate object, as this is the main table and the order is important
-			resultAux.addLogicalTable(new SQLJoinQuery(alphaSubject, null, null));//alpha subject
+			resultAux.addLogicalTable(new SQLJoinTable(alphaSubject, null, null));//alpha subject
 			
-			Collection<SQLJoinQuery> alphaPredicateObjects = new Vector<SQLJoinQuery>();
+			Collection<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
 			for(AlphaResultUnion alphaTP : alphaResultUnionList) {
-				Collection<SQLJoinQuery> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
+				Collection<SQLJoinTable> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
 				alphaPredicateObjects.addAll(tpAlphaPredicateObjects);
 			}
 
@@ -1219,7 +1214,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					}
 				}
 			} else {
-				for(SQLJoinQuery alphaPredicateObject : alphaPredicateObjects) {
+				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
 					resultAux.addLogicalTable(alphaPredicateObject);//alpha predicate object
 					resultAux.toString();
