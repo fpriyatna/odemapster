@@ -36,7 +36,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 	private ZExp onExp;
 
 	private List<SQLLogicalTable> logicalTables = new LinkedList<SQLLogicalTable>();
-	private Collection<SQLJoinQuery> joinQueries;
+	//private Collection<SQLJoinQuery> joinQueries;
 	//private Collection<SQLQuery> joinQueries2;
 	//private Collection<SQLQuery> unionQueries;
 	private String alias;
@@ -89,13 +89,13 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 
-	private void addJoinQuery(SQLJoinQuery joinQuery) {
-		if(this.joinQueries == null) {
-			this.joinQueries = new Vector<SQLJoinQuery>();
-		}
-
-		this.joinQueries.add(joinQuery);
-	}
+//	private void addJoinQuery(SQLJoinQuery joinQuery) {
+//		if(this.joinQueries == null) {
+//			this.joinQueries = new Vector<SQLJoinQuery>();
+//		}
+//
+//		this.joinQueries.add(joinQuery);
+//	}
 
 	public void addSelect(ZSelectItem newSelectItem) {
 		Collection<ZSelectItem> selectItems = this.getSelect();
@@ -394,11 +394,11 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 
 		//print join queries
-		if(this.joinQueries != null) {
-			for(SQLJoinQuery joinQuery : this.joinQueries) {
-				result += joinQuery.toString() + "\n";
-			}				
-		}
+//		if(this.joinQueries != null) {
+//			for(SQLJoinQuery joinQuery : this.joinQueries) {
+//				result += joinQuery.toString() + "\n";
+//			}				
+//		}
 
 //		//print join queries
 //		if(this.joinQueries2 != null) {
