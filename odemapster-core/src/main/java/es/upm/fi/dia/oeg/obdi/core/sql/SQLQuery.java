@@ -3,7 +3,6 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,10 +31,10 @@ public class SQLQuery extends ZQuery implements IQuery {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(SQLQuery.class);
-	private String joinType;
-	private ZExp onExp;
+	//private String joinType;
+	//private ZExp onExp;
 
-	private List<SQLLogicalTable> logicalTables = new LinkedList<SQLLogicalTable>();
+	private List<SQLJoinQuery> logicalTables = new LinkedList<SQLJoinQuery>();
 	//private Collection<SQLJoinQuery> joinQueries;
 	//private Collection<SQLQuery> joinQueries2;
 	//private Collection<SQLQuery> unionQueries;
@@ -52,6 +51,11 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	private String comments;
 
+	public SQLQuery(SQLLogicalTable logicalTable) {
+		SQLJoinQuery joinQuery = new SQLJoinQuery(logicalTable);
+		this.logicalTables.add(joinQuery);
+	}
+	
 	public SQLQuery(ZQuery zQuery) {
 		ZUtils.addCustomFunction("concat", 2);
 		ZUtils.addCustomFunction("substring", 3);
@@ -80,9 +84,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 
-	public void addLogicalTable(SQLLogicalTable logicalTable) {
+	public void addLogicalTable(SQLJoinQuery logicalTable) {
 		if(this.logicalTables == null) {
-			this.logicalTables = new LinkedList<SQLLogicalTable>();
+			this.logicalTables = new LinkedList<SQLJoinQuery>();
 		}
 
 		this.logicalTables.add(logicalTable);
@@ -98,9 +102,10 @@ public class SQLQuery extends ZQuery implements IQuery {
 //	}
 
 	public void addSelect(ZSelectItem newSelectItem) {
-		Collection<ZSelectItem> selectItems = this.getSelect();
+		Vector<ZSelectItem> selectItems = this.getSelect();
 		if(selectItems == null) {
-			this.addSelect(new Vector<ZSelectItem>());
+			selectItems = new Vector<ZSelectItem>();
+			this.addSelect(selectItems);
 		}
 
 		String newSelectItemAlias = newSelectItem.getAlias();
@@ -151,16 +156,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 		super.addWhere(where);
 	}
 
-	public void addOn(ZExp newOn) {
-		if(newOn != null) {
-			if(this.onExp == null) {
-				super.addWhere(newOn);
-			} else {
-				ZExp combinedWhere = new ZExpression("AND", this.onExp, newOn);
-				this.setOnExp(combinedWhere);
-			}
-		}
-	}
 
 	public void clearSelectItems() {
 		Collection<ZSelectItem> selectItems = this.getSelect();
@@ -310,10 +305,11 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 		if(this.logicalTables != null) {
 			for(int i=0; i<this.logicalTables.size();i++) {
-				SQLLogicalTable logicalTable = this.logicalTables.get(i);
+				SQLJoinQuery joinQuery = this.logicalTables.get(i);
+				SQLLogicalTable logicalTable = joinQuery.getJoinSource();
 				
 				String separator = "";
-				String logicalTableJoinType = logicalTable.getJoinType();
+				String logicalTableJoinType = joinQuery.getJoinType();
 				if(logicalTableJoinType != null && !logicalTableJoinType.equals("")) {
 					separator = logicalTableJoinType + " JOIN ";
 				} else {
@@ -328,7 +324,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 					fromSQL +=  separator + " ( "+ logicalTable.print(false) + " ) " + logicalTable.getAlias();	
 				}
 			
-				ZExp joinExp = logicalTable.getOnExp();
+				ZExpression joinExp = joinQuery.getOnExpression();
 				if(joinExp != null) {
 					fromSQL += " ON " + joinExp;
 				}
@@ -385,54 +381,10 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 		//print from
 		String fromSQL = this.printFrom();
-		if(this.joinType != null && (this.getSelect() == null || this.getSelect().size() == 0)) {
-			result += fromSQL + "\n";
-		} else {
-			result += "FROM " + fromSQL + "\n";
-		}
+		result += "FROM " + fromSQL + "\n";
 
-
-
-		//print join queries
-//		if(this.joinQueries != null) {
-//			for(SQLJoinQuery joinQuery : this.joinQueries) {
-//				result += joinQuery.toString() + "\n";
-//			}				
-//		}
-
-//		//print join queries
-//		if(this.joinQueries2 != null) {
-//			for(SQLQuery joinQuery : this.joinQueries2) {
-//				result += joinQuery.toString() + "\n";
-//			}				
-//		}
-
-
-		//		if(this.joinQueries2 != null) {
-		//			for(SQLQuery joinQuery : this.joinQueries2) {
-		//				String joinQueryString;
-		//				if(joinQuery.alias == null) {
-		//					joinQueryString = joinQuery.joinType + " JOIN " + joinQuery.toString() + "\n";
-		//				} else {
-		//					joinQueryString = joinQuery.joinType + " JOIN " + "(" + joinQuery.toString() 
-		//							+ ") AS " + joinQuery.alias + "\n";
-		//				}
-		//				joinQueryString += "ON " + joinQuery.onExp;
-		//						
-		//				logger.info("joinQueryString = " + joinQueryString);
-		//				result += joinQueryString;
-		//			}				
-		//		}
-
-
-
-		String whereSQL = null;
 		if(this.getWhere() != null) {
-			whereSQL = this.getWhere().toString();
-			if(whereSQL.startsWith("(") && whereSQL.endsWith(")")) {
-				whereSQL = whereSQL.substring(1, whereSQL.length() - 1);
-			}
-
+			String whereSQL = this.getWhere().toString();
 			if(whereSQL.startsWith("(") && whereSQL.endsWith(")")) {
 				whereSQL = whereSQL.substring(1, whereSQL.length() - 1);
 			}
@@ -440,27 +392,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 			whereSQL = whereSQL.replaceAll("\\) AND \\(", " AND ");
 			result += "WHERE " + whereSQL + "\n"; 
 		}
-
-		if(this.alias != null && !this.alias.equals("") && this.joinType != null) {
-			//join query has only one logical table
-			SQLLogicalTable logicalTable = this.logicalTables.iterator().next();
-			if(logicalTable instanceof SQLQuery) {
-				result = "(" + result + ") AS " + this.alias + "\n";
-			} else {
-				result = result + " " + this.alias + "\n";
-			}
-
-		}
-
-
-
-		//		String unionSQL = "\nUNION\n";
-		//		if(this.unionQueries != null) {
-		//			for(SQLQuery unionQuery : this.unionQueries) {
-		//				String unionQueryString = unionQuery.toString(); 
-		//				result += unionSQL + unionQueryString; 
-		//			}
-		//		}
 
 		Vector<ZOrderBy> orderByConditions = this.getOrderBy(); 
 		if(orderByConditions != null && orderByConditions.size() > 0) {
@@ -480,50 +411,27 @@ public class SQLQuery extends ZQuery implements IQuery {
 		}
 
 		return result.trim();
-
 	}
-
-	//	public void setUnionQueries(Collection<SQLQuery> unionQueries) {
-	//		this.unionQueries = unionQueries;
-	//	}
 
 	public void setAlias(String alias) {
 		this.alias = alias;
-	}
-
-	public void setJoinType(String joinType) {
-		this.joinType = joinType;
-	}
-
-	public void setOnExp(ZExp onExp) {
-		this.onExp = onExp;
 	}
 
 	public String getAlias() {
 		return this.alias;
 	}
 
-	public String getJoinType() {
-		return joinType;
-	}
-
-	public Collection<SQLLogicalTable> getLogicalTables() {
+	public Collection<SQLJoinQuery> getLogicalTables() {
 		return logicalTables;
 	}
 
-	public void setLogicalTables(List<SQLLogicalTable> logicalTables) {
+	public void setLogicalTables(List<SQLJoinQuery> logicalTables) {
 		this.logicalTables = logicalTables;
-	}
-
-	public void setLogicalTable(SQLLogicalTable logicalTable) {
-		this.logicalTables = new Vector<SQLLogicalTable>();
-		this.logicalTables.add(logicalTable);
 	}
 
 	public void setComments(String comments) {
 		this.comments = comments;
 	}
-
 
 	public ArrayList<String> getSelectItemAliases() {
 		ArrayList<String> result = new ArrayList<String>();
@@ -615,9 +523,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 		IQuery result;
 
 		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
-		Collection<SQLLogicalTable> logicalTables = this.getLogicalTables();
+		Collection<SQLJoinQuery> logicalTables = this.getLogicalTables();
 		if(logicalTables != null && logicalTables.size() == 1) {
-			SQLLogicalTable logicalTable = logicalTables.iterator().next();
+			SQLLogicalTable logicalTable = logicalTables.iterator().next().getJoinSource();
 			Collection<ZSelectItem> oldSelectItems;
 
 			if(logicalTable instanceof SQLFromItem) {
@@ -712,16 +620,18 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public IQuery eliminateSubQuery() throws Exception {
 		IQuery result;
-		Collection<SQLLogicalTable> logicalTables = this.getLogicalTables();
+		Collection<SQLJoinQuery> logicalTables = this.getLogicalTables();
 		if(logicalTables == null || logicalTables.size() == 0) {
 			result = this;
 		} else if(logicalTables.size() > 1) {
 			result = this;
 		} else {
-			SQLLogicalTable logicalTable = logicalTables.iterator().next();
+			SQLLogicalTable logicalTable = logicalTables.iterator().next().getJoinSource();
 			
 			Collection<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
-			if(logicalTable instanceof SQLQuery) {
+			if(logicalTable instanceof SQLFromItem) {
+				result = this;
+			} else  if(logicalTable instanceof SQLQuery) {
 				SQLQuery resultAux = (SQLQuery) logicalTable;
 				
 				Collection<ZSelectItem> innerSelectItems = resultAux.getSelectItems();
@@ -788,9 +698,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 		this.databaseType = databaseType;
 	}
 
-	public ZExp getOnExp() {
-		return this.onExp;
-	}
+//	public ZExp getOnExp() {
+//		return this.onExp;
+//	}
 
 	public String print(boolean withAlias) {
 		String result;

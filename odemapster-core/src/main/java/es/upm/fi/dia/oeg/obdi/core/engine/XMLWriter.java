@@ -1,13 +1,10 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.hp.hpl.jena.sparql.core.Var;
 
 import es.upm.fi.dia.oeg.obdi.core.XMLUtility;
 

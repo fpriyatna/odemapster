@@ -1,8 +1,5 @@
 package es.upm.fi.dia.oeg.obdi.core;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import Zql.ZConstant;
 import Zql.ZExpression;
 

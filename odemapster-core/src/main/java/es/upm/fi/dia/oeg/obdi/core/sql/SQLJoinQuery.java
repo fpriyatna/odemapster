@@ -2,19 +2,28 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZConstant;
-import Zql.ZExp;
 import Zql.ZExpression;
 
 public class SQLJoinQuery {
 	private static Logger logger = Logger.getLogger(SQLJoinQuery.class);
 
-	private String joinType;
 	private SQLLogicalTable joinSource;
-	private ZExpression onExp;
+	private String joinType;
+	private ZExpression onExpression;
 
+	public SQLJoinQuery(SQLLogicalTable joinSource,String joinType, ZExpression onExp) {
+		super();
+		this.joinType = joinType;
+		this.joinSource = joinSource;
+		this.onExpression = onExp;
+	}
+
+	public SQLJoinQuery(SQLLogicalTable joinSource) {
+		this(joinSource, null, null);
+	}
+	
 	public void setOnExpression(ZExpression onExp) {
-		this.onExp = onExp;
+		this.onExpression = onExp;
 	}
 
 	public void setJoinType(String joinType) {
@@ -30,7 +39,19 @@ public class SQLJoinQuery {
 		StringBuffer result = new StringBuffer();
 		result.append(this.joinType + " JOIN ");
 		result.append(" " + this.joinSource);
-		result.append(" ON " + this.onExp);
+		result.append(" ON " + this.onExpression);
 		return result.toString();
+	}
+
+	public SQLLogicalTable getJoinSource() {
+		return joinSource;
+	}
+
+	public String getJoinType() {
+		return joinType;
+	}
+
+	public ZExpression getOnExpression() {
+		return onExpression;
 	}
 }

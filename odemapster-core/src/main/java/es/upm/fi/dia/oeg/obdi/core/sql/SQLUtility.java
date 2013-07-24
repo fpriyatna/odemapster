@@ -3,8 +3,6 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.Collection;
 import java.util.Iterator;
 
-import es.upm.fi.dia.oeg.obdi.core.Constants;
-
 import Zql.ZExp;
 import Zql.ZExpression;
 

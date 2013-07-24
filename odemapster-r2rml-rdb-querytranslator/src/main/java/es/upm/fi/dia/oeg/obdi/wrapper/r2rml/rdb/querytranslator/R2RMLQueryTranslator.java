@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,15 +15,12 @@ import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
 import Zql.ZExp;
-import Zql.ZExpression;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.ResultSet;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
@@ -41,10 +37,10 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.CondSQLResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslatorUtility;
+import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
@@ -220,20 +216,21 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	}
 
 	@Override
-	protected SQLQuery trans(Triple tp, AbstractConceptMapping cm,
+	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
 			String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
-		SQLQuery result = new SQLQuery();
 
 		//alpha
 		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
 		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-		Collection<SQLLogicalTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
 		logger.debug("alpha logicalTable = " + alphaSubject);
-		result.addLogicalTable(alphaSubject);//alpha from subject
+		SQLQuery resultAux = new SQLQuery(alphaSubject);
+		
+		Collection<SQLJoinQuery> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
+		
 		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
-			for(SQLLogicalTable alphaPredicateObject : alphaPredicateObjects) {
+			for(SQLJoinQuery alphaPredicateObject : alphaPredicateObjects) {
 				//result.addJoinQuery(alphaPredicateObject);//alpha predicate object
-				result.addLogicalTable(alphaPredicateObject);
+				resultAux.addLogicalTable(alphaPredicateObject);
 				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
 			}
 		}
@@ -250,7 +247,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				tp, alphaResult, betaGenerator, nameGenerator
 				, cm, predicateURI);
 		logger.debug("prsql = " + selectItems);
-		result.setSelectItems(selectItems);
+		resultAux.setSelectItems(selectItems);
 
 		//CondSQL
 		AbstractCondSQLGenerator condSQLGenerator = 
@@ -259,22 +256,24 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				tp, alphaResult, betaGenerator, cm, predicateURI);
 		logger.debug("condSQL = " + condSQL);
 		if(condSQL != null) {
-			result.addWhere(condSQL.getExpression());
+			resultAux.addWhere(condSQL.getExpression());
 		}
 
+		IQuery transTP;
 		//subquery elimination
 		IQueryTranslationOptimizer optimizer = super.getOptimizer();
 		if(optimizer != null && optimizer.isSubQueryElimination()) {
 			try {
-				result = QueryTranslatorUtility.eliminateSubQuery(result);	
+				transTP = resultAux.eliminateSubQuery();	
 			} catch(Exception e) {
 				throw new QueryTranslationException("error in eliminating subquery!", e);
 			}
-
+		} else {
+			transTP = resultAux;
 		}
 
-		logger.debug("transTP(tp, cm) = " + result);
-		return result;
+		logger.debug("transTP(tp, cm) = " + transTP);
+		return transTP;
 	}
 
 	public static AbstractQueryTranslator getQueryTranslatorFreddy(

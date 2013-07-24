@@ -8,17 +8,17 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZConstant;
-import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
@@ -83,7 +83,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		logicalTableAlias = logicalTableUnfolded.generateAlias();
 		logicalTable.setAlias(logicalTableAlias);
 		//result.addFrom(logicalTableUnfolded);
-		result.addLogicalTable(logicalTableUnfolded);
+		result.addLogicalTable(new SQLJoinQuery(logicalTableUnfolded, null, null));
 
 		Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 		if(subjectMapColumnsString != null) {
@@ -163,14 +163,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				//unfold refObjectMap
 				R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap();
 				if(refObjectMap != null) {
-					SQLQuery joinQuery = new SQLQuery();
-					joinQuery.setJoinType("LEFT");
-					String joinQueryAlias = joinQuery.generateAlias();
-					joinQuery.setAlias(joinQueryAlias);
-					//refObjectMap.setAlias(joinQueryAlias);
-					this.mapRefObjectMapAlias.put(refObjectMap, joinQueryAlias);
-					predicateObjectMap.setAlias(joinQueryAlias);
-
 					R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
 					if(parentLogicalTable == null) {
 						String errorMessage = "Parent logical table is not found for RefObjectMap : " + predicateObjectMap.getMappedPredicateName();
@@ -178,8 +170,15 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					}
 					SQLLogicalTable sqlParentLogicalTable = 
 							(SQLLogicalTable) parentLogicalTable.accept(this);
-					joinQuery.addLogicalTable(sqlParentLogicalTable);
-
+					
+					SQLJoinQuery joinQuery = new SQLJoinQuery(sqlParentLogicalTable);
+					joinQuery.setJoinType("LEFT");
+					String joinQueryAlias = sqlParentLogicalTable.generateAlias();
+					sqlParentLogicalTable.setAlias(joinQueryAlias);
+					//refObjectMap.setAlias(joinQueryAlias);
+					this.mapRefObjectMapAlias.put(refObjectMap, joinQueryAlias);
+					predicateObjectMap.setAlias(joinQueryAlias);
+					
 					Collection<String> refObjectMapColumnsString = 
 							refObjectMap.getParentDatabaseColumnsString();
 					if(refObjectMapColumnsString != null ) {
@@ -198,17 +197,16 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					}
 
 
-					ZExp onExpression;
+					ZExpression onExpression;
 					Collection<R2RMLJoinCondition> joinConditions = 
 							refObjectMap.getJoinConditions();
 					if(joinConditions != null && joinConditions.size() > 0) {
 						onExpression = R2RMLUtility.generateJoinCondition(joinConditions
 								, logicalTableAlias, joinQueryAlias, dbType);
 					} else {
-						ZConstant constantOne = new ZConstant("1", ZConstant.NUMBER);
-						onExpression = new ZExpression("=", constantOne, constantOne);
+						onExpression = Constants.SQL_EXPRESSION_TRUE;
 					}
-					joinQuery.setOnExp(onExpression);
+					joinQuery.setOnExpression(onExpression);
 					//result.addJoinQuery(joinQuery);		
 					result.addLogicalTable(joinQuery);
 				}
@@ -227,8 +225,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	}
 
 	public SQLLogicalTable visit(R2RMLLogicalTable logicalTable) {
-		SQLLogicalTable result = null;
-
+		SQLLogicalTable result;
+		
 		Enum<LogicalTableType> logicalTableType = logicalTable.getLogicalTableType();
 		if(logicalTableType == LogicalTableType.TABLE_NAME) {
 			result = new SQLFromItem(logicalTable.getValue(), LogicalTableType.TABLE_NAME);
@@ -244,8 +242,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				logger.warn("Not able to parse the query, string will be used.");
 				result = new SQLFromItem(sqlString, LogicalTableType.QUERY_STRING);
 			}
-			
 		} else {
+			result = null;
 			logger.warn("Invalid logical table type");
 		}
 

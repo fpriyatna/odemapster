@@ -2,16 +2,16 @@ package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.util.List;
 
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 
 public class AlphaResult {
 	private SQLLogicalTable alphaSubject;
-	private List<SQLLogicalTable> alphaPredicateObjects;
+	private List<SQLJoinQuery> alphaPredicateObjects;
 	private String predicateURI;
 	
 	public AlphaResult(SQLLogicalTable alphaSubject
-			, List<SQLLogicalTable> alphaPredicateObjects, String predicateURI) {
+			, List<SQLJoinQuery> alphaPredicateObjects, String predicateURI) {
 		super();
 		this.alphaSubject = alphaSubject;
 		this.alphaPredicateObjects = alphaPredicateObjects;
@@ -22,7 +22,7 @@ public class AlphaResult {
 		return alphaSubject;
 	}
 
-	public List<SQLLogicalTable> getAlphaPredicateObjects() {
+	public List<SQLJoinQuery> getAlphaPredicateObjects() {
 		return alphaPredicateObjects;
 	}
 

@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,9 +16,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZExp;
-import Zql.ZExpression;
-import Zql.ZFromItem;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -33,14 +29,6 @@ import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.vocabulary.RDF;
-
-import es.upm.fi.dia.oeg.obdi.core.Constants;
-import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 
 
 public class QueryTranslatorUtility {
@@ -147,94 +135,94 @@ public class QueryTranslatorUtility {
 		return result;
 	}
 
-	public static SQLQuery eliminateSubQuery(SQLQuery query) throws Exception {
-		SQLQuery result = query;
-		Collection<SQLLogicalTable> fromItems = query.getLogicalTables();
-
-		if(fromItems.size() == 1) {
-			SQLLogicalTable fromItem = fromItems.iterator().next();
-			if(fromItem instanceof SQLQuery) {
-				Map<String, ZSelectItem> mapInnerSelectItems = new HashMap<String, ZSelectItem>();
-				SQLQuery fromItemSQLQuery = (SQLQuery) fromItem;
-				Vector<ZSelectItem> innerSelectItems = fromItemSQLQuery.getSelect();
-				for(ZSelectItem innerSelectItem : innerSelectItems) {
-					String innerSelectItemAlias = innerSelectItem.getAlias();
-					ZSelectItem innerSelectItemValue = null;
-					if(innerSelectItem.isExpression()) {
-						innerSelectItemValue = new ZSelectItem();
-						innerSelectItemValue.setExpression(innerSelectItem.getExpression());
-						if(innerSelectItemAlias == null || innerSelectItemAlias.equals("")) {
-							innerSelectItemAlias = innerSelectItem.getExpression().toString();
-						}
-					} else {
-						innerSelectItemValue = innerSelectItem;
-						if(innerSelectItemAlias == null || innerSelectItemAlias.equals("")) {
-							innerSelectItemAlias = QueryTranslatorUtility.getFullyQualifiedName(innerSelectItem);
-						}
-					}
-					mapInnerSelectItems.put(innerSelectItemAlias, innerSelectItemValue);
-				}
-
-				Vector<ZSelectItem> outerSelectItems = query.getSelect();
-				Vector<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
-				for(ZSelectItem outerSelectItem : outerSelectItems) {
-					ZSelectItem newSelectItem = null;
-					if(outerSelectItem.isExpression()) {
-						newSelectItem = outerSelectItem;
-					} else {
-						String outerSelectItemColumn = outerSelectItem.getColumn();
-						ZSelectItem innerSelectItemValue = mapInnerSelectItems.get(outerSelectItemColumn);
-						newSelectItem = innerSelectItemValue;
-						newSelectItem.setAlias(outerSelectItem.getAlias());
-					}
-					newSelectItems.add(newSelectItem);
-				}
-				result.setSelectItems(newSelectItems);
-
-				Collection<ZFromItem> subQueryFromItems = fromItemSQLQuery.getFrom();
-				List<SQLLogicalTable> logicalTables = new LinkedList<SQLLogicalTable>();
-				for(ZFromItem subQueryFromItem : subQueryFromItems) {
-					SQLLogicalTable logicalTable = new SQLFromItem(
-							subQueryFromItem.toString(), LogicalTableType.TABLE_NAME);
-					logicalTables.add(logicalTable);
-				}
-				result.setLogicalTables(logicalTables);
-
-				ZExp outerWhereCondition = query.getWhere();
-				ZExp newOuterWhereCondition = outerWhereCondition; 
-				Iterator<String> mapInnerSelectItemsKeysIterator = mapInnerSelectItems.keySet().iterator(); 
-				while(mapInnerSelectItemsKeysIterator.hasNext()) {
-					String mapInnerSelectItemKey = mapInnerSelectItemsKeysIterator.next();
-					String oldValue = mapInnerSelectItemKey;
-					String newValue = "";
-					ZSelectItem mapInnerSelectItemValue = mapInnerSelectItems.get(mapInnerSelectItemKey);
-					if(mapInnerSelectItemValue.isExpression()) {
-						newValue = mapInnerSelectItemValue.getExpression().toString();
-					} else {
-						newValue = mapInnerSelectItemValue.getTable();
-					}
-					if(fromItem.getAlias() != null) {
-						oldValue = fromItem.getAlias() + "." + oldValue;
-					}
-
-					newOuterWhereCondition = ODEMapsterUtility.replaceColumnNames(
-							newOuterWhereCondition, oldValue, newValue);
-				}
-				ZExpression newOuterWhereConditionExpression = (ZExpression) newOuterWhereCondition;
-				ZExpression innerWhereCondition = (ZExpression) fromItemSQLQuery.getWhere();
-				ZExp newWhereCondition = SQLUtility.combineExpressions(
-						innerWhereCondition, newOuterWhereConditionExpression, 
-						Constants.SQL_LOGICAL_OPERATOR_AND);
-				//result.set
-				result.setWhere(newWhereCondition);
-
-			}
-
-		}
-
-		return result;
-
-	}
+//	public static SQLQuery eliminateSubQuery(SQLQuery query) throws Exception {
+//		SQLQuery result = query;
+//		Collection<SQLJoinQuery> fromItems = query.getLogicalTables();
+//
+//		if(fromItems.size() == 1) {
+//			SQLLogicalTable fromItem = fromItems.iterator().next().getJoinSource();
+//			if(fromItem instanceof SQLQuery) {
+//				Map<String, ZSelectItem> mapInnerSelectItems = new HashMap<String, ZSelectItem>();
+//				SQLQuery fromItemSQLQuery = (SQLQuery) fromItem;
+//				Vector<ZSelectItem> innerSelectItems = fromItemSQLQuery.getSelect();
+//				for(ZSelectItem innerSelectItem : innerSelectItems) {
+//					String innerSelectItemAlias = innerSelectItem.getAlias();
+//					ZSelectItem innerSelectItemValue = null;
+//					if(innerSelectItem.isExpression()) {
+//						innerSelectItemValue = new ZSelectItem();
+//						innerSelectItemValue.setExpression(innerSelectItem.getExpression());
+//						if(innerSelectItemAlias == null || innerSelectItemAlias.equals("")) {
+//							innerSelectItemAlias = innerSelectItem.getExpression().toString();
+//						}
+//					} else {
+//						innerSelectItemValue = innerSelectItem;
+//						if(innerSelectItemAlias == null || innerSelectItemAlias.equals("")) {
+//							innerSelectItemAlias = QueryTranslatorUtility.getFullyQualifiedName(innerSelectItem);
+//						}
+//					}
+//					mapInnerSelectItems.put(innerSelectItemAlias, innerSelectItemValue);
+//				}
+//
+//				Vector<ZSelectItem> outerSelectItems = query.getSelect();
+//				Vector<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
+//				for(ZSelectItem outerSelectItem : outerSelectItems) {
+//					ZSelectItem newSelectItem = null;
+//					if(outerSelectItem.isExpression()) {
+//						newSelectItem = outerSelectItem;
+//					} else {
+//						String outerSelectItemColumn = outerSelectItem.getColumn();
+//						ZSelectItem innerSelectItemValue = mapInnerSelectItems.get(outerSelectItemColumn);
+//						newSelectItem = innerSelectItemValue;
+//						newSelectItem.setAlias(outerSelectItem.getAlias());
+//					}
+//					newSelectItems.add(newSelectItem);
+//				}
+//				result.setSelectItems(newSelectItems);
+//
+//				Collection<ZFromItem> subQueryFromItems = fromItemSQLQuery.getFrom();
+//				List<SQLJoinQuery> logicalTables = new LinkedList<SQLJoinQuery>();
+//				for(ZFromItem subQueryFromItem : subQueryFromItems) {
+//					SQLLogicalTable logicalTable = new SQLFromItem(
+//							subQueryFromItem.toString(), LogicalTableType.TABLE_NAME);
+//					logicalTables.add(logicalTable);
+//				}
+//				result.setLogicalTables(logicalTables);
+//
+//				ZExp outerWhereCondition = query.getWhere();
+//				ZExp newOuterWhereCondition = outerWhereCondition; 
+//				Iterator<String> mapInnerSelectItemsKeysIterator = mapInnerSelectItems.keySet().iterator(); 
+//				while(mapInnerSelectItemsKeysIterator.hasNext()) {
+//					String mapInnerSelectItemKey = mapInnerSelectItemsKeysIterator.next();
+//					String oldValue = mapInnerSelectItemKey;
+//					String newValue = "";
+//					ZSelectItem mapInnerSelectItemValue = mapInnerSelectItems.get(mapInnerSelectItemKey);
+//					if(mapInnerSelectItemValue.isExpression()) {
+//						newValue = mapInnerSelectItemValue.getExpression().toString();
+//					} else {
+//						newValue = mapInnerSelectItemValue.getTable();
+//					}
+//					if(fromItem.getAlias() != null) {
+//						oldValue = fromItem.getAlias() + "." + oldValue;
+//					}
+//
+//					newOuterWhereCondition = ODEMapsterUtility.replaceColumnNames(
+//							newOuterWhereCondition, oldValue, newValue);
+//				}
+//				ZExpression newOuterWhereConditionExpression = (ZExpression) newOuterWhereCondition;
+//				ZExpression innerWhereCondition = (ZExpression) fromItemSQLQuery.getWhere();
+//				ZExp newWhereCondition = SQLUtility.combineExpressions(
+//						innerWhereCondition, newOuterWhereConditionExpression, 
+//						Constants.SQL_LOGICAL_OPERATOR_AND);
+//				//result.set
+//				result.setWhere(newWhereCondition);
+//
+//			}
+//
+//		}
+//
+//		return result;
+//
+//	}
 
 
 

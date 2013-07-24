@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
-import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
@@ -190,9 +189,9 @@ public class R2RMLUtility {
 		return result;
 	}
 	
-	public static ZExp generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions
+	public static ZExpression generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions
 			, String parentTableAlias, String joinQueryAlias, String dbType) {
-		ZExp onExpression = null;
+		ZExpression onExpression = null;
 
 		
 		if(joinConditions != null) {
@@ -216,7 +215,7 @@ public class R2RMLUtility {
 				parentColumnName = joinQueryAlias + "." + parentSelectItem.columnToString();
 				ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
 				
-				ZExp joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
+				ZExpression joinConditionExpression = new ZExpression("=", childColumn, parentColumn);
 				if(onExpression == null) {
 					onExpression = joinConditionExpression;
 				} else {

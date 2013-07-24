@@ -24,7 +24,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -416,16 +415,15 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 		IQuery result = null;
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			SQLQuery resultAux = new SQLQuery();
+			SQLQuery resultAux = new SQLQuery(subOpSQL);
 			resultAux.setSelectItems(newSelectItems);
-			resultAux.setLogicalTable(subOpSQL);
 			resultAux.addWhere(newWhere);
 			result = resultAux.eliminateSubQuery();
 		} else {
 			SQLQuery resultAux = new SQLQuery();
 			resultAux.setSelectItems(newSelectItems);
 			//resultAux.addFrom(resultFrom);
-			resultAux.addLogicalTable(subOpSQL);
+			resultAux.addLogicalTable(new SQLJoinQuery(subOpSQL, null, null));
 			resultAux.addWhere(newWhere);
 			result = resultAux;
 		}
@@ -508,7 +506,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			newSelectItems.addAll(selectItemByVars);
 		}
 
-		SQLQuery result = new SQLQuery();
+		
 		if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
 			Connection conn = this.getConnection();
 			String subQueryViewName = "sqp" + Math.abs(opProject.hashCode());
@@ -523,8 +521,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			new SQLFromItem(opProjectSubOpSQL.toString(), LogicalTableType.QUERY_STRING);
 		}
 
+		SQLQuery result = new SQLQuery(opProjectSubOpSQL);
 		result.setSelectItems(newSelectItems);
-		result.setLogicalTable(opProjectSubOpSQL);
 		IQuery opProjectSQL = result.eliminateSubQuery();
 		logger.debug("opProjectSQL = \n" + opProjectSQL + "\n");
 		return opProjectSQL;
@@ -575,7 +573,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		SQLQuery query1 = new SQLQuery();
 		transGP1FromItem.setAlias(transGP1Alias);
 		//query1.addFrom(transGP1FromItem);
-		query1.addLogicalTable(transGP1);
+		query1.addLogicalTable(new SQLJoinQuery(transGP1, null, null));
 
 		String transGP2Alias = transGP2.generateAlias() + "R2";
 		transGP2.setAlias(transGP2Alias);
@@ -598,16 +596,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		transGP2FromItem.setAlias(transGP2Alias);
 
-		SQLJoinQuery joinQuery1 = new SQLJoinQuery();
-		joinQuery1.setJoinType(Constants.JOINS_TYPE_LEFT);
-		joinQuery1.setJoinSource(transGP2FromItem);
-		//joinQuery1.setOnExpression(new ZConstant("FALSE", ZConstant.UNKNOWN));
-		joinQuery1.setOnExpression(Constants.SQL_EXPRESSION_FALSE);
-
-		//query1.addJoinQuery(joinQuery1);
-		transGP2.setJoinType(Constants.JOINS_TYPE_LEFT);
-		transGP2.setOnExp(Constants.SQL_EXPRESSION_FALSE);
-		query1.addLogicalTable(transGP2);
+		query1.addLogicalTable(new SQLJoinQuery(transGP2, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
 		
 		Collection<ZSelectItem> gp1SelectItems = transGP1.getSelectItems();
 		Collection<ZSelectItem> gp2SelectItems = transGP2.getSelectItems();
@@ -658,7 +647,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		transR3FromItem.setAlias(transR3Alias);
 		//query2.addFrom(transR3FromItem);
-		query2.addLogicalTable(transR3);
+		query2.addLogicalTable(new SQLJoinQuery(transR3, null, null));
 		
 		IQuery transR4 = this.trans(gp1);
 		String transR4Alias = transR4.generateAlias() + "R4";
@@ -671,14 +660,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		transR4FromItem.setAlias(transR4Alias);
 
-		SQLJoinQuery joinQuery2 = new SQLJoinQuery();
-		joinQuery2.setJoinType(Constants.JOINS_TYPE_LEFT);
-		transR4.setJoinType(Constants.JOINS_TYPE_LEFT);
-		joinQuery2.setJoinSource(transR4FromItem);
-		//joinQuery2.setOnExpression(new ZConstant("FALSE", ZConstant.UNKNOWN));
-		joinQuery2.setOnExpression(Constants.SQL_EXPRESSION_FALSE);
-		transR4.setOnExp(Constants.SQL_EXPRESSION_FALSE);
-		query2.addLogicalTable(transR4);
+		query2.addLogicalTable(new SQLJoinQuery(transR4, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
 
 		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
 		query2.addSelect(selectItems2);
@@ -879,7 +861,6 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 //			SQLJoinQuery joinQuery2 = new SQLJoinQuery();
 //			joinQuery2.setJoinType(joinType);
 //			joinQuery2.setJoinSource(transGP2FromItem);
-			transGP2SQL.setJoinType(joinType);
 			//joinQuery.addLogicalTable(transGP2FromItem);
 			
 
@@ -953,12 +934,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				}				
 			}
 			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps, Constants.SQL_LOGICAL_OPERATOR_AND);
-			transGP2SQL.setOnExp(joinOnExpression);
 
 			SQLQuery transJoin = new SQLQuery();
-			transJoin.addLogicalTable(transGP1SQL);
+			transJoin.addLogicalTable(new SQLJoinQuery(transGP1SQL, null, null));
 			transJoin.setSelectItems(selectItems);
-			transJoin.addLogicalTable(transGP2SQL);			
+			transJoin.addLogicalTable(new SQLJoinQuery(transGP2SQL, joinType, joinOnExpression));		
 
 			logger.debug("transJoin = \n" + transJoin.toString() + "\n");
 			return transJoin;
@@ -1068,12 +1048,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		} else if(tpPredicate.isVariable()) {
 			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
 			if(pms != null && pms.size() > 0) {
-				List<SQLQuery> sqlQueries = new Vector<SQLQuery>();
+				List<IQuery> sqlQueries = new Vector<IQuery>();
 				for(AbstractPropertyMapping pm : pms) {
 					String predicateURI = pm.getMappedPredicateName();
-					SQLQuery sqlQuery = null;
 					try {
-						sqlQuery = this.trans(tp, cm, predicateURI);
+						IQuery sqlQuery = this.trans(tp, cm, predicateURI);
 						sqlQueries.add(sqlQuery);
 					} catch(InsatisfiableSQLExpression e) {
 						logger.warn("Insatifiable sql while translating : " + predicateURI + " in " + cm.getConceptName());
@@ -1092,7 +1071,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return result;
 	}
 
-	protected abstract SQLQuery trans(Triple tp, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression;
+	protected abstract IQuery trans(Triple tp, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression;
 
 	protected IQuery trans(Triple tp) throws QueryTranslationException {
 		IQuery result = null;
@@ -1205,11 +1184,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
 
 			//put this before alpha predicate object, as this is the main table and the order is important
-			resultAux.addLogicalTable(alphaSubject);//alpha subject
+			resultAux.addLogicalTable(new SQLJoinQuery(alphaSubject, null, null));//alpha subject
 			
-			Collection<SQLLogicalTable> alphaPredicateObjects = new Vector<SQLLogicalTable>();
+			Collection<SQLJoinQuery> alphaPredicateObjects = new Vector<SQLJoinQuery>();
 			for(AlphaResultUnion alphaTP : alphaResultUnionList) {
-				Collection<SQLLogicalTable> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
+				Collection<SQLJoinQuery> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
 				alphaPredicateObjects.addAll(tpAlphaPredicateObjects);
 			}
 
@@ -1240,7 +1219,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					}
 				}
 			} else {
-				for(SQLLogicalTable alphaPredicateObject : alphaPredicateObjects) {
+				for(SQLJoinQuery alphaPredicateObject : alphaPredicateObjects) {
 					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
 					resultAux.addLogicalTable(alphaPredicateObject);//alpha predicate object
 					resultAux.toString();
@@ -1266,13 +1245,13 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				resultAux.addWhere(condSQL);
 			}
 
+			
 			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-				resultAux = QueryTranslatorUtility.eliminateSubQuery(resultAux);
+				result = resultAux.eliminateSubQuery();
+			} else {
+				result = resultAux;	
 			}
-
-			result = resultAux;
 		}
-
 
 		logger.debug("transSTG = " + result);
 		return result;
