@@ -131,28 +131,25 @@ public class SQLUnion implements IQuery {
 		return result;
 	}
 
-	public IQuery removeSubQuery(Collection<ZSelectItem> newSelectItems,
-			ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions,
-			String databaseType) throws Exception {
-		SQLUnion result = new SQLUnion();
-		Iterator<SQLQuery> it = this.unionQueries.iterator();
-		while(it.hasNext()) {
-			IQuery sqlQuery = it.next();
-			IQuery resultAux;
-			if(it.hasNext()) {
-				resultAux = sqlQuery.removeSubQuery(
-						newSelectItems, newWhereCondition, null, databaseType);				
-			} else {
-				resultAux = sqlQuery.removeSubQuery(
-						newSelectItems, newWhereCondition, orderByConditions, databaseType);				
-			}
-
-			result.add(resultAux);
-		}
-		
-		return result;
-		
-	}
+//	public IQuery removeSubQuery(Collection<ZSelectItem> newSelectItems,
+//			ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions,
+//			String databaseType) throws Exception {
+//		SQLUnion result = new SQLUnion();
+//		Iterator<SQLQuery> it = this.unionQueries.iterator();
+//		while(it.hasNext()) {
+//			IQuery sqlQuery = it.next();
+//			IQuery resultAux;
+//			if(it.hasNext()) {
+//				resultAux = sqlQuery.removeSubQuery(
+//						newSelectItems, newWhereCondition, null, databaseType);				
+//			} else {
+//				resultAux = sqlQuery.removeSubQuery(
+//						newSelectItems, newWhereCondition, orderByConditions, databaseType);				
+//			}
+//			result.add(resultAux);
+//		}
+//		return result;
+//	}
 
 	public Collection<ZSelectItem> getSelectItems() {
 		return this.unionQueries.iterator().next().getSelectItems();
@@ -176,21 +173,21 @@ public class SQLUnion implements IQuery {
 		}
 	}
 
-	public IQuery removeSubQuery() throws Exception {
-		SQLUnion result = new SQLUnion();
-		Iterator<SQLQuery> it = this.unionQueries.iterator();
-		while(it.hasNext()) {
-			SQLQuery query = it.next();
-			IQuery resultAux = query.removeSubQuery();
-//			if(!it.hasNext()) {
-//				resultAux.setOrderBy(this.orderByConditions);
-//			}
-			result.add(resultAux);
-		}
-
-		result.setOrderBy(this.orderByConditions);
-		return result;
-	}
+//	public IQuery removeSubQuery() throws Exception {
+//		SQLUnion result = new SQLUnion();
+//		Iterator<SQLQuery> it = this.unionQueries.iterator();
+//		while(it.hasNext()) {
+//			SQLQuery query = it.next();
+//			IQuery resultAux = query.removeSubQuery();
+////			if(!it.hasNext()) {
+////				resultAux.setOrderBy(this.orderByConditions);
+////			}
+//			result.add(resultAux);
+//		}
+//
+//		result.setOrderBy(this.orderByConditions);
+//		return result;
+//	}
 
 	public String getDatabaseType() {
 		return databaseType;

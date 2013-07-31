@@ -18,17 +18,18 @@ public interface IQuery extends SQLLogicalTable {
 	public void cleanupOrderBy();
 	public void setOrderBy(Vector<ZOrderBy> orderByConditions);
 	public Vector<ZOrderBy> getOrderBy();
-	public IQuery removeSubQuery(Collection<ZSelectItem> newSelectItems
-			, ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions
-			, String databaseType) throws Exception;
 	public void setSelectItems(Collection<ZSelectItem> newSelectItems);
 	public void addWhere(ZExp newWhere);
-	public IQuery removeSubQuery() throws Exception;
 	public String getDatabaseType();
 	public void setDatabaseType(String dbType);
 	public void setDistinct(boolean distinct);
 	public boolean getDistinct();
-	
+
+//	public IQuery removeSubQuery() throws Exception;
+//	public IQuery removeSubQuery(Collection<ZSelectItem> newSelectItems
+//			, ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions
+//			, String databaseType) throws Exception;
+
 	//public Map<String, ZSelectItem> buildMapAliasSelectItem();
 	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections);
 	public void pushFilterDown(ZExpression pushedFilter);
