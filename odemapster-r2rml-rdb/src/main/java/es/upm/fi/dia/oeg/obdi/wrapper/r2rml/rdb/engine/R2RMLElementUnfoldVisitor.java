@@ -83,7 +83,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 		logicalTableAlias = logicalTableUnfolded.generateAlias();
 		logicalTable.setAlias(logicalTableAlias);
 		//result.addFrom(logicalTableUnfolded);
-		result.addLogicalTable(new SQLJoinTable(logicalTableUnfolded, null, null));
+		result.addFromItem(new SQLJoinTable(logicalTableUnfolded, null, null));
 
 		Collection<String> subjectMapColumnsString = subjectMap.getDatabaseColumnsString();
 		if(subjectMapColumnsString != null) {
@@ -208,7 +208,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					}
 					joinQuery.setOnExpression(onExpression);
 					//result.addJoinQuery(joinQuery);		
-					result.addLogicalTable(joinQuery);
+					result.addFromItem(joinQuery);
 				}
 
 			}

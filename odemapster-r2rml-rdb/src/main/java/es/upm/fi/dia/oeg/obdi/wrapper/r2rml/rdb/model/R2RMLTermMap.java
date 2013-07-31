@@ -82,7 +82,10 @@ public class R2RMLTermMap implements R2RMLElement
 				this.termMapType = TermMapType.COLUMN;
 				this.columnName = columnStatement.getObject().toString();
 				if(columnsMetaData != null) {
-					this.columnTypeName = columnsMetaData.get(this.columnName).getDataType();	
+					ColumnMetaData cmd = columnsMetaData.get(this.columnName);
+					if(cmd != null) {
+						this.columnTypeName = cmd.getDataType();	
+					}
 				}
 			} else {
 				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);
@@ -120,10 +123,6 @@ public class R2RMLTermMap implements R2RMLElement
 				}
 			}
 		}
-
-
-
-
 
 		Statement datatypeStatement = resource.getProperty(R2RMLConstants.R2RML_DATATYPE_PROPERTY);
 		if(datatypeStatement != null) {

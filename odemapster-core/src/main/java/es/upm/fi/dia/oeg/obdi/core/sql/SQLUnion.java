@@ -3,6 +3,8 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
@@ -13,7 +15,7 @@ import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.oeg.obdi.core.utility.CollectionUtility;
 
-public class UnionSQLQuery implements IQuery {
+public class SQLUnion implements IQuery {
 	String alias;
 	private String databaseType;
 	private Collection<SQLQuery> unionQueries = new Vector<SQLQuery>();
@@ -21,11 +23,11 @@ public class UnionSQLQuery implements IQuery {
 	private String joinType;
 	private ZExp onExp;
 	
-	public UnionSQLQuery() { 
+	public SQLUnion() { 
 		this.unionQueries = new Vector<SQLQuery>();
 	}
 
-	public UnionSQLQuery(Collection<? extends IQuery> queries) {
+	public SQLUnion(Collection<? extends IQuery> queries) {
 		this.unionQueries = new Vector<SQLQuery>();
 		
 		for(IQuery query : queries) {
@@ -41,8 +43,8 @@ public class UnionSQLQuery implements IQuery {
 		if(newQuery != null) {
 			if(newQuery instanceof SQLQuery) {
 				this.unionQueries.add((SQLQuery) newQuery);	
-			} else if(newQuery instanceof UnionSQLQuery) {
-				Collection<SQLQuery> queries = ((UnionSQLQuery) newQuery).getUnionQueries();
+			} else if(newQuery instanceof SQLUnion) {
+				Collection<SQLQuery> queries = ((SQLUnion) newQuery).getUnionQueries();
 				for(SQLQuery sqlQuery : queries) {
 					this.unionQueries.add(sqlQuery);
 				}
@@ -129,19 +131,19 @@ public class UnionSQLQuery implements IQuery {
 		return result;
 	}
 
-	public IQuery eliminateSubQuery2(Collection<ZSelectItem> newSelectItems,
+	public IQuery removeSubQuery(Collection<ZSelectItem> newSelectItems,
 			ZExpression newWhereCondition, Vector<ZOrderBy> orderByConditions,
 			String databaseType) throws Exception {
-		UnionSQLQuery result = new UnionSQLQuery();
+		SQLUnion result = new SQLUnion();
 		Iterator<SQLQuery> it = this.unionQueries.iterator();
 		while(it.hasNext()) {
 			IQuery sqlQuery = it.next();
 			IQuery resultAux;
 			if(it.hasNext()) {
-				resultAux = sqlQuery.eliminateSubQuery2(
+				resultAux = sqlQuery.removeSubQuery(
 						newSelectItems, newWhereCondition, null, databaseType);				
 			} else {
-				resultAux = sqlQuery.eliminateSubQuery2(
+				resultAux = sqlQuery.removeSubQuery(
 						newSelectItems, newWhereCondition, orderByConditions, databaseType);				
 			}
 
@@ -174,12 +176,12 @@ public class UnionSQLQuery implements IQuery {
 		}
 	}
 
-	public IQuery eliminateSubQuery() throws Exception {
-		UnionSQLQuery result = new UnionSQLQuery();
+	public IQuery removeSubQuery() throws Exception {
+		SQLUnion result = new SQLUnion();
 		Iterator<SQLQuery> it = this.unionQueries.iterator();
 		while(it.hasNext()) {
 			SQLQuery query = it.next();
-			IQuery resultAux = query.eliminateSubQuery();
+			IQuery resultAux = query.removeSubQuery();
 //			if(!it.hasNext()) {
 //				resultAux.setOrderBy(this.orderByConditions);
 //			}
@@ -229,6 +231,64 @@ public class UnionSQLQuery implements IQuery {
 			}
 		}
 		return result;
+	}
+
+
+	public void setDistinct(boolean distinct) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean getDistinct() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
+		for(SQLQuery sqlQuery : this.unionQueries) {
+			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
+					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
+
+			sqlQuery.pushProjectionsDown(pushedProjections
+					, mapInnerAliasSelectItem);
+		}
+	}
+
+//	public Map<String, ZSelectItem> buildMapAliasSelectItem() {
+//		Map<String, ZSelectItem> mapAliasSelectItem = new LinkedHashMap<String, ZSelectItem>();
+//		for(SQLQuery sqlQuery : this.unionQueries) {
+//			Map<String, ZSelectItem> mapAliasSelectItemAux = 
+//					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
+//			mapAliasSelectItem.putAll(mapAliasSelectItemAux);
+//		}
+//		return mapAliasSelectItem;
+//	}
+
+	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {
+		Iterator<SQLQuery> it = this.unionQueries.iterator();
+		while(it.hasNext()) {
+			SQLQuery sqlQuery = it.next();
+			
+			if(!it.hasNext()) {
+				Map<String, ZSelectItem> mapInnerAliasSelectItem = 
+						sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
+				
+				sqlQuery.pushOrderByDown(pushedOrderByCollection
+						, mapInnerAliasSelectItem);				
+			}
+		}
+	}
+
+	public void pushFilterDown(ZExpression pushedFilter) {
+		Iterator<SQLQuery> it = this.unionQueries.iterator();
+		while(it.hasNext()) {
+			SQLQuery sqlQuery = it.next();
+			
+			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
+					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
+			
+			sqlQuery.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
+		}
 	}
 
 }

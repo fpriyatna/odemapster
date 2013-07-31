@@ -83,7 +83,29 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		return result;
 	}
 
-
+	@Override
+	protected SQLLogicalTable calculateAlphaPredicateObject2 (Triple triple
+			, AbstractConceptMapping abstractConceptMapping
+			, AbstractPropertyMapping abstractPropertyMapping
+			, String logicalTableAlias) throws QueryTranslationException {
+		SQLLogicalTable result = null;
+		
+		R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) abstractPropertyMapping;  
+		R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+		
+		if(refObjectMap != null) { 
+			R2RMLLogicalTable parentLogicalTable = refObjectMap.getParentLogicalTable();
+			if(parentLogicalTable == null) {
+				String errorMessage = "Parent logical table is not found for RefObjectMap : " + refObjectMap;
+				throw new QueryTranslationException(errorMessage);
+			}
+			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
+			SQLLogicalTable sqlParentLogicalTableAux = unfolder.visit(parentLogicalTable);
+			result = sqlParentLogicalTableAux;
+		} 
+		
+		return result;
+	}
 
 	@Override
 	protected SQLLogicalTable calculateAlphaSubject(Node subject,
@@ -153,6 +175,35 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		}
 		return alphaPredicateObjects;
 	}
+
+	public List<SQLLogicalTable> calculateAlphaPredicateObjectSTG2(Triple tp
+			, AbstractConceptMapping cm, String tpPredicateURI
+			, String logicalTableAlias) throws Exception {
+		List<SQLLogicalTable> alphaPredicateObjects = new Vector<SQLLogicalTable>();
+		
+		boolean isRDFTypeStatement = RDF.type.getURI().equals(tpPredicateURI);
+		if(this.ignoreRDFTypeStatement && isRDFTypeStatement) {
+			//do nothing
+		} else {
+			tp.getObject();
+			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(tpPredicateURI);
+			if(pms != null && !pms.isEmpty()) {
+				R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
+				logger.debug("pm = " + pm);
+				R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+				if(refObjectMap != null) { 
+					SQLLogicalTable alphaPredicateObject = 
+							this.calculateAlphaPredicateObject2(tp, cm, pm, logicalTableAlias);
+					alphaPredicateObjects.add(alphaPredicateObject);
+				}
+			} else {
+				String errorMessage = "Undefined mapping for : " + tpPredicateURI + " in : " + cm.toString();
+				throw new QueryTranslationException(errorMessage);				
+				
+			}
+		}
+		return alphaPredicateObjects;
+	}
 	
 	@Override
 	public AlphaResult calculateAlpha(Triple tp, AbstractConceptMapping abstractConceptMapping
@@ -167,6 +218,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		//alpha predicate object
 		Collection<AbstractPropertyMapping> pms = abstractConceptMapping.getPropertyMappings(predicateURI);
 		List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
+		List<SQLLogicalTable> alphaPredicateObjects2 = new Vector<SQLLogicalTable>();
 		if(pms != null) {
 			if(pms.size() > 1) {
 				String errorMessage = "Multiple mappings of a predicate is not supported.";
@@ -179,9 +231,14 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 				SQLJoinTable alphaPredicateObject = this.calculateAlphaPredicateObject(
 						tp, abstractConceptMapping, pm, logicalTableAlias);
 				alphaPredicateObjects.add(alphaPredicateObject);
+
+				SQLLogicalTable alphaPredicateObject2 = this.calculateAlphaPredicateObject2(
+						tp, abstractConceptMapping, pm, logicalTableAlias);
+				alphaPredicateObjects2.add(alphaPredicateObject2);
 			}
 		}
 		AlphaResult alphaResult = new AlphaResult(alphaSubject, alphaPredicateObjects, predicateURI);
+		alphaResult.setAlphaPredicateObjects2(alphaPredicateObjects2);
 		
 		logger.debug("calculateAlpha = " + alphaResult);
 		return alphaResult;

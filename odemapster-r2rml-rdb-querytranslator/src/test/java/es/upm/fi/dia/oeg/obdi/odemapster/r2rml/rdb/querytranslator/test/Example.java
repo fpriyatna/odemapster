@@ -15,7 +15,7 @@ public class Example {
 	}
 	
 	private String configurationDirectory = System.getProperty("user.dir") + "/example";
-	@Test
+
 	public void batch() {
 		String configurationFile = "batch.r2rml.properties";
 		try {

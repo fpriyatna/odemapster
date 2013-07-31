@@ -9,6 +9,7 @@ public class AlphaResult {
 	private SQLLogicalTable alphaSubject;
 	private List<SQLJoinTable> alphaPredicateObjects;
 	private String predicateURI;
+	private List<SQLLogicalTable> alphaPredicateObjects2;
 	
 	public AlphaResult(SQLLogicalTable alphaSubject
 			, List<SQLJoinTable> alphaPredicateObjects, String predicateURI) {
@@ -35,6 +36,15 @@ public class AlphaResult {
 
 	public String getPredicateURI() {
 		return predicateURI;
+	}
+
+	public List<SQLLogicalTable> getAlphaPredicateObjects2() {
+		return alphaPredicateObjects2;
+	}
+
+	public void setAlphaPredicateObjects2(
+			List<SQLLogicalTable> alphaPredicateObjects2) {
+		this.alphaPredicateObjects2 = alphaPredicateObjects2;
 	}
 	
 	

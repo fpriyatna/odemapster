@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
 import Zql.ZExp;
+import Zql.ZFromItem;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -38,9 +40,11 @@ import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
@@ -230,7 +234,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
 			for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 				//result.addJoinQuery(alphaPredicateObject);//alpha predicate object
-				resultAux.addLogicalTable(alphaPredicateObject);
+				resultAux.addFromItem(alphaPredicateObject);
 				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
 			}
 		}
@@ -259,19 +263,39 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			resultAux.addWhere(condSQL.getExpression());
 		}
 
-		IQuery transTP;
+		IQuery transTP = resultAux;
 		//subquery elimination
 		IQueryTranslationOptimizer optimizer = super.getOptimizer();
 		if(optimizer != null && optimizer.isSubQueryElimination()) {
 			try {
-				transTP = resultAux.eliminateSubQuery();	
+				boolean needSubQueryElimination = false;
+				
+				Vector<ZFromItem> fromItems = resultAux.getFrom();
+				for(ZFromItem fromItem : fromItems) {
+					if(fromItem instanceof SQLFromItem) {
+						SQLFromItem sqlFromItem = (SQLFromItem) fromItem;
+						if(sqlFromItem.getForm() == LogicalTableType.QUERY_STRING) {
+							needSubQueryElimination = true;
+						}
+					} else if(fromItem instanceof SQLJoinTable) {
+						SQLJoinTable joinTable = (SQLJoinTable) fromItem;
+						SQLLogicalTable joinSource = joinTable.getJoinSource();
+						if(!(joinSource instanceof SQLFromItem)) {
+							needSubQueryElimination = true;
+						}
+					}
+				}
+				
+//				if(needSubQueryElimination) {
+//					transTP = resultAux.eliminateSubQuery();	
+//				}
+				transTP = resultAux;
+					
 			} catch(Exception e) {
 				throw new QueryTranslationException("error in eliminating subquery!", e);
 			}
-		} else {
-			transTP = resultAux;
 		}
-
+		
 		logger.debug("transTP(tp, cm) = " + transTP);
 		return transTP;
 	}

@@ -94,6 +94,7 @@ public abstract class AbstractAlphaGenerator {
 		for(Triple tp : triples) {
 			Node tpPredicate = tp.getPredicate();
 			List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
+			List<SQLLogicalTable> alphaPredicateObjects2 = new Vector<SQLLogicalTable>();
 			if(tpPredicate.isURI()) {
 				String tpPredicateURI = tpPredicate.getURI();
 
@@ -112,8 +113,17 @@ public abstract class AbstractAlphaGenerator {
 					if(alphaPredicateObjectAux != null) {
 						alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
 					}
+
+					List<SQLLogicalTable> alphaPredicateObjectAux2 = calculateAlphaPredicateObjectSTG2(
+							tp, cm, tpPredicateURI,logicalTableAlias);
+					if(alphaPredicateObjectAux2 != null) {
+						alphaPredicateObjects2.addAll(alphaPredicateObjectAux2);	
+					}
+
 					AlphaResult alphaResult = new AlphaResult(alphaSubject
 							, alphaPredicateObjects, tpPredicateURI);
+					alphaResult.setAlphaPredicateObjects2(alphaPredicateObjectAux2);
+					
 					AlphaResultUnion alphaTP = new AlphaResultUnion(alphaResult);
 					alphaResultUnionList.add(alphaTP);					
 				}
@@ -124,9 +134,20 @@ public abstract class AbstractAlphaGenerator {
 					String tpPredicateURI = pm.getMappedPredicateName();
 					List<SQLJoinTable> alphaPredicateObjectAux = calculateAlphaPredicateObjectSTG(
 							tp, cm, tpPredicateURI,logicalTableAlias);
-					alphaPredicateObjects.addAll(alphaPredicateObjectAux);
+					if(alphaPredicateObjectAux != null) {
+						alphaPredicateObjects.addAll(alphaPredicateObjectAux);	
+					}
+					
+					List<SQLLogicalTable> alphaPredicateObjectAux2 = calculateAlphaPredicateObjectSTG2(
+							tp, cm, tpPredicateURI,logicalTableAlias);					
+					if(alphaPredicateObjectAux2 != null) {
+						alphaPredicateObjects2.addAll(alphaPredicateObjectAux2);	
+					}
+
 					AlphaResult alphaResult = new AlphaResult(alphaSubject
 							, alphaPredicateObjects, tpPredicateURI);
+					alphaResult.setAlphaPredicateObjects2(alphaPredicateObjectAux2);
+					
 					alphaTP.add(alphaResult);
 				}
 				
@@ -151,6 +172,9 @@ public abstract class AbstractAlphaGenerator {
 			AbstractConceptMapping cm, String tpPredicateURI,
 			String logicalTableAlias) throws Exception;
 
+	public abstract List<SQLLogicalTable> calculateAlphaPredicateObjectSTG2(Triple tp,
+			AbstractConceptMapping cm, String tpPredicateURI,
+			String logicalTableAlias) throws Exception;
 
 	public boolean isIgnoreRDFTypeStatement() {
 		return ignoreRDFTypeStatement;
@@ -167,6 +191,12 @@ public abstract class AbstractAlphaGenerator {
 	public void setSubqueryAsView(boolean subqueryAsView) {
 		this.subqueryAsView = subqueryAsView;
 	}
+
+
+	protected abstract SQLLogicalTable calculateAlphaPredicateObject2(Triple triple,
+			AbstractConceptMapping abstractConceptMapping,
+			AbstractPropertyMapping abstractPropertyMapping,
+			String logicalTableAlias) throws QueryTranslationException;
 
 
 

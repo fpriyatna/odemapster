@@ -2,9 +2,12 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Vector;
 
 import Zql.ZExp;
 import Zql.ZExpression;
+import Zql.ZFromItem;
+import Zql.ZSelectItem;
 
 public class SQLUtility {
 
@@ -57,4 +60,55 @@ public class SQLUtility {
 		return result;
 	}
 
+	public boolean isSubqueryEliminationPossible(SQLLogicalTable leftTable, SQLLogicalTable rightTable) {
+		boolean leftTablePossible;
+		if(leftTable instanceof SQLFromItem) {
+			leftTablePossible = true;
+		} else if(leftTable instanceof SQLQuery) {
+			SQLQuery leftTableSQLQuery = (SQLQuery) leftTable;
+			Vector<ZFromItem> fromItems = leftTableSQLQuery.getFrom();
+			leftTablePossible = true;
+			for(ZFromItem fromItem : fromItems) {
+				if(!(fromItem instanceof SQLFromItem)) {
+					leftTablePossible = false;
+				}
+			}
+		} else {
+			
+		}
+			
+		return false;
+	}
+	
+	public IQuery joinQuery(Collection<ZSelectItem> selectItems, IQuery leftTable, IQuery rightTable, String joinType, ZExpression onExpression) {
+		
+		return null;
+	}
+	
+	public static String printSelectItems(Collection<ZSelectItem> selectItems, boolean distinct ) {
+		String selectSQL = "SELECT ";
+		
+		if(distinct) {
+			selectSQL += " DISTINCT ";
+		}
+
+		if(selectItems != null && selectItems.size()!=0) {
+			for(ZSelectItem mainQuerySelectItem : selectItems) {
+				String selectItemAlias = mainQuerySelectItem.getAlias();
+				mainQuerySelectItem.setAlias("");
+				String selectItemString = mainQuerySelectItem.toString();
+				if(selectItemAlias != null && !selectItemAlias.equals("")) {
+					selectItemString += " AS " + selectItemAlias;
+					mainQuerySelectItem.setAlias(selectItemAlias);
+				}
+				selectSQL = selectSQL + selectItemString + ", "; 
+			}
+			//remove the last coma and space
+			selectSQL = selectSQL.substring(0, selectSQL.length() - 2);
+		} else {
+			selectSQL += " * ";
+		}
+
+		return selectSQL;		
+	}
 }

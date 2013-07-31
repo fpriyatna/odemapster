@@ -38,9 +38,14 @@ public class SQLJoinTable extends ZFromItem {
 	@Override
 	public String toString() {
 		StringBuffer result = new StringBuffer();
-		result.append(this.joinType + " JOIN ");
-		result.append(" " + this.joinSource);
-		result.append(" ON " + this.onExpression);
+		if(this.joinType != null) {
+			result.append(this.joinType + " JOIN ");	
+		}
+		result.append(this.joinSource);
+		if(this.onExpression != null) {
+			result.append(" ON " + this.onExpression);	
+		}
+		
 		return result.toString();
 	}
 
