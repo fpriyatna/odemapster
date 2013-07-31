@@ -901,50 +901,47 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 			//.... JOIN ... ON <joinOnExpression>
 			Collection<ZExpression> joinOnExps = new HashSet<ZExpression>();
-			if(termsC == null || termsC.size() == 0) {
-				//SQL Server doesnt have TRUE constant
-				//joinOnExpression2 = new ZConstant("TRUE", ZConstant.UNKNOWN);
+			for(Node termC : termsC) {
+				if(termC.isVariable()) {
+					List<String> termCColumns1 = this.getColumnsByNode(termC, gp1SelectItems);
+					List<String> termCColumns2 = this.getColumnsByNode(termC, gp2SelectItems);
+
+					if(termCColumns1.size() == termCColumns2.size()) {
+						Iterator<String> termCColumns1Iterator = termCColumns1.iterator();
+						Iterator<String> termCColumns2Iterator = termCColumns2.iterator();
+
+						Collection<ZExp> exps1Aux = new Vector<ZExp>();
+						Collection<ZExp> exps2Aux = new Vector<ZExp>();
+						Collection<ZExp> exps3Aux = new Vector<ZExp>();
+						while(termCColumns1Iterator.hasNext()) {
+							String termCColumn1 = termCColumns1Iterator.next();
+							String termCColumn2 = termCColumns2Iterator.next();
+							ZConstant gp1TermC = new ZConstant(transGP1Alias + "." + termCColumn1, ZConstant.UNKNOWN);
+							ZConstant gp2TermC = new ZConstant(transGP2Alias + "." + termCColumn2, ZConstant.UNKNOWN);
+
+							ZExp exp1Aux = new ZExpression("=", gp1TermC, gp2TermC);
+							exps1Aux.add(exp1Aux);
+
+							ZExp exp2Aux = new ZExpression("IS NULL", gp1TermC);
+							exps2Aux.add(exp2Aux);
+
+							ZExp exp3Aux = new ZExpression("IS NULL", gp2TermC);
+							exps3Aux.add(exp3Aux);
+						}
+						ZExp exp1 = SQLUtility.combineExpresions(exps1Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+						ZExp exp2 = SQLUtility.combineExpresions(exps2Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+						ZExp exp3 = SQLUtility.combineExpresions(exps3Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+
+						ZExpression exp123 = new ZExpression("OR");
+						exp123.addOperand(exp1);
+						exp123.addOperand(exp2);
+						exp123.addOperand(exp3);
+						joinOnExps.add(exp123);
+					}						
+				}
+			}				
+			if(joinOnExps == null || joinOnExps.size() == 0) {
 				joinOnExps.add(Constants.SQL_EXPRESSION_TRUE);
-			} else {
-				for(Node termC : termsC) {
-					if(termC.isVariable()) {
-						List<String> termCColumns1 = this.getColumnsByNode(termC, gp1SelectItems);
-						List<String> termCColumns2 = this.getColumnsByNode(termC, gp2SelectItems);
-
-						if(termCColumns1.size() == termCColumns2.size()) {
-							Iterator<String> termCColumns1Iterator = termCColumns1.iterator();
-							Iterator<String> termCColumns2Iterator = termCColumns2.iterator();
-
-							Collection<ZExp> exps1Aux = new Vector<ZExp>();
-							Collection<ZExp> exps2Aux = new Vector<ZExp>();
-							Collection<ZExp> exps3Aux = new Vector<ZExp>();
-							while(termCColumns1Iterator.hasNext()) {
-								String termCColumn1 = termCColumns1Iterator.next();
-								String termCColumn2 = termCColumns2Iterator.next();
-								ZConstant gp1TermC = new ZConstant(transGP1Alias + "." + termCColumn1, ZConstant.UNKNOWN);
-								ZConstant gp2TermC = new ZConstant(transGP2Alias + "." + termCColumn2, ZConstant.UNKNOWN);
-
-								ZExp exp1Aux = new ZExpression("=", gp1TermC, gp2TermC);
-								exps1Aux.add(exp1Aux);
-
-								ZExp exp2Aux = new ZExpression("IS NULL", gp1TermC);
-								exps2Aux.add(exp2Aux);
-
-								ZExp exp3Aux = new ZExpression("IS NULL", gp2TermC);
-								exps3Aux.add(exp3Aux);
-							}
-							ZExp exp1 = SQLUtility.combineExpresions(exps1Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-							ZExp exp2 = SQLUtility.combineExpresions(exps2Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-							ZExp exp3 = SQLUtility.combineExpresions(exps3Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-
-							ZExpression exp123 = new ZExpression("OR");
-							exp123.addOperand(exp1);
-							exp123.addOperand(exp2);
-							exp123.addOperand(exp3);
-							joinOnExps.add(exp123);
-						}						
-					}
-				}				
 			}
 			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps, Constants.SQL_LOGICAL_OPERATOR_AND);
 
@@ -1277,12 +1274,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 
 
-//			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-//				result = resultAux.eliminateSubQuery();
-//			} else {
-//				result = resultAux;	
-//			}
-			
+			//			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
+			//				result = resultAux.eliminateSubQuery();
+			//			} else {
+			//				result = resultAux;	
+			//			}
+
 			result = resultAux;
 		}
 
