@@ -36,7 +36,7 @@ public class TableMetaData {
 				java.sql.Statement stmt = conn.createStatement();
 				
 				if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
-					String query = "SELECT * FROM information_schema.tables WHERE TABLE_SCHEMA = 'bsbm100m'";
+					String query = "SELECT * FROM information_schema.tables WHERE TABLE_SCHEMA = '" + databaseName + "'";
 					ResultSet rs = stmt.executeQuery(query);
 					while(rs.next()) {
 						String tableName = rs.getString("TABLE_NAME");

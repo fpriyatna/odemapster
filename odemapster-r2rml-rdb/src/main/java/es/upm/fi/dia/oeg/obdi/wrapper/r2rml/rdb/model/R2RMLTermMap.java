@@ -45,23 +45,26 @@ public class R2RMLTermMap implements R2RMLElement
 
 	//for constant type TermMap
 	private String constantValue;
-	
+
 	//for column type TermMap
 	private String columnName;
 	private String columnTypeName;
 
 	//for template type TermMap
 	private String templateString;
+
+	private boolean isNullable = true;
+
 	R2RMLTermMap(Resource resource, TermMapPosition termMapPosition, R2RMLTriplesMap owner) 
 			throws R2RMLInvalidTermMapException {
 		this.configurationProperties = owner.getOwner().getConfigurationProperties();
-		
+
 		this.owner = owner;
 
 		R2RMLLogicalTable logicalTable = this.owner.getLogicalTable();
-//		ResultSetMetaData rsmd = logicalTable.getRsmd();
+		//		ResultSetMetaData rsmd = logicalTable.getRsmd();
 		Map<String, ColumnMetaData> columnsMetaData = logicalTable.getColumnsMetaData();
-		
+
 		if(columnsMetaData == null) {
 			Connection conn = this.owner.getOwner().getConn();
 			try {
@@ -71,7 +74,7 @@ public class R2RMLTermMap implements R2RMLElement
 				logger.error(e.getMessage());
 			}
 		}
-		
+
 		Statement constantStatement = resource.getProperty(R2RMLConstants.R2RML_CONSTANT_PROPERTY);
 		if(constantStatement != null) {
 			this.termMapType = TermMapType.CONSTANT;
@@ -84,7 +87,8 @@ public class R2RMLTermMap implements R2RMLElement
 				if(columnsMetaData != null) {
 					ColumnMetaData cmd = columnsMetaData.get(this.columnName);
 					if(cmd != null) {
-						this.columnTypeName = cmd.getDataType();	
+						this.columnTypeName = cmd.getDataType();
+						this.isNullable = cmd.isNullable();
 					}
 				}
 			} else {
@@ -92,18 +96,25 @@ public class R2RMLTermMap implements R2RMLElement
 				if(templateStatement != null) {
 					this.termMapType = TermMapType.TEMPLATE;
 					this.templateString = templateStatement.getObject().toString();
-					
+
 					Collection<String> pkColumnStrings = this.getTemplateColumns();
+					
+					boolean isNullableAux = false;
 					for(String pkColumnString : pkColumnStrings) {
 						if(columnsMetaData != null) {
 							ColumnMetaData cmd = columnsMetaData.get(pkColumnString);
 							if(cmd != null) {
-								this.columnTypeName = cmd.getDataType();	
+								this.columnTypeName = cmd.getDataType();
+								if(cmd.isNullable()) {
+									isNullableAux = true;
+								}
 							} else {
 								logger.warn("metadata not found for: " + pkColumnString);
+								isNullableAux = true;
 							}
-						}						
+						}
 					}
+					this.isNullable = isNullableAux;
 				} else {
 					String termMapType;
 					if(this instanceof R2RMLSubjectMap) {
@@ -264,7 +275,7 @@ public class R2RMLTermMap implements R2RMLElement
 
 	public List<String> getTemplateColumns() {
 		List<String> result = new Vector<String>();
-		
+
 		TermMapType termMapValueType = this.getTermMapType();
 
 		if(termMapValueType == TermMapType.COLUMN) {
@@ -273,10 +284,10 @@ public class R2RMLTermMap implements R2RMLElement
 			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
 			RegexUtility regexUtility = new RegexUtility();
 			Collection<String> attributes = regexUtility.getTemplateColumns(this.templateString, true);
-			
+
 			result.addAll(attributes);
 		}
-		
+
 		return result;
 	}
 
@@ -375,27 +386,27 @@ public class R2RMLTermMap implements R2RMLElement
 	}
 
 
-//	public boolean hasWellDefinedURIExpression() {
-//		boolean result = false;
-//
-//		String columnName = this.getColumnName();
-//		if(columnName != null) {
-//			result = true;
-//		} else {
-//			String stringTemplate = this.templateString;
-//			if(stringTemplate != null) {
-//				Collection<String> attributes = 
-//						R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
-//				if(attributes != null && attributes.size() == 1) {
-//					result = true;
-//				}
-//			} else {
-//				result = false;
-//			}
-//		}
-//
-//		return result;
-//	}
+	//	public boolean hasWellDefinedURIExpression() {
+	//		boolean result = false;
+	//
+	//		String columnName = this.getColumnName();
+	//		if(columnName != null) {
+	//			result = true;
+	//		} else {
+	//			String stringTemplate = this.templateString;
+	//			if(stringTemplate != null) {
+	//				Collection<String> attributes = 
+	//						R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
+	//				if(attributes != null && attributes.size() == 1) {
+	//					result = true;
+	//				}
+	//			} else {
+	//				result = false;
+	//			}
+	//		}
+	//
+	//		return result;
+	//	}
 
 	public boolean isBlankNode() {
 		if(R2RMLConstants.R2RML_BLANKNODE_URI.equals(this.getTermType())) {
@@ -471,5 +482,5 @@ public class R2RMLTermMap implements R2RMLElement
 	}
 
 
-	
+
 }

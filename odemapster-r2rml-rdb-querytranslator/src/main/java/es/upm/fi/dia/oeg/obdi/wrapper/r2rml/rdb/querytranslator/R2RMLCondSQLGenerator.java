@@ -20,6 +20,7 @@ import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
@@ -56,7 +57,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 		ZExpression result2 = null;
 		R2RMLPredicateObjectMap poMap = (R2RMLPredicateObjectMap) pm;
 
-		R2RMLLogicalTable logicalTable = ((R2RMLTriplesMap) cm).getLogicalTable();
+		AbstractLogicalTable logicalTable = cm.getLogicalTable();
 		//ResultSetMetaData rsmd = logicalTable.getRsmd();
 		Map<String, ColumnMetaData> columnsMetaData = logicalTable.getColumnsMetaData();
 

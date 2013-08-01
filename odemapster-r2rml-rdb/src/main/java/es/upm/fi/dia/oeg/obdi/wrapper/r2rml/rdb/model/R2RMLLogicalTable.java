@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
 import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
@@ -19,14 +20,12 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 //import scala.reflect.generic.Trees.This;
 
-public abstract class R2RMLLogicalTable implements R2RMLElement {
+public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements R2RMLElement {
 	private static Logger logger = Logger.getLogger(R2RMLLogicalTable.class);
 
 	LogicalTableType logicalTableType;
 	private String alias;
 	private R2RMLTriplesMap owner;
-	private Map<String, ColumnMetaData> columnsMetaData;
-	private TableMetaData tableMetaData;
 	
 	R2RMLLogicalTable(R2RMLTriplesMap owner) {this.owner = owner;}
 
@@ -55,7 +54,7 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 					tableMetaData = new TableMetaData(tableName, tableRows);
 					tablesMetaData.put(tableName, tableMetaData);					
 				}
-				this.tableMetaData = tableMetaData;
+				super.tableMetaData = tableMetaData;
 			} catch(Exception e) {
 				logger.error("Error while getting size of logical table " + this);
 				throw e;
@@ -90,12 +89,12 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 						String columnName = rsmd.getColumnName(i);
 						String columnTypeName = rsmd.getColumnTypeName(i);
 						ColumnMetaData columnMetaData = new ColumnMetaData(
-								mapTableColumnsMetaDataKey, columnName, columnTypeName);
+								mapTableColumnsMetaDataKey, columnName, columnTypeName, true);
 						columnsMetaData.put(columnName, columnMetaData);
 					}
 					mapTableColumnsMetaData.put(mapTableColumnsMetaDataKey, columnsMetaData);
 				}
-				this.columnsMetaData = columnsMetaData;
+				super.columnsMetaData = columnsMetaData;
 			} catch(Exception e) {
 				logger.error("Error while producing ResultSetMetaData for Logical Table of Triples Map " + owner);
 			}
@@ -154,17 +153,9 @@ public abstract class R2RMLLogicalTable implements R2RMLElement {
 		this.alias = alias;
 	}
 
-	public long getLogicalTableSize() {
-		return this.tableMetaData.getTableRows();
-	}
 
-	public Map<String, ColumnMetaData> getColumnsMetaData() {
-		return columnsMetaData;
-	}
 
-	public TableMetaData getTableMetaData() {
-		return tableMetaData;
-	}
+
 
 
 

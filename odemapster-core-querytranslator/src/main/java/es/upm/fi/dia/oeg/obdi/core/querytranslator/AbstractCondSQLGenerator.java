@@ -116,13 +116,13 @@ public abstract class AbstractCondSQLGenerator {
 				betaGenerator.calculateBetaObject(tp, cm, predicateURI, alphaResult);
 		List<ZExp> betaObjectExpressions = new ArrayList<ZExp>();
 		for(SQLSelectItem betaObjectSelectItem : betaObjectSelectItems) {
-			ZExp betaObjectExpression;
+			ZExp betaObjectExp;
 			if(betaObjectSelectItem.isExpression()) {
-				betaObjectExpression = betaObjectSelectItem.getExpression();
+				betaObjectExp = betaObjectSelectItem.getExpression();
 			} else {
-				betaObjectExpression = new ZConstant(betaObjectSelectItem.toString(), ZConstant.COLUMNNAME);
+				betaObjectExp = new ZConstant(betaObjectSelectItem.toString(), ZConstant.COLUMNNAME);
 			}
-			betaObjectExpressions.add(betaObjectExpression);
+			betaObjectExpressions.add(betaObjectExp);
 		}
 		
 		
@@ -177,9 +177,10 @@ public abstract class AbstractCondSQLGenerator {
 				} 
 			} 
 
-			//for deadling with unbound() function, we should remove this part
+			//for dealing with unbound() function, we should remove this part
 			if(!isSingleTripleFromTripleBlock) {
 				for(ZExp betaObjectExpression : betaObjectExpressions) {
+					
 					ZExpression exp = this.generateIsNotNullExpression(betaObjectExpression);
 					if(exp != null) {
 						exps.add(exp);
@@ -266,7 +267,6 @@ public abstract class AbstractCondSQLGenerator {
 							, new ZConstant(subject.toString(), ZConstant.STRING));				
 				}
 			}
-
 		}
 
 		return result1;

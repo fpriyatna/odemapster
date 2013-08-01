@@ -14,12 +14,14 @@ public class ColumnMetaData {
 	private String tableName;
 	private String columnName;
 	private String dataType;
-
-	public ColumnMetaData(String tableName, String columnName, String dataType) {
+	private boolean isNullable = true;
+	
+	public ColumnMetaData(String tableName, String columnName, String dataType, boolean isNullable) {
 		super();
 		this.tableName = tableName;
 		this.columnName = columnName;
 		this.dataType = dataType;
+		this.isNullable = isNullable;
 	}
 	
 	public static Map<String, Map<String, ColumnMetaData>> buildColumnsMetaData(
@@ -31,7 +33,7 @@ public class ColumnMetaData {
 				java.sql.Statement stmt = conn.createStatement();
 				
 				if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
-					String query = "SELECT * FROM information_schema.columns WHERE TABLE_SCHEMA = 'bsbm100m'";
+					String query = "SELECT * FROM information_schema.columns WHERE TABLE_SCHEMA = '" + databaseName + "'";
 					ResultSet rs = stmt.executeQuery(query);
 					while(rs.next()) {
 						String tableName = rs.getString("TABLE_NAME");
@@ -45,8 +47,13 @@ public class ColumnMetaData {
 						ColumnMetaData columnMetaData = mapTableColumnMetaData.get(columnName);
 						if(columnMetaData == null) {
 							String dataType = rs.getString("DATA_TYPE");
+							String isNullableString = rs.getString("IS_NULLABLE");
+							boolean isNullable = true;
+							if(isNullableString != null && isNullableString.equalsIgnoreCase("NO") && isNullableString.equalsIgnoreCase("FALSE")) {
+								isNullable = false;
+							}
 							columnMetaData = new ColumnMetaData(
-									tableName, columnName, dataType);
+									tableName, columnName, dataType, isNullable);
 							mapTableColumnMetaData.put(columnName, columnMetaData);
 						}
 					}					
@@ -74,8 +81,15 @@ public class ColumnMetaData {
 	@Override
 	public String toString() {
 		return "ColumnMetaData [tableName=" + tableName + ", columnName="
-				+ columnName + ", dataType=" + dataType + "]";
+				+ columnName + ", dataType=" + dataType + ", isNullable="
+				+ isNullable + "]";
 	}
+
+	public boolean isNullable() {
+		return isNullable;
+	}
+
+
 
 	
 }

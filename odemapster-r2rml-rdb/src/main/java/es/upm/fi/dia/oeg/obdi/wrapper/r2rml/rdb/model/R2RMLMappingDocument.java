@@ -30,6 +30,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
 import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
@@ -42,6 +43,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
+	
 	public R2RMLMappingDocument(String mappingDocumentPath
 			, ConfigurationProperties configurationProperties) 
 					throws Exception {
@@ -58,9 +60,8 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 				String databaseType = 
 						configurationProperties.getDatabaseType();
 				if(databaseName != null) {
-					super.tablesMetaData = 
-							TableMetaData.buildTablesMetaData(
-									conn, databaseName, databaseType);	
+					super.tablesMetaData = TableMetaData.buildTablesMetaData(conn, databaseName, databaseType);
+					super.columnsMetaData = ColumnMetaData.buildColumnsMetaData(conn, databaseName, databaseType);
 				}
 			}
 		}
