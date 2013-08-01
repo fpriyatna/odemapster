@@ -226,7 +226,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		//alpha
 		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
 		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-		logger.debug("alpha logicalTable = " + alphaSubject);
+		logger.info("alphaSubject = " + alphaSubject);
 		SQLQuery resultAux = new SQLQuery(alphaSubject);
 		
 		Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();

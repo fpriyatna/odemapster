@@ -2,6 +2,8 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import Zql.ZExp;
 import Zql.ZSelectItem;
@@ -54,26 +56,46 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	public SQLSelectItem(String arg0) {
 		super(arg0);
 		
-		String[] splitColumns = arg0.split("\\.");
-		if(splitColumns.length == 1) {//nr
-		} else if(splitColumns.length == 2) { //product.nr
-			this.table = splitColumns[0];
-		} else if(splitColumns.length == 3) { //benchmark.product.nr
-			this.schema = splitColumns[0];
-			this.table = splitColumns[1];
-		} else if(splitColumns.length == 4) {//benchmark.dbo.product.nr			
-			this.schema = splitColumns[0];
-			this.table = splitColumns[1] + "." + splitColumns[2];
+		//String[] splitColumns = arg0.split("\\.");
+		List<String> splitColumns = this.splitAndClean(arg0);
+		if(splitColumns.size() == 1) {//nr
+			this.column = splitColumns.get(0);
+		} else if(splitColumns.size() == 2) { //product.nr
+			this.table = splitColumns.get(0);
+		} else if(splitColumns.size() == 3) { //benchmark.product.nr
+			this.schema = splitColumns.get(0);
+			this.table = splitColumns.get(1);
+		} else if(splitColumns.size() == 4) {//benchmark.dbo.product.nr			
+			this.schema = splitColumns.get(0);
+			this.table = splitColumns.get(1) + "." + splitColumns.get(2);
 		}
-		String[] splitColumnType = splitColumns[splitColumns.length - 1].split("::");
+		
+		String[] splitColumnType = splitColumns.get(splitColumns.size() - 1).split("::");
 		this.column = splitColumnType[0];
 		if(splitColumnType.length > 1) {
 			this.columnType = splitColumnType[1];	
 		}
-		
-
 	}
 
+	public List<String> splitAndClean(String str) {
+		List<String> result = new LinkedList<String>();
+		
+		String[] splitColumns = str.split("\\.");
+		if(splitColumns != null) {
+			for(String splitColumn : splitColumns) {
+				if(splitColumn.startsWith("\"") || splitColumn.startsWith("`")) {
+					splitColumn = splitColumn.substring(1);
+				}
+				if(splitColumn.endsWith("\"") || splitColumn.endsWith("`")) {
+					splitColumn = splitColumn.substring(0, splitColumn.length()-1);
+				}
+				result.add(splitColumn);
+			}
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public void setExpression(ZExp arg0) {
 		super.setExpression(arg0);

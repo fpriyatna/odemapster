@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -19,6 +20,7 @@ import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 
@@ -68,6 +70,7 @@ public abstract class AbstractCondSQLGenerator {
 
 
 	public ZExpression generateIsNotNullExpression(ZExp betaObjectExpression) {
+		
 		ZExpression exp = new ZExpression("IS NOT NULL");
 		exp.addOperand(betaObjectExpression);
 		return exp;
@@ -77,6 +80,7 @@ public abstract class AbstractCondSQLGenerator {
 			,AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
 			, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
 		Collection<ZExpression> exps = new HashSet<ZExpression>();
+		Map<String, ColumnMetaData> mapColumnMetaData = cm.getLogicalTable().getColumnsMetaData();
 
 		Collection<AbstractPropertyMapping> pms = 
 				cm.getPropertyMappings(predicateURI);
@@ -120,7 +124,8 @@ public abstract class AbstractCondSQLGenerator {
 			if(betaObjectSelectItem.isExpression()) {
 				betaObjectExp = betaObjectSelectItem.getExpression();
 			} else {
-				betaObjectExp = new ZConstant(betaObjectSelectItem.toString(), ZConstant.COLUMNNAME);
+				betaObjectExp = new ZConstant(betaObjectSelectItem.toString()
+						, ZConstant.COLUMNNAME);
 			}
 			betaObjectExpressions.add(betaObjectExp);
 		}
@@ -167,7 +172,7 @@ public abstract class AbstractCondSQLGenerator {
 				//result = new ZExpression("AND", result, exp);
 			}
 
-		} else { // improvement by Freddy
+		} else { //object.isVariable() // improvement by Freddy
 			boolean isSingleTripleFromTripleBlock = false;
 
 			if(tp instanceof ExtendedTriple) {
@@ -179,12 +184,20 @@ public abstract class AbstractCondSQLGenerator {
 
 			//for dealing with unbound() function, we should remove this part
 			if(!isSingleTripleFromTripleBlock) {
+				
 				for(ZExp betaObjectExpression : betaObjectExpressions) {
-					
-					ZExpression exp = this.generateIsNotNullExpression(betaObjectExpression);
-					if(exp != null) {
-						exps.add(exp);
-					}					
+					if(betaObjectExpression instanceof ZConstant) {
+						String betaValue = ((ZConstant) betaObjectExpression).getValue();
+						SQLSelectItem betaColumnSelectItem = new SQLSelectItem(betaValue);
+						String betaColumn = betaColumnSelectItem.getColumn();
+						ColumnMetaData cmd = mapColumnMetaData.get(betaColumn);
+						if(cmd == null || cmd.isNullable()) {
+							ZExpression exp = this.generateIsNotNullExpression(betaObjectExpression);
+							if(exp != null) {
+								exps.add(exp);
+							}							
+						}
+					}
 				}
 			}
 		}

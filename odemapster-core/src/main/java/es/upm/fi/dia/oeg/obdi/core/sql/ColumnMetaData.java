@@ -49,9 +49,12 @@ public class ColumnMetaData {
 							String dataType = rs.getString("DATA_TYPE");
 							String isNullableString = rs.getString("IS_NULLABLE");
 							boolean isNullable = true;
-							if(isNullableString != null && isNullableString.equalsIgnoreCase("NO") && isNullableString.equalsIgnoreCase("FALSE")) {
-								isNullable = false;
+							if(isNullableString != null) {
+								if(isNullableString.equalsIgnoreCase("NO") || isNullableString.equalsIgnoreCase("FALSE")) {
+									isNullable = false;
+								}
 							}
+							
 							columnMetaData = new ColumnMetaData(
 									tableName, columnName, dataType, isNullable);
 							mapTableColumnMetaData.put(columnName, columnMetaData);

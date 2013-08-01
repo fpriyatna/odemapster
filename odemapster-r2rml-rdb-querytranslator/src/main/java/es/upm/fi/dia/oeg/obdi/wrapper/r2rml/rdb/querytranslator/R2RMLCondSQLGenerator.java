@@ -121,6 +121,8 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 				} else if(termMapType == TermMapType.CONSTANT) {
 					//TODO
 				}					
+			} else if(tpObject.isVariable()) {
+				
 			}
 
 			if(refObjectMap != null && objectMap == null) {

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 22, 2013 at 12:14 
+-- Generation Time: Aug 01, 2013 at 05:26 
 -- Server version: 5.5.31
 -- PHP Version: 5.4.16
 
@@ -29,16 +29,16 @@ USE `odemapster_example`;
 --
 
 CREATE TABLE IF NOT EXISTS `Sport` (
-  `ID` int(11) NOT NULL DEFAULT '0',
-  `Name` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`ID`)
+  `id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `Sport`
 --
 
-INSERT INTO `Sport` (`ID`, `Name`) VALUES
+INSERT INTO `Sport` (`id`, `name`) VALUES
 (100, 'Tennis');
 
 -- --------------------------------------------------------
@@ -48,22 +48,22 @@ INSERT INTO `Sport` (`ID`, `Name`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `Student` (
-  `ID` char(8) NOT NULL DEFAULT '0',
-  `Name` varchar(50) DEFAULT NULL,
-  `Sport` int(11) DEFAULT NULL,
+  `id` char(8) NOT NULL DEFAULT '0',
+  `name` varchar(50) DEFAULT NULL,
+  `sport` int(11) DEFAULT NULL,
   `status` varchar(10) NOT NULL,
-  `webPage` varchar(100) DEFAULT NULL,
+  `webpage` varchar(100) DEFAULT NULL,
   `phone` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `Sport` (`Sport`)
+  PRIMARY KEY (`id`),
+  KEY `Sport` (`sport`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `Student`
 --
 
-INSERT INTO `Student` (`ID`, `Name`, `Sport`, `status`, `webPage`, `phone`, `email`) VALUES
+INSERT INTO `Student` (`id`, `name`, `sport`, `status`, `webpage`, `phone`, `email`) VALUES
 ('B1', 'Paul', 100, 'active', NULL, '777-3426', NULL),
 ('B2', 'John', NULL, 'active', NULL, NULL, 'john@acd.edu'),
 ('B3', 'George', NULL, 'active', 'www.george.edu', NULL, NULL),

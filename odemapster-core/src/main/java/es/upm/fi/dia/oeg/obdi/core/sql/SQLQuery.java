@@ -75,6 +75,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		if(zQuery.getFrom() != null) { this.addFrom(zQuery.getFrom());}
 		if(zQuery.getWhere() != null) { this.addWhere(zQuery.getWhere());}
 		if(zQuery.getGroupBy() != null) {this.addGroupBy(zQuery.getGroupBy());}
+		
 	}
 
 	public void addLogicalTable(SQLLogicalTable logicalTable) {
@@ -636,23 +637,29 @@ public class SQLQuery extends ZQuery implements IQuery {
 					}
 
 				} else {
+					String separator = "";
+					if(i > 0) {
+						separator = ", ";	
+					}
+					
+					String fromItemString = "";
 					if(mainQueryFromItem.getSchema() != null) {
-						fromSQL += mainQueryFromItem.getSchema() + ".";
+						fromItemString += mainQueryFromItem.getSchema() + ".";
 					}
 					if(mainQueryFromItem.getTable() != null) {
-						fromSQL += mainQueryFromItem.getTable() + ".";
+						fromItemString += mainQueryFromItem.getTable() + ".";
 					}
 					if(mainQueryFromItem.getColumn() != null) {
-						fromSQL += mainQueryFromItem.getColumn() + ".";
+						fromItemString += mainQueryFromItem.getColumn() + ".";
 					}
-					fromSQL = fromSQL.substring(0, fromSQL.length()-1);
-
+					fromItemString = fromItemString.substring(0, fromItemString.length()-1);
 
 					String mainQueryFromItemAlias = mainQueryFromItem.getAlias();
 					if(mainQueryFromItemAlias != null && mainQueryFromItemAlias.length() > 0) {
-						fromSQL += " " + mainQueryFromItem.getAlias();
+						fromItemString += " " + mainQueryFromItem.getAlias();
 					}
-
+					
+					fromSQL += separator + fromItemString;
 				}
 				i++;
 			}
