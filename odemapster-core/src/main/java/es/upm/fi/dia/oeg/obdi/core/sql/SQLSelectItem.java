@@ -55,7 +55,6 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 
 	public SQLSelectItem(String arg0) {
 		super(arg0);
-		
 		//String[] splitColumns = arg0.split("\\.");
 		List<String> splitColumns = this.splitAndClean(arg0);
 		if(splitColumns.size() == 1) {//nr
@@ -78,17 +77,16 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 	}
 
 	public List<String> splitAndClean(String str) {
-		List<String> result = new LinkedList<String>();
+		if(str != null) {
+			str = str.trim();
+			
+		}
+		String str2 = str.replaceAll("`", "").replaceAll("\"", "");
 		
-		String[] splitColumns = str.split("\\.");
+		List<String> result = new LinkedList<String>();
+		String[] splitColumns = str2.split("\\.");
 		if(splitColumns != null) {
 			for(String splitColumn : splitColumns) {
-				if(splitColumn.startsWith("\"") || splitColumn.startsWith("`")) {
-					splitColumn = splitColumn.substring(1);
-				}
-				if(splitColumn.endsWith("\"") || splitColumn.endsWith("`")) {
-					splitColumn = splitColumn.substring(0, splitColumn.length()-1);
-				}
 				result.add(splitColumn);
 			}
 		}
@@ -280,5 +278,16 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 
 		return result;
 	}
-	
+
+	public static SQLSelectItem create(ZSelectItem zSelectItem) {
+		String alias = zSelectItem.getAlias();
+		zSelectItem.setAlias("");
+		
+		SQLSelectItem result = new SQLSelectItem(zSelectItem.toString());
+		if(alias != null) {
+			result.setAlias(alias);
+		}
+		
+		return result;
+	}
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZFromItem;
@@ -11,6 +12,23 @@ import Zql.ZSelectItem;
 
 public class SQLUtility {
 
+	public static ZExpression combineExpresions(ZExp exp1
+			, Collection<? extends ZExp> exps, String logicalOperator
+			) {
+		Collection<ZExp> expressions = new Vector<ZExp>();
+		if(exp1 != null) {
+			expressions.add(exp1);	
+		}
+		
+		if(exps != null) {
+			expressions.addAll(exps);	
+		}
+		
+		ZExpression result = SQLUtility.combineExpresions(expressions, logicalOperator);
+		return result;
+	}
+
+		
 	public static ZExpression combineExpresions(
 			Collection<? extends ZExp> exps, String logicalOperator
 			) {

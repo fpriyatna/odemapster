@@ -95,6 +95,7 @@ public class R2RMLUtility {
 	
 	public static ZQuery toZQuery(String sqlString) {
 		try {
+			//sqlString = sqlString.replaceAll(".date ", ".date2");
 			ByteArrayInputStream bs = new ByteArrayInputStream(sqlString.getBytes());
 			ZqlParser parser = new ZqlParser(bs);
 			ZStatement statement = parser.readStatement();

@@ -190,7 +190,11 @@ public abstract class AbstractCondSQLGenerator {
 						String betaValue = ((ZConstant) betaObjectExpression).getValue();
 						SQLSelectItem betaColumnSelectItem = new SQLSelectItem(betaValue);
 						String betaColumn = betaColumnSelectItem.getColumn();
-						ColumnMetaData cmd = mapColumnMetaData.get(betaColumn);
+						ColumnMetaData cmd = null;
+						if(mapColumnMetaData != null) {
+							cmd = mapColumnMetaData.get(betaColumn);	
+						}
+						
 						if(cmd == null || cmd.isNullable()) {
 							ZExpression exp = this.generateIsNotNullExpression(betaObjectExpression);
 							if(exp != null) {

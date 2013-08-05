@@ -13,11 +13,14 @@
 <TriplesMapPerson>
     a rr:TriplesMap;
         
-	rr:logicalTable [ rr:tableName  "Student" ];
+	rr:logicalTable [ 
+        rr:tableName  "Student" 
+        # rr:sqlQuery  """SELECT Student.id AS id, Student.name AS name, Student.webpage AS webpage, Student.phone as phone, Student.email AS email FROM Student, Sport WHERE Student.Sport = Sport.ID""" 
+    ];
 	
     rr:subjectMap [    
 		a rr:Subject;
-		rr:template "http://mappingpedia.linkeddata.es/resources/Person/{ID}";
+		rr:template "http://mappingpedia.linkeddata.es/resources/Person/{id}";
 		rr:termType rr:IRI;
 		rr:class <http://mappingpedia.linkeddata.es/vocabulary/Person>;
 	];
@@ -26,7 +29,7 @@
     [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/name> ]; 
       rr:objectMap    [ 
-             rr:column "Name";
+             rr:column "name";
              rr:termType rr:Literal;
       ];
     ];
@@ -35,7 +38,7 @@
     [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/webpage> ]; 
       rr:objectMap    [ 
-             rr:column "webPage";
+             rr:column "webpage";
              rr:termType rr:Literal;
       ];
     ];

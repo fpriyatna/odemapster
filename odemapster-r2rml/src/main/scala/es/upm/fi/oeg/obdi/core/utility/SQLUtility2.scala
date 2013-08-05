@@ -11,7 +11,7 @@ class SQLUtility2 {
 	def replaceExp(oldExp : ZExp, mapReplacement : java.util.Map[ZConstant, ZConstant])  : ZExp= {
 			val newExpression = {
 					if(mapReplacement.size == 0) { 
-						oldExp;;
+						oldExp;
 					} else {
 						val newExpressionAux = SQLUtility2.this.replaceExp(oldExp, mapReplacement.head);
 						SQLUtility2.this.replaceExp(newExpressionAux, mapReplacement.tail);
@@ -21,7 +21,7 @@ class SQLUtility2 {
 			newExpression
 	}
 
-	private def replaceExp(oldExp : ZExp, mapReplacement : (ZConstant, ZConstant)) : ZExp = {
+	private def replaceExp(oldExp : ZExp, replacementTuple : (ZConstant, ZConstant)) : ZExp = {
 		val newExp : ZExp = {
 		if(oldExp.isInstanceOf[ZExpression]) {
 			val oldExpression = oldExp.asInstanceOf[ZExpression];
@@ -33,10 +33,10 @@ class SQLUtility2 {
 
 				val newOperand = {
 						if(oldOperand.isInstanceOf[ZConstant]) {
-							SQLUtility2.this.replaceConstant(oldOperand.asInstanceOf[ZConstant], mapReplacement);
+							SQLUtility2.this.replaceConstant(oldOperand.asInstanceOf[ZConstant], replacementTuple);
 
 						} else if(oldOperand.isInstanceOf[ZExpression]) {
-							SQLUtility2.this.replaceExp(oldOperand.asInstanceOf[ZExpression], mapReplacement);;
+							SQLUtility2.this.replaceExp(oldOperand.asInstanceOf[ZExpression], replacementTuple);;
 						} else {
 
 							null;
@@ -62,16 +62,19 @@ class SQLUtility2 {
 
 	}
 
-	private def replaceConstant(oldExp : ZConstant, mapReplacement : (ZConstant, ZConstant) ) : ZConstant = {
-		val newExpression : ZConstant =  
-				if(oldExp.getValue().equals(mapReplacement._1.getValue())) {
-					mapReplacement._2;
+	private def replaceConstant(oldExp : ZConstant, replacementTuple : (ZConstant, ZConstant) ) : ZConstant = {
+		val oldExpValue = oldExp.getValue().trim().replaceAll("`", "").replaceAll("\"", "");
+		val replacedValue = replacementTuple._1.getValue().trim().replaceAll("`", "").replaceAll("\"", "");
+		
+		val newExpression : ZConstant =
+				if(oldExpValue.equals(replacedValue)) {
+					replacementTuple._2;
 				} else {
 					oldExp
 				}
 
 
-	newExpression;
+		newExpression;
 	}
 
 }

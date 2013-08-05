@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
+import Zql.ZFromItem;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
@@ -954,8 +955,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
 				if(Constants.JOINS_TYPE_INNER.equals(joinType ) &&   //INNER join
 						transGP1SQL instanceof SQLQuery && transGP2SQL instanceof SQLQuery) {
-					transJoin = SQLQuery.create(
-							selectItems, (SQLQuery) transGP1SQL, (SQLQuery) transGP2SQL, joinOnExpression);
+					Collection<SQLLogicalTable> transGPs = new Vector<SQLLogicalTable>();
+					transGPs.add(transGP1SQL);
+					transGPs.add(transGP2SQL);
+					transJoin = SQLQuery.create(selectItems, transGPs, joinOnExpression);
 				} else {
 					SQLQuery transJoinAux = new SQLQuery();
 					transJoinAux.setSelectItems(selectItems);
@@ -1208,78 +1211,66 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Op opJoin = OpJoin.create(opBGPHead, opBGPTail);
 			result = this.trans(opJoin);
 		} else {// no union in alpha
-			SQLQuery resultAux = new SQLQuery();
-			//alpha(stg) returns the same result for subject
+			//ALPHA(stg) returns the same result for subject
 			AlphaResult alphaResult = alphaResultUnionList.get(0).get(0);
 			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-
-			//put this before alpha predicate object, as this is the main table and the order is important
-			resultAux.addFromItem(new SQLJoinTable(alphaSubject, null, null));//alpha subject
-
 			Collection<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
 			for(AlphaResultUnion alphaTP : alphaResultUnionList) {
 				Collection<SQLJoinTable> tpAlphaPredicateObjects = alphaTP.get(0).getAlphaPredicateObjects();
 				alphaPredicateObjects.addAll(tpAlphaPredicateObjects);
 			}
 
-			if(alphaPredicateObjects == null || alphaPredicateObjects.isEmpty()) {
-				if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
-					boolean condition1 = false;
-					if(alphaSubject instanceof SQLFromItem 
-							&& ((SQLFromItem)alphaSubject).getForm() == LogicalTableType.QUERY_STRING ) {
-						condition1 = true;
-					}
-					boolean condition2 = false;
-					if(alphaSubject instanceof SQLQuery) {
-						condition2 = true;
-					}
-					if(condition1 || condition2) {
-						String logicalTableAlias = alphaSubject.getAlias();
-						alphaSubject.setAlias("");
-						Connection conn = this.getConnection();
-						String subQueryViewName = "sqa" + Math.abs(stg.hashCode());
-						String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryViewName;
-						logger.info(dropViewSQL + ";\n");
-						DBUtility.execute(conn, dropViewSQL);
-						String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + alphaSubject;
-						logger.info(createViewSQL + ";\n");
-						DBUtility.execute(conn, createViewSQL);
-						alphaSubject = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
-						alphaSubject.setAlias(logicalTableAlias);					
-					}
-				}
-			} else {
-				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
-					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
-				}
-			}
-
-
-
-			//			//BetaSTG
-			//			List<BetaResultSet> betaResultSetList = this.betaGenerator.calculateBetaSTG(stg, cm, alphaResultUnionList);
-
 			//PRSQLSTG
 			Collection<ZSelectItem> selectItems = 
 					this.prSQLGenerator.genPRSQLSTG(stg, alphaResult
 							, betaGenerator, nameGenerator, cm);
-			resultAux.setSelectItems(selectItems);
+
 
 			//CondSQLSTG
 			ZExpression condSQL = this.condSQLGenerator.genCondSQLSTG(stg
 					, alphaResult, betaGenerator, cm);
-			if(condSQL != null) {
-				resultAux.addWhere(condSQL);
+
+			//TRANS(STG)
+			SQLQuery resultAux;
+			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
+				Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+				Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+				logicalTables.add(alphaSubject);
+				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+					SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+					logicalTables.add(logicalTable);
+					ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+					joinExpressions.add(joinExpression);
+				}
+				ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+				
+				resultAux = SQLQuery.create(selectItems, logicalTables, newWhere);
+			} else { //without subquery elimination
+				resultAux = new SQLQuery();
+				
+				//alpha subject
+				resultAux.addFromItem(new SQLJoinTable(alphaSubject, null, null));
+				//alpha predicate objects
+				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
+					if(alphaSubject instanceof SQLFromItem) {
+						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+					} else if(alphaSubject instanceof SQLQuery) {
+						ZExpression onExpression = alphaPredicateObject.getOnExpression();
+						alphaPredicateObject.setOnExpression(null);
+						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
+						resultAux.pushFilterDown(onExpression);
+					} else {
+						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+					}
+				}
+				
+				//prsql
+				resultAux.setSelectItems(selectItems);
+
+				//condsql
+				resultAux.setWhere(condSQL);
 			}
-
-
-			//			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			//				result = resultAux.eliminateSubQuery();
-			//			} else {
-			//				result = resultAux;	
-			//			}
-
 			result = resultAux;
 		}
 
