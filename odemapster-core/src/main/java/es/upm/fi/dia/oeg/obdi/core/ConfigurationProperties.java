@@ -33,6 +33,8 @@ public class ConfigurationProperties extends Properties {
 	//query translator
 	private boolean selfJoinElimination;
 	private boolean subQueryElimination;
+	private boolean transJoinSubQueryElimination;
+	private boolean transSTGSubQueryElimination;
 	private boolean subQueryAsView;
 	private String queryTranslatorClassName;
 	private String queryEvaluatorClassName;
@@ -188,6 +190,12 @@ public class ConfigurationProperties extends Properties {
 		this.subQueryElimination = this.readBoolean(Constants.SUBQUERY_ELIMINATION, true);
 		logger.debug("Subquery elimination = " + this.subQueryElimination);
 
+		this.transJoinSubQueryElimination = this.readBoolean(Constants.TRANSJOIN_SUBQUERY_ELIMINATION, true);
+		logger.debug("Trans join subquery elimination = " + this.transJoinSubQueryElimination);
+
+		this.transSTGSubQueryElimination = this.readBoolean(Constants.TRANSSTG_SUBQUERY_ELIMINATION, true);
+		logger.debug("Trans stg subquery elimination = " + this.transSTGSubQueryElimination);
+
 		this.subQueryAsView = this.readBoolean(Constants.SUBQUERY_AS_VIEW, false);
 		logger.debug("Subquery as view = " + this.subQueryAsView);
 
@@ -243,6 +251,14 @@ public class ConfigurationProperties extends Properties {
 
 	public boolean isSubQueryElimination() {
 		return subQueryElimination;
+	}
+
+	public boolean isTransJoinSubQueryElimination() {
+		return this.transJoinSubQueryElimination;
+	}
+
+	public boolean isTransSTGSubQueryElimination() {
+		return this.transSTGSubQueryElimination;
 	}
 
 	public boolean isLiteralRemoveStrangeChars() {

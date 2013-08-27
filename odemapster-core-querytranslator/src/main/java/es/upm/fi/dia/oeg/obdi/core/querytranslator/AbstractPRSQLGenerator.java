@@ -200,10 +200,9 @@ public abstract class AbstractPRSQLGenerator {
 			}
 		}
 
-		Collection<ZSelectItem> prList2 = new Vector<ZSelectItem>(prList);
 
-		logger.debug("genPRSQLTB = " + prList2);
-		return prList2;
+		logger.debug("genPRSQLTB = " + prList);
+		return prList;
 	}
 
 	public boolean isIgnoreRDFTypeStatement() {

@@ -143,13 +143,14 @@ public class SQLSelectItem extends ZSelectItem implements Cloneable {
 		}
 		
 
-		String enclosedCharacter = "\"";
+		String enclosedCharacter = "";
 		if(Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType)) {
 			enclosedCharacter = Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
 		} else if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
 			enclosedCharacter = Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
 		} else {
-			enclosedCharacter = Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER;
+			//enclosedCharacter = Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER;
+			//nothing
 		}
 
 		if(this.isExpression()) {

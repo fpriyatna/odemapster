@@ -4,9 +4,11 @@ import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 
 public class QueryTranslationOptimizer implements IQueryTranslationOptimizer {
 
-	private boolean selfJoinElimination = false;
-	private boolean unionQueryReduction = false;
-	private boolean subQueryElimination = false;
+	private boolean selfJoinElimination = true;
+	private boolean transJoinSubQueryElimination = false;
+	private boolean transSTGSubQueryElimination = false;
+	private boolean unionQueryReduction = true;
+	private boolean subQueryElimination = true;
 	private boolean subQueryAsView = false;
 	
 	public boolean isSelfJoinElimination() {
@@ -39,6 +41,22 @@ public class QueryTranslationOptimizer implements IQueryTranslationOptimizer {
 
 	public void setSubQueryAsView(boolean subQueryAsView) {
 		this.subQueryAsView = subQueryAsView;
+	}
+
+	public boolean isTransJoinSubQueryElimination() {
+		return this.transJoinSubQueryElimination;
+	}
+
+	public void setTransJoinSubQueryElimination(boolean subQueryElimination) {
+		this.transJoinSubQueryElimination = subQueryElimination;
+	}
+
+	public boolean isTransSTGSubQueryElimination() {
+		return transSTGSubQueryElimination;
+	}
+
+	public void setTransSTGSubQueryElimination(boolean transSTGSubQueryElimination) {
+		this.transSTGSubQueryElimination = transSTGSubQueryElimination;
 	}
 
 }

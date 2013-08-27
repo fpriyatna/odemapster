@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
 import Zql.ZExp;
+import Zql.ZExpression;
 import Zql.ZFromItem;
 import Zql.ZSelectItem;
 
@@ -23,6 +24,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
@@ -44,6 +46,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
@@ -226,22 +229,9 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		//alpha
 		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
 		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-		logger.info("alphaSubject = " + alphaSubject);
-		SQLQuery resultAux = new SQLQuery(alphaSubject);
-		
 		Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
-		
-		if(alphaPredicateObjects != null && !alphaPredicateObjects.isEmpty()) {
-			for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-				//result.addJoinQuery(alphaPredicateObject);//alpha predicate object
-				resultAux.addFromItem(alphaPredicateObject);
-				logger.debug("alphaPredicateObject = " + alphaPredicateObject);
-			}
-		}
 
 		//beta
-		//BetaResult betaResult = super.getBetaGenerator().calculateBeta(tp, cm, predicateURI, alphaResult);
-
 		AbstractBetaGenerator betaGenerator = super.getBetaGenerator();
 
 		//PRSQL
@@ -250,52 +240,56 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		Collection<ZSelectItem> selectItems = prSQLGenerator.genPRSQL(
 				tp, alphaResult, betaGenerator, nameGenerator
 				, cm, predicateURI);
-		logger.debug("prsql = " + selectItems);
-		resultAux.setSelectItems(selectItems);
 
 		//CondSQL
 		AbstractCondSQLGenerator condSQLGenerator = 
 				super.getCondSQLGenerator();
-		CondSQLResult condSQL = condSQLGenerator.genCondSQL(
+		CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
 				tp, alphaResult, betaGenerator, cm, predicateURI);
-		logger.debug("condSQL = " + condSQL);
-		if(condSQL != null) {
-			resultAux.addWhere(condSQL.getExpression());
+		ZExp condSQL = null;
+		if(condSQLResult != null) {
+			condSQL = condSQLResult.getExpression();
 		}
 
-		IQuery transTP = resultAux;
-		//subquery elimination
-		IQueryTranslationOptimizer optimizer = super.getOptimizer();
-		if(optimizer != null && optimizer.isSubQueryElimination()) {
+		SQLQuery resultAux = null;
+		if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
 			try {
-				boolean needSubQueryElimination = false;
-				
-				Vector<ZFromItem> fromItems = resultAux.getFrom();
-				for(ZFromItem fromItem : fromItems) {
-					if(fromItem instanceof SQLFromItem) {
-						SQLFromItem sqlFromItem = (SQLFromItem) fromItem;
-						if(sqlFromItem.getForm() == LogicalTableType.QUERY_STRING) {
-							needSubQueryElimination = true;
-						}
-					} else if(fromItem instanceof SQLJoinTable) {
-						SQLJoinTable joinTable = (SQLJoinTable) fromItem;
-						SQLLogicalTable joinSource = joinTable.getJoinSource();
-						if(!(joinSource instanceof SQLFromItem)) {
-							needSubQueryElimination = true;
-						}
-					}
+				Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+				Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+				logicalTables.add(alphaSubject);
+				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+					SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+					logicalTables.add(logicalTable);
+					ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+					joinExpressions.add(joinExpression);
 				}
-				
-//				if(needSubQueryElimination) {
-//					transTP = resultAux.eliminateSubQuery();	
-//				}
-				transTP = resultAux;
-					
+				ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+				resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
 			} catch(Exception e) {
-				throw new QueryTranslationException("error in eliminating subquery!", e);
+				String errorMessage = "error in eliminating subquery!";
+				logger.error(errorMessage);
 			}
+		} 
+		
+		if(resultAux == null) { //without subquery elimination or error occured during the process
+			resultAux = new SQLQuery(alphaSubject);
+			for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+				if(alphaSubject instanceof SQLFromItem) {
+					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+				} else if(alphaSubject instanceof SQLQuery) {
+					ZExpression onExpression = alphaPredicateObject.getOnExpression();
+					alphaPredicateObject.setOnExpression(null);
+					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
+					resultAux.pushFilterDown(onExpression);
+				} else {
+					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+				}
+			}
+			resultAux.setSelectItems(selectItems);
+			resultAux.setWhere(condSQL);
 		}
 		
+		IQuery transTP = resultAux;
 		logger.debug("transTP(tp, cm) = " + transTP);
 		return transTP;
 	}
@@ -328,6 +322,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		queryTranslationOptimizer.setSelfJoinElimination(true);
 		queryTranslationOptimizer.setUnionQueryReduction(true);
 		queryTranslationOptimizer.setSubQueryElimination(true);
+		queryTranslationOptimizer.setTransJoinSubQueryElimination(false);
 		queryTranslationOptimizer.setSubQueryAsView(false);
 
 		AbstractQueryTranslator queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn); 

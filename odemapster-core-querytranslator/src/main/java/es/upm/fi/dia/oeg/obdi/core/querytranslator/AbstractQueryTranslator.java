@@ -49,6 +49,8 @@ import com.hp.hpl.jena.sparql.expr.E_OneOf;
 import com.hp.hpl.jena.sparql.expr.E_Regex;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprFunction;
+import com.hp.hpl.jena.sparql.expr.ExprFunction1;
+import com.hp.hpl.jena.sparql.expr.ExprFunction2;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -74,6 +76,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUnion;
+import es.upm.fi.oeg.obdi.core.utility.SQLConstant;
 
 public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private static Logger logger = Logger.getLogger(AbstractQueryTranslator.class);
@@ -83,14 +86,14 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected AbstractUnfolder unfolder;
 	private Connection connection;
 	protected Map<Node, Set<AbstractConceptMapping>> mapInferredTypes;
-	private IQueryTranslationOptimizer optimizer = null;
+	protected IQueryTranslationOptimizer optimizer = null;
 	protected boolean ignoreRDFTypeStatement = false;
 	protected Map<Op, Collection<Node>> mapTermsC = new HashMap<Op, Collection<Node>>();
 	protected Map<Op, String> mapTransGP1Alias = new HashMap<Op, String>();
 	private Map<String, Object> mapVarMapping2 = new HashMap<String, Object>();
 	public enum POS {sub, pre, obj}
 	private ConfigurationProperties configurationProperties;
-	private String databaseType = Constants.DATABASE_MYSQL;
+	protected String databaseType = Constants.DATABASE_MYSQL;
 	private Map<String, String> functionsMap = new HashMap<String, String>();
 
 	//chebotko functions
@@ -509,21 +512,19 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			logger.info(createViewSQL  + ";\n");
 			DBUtility.execute(conn, createViewSQL);
 			new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
-		} else {
-			new SQLFromItem(opProjectSubOpSQL.toString(), LogicalTableType.QUERY_STRING);
 		}
-
-		IQuery result;
+		
+		IQuery transProjectSQL;
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
 			opProjectSubOpSQL.pushProjectionsDown(newSelectItems);
-			result = opProjectSubOpSQL;
+			transProjectSQL = opProjectSubOpSQL;
 		} else {
 			SQLQuery resultAux = new SQLQuery(opProjectSubOpSQL);
 			resultAux.setSelectItems(newSelectItems);
-			result = resultAux;
+			transProjectSQL = resultAux;
 		}
 
-		return result;
+		return transProjectSQL;
 	}
 
 	protected IQuery trans(OpSlice opSlice) throws Exception {
@@ -569,6 +570,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 
 		SQLQuery query1 = new SQLQuery();
+		query1.setDatabaseType(this.databaseType);
+		
 		transGP1FromItem.setAlias(transGP1Alias);
 		//query1.addFrom(transGP1FromItem);
 		query1.addFromItem(new SQLJoinTable(transGP1, null, null));
@@ -630,7 +633,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 
 		SQLQuery query2 = new SQLQuery();
-
+		query2.setDatabaseType(this.databaseType);
+		
 		IQuery transR3 = this.trans(gp2);
 		Collection<ZSelectItem> r3SelectItems = transR3.getSelectItems();
 
@@ -680,12 +684,13 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		selectItems2.addAll(selectItemsC2);
 
-		SQLUnion result = new SQLUnion();
-		result.add(query1);
-		result.add(query2);
-		logger.debug("transUnionSQL = \n" + result);
+		SQLUnion transUnionSQL = new SQLUnion();
+		transUnionSQL.setDatabaseType(this.databaseType);
+		transUnionSQL.add(query1);
+		transUnionSQL.add(query2);
+		logger.debug("transUnionSQL = \n" + transUnionSQL);
 
-		return result;
+		return transUnionSQL;
 	}
 
 	protected List<ZExp> transConstant(NodeValue nodeValue) {
@@ -732,7 +737,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		Collection<ZExp> resultAux = new Vector<ZExp>();
 		List<Expr> exprs = exprList.getList();
 		for(Expr expr : exprs) {
-			resultAux.addAll(this.transExpr(op, expr, subOpSelectItems, prefix));
+			List<ZExp> exprTranslated = this.transExpr(op, expr, subOpSelectItems, prefix);
+			resultAux.addAll(exprTranslated);
 		}
 		ZExpression result = SQLUtility.combineExpresions(resultAux, Constants.SQL_LOGICAL_OPERATOR_AND);
 		return result;
@@ -741,62 +747,146 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	private ZExp transFunction(Op op, ExprFunction exprFunction
 			, Collection<ZSelectItem> subOpSelectItems, String prefix) {
-		String functionSymbol;
-		if(exprFunction instanceof E_Bound) {
-			//functionSymbol = "IS NOT NULL";
-			functionSymbol = functionsMap.get(E_Bound.class.toString());
-		} else if(exprFunction instanceof E_LogicalNot) {
-			//functionSymbol = "NOT";
-			functionSymbol = functionsMap.get(E_LogicalNot.class.toString());
-		} else if(exprFunction instanceof E_LogicalAnd) {
-			//functionSymbol = "AND";
-			functionSymbol = functionsMap.get(E_LogicalAnd.class.toString());
-		} else if(exprFunction instanceof E_LogicalOr) {
-			//functionSymbol = "OR";
-			functionSymbol = functionsMap.get(E_LogicalOr.class.toString());
-		} else if(exprFunction instanceof E_NotEquals){
-			if(Constants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
-				functionSymbol = "<>";
-			} else {
-				functionSymbol = "!=";
-			}
-		} else if(exprFunction instanceof E_Regex) {
-			//functionSymbol = "LIKE";
-			functionSymbol = functionsMap.get(E_Regex.class.toString());
-		} else if(exprFunction instanceof E_OneOf) {
-			//functionSymbol = "IN";
-			functionSymbol = functionsMap.get(E_OneOf.class.toString());
-		} else {
-			functionSymbol = exprFunction.getOpName();
-		}
-
+		ZExpression result;
+		String functionSymbol = null;
 		List<Expr> args = exprFunction.getArgs();
-		List<List<ZExp>> transArgs = new Vector<List<ZExp>>();
-		for(int i=0; i<args.size(); i++) {
-			Expr arg = args.get(i);
-			List<ZExp> zExps = this.transExpr(op, arg, subOpSelectItems, prefix);
-			List<ZExp> transArg = new Vector<ZExp>();
-
-			for(ZExp zExp : zExps) {
-				if(exprFunction instanceof E_Regex && i==1) {
-					zExp = new ZConstant("%" + ((ZConstant)zExp).getValue() + "%", ZConstant.STRING);
-				}
-				transArg.add(zExp);
+		
+		if(exprFunction instanceof ExprFunction1) {
+			Expr arg = args.get(0);
+			
+			if(exprFunction instanceof E_Bound) {
+				//functionSymbol = "IS NOT NULL";
+				functionSymbol = functionsMap.get(E_Bound.class.toString());
+			} else if(exprFunction instanceof E_LogicalNot) {
+				//functionSymbol = "NOT";
+				functionSymbol = functionsMap.get(E_LogicalNot.class.toString());
+			} else {
+				functionSymbol = exprFunction.getOpName();
 			}
-			transArgs.add(transArg);
-		}
-
-		Collection<ZExp> resultAuxs = new Vector<ZExp>();
-		for(int j=0; j<transArgs.get(0).size(); j++ ) {
-			ZExpression resultAux = new ZExpression(functionSymbol);
-			for(int i=0; i<args.size(); i++) {
-				ZExp operand = transArgs.get(i).get(j);
+			
+			List<ZExp> argTranslated = this.transExpr(op, arg, subOpSelectItems, prefix);
+			Collection<ZExp> resultAuxs = new Vector<ZExp>();
+			for(int i=0; i<argTranslated.size(); i++ ) {
+				ZExpression resultAux = new ZExpression(functionSymbol);
+				ZExp operand = argTranslated.get(i);
 				resultAux.addOperand(operand);
-
+				resultAuxs.add(resultAux);
 			}
-			resultAuxs.add(resultAux);
+			
+			result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
+		} else if(exprFunction instanceof ExprFunction2) {
+			Expr leftArg = args.get(0);
+			Expr rightArg = args.get(1);
+			List<ZExp> leftExprTranslated = this.transExpr(op, leftArg, subOpSelectItems, prefix);
+			List<ZExp> rightExprTranslated = this.transExpr(op, rightArg, subOpSelectItems, prefix);
+			
+			if(exprFunction instanceof E_NotEquals){
+				if(Constants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
+					functionSymbol = "<>";
+				} else {
+					functionSymbol = "!=";
+				}
+
+				String concatSymbol;
+				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
+					concatSymbol = "||";
+				} else {
+					concatSymbol = "CONCAT";
+				}
+				
+				ZExpression leftConcatOperand = new ZExpression(concatSymbol);
+				for(int i=0; i<leftExprTranslated.size(); i++ ) {
+					ZExp leftOperand = leftExprTranslated.get(i);
+					
+					if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && leftOperand instanceof ZConstant) {
+						String leftOperandValue = ((ZConstant) leftOperand).getValue();
+						SQLConstant leftOperandNew = new SQLConstant(leftOperandValue, ((ZConstant) leftOperand).getType());
+						leftOperandNew.setColumnType("text");
+						leftConcatOperand.addOperand(leftOperandNew);
+					} else {
+						leftConcatOperand.addOperand(leftOperand);	
+					}
+				}
+
+				ZExpression rightConcatOperand = new ZExpression(concatSymbol);
+				for(int i=0; i<rightExprTranslated.size(); i++ ) {
+					ZExp rightOperand = rightExprTranslated.get(i);
+					if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && rightOperand instanceof ZConstant) {
+						String rightOperandValue = ((ZConstant) rightOperand).getValue();
+						SQLConstant rightOperandNew = new SQLConstant(rightOperandValue, ((ZConstant) rightOperand).getType());
+						rightOperandNew.setColumnType("text");
+						rightConcatOperand.addOperand(rightOperandNew);
+					} else {
+						rightConcatOperand.addOperand(rightOperand);	
+					}
+				}
+
+				ZExpression resultAux = new ZExpression(functionSymbol);
+				resultAux.addOperand(leftConcatOperand);
+				resultAux.addOperand(rightConcatOperand);
+				
+				result = resultAux;
+			} else {
+				if(exprFunction instanceof E_LogicalAnd) {
+					//functionSymbol = "AND";
+					functionSymbol = functionsMap.get(E_LogicalAnd.class.toString());
+				} else if(exprFunction instanceof E_LogicalOr) {
+					//functionSymbol = "OR";
+					functionSymbol = functionsMap.get(E_LogicalOr.class.toString());
+				} else {
+					functionSymbol = exprFunction.getOpName();
+				}
+				
+				Collection<ZExp> resultAuxs = new Vector<ZExp>();
+				for(int i=0; i<leftExprTranslated.size(); i++ ) {
+					ZExpression resultAux = new ZExpression(functionSymbol);
+					ZExp leftOperand = leftExprTranslated.get(i);
+					resultAux.addOperand(leftOperand);
+					ZExp rightOperand = rightExprTranslated.get(i);
+					resultAux.addOperand(rightOperand);
+					resultAuxs.add(resultAux);
+				}
+				result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
+			}
+		} else {
+			List<List<ZExp>> transArgs = new Vector<List<ZExp>>();
+			for(int i=0; i<args.size(); i++) {
+				Expr arg = args.get(i);
+				List<ZExp> zExps = this.transExpr(op, arg, subOpSelectItems, prefix);
+				List<ZExp> transArg = new Vector<ZExp>();
+
+				for(ZExp zExp : zExps) {
+					if(exprFunction instanceof E_Regex && i==1) {
+						zExp = new ZConstant("%" + ((ZConstant)zExp).getValue() + "%", ZConstant.STRING);
+					}
+					transArg.add(zExp);
+				}
+				transArgs.add(transArg);
+			}
+
+			if(exprFunction instanceof E_Regex) {
+				//functionSymbol = "LIKE";
+				functionSymbol = functionsMap.get(E_Regex.class.toString());
+			} else if(exprFunction instanceof E_OneOf) {
+				//functionSymbol = "IN";
+				functionSymbol = functionsMap.get(E_OneOf.class.toString());
+			} else {
+				functionSymbol = exprFunction.getOpName();
+			}
+			
+			Collection<ZExp> resultAuxs = new Vector<ZExp>();
+			int arg0Size = transArgs.get(0).size();
+			for(int j=0; j<arg0Size; j++ ) {
+				ZExpression resultAux = new ZExpression(functionSymbol);
+				for(int i=0; i<args.size(); i++) {
+					ZExp operand = transArgs.get(i).get(j);
+					resultAux.addOperand(operand);
+				}
+				resultAuxs.add(resultAux);
+			}
+			result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
 		}
-		ZExpression result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
+		
 		return result;
 	}
 
@@ -951,22 +1041,27 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			SQLJoinTable table2 = new SQLJoinTable(transGP2SQL, joinType, joinOnExpression);
 			table2.setAlias(transGP2Alias);
 
-			IQuery transJoin;
-			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-				if(Constants.JOINS_TYPE_INNER.equals(joinType ) &&   //INNER join
-						transGP1SQL instanceof SQLQuery && transGP2SQL instanceof SQLQuery) {
-					Collection<SQLLogicalTable> transGPs = new Vector<SQLLogicalTable>();
-					transGPs.add(transGP1SQL);
-					transGPs.add(transGP2SQL);
-					transJoin = SQLQuery.create(selectItems, transGPs, joinOnExpression);
-				} else {
-					SQLQuery transJoinAux = new SQLQuery();
-					transJoinAux.setSelectItems(selectItems);
-					transJoinAux.addFromItem(table1);
-					transJoinAux.addFromItem(table2);
-					transJoin = transJoinAux;
+			IQuery transJoin = null;
+			if(this.optimizer != null) {
+				boolean isTransJoinSubQueryElimination = this.optimizer.isTransJoinSubQueryElimination();
+				if(isTransJoinSubQueryElimination) {
+					try {
+						if(Constants.JOINS_TYPE_INNER.equals(joinType ) &&   //INNER join
+								transGP1SQL instanceof SQLQuery && transGP2SQL instanceof SQLQuery) {
+							Collection<SQLLogicalTable> transGPs = new Vector<SQLLogicalTable>();
+							transGPs.add(transGP1SQL);
+							transGPs.add(transGP2SQL);
+							transJoin = SQLQuery.create(selectItems, transGPs, joinOnExpression, this.databaseType);
+						}					
+					} catch(Exception e) {
+						String errorMessage = "error while eliminating subquery in transjoin.";
+						logger.error(errorMessage);
+						transJoin = null;
+					}					
 				}
-			} else {
+			}
+
+			if(transJoin == null) { //subquery not eliminated
 				SQLQuery transJoinAux = new SQLQuery();
 				transJoinAux.setSelectItems(selectItems);
 				transJoinAux.addFromItem(table1);
@@ -1185,7 +1280,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	private IQuery transSTG(List<Triple> stg
 			, AbstractConceptMapping cm) throws Exception {
-		IQuery result;
+		IQuery transSTG;
 
 		//AlphaSTG
 		List<AlphaResultUnion> alphaResultUnionList = 
@@ -1209,7 +1304,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			OpBGP opBGPTail = new OpBGP(basicPatternTail);
 
 			Op opJoin = OpJoin.create(opBGPHead, opBGPTail);
-			result = this.trans(opJoin);
+			transSTG = this.trans(opJoin);
 		} else {// no union in alpha
 			//ALPHA(stg) returns the same result for subject
 			AlphaResult alphaResult = alphaResultUnionList.get(0).get(0);
@@ -1231,51 +1326,45 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					, alphaResult, betaGenerator, cm);
 
 			//TRANS(STG)
-			SQLQuery resultAux;
-			if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-				Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-				Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-				logicalTables.add(alphaSubject);
-				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-					SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-					logicalTables.add(logicalTable);
-					ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-					joinExpressions.add(joinExpression);
+			SQLQuery resultAux = null;
+			if(this.optimizer != null) {
+				boolean isTransSTGSubQueryElimination = this.optimizer.isTransSTGSubQueryElimination();
+				if(isTransSTGSubQueryElimination) {
+					try {
+						Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+						Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+						logicalTables.add(alphaSubject);
+						for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+							SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+							logicalTables.add(logicalTable);
+							ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+							joinExpressions.add(joinExpression);
+						}
+						ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+						resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
+					} catch(Exception e) {
+						String errorMessage = "error in eliminating subquery!";
+						logger.error(errorMessage);
+						resultAux = null;
+					}					
 				}
-				ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-				
-				resultAux = SQLQuery.create(selectItems, logicalTables, newWhere);
-			} else { //without subquery elimination
-				resultAux = new SQLQuery();
-				
-				//alpha subject
-				resultAux.addFromItem(new SQLJoinTable(alphaSubject, null, null));
-				//alpha predicate objects
-				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-					//resultAux.addJoinQuery(alphaPredicateObject);//alpha predicate object
-					if(alphaSubject instanceof SQLFromItem) {
-						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
-					} else if(alphaSubject instanceof SQLQuery) {
-						ZExpression onExpression = alphaPredicateObject.getOnExpression();
-						alphaPredicateObject.setOnExpression(null);
-						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
-						resultAux.pushFilterDown(onExpression);
-					} else {
-						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
-					}
-				}
-				
-				//prsql
-				resultAux.setSelectItems(selectItems);
+			} 
 
-				//condsql
+			if(resultAux == null) { //without subquery elimination or error occured during the process
+				resultAux = new SQLQuery(alphaSubject);
+				resultAux.setDatabaseType(this.databaseType);
+				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
+				}
+				resultAux.setSelectItems(selectItems);
 				resultAux.setWhere(condSQL);
 			}
-			result = resultAux;
+
+			transSTG = resultAux;
 		}
 
-		logger.debug("transSTG = " + result);
-		return result;
+		logger.debug("transSTG = " + transSTG);
+		return transSTG;
 	}
 
 

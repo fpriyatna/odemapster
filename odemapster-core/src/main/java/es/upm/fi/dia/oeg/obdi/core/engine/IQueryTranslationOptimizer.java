@@ -9,7 +9,13 @@ public interface IQueryTranslationOptimizer {
 	
 	public boolean isSubQueryElimination();
 	public void setSubQueryElimination(boolean subQueryElimination);
-	
+
+	public boolean isTransJoinSubQueryElimination();
+	public void setTransJoinSubQueryElimination(boolean subQueryElimination);
+
+	public boolean isTransSTGSubQueryElimination();
+	public void setTransSTGSubQueryElimination(boolean subQueryElimination);
+
 	public boolean isSubQueryAsView();
 	public void setSubQueryAsView(boolean subQueryAsView);
 }

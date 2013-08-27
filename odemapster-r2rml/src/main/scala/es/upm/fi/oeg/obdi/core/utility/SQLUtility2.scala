@@ -22,26 +22,26 @@ class SQLUtility2 {
 	}
 
 	private def replaceExp(oldExp : ZExp, replacementTuple : (ZConstant, ZConstant)) : ZExp = {
-		val newExp : ZExp = {
+		var newExp : ZExp = null;
+	  
+		val oldExpIsExpression = oldExp.isInstanceOf[ZExpression];
 		if(oldExp.isInstanceOf[ZExpression]) {
 			val oldExpression = oldExp.asInstanceOf[ZExpression];
 			val operator = oldExpression.getOperator();
 			val oldOperands = oldExpression.getOperands();
 			var newOperands = List[ZExp]();
 
-			for(oldOperand <- oldOperands) yield {
-
-				val newOperand = {
-						if(oldOperand.isInstanceOf[ZConstant]) {
-							SQLUtility2.this.replaceConstant(oldOperand.asInstanceOf[ZConstant], replacementTuple);
-
-						} else if(oldOperand.isInstanceOf[ZExpression]) {
-							SQLUtility2.this.replaceExp(oldOperand.asInstanceOf[ZExpression], replacementTuple);;
-						} else {
-
-							null;
-						}
+			for(oldOperand <- oldOperands) {
+				var newOperand : ZExp = null;
+				
+				if(oldOperand.isInstanceOf[ZConstant]) {
+					newOperand = SQLUtility2.this.replaceConstant(oldOperand.asInstanceOf[ZConstant], replacementTuple);
+				} else if(oldOperand.isInstanceOf[ZExpression]) {
+					newOperand = SQLUtility2.this.replaceExp(oldOperand.asInstanceOf[ZExpression], replacementTuple);
+				} else {
+					newOperand = null;
 				}
+				
 				newOperands = newOperand :: newOperands; 
 			}
 
@@ -49,32 +49,40 @@ class SQLUtility2 {
 			for(newOperand <- newOperands reverse) yield {
 				newExpression.addOperand(newOperand);
 			}
-			newExpression;
+			newExp = newExpression;
 		} else if(oldExp.isInstanceOf[ZConstant]) {
 			val oldConstant = oldExp.asInstanceOf[ZConstant];
-			oldConstant;
+			newExp = oldConstant;
 		} else {
-			oldExp;
+			newExp = oldExp;
 		}
-	}
 
-	newExp;
+		newExp;
 
 	}
 
 	private def replaceConstant(oldExp : ZConstant, replacementTuple : (ZConstant, ZConstant) ) : ZConstant = {
-		val oldExpValue = oldExp.getValue().trim().replaceAll("`", "").replaceAll("\"", "");
-		val replacedValue = replacementTuple._1.getValue().trim().replaceAll("`", "").replaceAll("\"", "");
+		val replacementTuple1 =  replacementTuple._1;
+		val replacementTuple2 =  replacementTuple._2;
 		
-		val newExpression : ZConstant =
-				if(oldExpValue.equals(replacedValue)) {
-					replacementTuple._2;
-				} else {
-					oldExp
+		val oldExpValue = oldExp.getValue().trim().replaceAll("`", "").replaceAll("\"", "");
+		val replacedValue = replacementTuple1.getValue().trim().replaceAll("`", "").replaceAll("\"", "");
+		
+		val newConstant : ZConstant = {
+			if(oldExpValue.equals(replacedValue)) {
+				var sqlConstant = new SQLConstant(replacementTuple2);
+				if(oldExp.isInstanceOf[SQLConstant]) {
+					val columnType = oldExp.asInstanceOf[SQLConstant].columnType;
+					if(columnType != null) {
+						sqlConstant.columnType = columnType;
+					}			    
 				}
-
-
-		newExpression;
+				sqlConstant;
+			} else {
+				oldExp;
+			}
+		}
+		newConstant;
 	}
 
 }

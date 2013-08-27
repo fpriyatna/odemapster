@@ -270,14 +270,22 @@ public abstract class AbstractRunner {
 
 		//query translation optimizer
 		IQueryTranslationOptimizer queryTranslationOptimizer = this.buildQueryTranslationOptimizer();
-		boolean optimizeTriplesSameSubject = this.isSelfJoinElimination();
-		queryTranslationOptimizer.setSelfJoinElimination(optimizeTriplesSameSubject);
+		boolean eliminateSelfJoin = this.isSelfJoinElimination();
+		queryTranslationOptimizer.setSelfJoinElimination(eliminateSelfJoin);
+		
 		boolean eliminateSubQuery = this.isSubQueryElimination();
 		queryTranslationOptimizer.setSubQueryElimination(eliminateSubQuery);
+		
+		boolean transJoinEliminateSubQuery = this.isTransJoinSubQueryElimination();
+		queryTranslationOptimizer.setTransJoinSubQueryElimination(transJoinEliminateSubQuery);
+		
+		boolean transSTGEliminateSubQuery = this.isTransSTGSubQueryElimination();
+		queryTranslationOptimizer.setTransSTGSubQueryElimination(transSTGEliminateSubQuery);
+		
 		boolean subQueryAsView = this.isSubQueryAsView();
 		queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
+		
 		this.queryTranslator.setOptimizer(queryTranslationOptimizer);
-
 		logger.debug("query translator = " + this.queryTranslator);
 	}
 
@@ -293,6 +301,22 @@ public abstract class AbstractRunner {
 		boolean result = true;
 		if(this.configurationProperties != null) {
 			result = this.configurationProperties.isSubQueryElimination();
+		}
+		return result;
+	}
+
+	private boolean isTransJoinSubQueryElimination() {
+		boolean result = false;
+		if(this.configurationProperties != null) {
+			result = this.configurationProperties.isTransJoinSubQueryElimination();
+		}
+		return result;
+	}
+
+	private boolean isTransSTGSubQueryElimination() {
+		boolean result = false;
+		if(this.configurationProperties != null) {
+			result = this.configurationProperties.isTransSTGSubQueryElimination();
 		}
 		return result;
 	}

@@ -975,17 +975,19 @@ public class SQLQuery extends ZQuery implements IQuery {
 					outerSelectItem.setAlias(outerSelectItemAlias);
 				}
 				
+				ZSelectItem replacementSelectItem;
 				ZSelectItem innerSelectItem = mapInnerAliasSelectItem.get(outerSelectItemString);
 				if(innerSelectItem != null) {
-					SQLSelectItem newSelectItem = SQLSelectItem.create(innerSelectItem);
-					selectItemsReplacement.put(outerSelectItem, newSelectItem);
+					SQLSelectItem replacementSelectItemAux = SQLSelectItem.create(innerSelectItem);
+					//replacementSelectItemAux.setDbType(this.databaseType);
 					if(outerSelectItemAlias != null) {
-						newSelectItem.setAlias(outerSelectItemAlias);
+						replacementSelectItemAux.setAlias(outerSelectItemAlias);
 					}
+					replacementSelectItem = replacementSelectItemAux;
 				} else {
-					selectItemsReplacement.put(outerSelectItem, outerSelectItem);
+					replacementSelectItem = outerSelectItem;
 				}
-
+				selectItemsReplacement.put(outerSelectItem, replacementSelectItem);
 			}
 		}
 
@@ -1032,17 +1034,29 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 	public static SQLQuery create(Collection<ZSelectItem> selectItems
-			, Collection<? extends SQLLogicalTable> sqlLogicalTables, ZExpression whereExpression) {
+			, Collection<? extends SQLLogicalTable> sqlLogicalTables
+			, ZExpression whereExpression, String databasetype) {
 		SQLQuery result = new SQLQuery();
-
+		result.setDatabaseType(databasetype);
+		
 		Map<String, ZSelectItem> mapAliasSelectItems = 
 				new LinkedHashMap<String, ZSelectItem>();
 
 		for(SQLLogicalTable sqlLogicalTable : sqlLogicalTables) {
 			if(sqlLogicalTable instanceof SQLQuery) {
 				SQLQuery logicalTableSQLQuery = (SQLQuery) sqlLogicalTable;
-				Vector<ZFromItem> fromItemsLeft = logicalTableSQLQuery.getFrom();
-				result.addFromItems(fromItemsLeft);
+				Vector<ZFromItem> logicalTableFromItems = logicalTableSQLQuery.getFrom();
+				for(ZFromItem fromItem : logicalTableFromItems) {
+					String fromItemAlias = fromItem.getAlias();
+					if(fromItemAlias == null || fromItemAlias.equals("")) {
+						String logicalTableAlias = sqlLogicalTable.getAlias();
+						if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
+							fromItem.setAlias(logicalTableAlias);	
+						}
+					}
+					result.addFromItem(fromItem);	
+				}
+				
 				result.addWhere(logicalTableSQLQuery.getWhere());
 				Collection<ZSelectItem> selectItemsLeft = logicalTableSQLQuery.getSelectItems();
 				result.addSelects(selectItemsLeft);
