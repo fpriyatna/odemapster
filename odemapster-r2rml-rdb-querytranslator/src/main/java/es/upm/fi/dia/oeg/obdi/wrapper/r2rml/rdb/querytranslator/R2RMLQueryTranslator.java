@@ -225,72 +225,76 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	@Override
 	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
 			String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
-
+		IQuery transTP = null;
+		
 		//alpha
 		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
-		SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-		Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
+		if(alphaResult != null) {
+			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
+			Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
 
-		//beta
-		AbstractBetaGenerator betaGenerator = super.getBetaGenerator();
+			//beta
+			AbstractBetaGenerator betaGenerator = super.getBetaGenerator();
 
-		//PRSQL
-		AbstractPRSQLGenerator prSQLGenerator = super.getPrSQLGenerator();
-		NameGenerator nameGenerator = super.getNameGenerator(); 
-		Collection<ZSelectItem> selectItems = prSQLGenerator.genPRSQL(
-				tp, alphaResult, betaGenerator, nameGenerator
-				, cm, predicateURI);
+			//PRSQL
+			AbstractPRSQLGenerator prSQLGenerator = super.getPrSQLGenerator();
+			NameGenerator nameGenerator = super.getNameGenerator(); 
+			Collection<ZSelectItem> selectItems = prSQLGenerator.genPRSQL(
+					tp, alphaResult, betaGenerator, nameGenerator
+					, cm, predicateURI);
 
-		//CondSQL
-		AbstractCondSQLGenerator condSQLGenerator = 
-				super.getCondSQLGenerator();
-		CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
-				tp, alphaResult, betaGenerator, cm, predicateURI);
-		ZExp condSQL = null;
-		if(condSQLResult != null) {
-			condSQL = condSQLResult.getExpression();
-		}
+			//CondSQL
+			AbstractCondSQLGenerator condSQLGenerator = 
+					super.getCondSQLGenerator();
+			CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
+					tp, alphaResult, betaGenerator, cm, predicateURI);
+			ZExp condSQL = null;
+			if(condSQLResult != null) {
+				condSQL = condSQLResult.getExpression();
+			}
 
-		SQLQuery resultAux = null;
-		if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			try {
-				Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-				Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-				logicalTables.add(alphaSubject);
+			SQLQuery resultAux = null;
+			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
+				try {
+					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+					logicalTables.add(alphaSubject);
+					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+						SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+						logicalTables.add(logicalTable);
+						ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+						joinExpressions.add(joinExpression);
+					}
+					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
+				} catch(Exception e) {
+					String errorMessage = "error in eliminating subquery!";
+					logger.error(errorMessage);
+				}
+			} 
+			
+			if(resultAux == null) { //without subquery elimination or error occured during the process
+				resultAux = new SQLQuery(alphaSubject);
 				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-					SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-					logicalTables.add(logicalTable);
-					ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-					joinExpressions.add(joinExpression);
+					if(alphaSubject instanceof SQLFromItem) {
+						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+					} else if(alphaSubject instanceof SQLQuery) {
+						ZExpression onExpression = alphaPredicateObject.getOnExpression();
+						alphaPredicateObject.setOnExpression(null);
+						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
+						resultAux.pushFilterDown(onExpression);
+					} else {
+						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+					}
 				}
-				ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-				resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
-			} catch(Exception e) {
-				String errorMessage = "error in eliminating subquery!";
-				logger.error(errorMessage);
+				resultAux.setSelectItems(selectItems);
+				resultAux.setWhere(condSQL);
 			}
-		} 
-		
-		if(resultAux == null) { //without subquery elimination or error occured during the process
-			resultAux = new SQLQuery(alphaSubject);
-			for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-				if(alphaSubject instanceof SQLFromItem) {
-					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
-				} else if(alphaSubject instanceof SQLQuery) {
-					ZExpression onExpression = alphaPredicateObject.getOnExpression();
-					alphaPredicateObject.setOnExpression(null);
-					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
-					resultAux.pushFilterDown(onExpression);
-				} else {
-					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
-				}
-			}
-			resultAux.setSelectItems(selectItems);
-			resultAux.setWhere(condSQL);
+			
+			transTP = resultAux;
+			logger.debug("transTP(tp, cm) = " + transTP);			
 		}
-		
-		IQuery transTP = resultAux;
-		logger.debug("transTP(tp, cm) = " + transTP);
+
 		return transTP;
 	}
 

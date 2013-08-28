@@ -344,7 +344,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			throw new QueryTranslationException("Unsupported query!");
 		}
 
-		result.setDatabaseType(databaseType);
+		if(result != null) {
+			result.setDatabaseType(databaseType);	
+		}
+		
 		return result;
 	}
 

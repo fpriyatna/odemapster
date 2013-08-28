@@ -209,40 +209,42 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	public AlphaResult calculateAlpha(Triple tp, AbstractConceptMapping abstractConceptMapping
 			, String predicateURI)
 			throws QueryTranslationException {
-		
-		//alpha subject
-		Node tpSubject = tp.getSubject();
-		SQLLogicalTable alphaSubject = this.calculateAlphaSubject(tpSubject, abstractConceptMapping);
-		String logicalTableAlias = alphaSubject.getAlias();
-		
-		//alpha predicate object
+		AlphaResult alphaResult = null;
 		Collection<AbstractPropertyMapping> pms = abstractConceptMapping.getPropertyMappings(predicateURI);
-		List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
-		List<SQLLogicalTable> alphaPredicateObjects2 = new Vector<SQLLogicalTable>();
-		if(pms != null) {
-			if(pms.size() > 1) {
-				String errorMessage = "Multiple mappings of a predicate is not supported.";
-				throw new QueryTranslationException(errorMessage);				
-			}
+		if(pms != null && !pms.isEmpty()) {
+			//alpha subject
+			Node tpSubject = tp.getSubject();
+			SQLLogicalTable alphaSubject = this.calculateAlphaSubject(tpSubject, abstractConceptMapping);
+			String logicalTableAlias = alphaSubject.getAlias();
 			
-			R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
-			R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
-			if(refObjectMap != null) { 
-				SQLJoinTable alphaPredicateObject = this.calculateAlphaPredicateObject(
-						tp, abstractConceptMapping, pm, logicalTableAlias);
-				alphaPredicateObjects.add(alphaPredicateObject);
+			//alpha predicate object
+			List<SQLJoinTable> alphaPredicateObjects = new Vector<SQLJoinTable>();
+			List<SQLLogicalTable> alphaPredicateObjects2 = new Vector<SQLLogicalTable>();
+			if(pms != null && !pms.isEmpty()) {
+				if(pms.size() > 1) {
+					String errorMessage = "Multiple mappings of a predicate is not supported.";
+					throw new QueryTranslationException(errorMessage);				
+				}
+				
+				R2RMLPredicateObjectMap pm = (R2RMLPredicateObjectMap) pms.iterator().next();
+				R2RMLRefObjectMap refObjectMap = pm.getRefObjectMap();
+				if(refObjectMap != null) { 
+					SQLJoinTable alphaPredicateObject = this.calculateAlphaPredicateObject(
+							tp, abstractConceptMapping, pm, logicalTableAlias);
+					alphaPredicateObjects.add(alphaPredicateObject);
 
-				SQLLogicalTable alphaPredicateObject2 = this.calculateAlphaPredicateObject2(
-						tp, abstractConceptMapping, pm, logicalTableAlias);
-				alphaPredicateObjects2.add(alphaPredicateObject2);
+					SQLLogicalTable alphaPredicateObject2 = this.calculateAlphaPredicateObject2(
+							tp, abstractConceptMapping, pm, logicalTableAlias);
+					alphaPredicateObjects2.add(alphaPredicateObject2);
+				}
 			}
+			alphaResult = new AlphaResult(alphaSubject, alphaPredicateObjects, predicateURI);
+			alphaResult.setAlphaPredicateObjects2(alphaPredicateObjects2);
+			
+			logger.debug("calculateAlpha = " + alphaResult);			
 		}
-		AlphaResult alphaResult = new AlphaResult(alphaSubject, alphaPredicateObjects, predicateURI);
-		alphaResult.setAlphaPredicateObjects2(alphaPredicateObjects2);
-		
-		logger.debug("calculateAlpha = " + alphaResult);
-		return alphaResult;
 
+		return alphaResult;
 	}
 
 }
