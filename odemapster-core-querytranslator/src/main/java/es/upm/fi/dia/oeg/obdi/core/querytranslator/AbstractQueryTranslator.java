@@ -801,36 +801,47 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					concatSymbol = "CONCAT";
 				}
 				
-				ZExpression leftConcatOperand = new ZExpression(concatSymbol);
-				for(int i=0; i<leftExprTranslated.size(); i++ ) {
-					ZExp leftOperand = leftExprTranslated.get(i);
-					
-					if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && leftOperand instanceof ZConstant) {
-						String leftOperandValue = ((ZConstant) leftOperand).getValue();
-						SQLConstant leftOperandNew = new SQLConstant(leftOperandValue, ((ZConstant) leftOperand).getType());
-						leftOperandNew.setColumnType("text");
-						leftConcatOperand.addOperand(leftOperandNew);
-					} else {
-						leftConcatOperand.addOperand(leftOperand);	
-					}
-				}
-
-				ZExpression rightConcatOperand = new ZExpression(concatSymbol);
-				for(int i=0; i<rightExprTranslated.size(); i++ ) {
-					ZExp rightOperand = rightExprTranslated.get(i);
-					if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && rightOperand instanceof ZConstant) {
-						String rightOperandValue = ((ZConstant) rightOperand).getValue();
-						SQLConstant rightOperandNew = new SQLConstant(rightOperandValue, ((ZConstant) rightOperand).getType());
-						rightOperandNew.setColumnType("text");
-						rightConcatOperand.addOperand(rightOperandNew);
-					} else {
-						rightConcatOperand.addOperand(rightOperand);	
-					}
-				}
-
 				ZExpression resultAux = new ZExpression(functionSymbol);
-				resultAux.addOperand(leftConcatOperand);
-				resultAux.addOperand(rightConcatOperand);
+				
+				//concat only when it has multiple arguments
+				int leftExprTranslatedSize = leftExprTranslated.size();
+				if(leftExprTranslatedSize == 1) {
+					resultAux.addOperand(leftExprTranslated.get(0));
+				} else if (leftExprTranslatedSize > 1) {
+					ZExpression leftConcatOperand = new ZExpression(concatSymbol);
+					for(int i=0; i<leftExprTranslated.size(); i++ ) {
+						ZExp leftOperand = leftExprTranslated.get(i);
+						if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && leftOperand instanceof ZConstant) {
+							String leftOperandValue = ((ZConstant) leftOperand).getValue();
+							SQLConstant leftOperandNew = new SQLConstant(leftOperandValue, ((ZConstant) leftOperand).getType());
+							leftOperandNew.setColumnType("text");
+							leftConcatOperand.addOperand(leftOperandNew);
+						} else {
+							leftConcatOperand.addOperand(leftOperand);	
+						}
+					}
+					resultAux.addOperand(leftConcatOperand);					
+				}
+				
+				
+				int rightExprTranslatedSize = rightExprTranslated.size();
+				if(rightExprTranslatedSize == 1) {
+					resultAux.addOperand(rightExprTranslated.get(0));
+				} else if (rightExprTranslatedSize > 1) {
+					ZExpression rightConcatOperand = new ZExpression(concatSymbol);
+					for(int i=0; i<rightExprTranslated.size(); i++ ) {
+						ZExp rightOperand = rightExprTranslated.get(i);
+						if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && rightOperand instanceof ZConstant) {
+							String rightOperandValue = ((ZConstant) rightOperand).getValue();
+							SQLConstant rightOperandNew = new SQLConstant(rightOperandValue, ((ZConstant) rightOperand).getType());
+							rightOperandNew.setColumnType("text");
+							rightConcatOperand.addOperand(rightOperandNew);
+						} else {
+							rightConcatOperand.addOperand(rightOperand);	
+						}
+					}
+					resultAux.addOperand(rightConcatOperand);					
+				}
 				
 				result = resultAux;
 			} else {
