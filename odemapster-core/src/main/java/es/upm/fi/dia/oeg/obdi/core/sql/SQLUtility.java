@@ -129,4 +129,18 @@ public class SQLUtility {
 
 		return selectSQL;		
 	}
+	
+	public static String getValueWithoutAlias(ZSelectItem selectItem) {
+		String result;
+		
+		String selectItemAlias = selectItem.getAlias();
+		if(selectItemAlias != null && !selectItemAlias.equals("")) {
+			selectItem.setAlias("");
+			result = selectItem.toString();
+			selectItem.setAlias(selectItemAlias);
+		} else {
+			result = selectItem.toString();
+		}
+		return result;
+	}
 }

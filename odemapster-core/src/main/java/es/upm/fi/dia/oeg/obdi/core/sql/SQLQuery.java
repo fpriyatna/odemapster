@@ -213,30 +213,33 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void cleanupSelectItems() {
 		Vector<ZSelectItem> selectItems = this.getSelect();
-		Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
-		for(ZSelectItem selectItem : selectItems) {
-			String selectItemName;
-			String alias = selectItem.getAlias();
-			if(alias == null || alias.equals("")) {
-				selectItemName = selectItem.getColumn();
-			} else {
-				selectItemName = selectItem.getAlias();
-			}
+		
+		if(selectItems != null) {
+			Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
+			for(ZSelectItem selectItem : selectItems) {
+				String selectItemName;
+				String alias = selectItem.getAlias();
+				if(alias == null || alias.equals("")) {
+					selectItemName = selectItem.getColumn();
+				} else {
+					selectItemName = selectItem.getAlias();
+				}
 
-			if(selectItemName.startsWith(Constants.PREFIX_VAR)) {
-				String newSelectItemAlias = 
-						selectItemName.substring(Constants.PREFIX_VAR.length(), selectItemName.length());
-				selectItem.setAlias(newSelectItemAlias);
-				selectItems2.add(selectItem);					
-			} else if(selectItemName.startsWith(Constants.PREFIX_LIT)) {
-				//do nothing
-			} else if(selectItemName.startsWith(Constants.PREFIX_URI)) {
-				//do nothing
-			} else {
-				selectItems2.add(selectItem);
+				if(selectItemName.startsWith(Constants.PREFIX_VAR)) {
+					String newSelectItemAlias = 
+							selectItemName.substring(Constants.PREFIX_VAR.length(), selectItemName.length());
+					selectItem.setAlias(newSelectItemAlias);
+					selectItems2.add(selectItem);					
+				} else if(selectItemName.startsWith(Constants.PREFIX_LIT)) {
+					//do nothing
+				} else if(selectItemName.startsWith(Constants.PREFIX_URI)) {
+					//do nothing
+				} else {
+					selectItems2.add(selectItem);
+				}
 			}
+			this.setSelectItems(selectItems2);			
 		}
-		this.setSelectItems(selectItems2);
 	}
 
 
@@ -546,9 +549,14 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public ArrayList<String> getSelectItemAliases() {
 		ArrayList<String> result = new ArrayList<String>();
-		for(ZSelectItem selectItem : this.getSelect()) {
-			result.add(selectItem.getAlias());
+		
+		Collection<ZSelectItem> selectItems = this.getSelect();
+		if(selectItems != null) {
+			for(ZSelectItem selectItem : selectItems) {
+				result.add(selectItem.getAlias());
+			}			
 		}
+
 		return result;
 	}
 

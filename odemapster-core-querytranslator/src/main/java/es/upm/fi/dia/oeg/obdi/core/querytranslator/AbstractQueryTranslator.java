@@ -344,6 +344,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			throw new QueryTranslationException("Unsupported query!");
 		}
 
+		result.setDatabaseType(databaseType);
 		return result;
 	}
 
@@ -378,18 +379,18 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	protected IQuery trans(OpDistinct opDistinct) throws Exception {
 		Op opDistinctSubOp = opDistinct.getSubOp(); 
-		IQuery sqlQuery = this.trans(opDistinctSubOp);
-		if(sqlQuery instanceof SQLQuery) {
-			((SQLQuery)sqlQuery).setDistinct(true);	
+		IQuery opDistinctSubOpSQL = this.trans(opDistinctSubOp);
+		if(opDistinctSubOpSQL instanceof SQLQuery) {
+			((SQLQuery)opDistinctSubOpSQL).setDistinct(true);	
 		}
-		return sqlQuery;
+		return opDistinctSubOpSQL;
 	}
 
 	protected IQuery trans(OpFilter opFilter) throws Exception {
 		Op opFilterSubOp = opFilter.getSubOp();
 		IQuery subOpSQL = this.trans(opFilterSubOp);
+		
 		Collection<ZSelectItem> subOpSelectItems = subOpSQL.getSelectItems(); 
-		subOpSQL.setDatabaseType(this.databaseType);
 		String transGPSQLAlias = subOpSQL.generateAlias();
 
 		ExprList exprList = opFilter.getExprs();
@@ -415,9 +416,16 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			subOpSQL.pushFilterDown(newWhere);
 			result = subOpSQL;
 		} else {
-			ZSelectItem newSelectItem = new ZSelectItem("*");
+			Collection<ZSelectItem> oldSelectItems = subOpSQL.getSelectItems();
 			Collection<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
-			newSelectItems.add(newSelectItem);
+			for(ZSelectItem oldSelectItem : oldSelectItems) {
+				String oldSelectItemAlias = oldSelectItem.getAlias();
+				ZSelectItem newSelectItem = new ZSelectItem(transGPSQLAlias + "." + oldSelectItemAlias);
+				newSelectItem.setAlias(oldSelectItemAlias);
+				newSelectItems.add(newSelectItem);
+			}
+//			ZSelectItem newSelectItem = new ZSelectItem("*");
+//			newSelectItems.add(newSelectItem);
 			SQLQuery resultAux = new SQLQuery(subOpSQL);
 			resultAux.setSelectItems(newSelectItems);
 			resultAux.addWhere(newWhere);
@@ -446,8 +454,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	protected IQuery trans(OpOrder opOrder) throws Exception {
 		Op opOrderSubOp = opOrder.getSubOp();
-		IQuery transOpOrderSubOp = this.trans(opOrderSubOp);
-		transOpOrderSubOp.setDatabaseType(databaseType);
+		IQuery opOrderSubOpSQL = this.trans(opOrderSubOp);
 
 		Vector<ZOrderBy> orderByConditions = new Vector<ZOrderBy>();
 		for(SortCondition sortCondition : opOrder.getConditions()) {
@@ -474,11 +481,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		IQuery transOpOrder; 
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
 			//result = transOrderBy.eliminateSubQuery(null, null, orderByConditions,this.databaseType);
-			transOpOrderSubOp.pushOrderByDown(orderByConditions);
-			transOpOrder = transOpOrderSubOp;
+			opOrderSubOpSQL.pushOrderByDown(orderByConditions);
+			transOpOrder = opOrderSubOpSQL;
 		} else {
-			transOpOrderSubOp.setOrderBy(orderByConditions);
-			transOpOrder = transOpOrderSubOp;
+			opOrderSubOpSQL.setOrderBy(orderByConditions);
+			transOpOrder = opOrderSubOpSQL;
 		}
 
 		String transOpOrderString = transOpOrder.toString();
