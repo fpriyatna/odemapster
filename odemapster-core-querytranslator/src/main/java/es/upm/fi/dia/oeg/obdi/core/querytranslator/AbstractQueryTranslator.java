@@ -76,6 +76,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUnion;
+import es.upm.fi.oeg.obdi.core.utility.SPARQLUtility;
 import es.upm.fi.oeg.obdi.core.utility.SQLConstant;
 
 public abstract class AbstractQueryTranslator implements IQueryTranslator {
@@ -95,7 +96,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private ConfigurationProperties configurationProperties;
 	protected String databaseType = Constants.DATABASE_MYSQL;
 	private Map<String, String> functionsMap = new HashMap<String, String>();
-
+	Collection<String> notNullColumns = new Vector<String>();
+	
 	//chebotko functions
 	private AbstractAlphaGenerator alphaGenerator;
 	private AbstractBetaGenerator betaGenerator;
@@ -1012,8 +1014,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 
 			//.... JOIN ... ON <joinOnExpression>
+			SPARQLUtility sparqlUtility = new SPARQLUtility();
 			Collection<ZExpression> joinOnExps = new HashSet<ZExpression>();
 			for(Node termC : termsC) {
+				boolean isTermCInSubjectGP1 = sparqlUtility.isNodeInSubjectGraph(termC, gp1);
+				boolean isTermCInSubjectGP2 = sparqlUtility.isNodeInSubjectGraph(termC, gp2);
+				
 				if(termC.isVariable()) {
 					List<String> termCColumns1 = this.getColumnsByNode(termC, gp1SelectItems);
 					List<String> termCColumns2 = this.getColumnsByNode(termC, gp2SelectItems);
@@ -1022,33 +1028,48 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 						Iterator<String> termCColumns1Iterator = termCColumns1.iterator();
 						Iterator<String> termCColumns2Iterator = termCColumns2.iterator();
 
-						Collection<ZExp> exps1Aux = new Vector<ZExp>();
-						Collection<ZExp> exps2Aux = new Vector<ZExp>();
-						Collection<ZExp> exps3Aux = new Vector<ZExp>();
+						Collection<ZExpression> exps1Aux = new Vector<ZExpression>();
+						Collection<ZExpression> exps2Aux = new Vector<ZExpression>();
+						Collection<ZExpression> exps3Aux = new Vector<ZExpression>();
 						while(termCColumns1Iterator.hasNext()) {
 							String termCColumn1 = termCColumns1Iterator.next();
 							String termCColumn2 = termCColumns2Iterator.next();
 							ZConstant gp1TermC = new ZConstant(transGP1Alias + "." + termCColumn1, ZConstant.UNKNOWN);
 							ZConstant gp2TermC = new ZConstant(transGP2Alias + "." + termCColumn2, ZConstant.UNKNOWN);
 
-							ZExp exp1Aux = new ZExpression("=", gp1TermC, gp2TermC);
+							ZExpression exp1Aux = new ZExpression("=", gp1TermC, gp2TermC);
 							exps1Aux.add(exp1Aux);
 
-							ZExp exp2Aux = new ZExpression("IS NULL", gp1TermC);
-							exps2Aux.add(exp2Aux);
-
-							ZExp exp3Aux = new ZExpression("IS NULL", gp2TermC);
-							exps3Aux.add(exp3Aux);
+							if(!isTermCInSubjectGP1 && !(gp1 instanceof OpBGP)) {
+								ZExpression exp2Aux = new ZExpression("IS NULL", gp1TermC);
+								exps2Aux.add(exp2Aux);
+							}
+							
+							if(!isTermCInSubjectGP2 && !(gp2 instanceof OpBGP)) {
+								ZExpression exp3Aux = new ZExpression("IS NULL", gp2TermC);
+								exps3Aux.add(exp3Aux);								
+							}
 						}
-						ZExp exp1 = SQLUtility.combineExpresions(exps1Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-						ZExp exp2 = SQLUtility.combineExpresions(exps2Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-						ZExp exp3 = SQLUtility.combineExpresions(exps3Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+						ZExpression exp1 = SQLUtility.combineExpresions(exps1Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+						ZExpression exp2 = SQLUtility.combineExpresions(exps2Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+						ZExpression exp3 = SQLUtility.combineExpresions(exps3Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
 
-						ZExpression exp123 = new ZExpression("OR");
-						exp123.addOperand(exp1);
-						exp123.addOperand(exp2);
-						exp123.addOperand(exp3);
-						joinOnExps.add(exp123);
+						if(exps2Aux.isEmpty() && exps2Aux.isEmpty()) {
+							joinOnExps.add(exp1);
+						} else {
+							ZExpression exp123 = new ZExpression("OR");
+							exp123.addOperand(exp1);
+							
+							if(!isTermCInSubjectGP1) {
+								exp123.addOperand(exp2);	
+							}
+							
+							if(!isTermCInSubjectGP2) {
+								exp123.addOperand(exp3);	
+							}
+							
+							joinOnExps.add(exp123);							
+						}
 					}						
 				}
 			}				
