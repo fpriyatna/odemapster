@@ -469,8 +469,7 @@ public class NodeTypeInferrer {
 				if(tpPredicate.isURI()) {
 					String predicateURI = tpPredicate.getURI();
 					if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-						Set<AbstractConceptMapping> nodeTypes = 
-								this.mappingDocument.getPossibleRange(predicateURI);
+						Set<AbstractConceptMapping> nodeTypes = this.mappingDocument.getPossibleRange(predicateURI);
 						//this.addToInferredTypes(mapNodeTypes, tp.getObject(), nodeTypes);
 						
 						if(nodeTypes != null && nodeTypes.size() > 0) {
