@@ -1078,11 +1078,6 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps, Constants.SQL_LOGICAL_OPERATOR_AND);
 
-			SQLJoinTable table1 = new SQLJoinTable(transGP1SQL, null, null);
-			table1.setAlias(transGP1Alias);
-			SQLJoinTable table2 = new SQLJoinTable(transGP2SQL, joinType, joinOnExpression);
-			table2.setAlias(transGP2Alias);
-
 			IQuery transJoin = null;
 			if(this.optimizer != null) {
 				boolean isTransJoinSubQueryElimination = this.optimizer.isTransJoinSubQueryElimination();
@@ -1090,10 +1085,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					try {
 						if(Constants.JOINS_TYPE_INNER.equals(joinType ) &&   //INNER join
 								transGP1SQL instanceof SQLQuery && transGP2SQL instanceof SQLQuery) {
-							Collection<SQLLogicalTable> transGPs = new Vector<SQLLogicalTable>();
-							transGPs.add(transGP1SQL);
-							transGPs.add(transGP2SQL);
-							transJoin = SQLQuery.create(selectItems, transGPs, joinOnExpression, this.databaseType);
+//							Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+//							logicalTables.add(transGP1SQL);
+//							logicalTables.add(transGP2SQL);
+							transJoin = SQLQuery.create(selectItems, transGP1SQL, transGP2SQL, joinType, joinOnExpression, this.databaseType);
 						}					
 					} catch(Exception e) {
 						String errorMessage = "error while eliminating subquery in transjoin.";
@@ -1104,6 +1099,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 
 			if(transJoin == null) { //subquery not eliminated
+				SQLJoinTable table1 = new SQLJoinTable(transGP1SQL, null, null);
+				table1.setAlias(transGP1Alias);
+				SQLJoinTable table2 = new SQLJoinTable(transGP2SQL, joinType, joinOnExpression);
+				table2.setAlias(transGP2Alias);
+				
 				SQLQuery transJoinAux = new SQLQuery();
 				transJoinAux.setSelectItems(selectItems);
 				transJoinAux.addFromItem(table1);
