@@ -26,6 +26,7 @@ import Zql.ZUtils;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.oeg.obdi.core.utility.SQLUtility2;
 
 public class SQLQuery extends ZQuery implements IQuery {
@@ -77,7 +78,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		if(zQuery.getFrom() != null) { this.addFrom(zQuery.getFrom());}
 		if(zQuery.getWhere() != null) { this.addWhere(zQuery.getWhere());}
 		if(zQuery.getGroupBy() != null) {this.addGroupBy(zQuery.getGroupBy());}
-		
+
 	}
 
 	public void addLogicalTable(SQLLogicalTable logicalTable) {
@@ -124,7 +125,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 			this.addSelect(selectItem);
 		}
 	}
-	
+
 	public void addSelect(ZSelectItem newSelectItem) {
 		Vector<ZSelectItem> selectItems = this.getSelect();
 		if(selectItems == null) {
@@ -215,7 +216,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void cleanupSelectItems() {
 		Vector<ZSelectItem> selectItems = this.getSelect();
-		
+
 		if(selectItems != null) {
 			Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
 			for(ZSelectItem selectItem : selectItems) {
@@ -263,7 +264,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 				result = this;
 			} else {
 				if(this.hasSubquery()) {
-					
+
 					SQLUtility2 sqlUtility2 = new SQLUtility2();
 
 					Map<ZSelectItem, ZSelectItem> mapSelectItems = this.buildMapSelectItemOrigin();
@@ -309,7 +310,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 										}
 
 									} else {
-										
+
 									}
 
 								}
@@ -551,7 +552,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public ArrayList<String> getSelectItemAliases() {
 		ArrayList<String> result = new ArrayList<String>();
-		
+
 		Collection<ZSelectItem> selectItems = this.getSelect();
 		if(selectItems != null) {
 			for(ZSelectItem selectItem : selectItems) {
@@ -651,7 +652,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 					if(i > 0) {
 						separator = ", ";	
 					}
-					
+
 					String fromItemString = "";
 					if(mainQueryFromItem.getSchema() != null) {
 						fromItemString += mainQueryFromItem.getSchema() + ".";
@@ -668,7 +669,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 					if(mainQueryFromItemAlias != null && mainQueryFromItemAlias.length() > 0) {
 						fromItemString += " " + mainQueryFromItem.getAlias();
 					}
-					
+
 					fromSQL += separator + fromItemString;
 				}
 				i++;
@@ -749,7 +750,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 		//print select
 		String selectSQL = SQLUtility.printSelectItems(this.getSelectItems(), this.getDistinct());
-		
+
 		result += selectSQL + "\n";
 
 		//print from
@@ -927,7 +928,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public boolean hasSubquery() {
 		boolean subqueryFound = false;
-		
+
 		Vector<ZFromItem> fromItems = this.getFrom();
 		for(ZFromItem fromItem : fromItems) {
 			if(!subqueryFound) {
@@ -944,14 +945,14 @@ public class SQLQuery extends ZQuery implements IQuery {
 				}				
 			}
 		}
-		
+
 		return subqueryFound;
 	}
-	
+
 	public Map<String, ZSelectItem> buildMapAliasSelectItem() {
 		return this.buildMapAliasSelectItemAux(this.alias);
 	}
-	
+
 	public Map<String, ZSelectItem> buildMapAliasSelectItemAux(String prefix) {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = new LinkedHashMap<String, ZSelectItem>();
 		Collection<ZSelectItem> innerSelectItems = this.getSelectItems();
@@ -964,9 +965,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 			mapInnerAliasSelectItem.put(innerSelectItemAlias.trim(), innerSelectItem);
 		}
 		return mapInnerAliasSelectItem;
-		
+
 	}
-	
+
 	void pushProjectionsDown(Collection<ZSelectItem> pushedProjections
 			, Map<String, ZSelectItem> mapInnerAliasSelectItem) {
 		//Map<String, ZSelectItem> mapInnerAliasSelectItem = this.getMapAliasSelectItem();
@@ -984,7 +985,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 				if(outerSelectItemAlias != null) {
 					outerSelectItem.setAlias(outerSelectItemAlias);
 				}
-				
+
 				ZSelectItem replacementSelectItem;
 				ZSelectItem innerSelectItem = mapInnerAliasSelectItem.get(outerSelectItemString);
 				if(innerSelectItem != null) {
@@ -1001,16 +1002,16 @@ public class SQLQuery extends ZQuery implements IQuery {
 			}
 		}
 
-	
+
 		Collection<ZSelectItem> newSelectItems = selectItemsReplacement.values();
 		this.setSelectItems(newSelectItems);
-		
+
 	}
 
-	void pushFilterDown(ZExpression pushedFilter
+	ZExp pushFilterDown(ZExpression pushedFilter
 			, Map<String, ZSelectItem> mapInnerAliasSelectItem) {
 		//Map<String, ZSelectItem> mapInnerAliasSelectItem = this.getMapAliasSelectItem();
-		
+
 		Map<ZConstant, ZConstant> whereReplacement = new LinkedHashMap<ZConstant, ZConstant>();
 		for(String alias : mapInnerAliasSelectItem.keySet()) {
 			ZConstant aliasColumn = new ZConstant(alias, ZConstant.COLUMNNAME);
@@ -1032,11 +1033,12 @@ public class SQLQuery extends ZQuery implements IQuery {
 			}
 			whereReplacement.put(aliasColumn, zConstant);
 		}
-		
+
 		SQLUtility2 sqlUtility2 = new SQLUtility2();
 		ZExp newFilter = sqlUtility2.replaceExp(pushedFilter, whereReplacement);
-		this.addWhere(newFilter);
-		
+		return newFilter;
+		//this.addWhere(newFilter);
+
 	}
 
 	public boolean getDistinct() {
@@ -1046,79 +1048,121 @@ public class SQLQuery extends ZQuery implements IQuery {
 	public static SQLQuery create(Collection<ZSelectItem> selectItems
 			, SQLLogicalTable leftTable, SQLLogicalTable rightTable 
 			, String joinType, ZExpression whereExpression, String databasetype) {
-		
-		SQLQuery result;
-		
-		if(Constants.JOINS_TYPE_INNER.equals(joinType)) {
+
+		SQLQuery result = null;
+		boolean proceed = true;
+		if(Constants.JOINS_TYPE_LEFT.equals(joinType) && rightTable instanceof SQLQuery) {
+			SQLQuery rightTableSQLQuery = (SQLQuery) rightTable;
+			Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
+			if(rightTableFromItems.size() != 1) {
+				String errorMessage = "Subquery elimination for left outer join can deal with 1 right table only!";
+				logger.warn(errorMessage);
+				proceed = false;
+			}
+		}
+
+		if(proceed) {
 			result = new SQLQuery();
 			result.setDatabaseType(databasetype);
-			
+
 			Map<String, ZSelectItem> mapAliasSelectItems = 
 					new LinkedHashMap<String, ZSelectItem>();
 
-				if(leftTable instanceof SQLQuery) {
-					SQLQuery logicalTableSQLQuery = (SQLQuery) leftTable;
-					Vector<ZFromItem> logicalTableFromItems = logicalTableSQLQuery.getFrom();
-					for(ZFromItem fromItem : logicalTableFromItems) {
-						String fromItemAlias = fromItem.getAlias();
-						if(fromItemAlias == null || fromItemAlias.equals("")) {
-							String logicalTableAlias = leftTable.getAlias();
-							if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
-								fromItem.setAlias(logicalTableAlias);	
-							}
+			if(leftTable instanceof SQLQuery) {
+				SQLQuery leftTableSQLQuery = (SQLQuery) leftTable;
+				Vector<ZFromItem> leftTableFromItems = leftTableSQLQuery.getFrom();
+				for(ZFromItem leftTableFromItem : leftTableFromItems) {
+					String fromItemAlias = leftTableFromItem.getAlias();
+					if(fromItemAlias == null || fromItemAlias.equals("")) {
+						String logicalTableAlias = leftTable.getAlias();
+						if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
+							leftTableFromItem.setAlias(logicalTableAlias);	
 						}
-						result.addFromItem(fromItem);	
 					}
-					
-					result.addWhere(logicalTableSQLQuery.getWhere());
-					Collection<ZSelectItem> selectItemsLeft = logicalTableSQLQuery.getSelectItems();
-					result.addSelects(selectItemsLeft);
-					Map<String, ZSelectItem> mapAliasSelectItemsLeft = logicalTableSQLQuery.buildMapAliasSelectItem();
-					mapAliasSelectItems.putAll(mapAliasSelectItemsLeft);
-				} else if(leftTable instanceof SQLFromItem) {
-					SQLFromItem leftTableFromItem = (SQLFromItem) leftTable; 
-					result.addFromItem(leftTableFromItem);
+					result.addFromItem(leftTableFromItem);	
 				}
 
-				if(rightTable instanceof SQLQuery) {
-					SQLQuery logicalTableSQLQuery = (SQLQuery) rightTable;
-					Vector<ZFromItem> logicalTableFromItems = logicalTableSQLQuery.getFrom();
-					for(ZFromItem fromItem : logicalTableFromItems) {
-						String fromItemAlias = fromItem.getAlias();
+				result.addWhere(leftTableSQLQuery.getWhere());
+				Collection<ZSelectItem> leftTableSelectItems = leftTableSQLQuery.getSelectItems();
+				result.addSelects(leftTableSelectItems);
+				Map<String, ZSelectItem> mapAliasSelectItemsLeft = leftTableSQLQuery.buildMapAliasSelectItem();
+				mapAliasSelectItems.putAll(mapAliasSelectItemsLeft);
+			} else if(leftTable instanceof SQLFromItem) {
+				SQLFromItem leftTableFromItem = (SQLFromItem) leftTable; 
+				result.addFromItem(leftTableFromItem);
+			}
+
+			if(rightTable instanceof SQLQuery) {
+				SQLQuery rightTableSQLQuery = (SQLQuery) rightTable;
+				String logicalTableAlias = rightTable.getAlias();
+				SQLJoinTable joinTable = null;
+				Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
+
+				if(Constants.JOINS_TYPE_INNER.equals(joinType)) {
+					for(ZFromItem rightTableFromItem : rightTableFromItems) {
+						String fromItemAlias = rightTableFromItem.getAlias();
 						if(fromItemAlias == null || fromItemAlias.equals("")) {
-							String logicalTableAlias = rightTable.getAlias();
 							if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
-								fromItem.setAlias(logicalTableAlias);	
+								rightTableFromItem.setAlias(logicalTableAlias);	
 							}
 						}
-						result.addFromItem(fromItem);	
+						result.addFromItem(rightTableFromItem);	
 					}
+
 					
-					result.addWhere(logicalTableSQLQuery.getWhere());
-					Collection<ZSelectItem> selectItemsLeft = logicalTableSQLQuery.getSelectItems();
-					result.addSelects(selectItemsLeft);
-					Map<String, ZSelectItem> mapAliasSelectItemsLeft = logicalTableSQLQuery.buildMapAliasSelectItem();
-					mapAliasSelectItems.putAll(mapAliasSelectItemsLeft);
-				} else if(rightTable instanceof SQLFromItem) {
-					SQLFromItem leftTableFromItem = (SQLFromItem) rightTable; 
-					result.addFromItem(leftTableFromItem);
+				} else if(Constants.JOINS_TYPE_LEFT.equals(joinType)) {
+					if(rightTableFromItems.size() == 1) {
+						ZFromItem rightTableFromItem = rightTableFromItems.get(0);
+						String rightTableName = rightTableFromItem.getTable();
+						SQLLogicalTable rightTableLogicalTable = new SQLFromItem(rightTableName, LogicalTableType.TABLE_NAME);
+						joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, null);
+						String fromItemAlias = rightTableFromItem.getAlias();
+						if(fromItemAlias == null || fromItemAlias.equals("")) {
+							if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
+								rightTableLogicalTable.setAlias(logicalTableAlias);	
+							}
+						} else {
+							rightTableLogicalTable.setAlias(fromItemAlias);
+						}
+						result.addFromItem(joinTable);	
+					} else {
+						String errorMessage = "Subquery elimination for left outer join can handle 1 right table only!";
+						logger.error(errorMessage);
+					}
+				} else {
+					String errorMessage = "Undefined join type!";
+					logger.error(errorMessage);
 				}
-			
-			result.pushProjectionsDown(selectItems, mapAliasSelectItems);
-			result.pushFilterDown(whereExpression, mapAliasSelectItems);
-		} else {
-			result = null;
+
+
+				result.addWhere(rightTableSQLQuery.getWhere());
+				Collection<ZSelectItem> rightTableSelectItems = rightTableSQLQuery.getSelectItems();
+				result.addSelects(rightTableSelectItems);
+				Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTableSQLQuery.buildMapAliasSelectItem();
+				mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
+				
+				ZExpression newFilter = (ZExpression) result.pushFilterDown(whereExpression, mapAliasSelectItems);
+				if(Constants.JOINS_TYPE_INNER.equals(joinType)) {
+					result.addWhere(newFilter);
+				} else if(Constants.JOINS_TYPE_LEFT.equals(joinType)) {
+					joinTable.setOnExpression(newFilter);
+				}
+				result.pushProjectionsDown(selectItems, mapAliasSelectItems);
+			} else if(rightTable instanceof SQLFromItem) {
+				SQLFromItem leftTableFromItem = (SQLFromItem) rightTable; 
+				result.addFromItem(leftTableFromItem);
+			}
 		}
-		
+
 		return result;
 	}
-	
+
 	public static SQLQuery create(Collection<ZSelectItem> selectItems
 			, Collection<? extends SQLLogicalTable> sqlLogicalTables
 			, ZExpression whereExpression, String databasetype) {
 		SQLQuery result = new SQLQuery();
 		result.setDatabaseType(databasetype);
-		
+
 		Map<String, ZSelectItem> mapAliasSelectItems = 
 				new LinkedHashMap<String, ZSelectItem>();
 
@@ -1136,7 +1180,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 					}
 					result.addFromItem(fromItem);	
 				}
-				
+
 				result.addWhere(logicalTableSQLQuery.getWhere());
 				Collection<ZSelectItem> selectItemsLeft = logicalTableSQLQuery.getSelectItems();
 				result.addSelects(selectItemsLeft);
@@ -1147,40 +1191,41 @@ public class SQLQuery extends ZQuery implements IQuery {
 				result.addFromItem(leftTableFromItem);
 			}
 		}
-		
+
 		result.pushProjectionsDown(selectItems, mapAliasSelectItems);
-		result.pushFilterDown(whereExpression, mapAliasSelectItems);
+		ZExp newExpression = result.pushFilterDown(whereExpression, mapAliasSelectItems);
+		result.addWhere(newExpression);
 		return result;
 	}
-	
-//	public static SQLQuery createAux(Collection<ZSelectItem> selectItems
-//			, SQLQuery leftTable, SQLQuery rightTable, ZExpression onExpression) {
-//		SQLQuery result = new SQLQuery();
-//		
-//		Vector<ZFromItem> fromItemsLeft = leftTable.getFrom();
-//		result.addFromItems(fromItemsLeft);
-//		Vector<ZFromItem> fromItemsRight = rightTable.getFrom();
-//		result.addFromItems(fromItemsRight);
-//
-//		result.addWhere(leftTable.getWhere());
-//		result.addWhere(rightTable.getWhere());
-//		
-//		Collection<ZSelectItem> selectItemsLeft = leftTable.getSelectItems();
-//		result.addSelects(selectItemsLeft);
-//		Collection<ZSelectItem> selectItemsRight = rightTable.getSelectItems();
-//		result.addSelects(selectItemsRight);
-//		
-//		Map<String, ZSelectItem> mapAliasSelectItemsLeft = leftTable.buildMapAliasSelectItem();
-//		Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTable.buildMapAliasSelectItem();
-//		Map<String, ZSelectItem> mapAliasSelectItems = 
-//				new LinkedHashMap<String, ZSelectItem>(mapAliasSelectItemsLeft);
-//		mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
-//		result.pushProjectionsDown(selectItems, mapAliasSelectItems);
-//		
-//		result.pushFilterDown(onExpression, mapAliasSelectItems);
-//		
-//		return result;
-//	}
+
+	//	public static SQLQuery createAux(Collection<ZSelectItem> selectItems
+	//			, SQLQuery leftTable, SQLQuery rightTable, ZExpression onExpression) {
+	//		SQLQuery result = new SQLQuery();
+	//		
+	//		Vector<ZFromItem> fromItemsLeft = leftTable.getFrom();
+	//		result.addFromItems(fromItemsLeft);
+	//		Vector<ZFromItem> fromItemsRight = rightTable.getFrom();
+	//		result.addFromItems(fromItemsRight);
+	//
+	//		result.addWhere(leftTable.getWhere());
+	//		result.addWhere(rightTable.getWhere());
+	//		
+	//		Collection<ZSelectItem> selectItemsLeft = leftTable.getSelectItems();
+	//		result.addSelects(selectItemsLeft);
+	//		Collection<ZSelectItem> selectItemsRight = rightTable.getSelectItems();
+	//		result.addSelects(selectItemsRight);
+	//		
+	//		Map<String, ZSelectItem> mapAliasSelectItemsLeft = leftTable.buildMapAliasSelectItem();
+	//		Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTable.buildMapAliasSelectItem();
+	//		Map<String, ZSelectItem> mapAliasSelectItems = 
+	//				new LinkedHashMap<String, ZSelectItem>(mapAliasSelectItemsLeft);
+	//		mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
+	//		result.pushProjectionsDown(selectItems, mapAliasSelectItems);
+	//		
+	//		result.pushFilterDown(onExpression, mapAliasSelectItems);
+	//		
+	//		return result;
+	//	}
 
 	void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection,
 			Map<String, ZSelectItem> mapInnerAliasSelectItem) {
@@ -1205,7 +1250,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 			}
 			whereReplacement.put(aliasColumn, zConstant);
 		}
-		
+
 		SQLUtility2 sqlUtility2 = new SQLUtility2();
 		Vector<ZOrderBy> newOrderByCollection = new Vector<ZOrderBy>();
 		for(ZOrderBy oldOrderBy : pushedOrderByCollection) {
@@ -1216,9 +1261,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 			newOrderByCollection.add(newOrderBy);
 		}
 		this.setOrderBy(newOrderByCollection);
-		
-		
-		
+
+
+
 	}
 
 	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
@@ -1228,8 +1273,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void pushFilterDown(ZExpression pushedFilter) {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
-		this.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
-		
+		ZExp newFilter = this.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
+		this.addWhere(newFilter);
+
 	}
 
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {

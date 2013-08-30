@@ -1083,8 +1083,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				boolean isTransJoinSubQueryElimination = this.optimizer.isTransJoinSubQueryElimination();
 				if(isTransJoinSubQueryElimination) {
 					try {
-						if(Constants.JOINS_TYPE_INNER.equals(joinType ) &&   //INNER join
-								transGP1SQL instanceof SQLQuery && transGP2SQL instanceof SQLQuery) {
+						if(transGP1SQL instanceof SQLQuery && transGP2SQL instanceof SQLQuery) {
 //							Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
 //							logicalTables.add(transGP1SQL);
 //							logicalTables.add(transGP2SQL);

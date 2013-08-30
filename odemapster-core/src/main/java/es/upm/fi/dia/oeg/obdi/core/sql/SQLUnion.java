@@ -284,7 +284,8 @@ public class SQLUnion implements IQuery {
 			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
 					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
 			
-			sqlQuery.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
+			ZExp newExpression = sqlQuery.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
+			sqlQuery.addWhere(newExpression);
 		}
 	}
 
