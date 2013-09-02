@@ -1090,7 +1090,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 							transJoin = SQLQuery.create(selectItems, transGP1SQL, transGP2SQL, joinType, joinOnExpression, this.databaseType);
 						}					
 					} catch(Exception e) {
-						String errorMessage = "error while eliminating subquery in transjoin.";
+						String errorMessage = "error while eliminating subquery in transjoin: " + e.getMessage();
 						logger.error(errorMessage);
 						transJoin = null;
 					}					

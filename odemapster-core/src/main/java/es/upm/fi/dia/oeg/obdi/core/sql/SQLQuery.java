@@ -1047,7 +1047,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public static SQLQuery create(Collection<ZSelectItem> selectItems
 			, SQLLogicalTable leftTable, SQLLogicalTable rightTable 
-			, String joinType, ZExpression whereExpression, String databasetype) {
+			, String joinType, ZExpression oldJoinExpression, String databasetype) {
 
 		SQLQuery result = null;
 		boolean proceed = true;
@@ -1094,59 +1094,41 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 			if(rightTable instanceof SQLQuery) {
 				SQLQuery rightTableSQLQuery = (SQLQuery) rightTable;
+				Collection<ZSelectItem> rightTableSelectItems = rightTableSQLQuery.getSelectItems();
+				Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTableSQLQuery.buildMapAliasSelectItem();
+				mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
+				ZExpression newJoinExpression = (ZExpression) result.pushFilterDown(oldJoinExpression, mapAliasSelectItems);
+
 				String logicalTableAlias = rightTable.getAlias();
 				SQLJoinTable joinTable = null;
 				Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
 
-				if(Constants.JOINS_TYPE_INNER.equals(joinType)) {
-					for(ZFromItem rightTableFromItem : rightTableFromItems) {
-						String fromItemAlias = rightTableFromItem.getAlias();
-						if(fromItemAlias == null || fromItemAlias.equals("")) {
-							if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
-								rightTableFromItem.setAlias(logicalTableAlias);	
+				for(ZFromItem rightTableFromItem : rightTableFromItems) {
+					if(rightTableFromItem instanceof SQLFromItem) {
+						LogicalTableType tableType = ((SQLFromItem) rightTableFromItem).getForm();
+						if(tableType == LogicalTableType.TABLE_NAME) {
+							String rightTableName = rightTableFromItem.getTable();
+							SQLLogicalTable rightTableLogicalTable = new SQLFromItem(rightTableName, LogicalTableType.TABLE_NAME);
+							joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, Constants.SQL_EXPRESSION_TRUE);
+							String fromItemAlias = rightTableFromItem.getAlias();
+							if(fromItemAlias == null || fromItemAlias.equals("")) {
+								if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
+									rightTableLogicalTable.setAlias(logicalTableAlias);	
+								}
+							} else {
+								rightTableLogicalTable.setAlias(fromItemAlias);
 							}
 						}
-						result.addFromItem(rightTableFromItem);	
+					} else if(rightTableFromItem instanceof SQLJoinTable) {
+						joinTable = (SQLJoinTable) rightTableFromItem;
 					}
 
-					
-				} else if(Constants.JOINS_TYPE_LEFT.equals(joinType)) {
-					if(rightTableFromItems.size() == 1) {
-						ZFromItem rightTableFromItem = rightTableFromItems.get(0);
-						String rightTableName = rightTableFromItem.getTable();
-						SQLLogicalTable rightTableLogicalTable = new SQLFromItem(rightTableName, LogicalTableType.TABLE_NAME);
-						joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, null);
-						String fromItemAlias = rightTableFromItem.getAlias();
-						if(fromItemAlias == null || fromItemAlias.equals("")) {
-							if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
-								rightTableLogicalTable.setAlias(logicalTableAlias);	
-							}
-						} else {
-							rightTableLogicalTable.setAlias(fromItemAlias);
-						}
-						result.addFromItem(joinTable);	
-					} else {
-						String errorMessage = "Subquery elimination for left outer join can handle 1 right table only!";
-						logger.error(errorMessage);
-					}
-				} else {
-					String errorMessage = "Undefined join type!";
-					logger.error(errorMessage);
+					result.addFromItem(joinTable);						
 				}
 
-
+				result.addWhere(newJoinExpression);
 				result.addWhere(rightTableSQLQuery.getWhere());
-				Collection<ZSelectItem> rightTableSelectItems = rightTableSQLQuery.getSelectItems();
 				result.addSelects(rightTableSelectItems);
-				Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTableSQLQuery.buildMapAliasSelectItem();
-				mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
-				
-				ZExpression newFilter = (ZExpression) result.pushFilterDown(whereExpression, mapAliasSelectItems);
-				if(Constants.JOINS_TYPE_INNER.equals(joinType)) {
-					result.addWhere(newFilter);
-				} else if(Constants.JOINS_TYPE_LEFT.equals(joinType)) {
-					joinTable.setOnExpression(newFilter);
-				}
 				result.pushProjectionsDown(selectItems, mapAliasSelectItems);
 			} else if(rightTable instanceof SQLFromItem) {
 				SQLFromItem leftTableFromItem = (SQLFromItem) rightTable; 
