@@ -35,17 +35,28 @@ public class TableMetaData {
 			try {
 				java.sql.Statement stmt = conn.createStatement();
 				
+				String query = null;
+				String tableNameColumn = null;
+				String tableRowsColumn = null;
 				if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
-					String query = "SELECT * FROM information_schema.tables WHERE TABLE_SCHEMA = '" + databaseName + "'";
+					query = "SELECT * FROM information_schema.tables WHERE TABLE_SCHEMA = '" + databaseName + "'";
+					tableNameColumn = "TABLE_NAME";
+					tableRowsColumn = "TABLE_ROWS";
+				} else if(databaseType.equalsIgnoreCase(Constants.DATABASE_POSTGRESQL)) {
+					query = "SELECT * FROM pg_stat_user_tables ";
+					tableNameColumn = "relname";
+					tableRowsColumn = "seq_tup_read";					
+				}
+
+				if(query != null) {
 					ResultSet rs = stmt.executeQuery(query);
 					while(rs.next()) {
-						String tableName = rs.getString("TABLE_NAME");
-						long tableRows = rs.getLong("TABLE_ROWS");
+						String tableName = rs.getString(tableNameColumn);
+						long tableRows = rs.getLong(tableRowsColumn);
 						TableMetaData tableMetaData = new TableMetaData(tableName, tableRows);
 						result.put(tableMetaData.tableName, tableMetaData);
 					}					
 				}
-
 			} catch(Exception e) {
 				logger.error("Error while getting table meta data");
 			}

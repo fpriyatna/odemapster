@@ -53,10 +53,12 @@ implements R2RMLElement, IConceptMapping {
 						logicalTableStatementObjectResource, this);
 				try {
 					this.logicalTable.buildMetaData(
-							this.owner.getConn());	
+							this.owner.getConn());
+					//logger.info("metadata built.");
 				} catch(Exception e) {
 					logger.error(e.getMessage());
 				}
+				
 			} else {
 				String errorMessage = "Missing rr:logicalTable";
 				logger.error(errorMessage);

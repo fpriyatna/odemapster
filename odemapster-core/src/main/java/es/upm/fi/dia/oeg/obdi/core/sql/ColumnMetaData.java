@@ -32,34 +32,51 @@ public class ColumnMetaData {
 			try {
 				java.sql.Statement stmt = conn.createStatement();
 				
+				String query = null;
+				String tableNameColumn = null;
+				String columnNameColumn = null;
+				String datatypeColumn = null;
+				String isNullableColumn = null;
+				
 				if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
-					String query = "SELECT * FROM information_schema.columns WHERE TABLE_SCHEMA = '" + databaseName + "'";
-					ResultSet rs = stmt.executeQuery(query);
-					while(rs.next()) {
-						String tableName = rs.getString("TABLE_NAME");
-						Map<String, ColumnMetaData> mapTableColumnMetaData = result.get(tableName);
-						if(mapTableColumnMetaData == null) {
-							mapTableColumnMetaData = new HashMap<String, ColumnMetaData>();
-							result.put(tableName, mapTableColumnMetaData);
-						}
-								
-						String columnName = rs.getString("COLUMN_NAME");
-						ColumnMetaData columnMetaData = mapTableColumnMetaData.get(columnName);
-						if(columnMetaData == null) {
-							String dataType = rs.getString("DATA_TYPE");
-							String isNullableString = rs.getString("IS_NULLABLE");
-							boolean isNullable = true;
-							if(isNullableString != null) {
-								if(isNullableString.equalsIgnoreCase("NO") || isNullableString.equalsIgnoreCase("FALSE")) {
-									isNullable = false;
-								}
-							}
+					query = "SELECT * FROM information_schema.columns WHERE TABLE_SCHEMA = '" + databaseName + "'";
+					tableNameColumn = "TABLE_NAME";
+					columnNameColumn = "COLUMN_NAME";
+					datatypeColumn = "DATA_TYPE";
+					isNullableColumn = "IS_NULLABLE";
+				} else if(databaseType.equalsIgnoreCase(Constants.DATABASE_POSTGRESQL)) {
+					query = "SELECT * FROM information_schema.columns";
+					tableNameColumn = "table_name";
+					columnNameColumn = "column_name";
+					datatypeColumn = "data_type";
+					isNullableColumn = "is_nullable";					
+				}
+				
+				ResultSet rs = stmt.executeQuery(query);
+				while(rs.next()) {
+					String tableName = rs.getString(tableNameColumn);
+					Map<String, ColumnMetaData> mapTableColumnMetaData = result.get(tableName);
+					if(mapTableColumnMetaData == null) {
+						mapTableColumnMetaData = new HashMap<String, ColumnMetaData>();
+						result.put(tableName, mapTableColumnMetaData);
+					}
 							
-							columnMetaData = new ColumnMetaData(
-									tableName, columnName, dataType, isNullable);
-							mapTableColumnMetaData.put(columnName, columnMetaData);
+					String columnName = rs.getString(columnNameColumn);
+					ColumnMetaData columnMetaData = mapTableColumnMetaData.get(columnName);
+					if(columnMetaData == null) {
+						String dataType = rs.getString(datatypeColumn);
+						String isNullableString = rs.getString(isNullableColumn);
+						boolean isNullable = true;
+						if(isNullableString != null) {
+							if(isNullableString.equalsIgnoreCase("NO") || isNullableString.equalsIgnoreCase("FALSE")) {
+								isNullable = false;
+							}
 						}
-					}					
+						
+						columnMetaData = new ColumnMetaData(
+								tableName, columnName, dataType, isNullable);
+						mapTableColumnMetaData.put(columnName, columnMetaData);
+					}
 				}
 			} catch(Exception e) {
 				logger.error("Error while getting table meta data");

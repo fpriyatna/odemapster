@@ -60,6 +60,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 				String databaseType = 
 						configurationProperties.getDatabaseType();
 				if(databaseName != null) {
+					logger.info("building metadata.");
 					super.tablesMetaData = TableMetaData.buildTablesMetaData(conn, databaseName, databaseType);
 					super.columnsMetaData = ColumnMetaData.buildColumnsMetaData(conn, databaseName, databaseType);
 				}

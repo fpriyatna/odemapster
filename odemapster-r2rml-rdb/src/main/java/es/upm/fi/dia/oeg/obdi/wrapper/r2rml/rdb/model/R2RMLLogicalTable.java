@@ -46,6 +46,8 @@ public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements 
 				
 				TableMetaData tableMetaData = tablesMetaData.get(tableName);
 				if(tableMetaData == null) {
+					logger.info("building table metadata for " + tableName);
+
 					java.sql.Statement stmt = conn.createStatement();
 					String query = "SELECT COUNT(*) FROM " + tableName + " T";
 					ResultSet rs = stmt.executeQuery(query);
@@ -81,6 +83,7 @@ public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements 
 					columnsMetaData = new HashMap<String, ColumnMetaData>();
 					mapTableColumnsMetaData.put(mapTableColumnsMetaDataKey, columnsMetaData);
 					
+					logger.info("building column metadata");
 					java.sql.Statement stmt = conn.createStatement();
 					ResultSet rs = stmt.executeQuery(query);
 					ResultSetMetaData rsmd = rs.getMetaData();
