@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,6 +23,8 @@ public class SQLUnion implements IQuery {
 	private Vector<ZOrderBy> orderByConditions;
 	private String joinType;
 	private ZExp onExp;
+	private long slice = -1;
+	private long offset = -1;
 	
 	public SQLUnion() { 
 		this.unionQueries = new Vector<SQLQuery>();
@@ -81,12 +84,20 @@ public class SQLUnion implements IQuery {
 				orderByConditionsCollection.add(orderBy);
 			}
 			
-			
 			String orderByString = collectionUtility.mkString(orderByConditionsCollection, 
 					", ", Constants.SQL_KEYWORD_ORDER_BY + " ", " ");
 			result = result + orderByString;
 		}
 			
+		if(this.slice > 0) {
+			result = result + "\n" + "LIMIT " + this.slice; 
+		}
+		
+		if(this.offset> 0) {
+			result = result + "\n" + "OFFSET " + this.offset; 
+		}
+
+		
 		return result;
 	}
 
@@ -123,12 +134,7 @@ public class SQLUnion implements IQuery {
 	}
 
 	public Vector<ZOrderBy> getOrderBy() {
-		Vector<ZOrderBy> result = new Vector<ZOrderBy>();
-		
-		if(this.unionQueries != null && !this.unionQueries.isEmpty()) {
-			result = this.unionQueries.iterator().next().getOrderBy();
-		}
-		return result;
+		return this.orderByConditions;
 	}
 
 //	public IQuery removeSubQuery(Collection<ZSelectItem> newSelectItems,
@@ -241,14 +247,20 @@ public class SQLUnion implements IQuery {
 		return false;
 	}
 
-	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
+	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
 		for(SQLQuery sqlQuery : this.unionQueries) {
 			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
 					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
 
-			sqlQuery.pushProjectionsDown(pushedProjections
+			Collection<ZSelectItem> newProjections = sqlQuery.pushProjectionsDown(pushedProjections
 					, mapInnerAliasSelectItem);
+			sqlQuery.setSelectItems(newProjections);
+			result.addAll(newProjections);
 		}
+		
+		return result;
 	}
 
 //	public Map<String, ZSelectItem> buildMapAliasSelectItem() {
@@ -263,17 +275,20 @@ public class SQLUnion implements IQuery {
 
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {
 		Iterator<SQLQuery> it = this.unionQueries.iterator();
+		Map<String, ZSelectItem> mapInnerAliasSelectItem = new HashMap<String, ZSelectItem>();
 		while(it.hasNext()) {
 			SQLQuery sqlQuery = it.next();
 			
 			if(!it.hasNext()) {
-				Map<String, ZSelectItem> mapInnerAliasSelectItem = 
+				Map<String, ZSelectItem> mapInnerAliasSelectItemAux = 
 						sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
-				
-				sqlQuery.pushOrderByDown(pushedOrderByCollection
-						, mapInnerAliasSelectItem);				
+				mapInnerAliasSelectItem.putAll(mapInnerAliasSelectItemAux);
 			}
 		}
+		
+		Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(pushedOrderByCollection
+				, mapInnerAliasSelectItem);
+		this.setOrderBy(newOrderByCollection);
 	}
 
 	public void pushFilterDown(ZExpression pushedFilter) {
@@ -287,6 +302,15 @@ public class SQLUnion implements IQuery {
 			ZExp newExpression = sqlQuery.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
 			sqlQuery.addWhere(newExpression);
 		}
+	}
+
+	public void setSlice(long slice) {
+		this.slice = slice;
+		
+	}
+
+	public void setOffset(long offset) {
+		this.offset = offset;
 	}
 
 }

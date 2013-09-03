@@ -2,12 +2,17 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.oeg.obdi.core.utility.SQLUtility2;
+import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZFromItem;
+import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
 public class SQLUtility {
@@ -143,4 +148,41 @@ public class SQLUtility {
 		}
 		return result;
 	}
+	
+	static Vector<ZOrderBy> pushOrderByDown(Collection<ZOrderBy> oldOrderByCollection,
+			Map<String, ZSelectItem> mapInnerAliasSelectItem) {
+		Map<ZConstant, ZConstant> whereReplacement = new LinkedHashMap<ZConstant, ZConstant>();
+		for(String alias : mapInnerAliasSelectItem.keySet()) {
+			ZConstant aliasColumn = new ZConstant(alias, ZConstant.COLUMNNAME);
+			ZSelectItem selectItem = mapInnerAliasSelectItem.get(alias);
+			ZConstant zConstant;
+			if(selectItem.isExpression()) {
+				String selectItemValue = selectItem.getExpression().toString();
+				zConstant = new ZConstant(selectItemValue, ZConstant.UNKNOWN);
+			} else {
+				String selectItemTable = selectItem.getTable();
+				String selectItemColumn = selectItem.getColumn();
+				String selectItemValue;
+				if(selectItemTable != null && !selectItemTable.equals("")) {
+					selectItemValue = selectItemTable + "." + selectItemColumn;  
+				} else {
+					selectItemValue = selectItemColumn; 
+				}
+				zConstant = new ZConstant(selectItemValue, ZConstant.COLUMNNAME);
+			}
+			whereReplacement.put(aliasColumn, zConstant);
+		}
+
+		SQLUtility2 sqlUtility2 = new SQLUtility2();
+		Vector<ZOrderBy> newOrderByCollection = new Vector<ZOrderBy>();
+		for(ZOrderBy oldOrderBy : oldOrderByCollection) {
+			ZExp orderByExp = oldOrderBy.getExpression();
+			ZExp newOrderByExp = sqlUtility2.replaceExp(orderByExp, whereReplacement);
+			ZOrderBy newOrderBy = new ZOrderBy(newOrderByExp);
+			newOrderBy.setAscOrder(oldOrderBy.getAscOrder());
+			newOrderByCollection.add(newOrderBy);
+		}
+		return newOrderByCollection;
+		//this.setOrderBy(newOrderByCollection);
+	}	
 }

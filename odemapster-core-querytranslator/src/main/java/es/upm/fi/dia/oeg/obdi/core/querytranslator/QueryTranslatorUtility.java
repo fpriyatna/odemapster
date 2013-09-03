@@ -16,6 +16,9 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZConstant;
+import Zql.ZExp;
+import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -29,6 +32,8 @@ import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.vocabulary.RDF;
+
+import es.upm.fi.oeg.obdi.core.utility.SQLUtility2;
 
 
 public class QueryTranslatorUtility {
@@ -586,4 +591,6 @@ public class QueryTranslatorUtility {
 		}
 		return result;
 	}
+
+
 }

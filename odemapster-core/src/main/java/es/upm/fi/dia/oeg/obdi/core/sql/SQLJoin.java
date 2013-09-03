@@ -17,6 +17,8 @@ public class SQLJoin implements IQuery {
 	private String joinType;
 	private ZExpression onExpression;
 	private boolean distinct = false;
+	private long slice = -1;
+	private long offset = -1;
 	
 	public void setAlias(String alias) {
 		// TODO Auto-generated method stub
@@ -84,9 +86,9 @@ public class SQLJoin implements IQuery {
 		// TODO Auto-generated method stub
 		
 	}
-	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
+	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 	public void pushFilterDown(ZExpression pushedFilter) {
 		// TODO Auto-generated method stub
@@ -143,6 +145,14 @@ public class SQLJoin implements IQuery {
 		return null;
 	}
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void setSlice(long slice) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void setOffset(long offset) {
 		// TODO Auto-generated method stub
 		
 	}	

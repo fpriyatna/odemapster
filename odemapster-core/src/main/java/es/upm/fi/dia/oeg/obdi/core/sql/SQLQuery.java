@@ -949,11 +949,11 @@ public class SQLQuery extends ZQuery implements IQuery {
 		return subqueryFound;
 	}
 
-	public Map<String, ZSelectItem> buildMapAliasSelectItem() {
+	protected Map<String, ZSelectItem> buildMapAliasSelectItem() {
 		return this.buildMapAliasSelectItemAux(this.alias);
 	}
 
-	public Map<String, ZSelectItem> buildMapAliasSelectItemAux(String prefix) {
+	protected Map<String, ZSelectItem> buildMapAliasSelectItemAux(String prefix) {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = new LinkedHashMap<String, ZSelectItem>();
 		Collection<ZSelectItem> innerSelectItems = this.getSelectItems();
 		for(ZSelectItem innerSelectItem : innerSelectItems) {
@@ -968,7 +968,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	}
 
-	void pushProjectionsDown(Collection<ZSelectItem> pushedProjections
+	Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections
 			, Map<String, ZSelectItem> mapInnerAliasSelectItem) {
 		//Map<String, ZSelectItem> mapInnerAliasSelectItem = this.getMapAliasSelectItem();
 
@@ -1004,8 +1004,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 
 		Collection<ZSelectItem> newSelectItems = selectItemsReplacement.values();
-		this.setSelectItems(newSelectItems);
-
+		return newSelectItems;
+		//this.setSelectItems(newSelectItems);
 	}
 
 	ZExp pushFilterDown(ZExpression pushedFilter
@@ -1129,7 +1129,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 				result.addWhere(newJoinExpression);
 				result.addWhere(rightTableSQLQuery.getWhere());
 				result.addSelects(rightTableSelectItems);
-				result.pushProjectionsDown(selectItems, mapAliasSelectItems);
+				Collection<ZSelectItem> newProjections = result.pushProjectionsDown(selectItems, mapAliasSelectItems);
+				result.setSelectItems(newProjections);
 			} else if(rightTable instanceof SQLFromItem) {
 				SQLFromItem leftTableFromItem = (SQLFromItem) rightTable; 
 				result.addFromItem(leftTableFromItem);
@@ -1174,7 +1175,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 			}
 		}
 
-		result.pushProjectionsDown(selectItems, mapAliasSelectItems);
+		Collection<ZSelectItem> newProjections = result.pushProjectionsDown(selectItems, mapAliasSelectItems);
+		result.setSelectItems(newProjections);
 		ZExp newExpression = result.pushFilterDown(whereExpression, mapAliasSelectItems);
 		result.addWhere(newExpression);
 		return result;
@@ -1209,48 +1211,12 @@ public class SQLQuery extends ZQuery implements IQuery {
 	//		return result;
 	//	}
 
-	void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection,
-			Map<String, ZSelectItem> mapInnerAliasSelectItem) {
-		Map<ZConstant, ZConstant> whereReplacement = new LinkedHashMap<ZConstant, ZConstant>();
-		for(String alias : mapInnerAliasSelectItem.keySet()) {
-			ZConstant aliasColumn = new ZConstant(alias, ZConstant.COLUMNNAME);
-			ZSelectItem selectItem = mapInnerAliasSelectItem.get(alias);
-			ZConstant zConstant;
-			if(selectItem.isExpression()) {
-				String selectItemValue = selectItem.getExpression().toString();
-				zConstant = new ZConstant(selectItemValue, ZConstant.UNKNOWN);
-			} else {
-				String selectItemTable = selectItem.getTable();
-				String selectItemColumn = selectItem.getColumn();
-				String selectItemValue;
-				if(selectItemTable != null && !selectItemTable.equals("")) {
-					selectItemValue = selectItemTable + "." + selectItemColumn;  
-				} else {
-					selectItemValue = selectItemColumn; 
-				}
-				zConstant = new ZConstant(selectItemValue, ZConstant.COLUMNNAME);
-			}
-			whereReplacement.put(aliasColumn, zConstant);
-		}
-
-		SQLUtility2 sqlUtility2 = new SQLUtility2();
-		Vector<ZOrderBy> newOrderByCollection = new Vector<ZOrderBy>();
-		for(ZOrderBy oldOrderBy : pushedOrderByCollection) {
-			ZExp orderByExp = oldOrderBy.getExpression();
-			ZExp newOrderByExp = sqlUtility2.replaceExp(orderByExp, whereReplacement);
-			ZOrderBy newOrderBy = new ZOrderBy(newOrderByExp);
-			newOrderBy.setAscOrder(oldOrderBy.getAscOrder());
-			newOrderByCollection.add(newOrderBy);
-		}
-		this.setOrderBy(newOrderByCollection);
 
 
-
-	}
-
-	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
+	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
-		this.pushProjectionsDown(pushedProjections, mapInnerAliasSelectItem);
+		Collection<ZSelectItem> newProjections = this.pushProjectionsDown(pushedProjections, mapInnerAliasSelectItem);
+		return newProjections;
 	}
 
 	public void pushFilterDown(ZExpression pushedFilter) {
@@ -1262,6 +1228,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
-		this.pushOrderByDown(pushedOrderByCollection, mapInnerAliasSelectItem);
+		Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(pushedOrderByCollection, mapInnerAliasSelectItem);
+		this.setOrderBy(newOrderByCollection);
 	}
 }

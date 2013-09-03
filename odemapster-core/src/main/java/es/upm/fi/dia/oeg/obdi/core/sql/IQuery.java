@@ -23,6 +23,8 @@ public interface IQuery extends SQLLogicalTable {
 	public String getDatabaseType();
 	public void setDatabaseType(String dbType);
 	public void setDistinct(boolean distinct);
+	public void setSlice(long slice);
+	public void setOffset(long offset);
 	public boolean getDistinct();
 
 //	public IQuery removeSubQuery() throws Exception;
@@ -31,7 +33,7 @@ public interface IQuery extends SQLLogicalTable {
 //			, String databaseType) throws Exception;
 
 	//public Map<String, ZSelectItem> buildMapAliasSelectItem();
-	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections);
+	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections);
 	public void pushFilterDown(ZExpression pushedFilter);
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection);
 	

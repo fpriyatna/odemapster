@@ -37,7 +37,7 @@ public class NodeTypeInferrer {
 	private static Logger logger = Logger.getLogger(NodeTypeInferrer.class);
 	private AbstractMappingDocument mappingDocument;
 	private Query query;
-	
+
 	public void setQuery(Query query) {
 		this.query = query;
 	}
@@ -55,18 +55,18 @@ public class NodeTypeInferrer {
 
 	}
 
-//	private void addToInferredTypes(Map<Node, Set<AbstractConceptMapping>> mapNodeTypes, Node node, AbstractConceptMapping cm) {
-//		Set<AbstractConceptMapping> types = mapNodeTypes.get(node);
-//		if(types == null) { 
-//			types = new HashSet<AbstractConceptMapping>();
-//			mapNodeTypes.put(node, types);
-//		} else {
-//			if(types.contains(cm)) {
-//				types.retainAll(new Hacm);
-//			}
-//		}
-//		types.add(cm);
-//	}
+	//	private void addToInferredTypes(Map<Node, Set<AbstractConceptMapping>> mapNodeTypes, Node node, AbstractConceptMapping cm) {
+	//		Set<AbstractConceptMapping> types = mapNodeTypes.get(node);
+	//		if(types == null) { 
+	//			types = new HashSet<AbstractConceptMapping>();
+	//			mapNodeTypes.put(node, types);
+	//		} else {
+	//			if(types.contains(cm)) {
+	//				types.retainAll(new Hacm);
+	//			}
+	//		}
+	//		types.add(cm);
+	//	}
 
 	private void addToInferredTypes(Map<Node, Set<AbstractConceptMapping>> mapNodeTypes, Node node, Set<AbstractConceptMapping> cms) {
 		Set<AbstractConceptMapping> types = mapNodeTypes.get(node);
@@ -85,29 +85,29 @@ public class NodeTypeInferrer {
 		if(this.mapInferredTypes == null) {
 			this.mapInferredTypes = this.infer(query); 
 		}
-		
+
 		return this.mapInferredTypes;
 	}
-	
+
 	public Map<Node, Set<AbstractConceptMapping>> infer(Query query) {
 		if(this.mapInferredTypes == null) {
 			Element queryPattern = query.getQueryPattern();
 			Op opQueryPattern = Algebra.compile(queryPattern);
 			this.mapInferredTypes = this.infer(opQueryPattern);			
 		}
-		
+
 		return this.mapInferredTypes;
 	}
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> infer(Op opQueryPattern) {
 		if(this.mapInferredTypes == null) {
 			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesByRdfType = 
 					this.inferByRDFType(opQueryPattern);
 			logger.info("mapNodeTypesByRdfType = " + mapNodeTypesByRdfType);
 
-//			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesBySubject = 
-//					this.inferBySubject(opQueryPattern);
-//			logger.info("mapNodeTypesBySubject = " + mapNodeTypesBySubject);
+			//			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesBySubject = 
+			//					this.inferBySubject(opQueryPattern);
+			//			logger.info("mapNodeTypesBySubject = " + mapNodeTypesBySubject);
 
 			Map<Node, Set<AbstractConceptMapping>> mapSubjectTypesByPredicatesURIs = 
 					this.inferSubjectTypesByPredicatesURIs(opQueryPattern);
@@ -133,30 +133,29 @@ public class NodeTypeInferrer {
 			}
 			logger.info("mapObjectTypesByObjectsURIs updated = " + mapObjectTypesByObjectsURIs);
 
-			Map<Node, Set<AbstractConceptMapping>> mapObjectTypesByPredicatesURIs = 
-			this.inferObjectTypesByPredicateURI(opQueryPattern);
+			Map<Node, Set<AbstractConceptMapping>> mapObjectTypesByPredicatesURIs = this.inferObjectTypesByPredicateURI(opQueryPattern); 
 			logger.info("mapObjectTypesByPredicateURI = " + mapObjectTypesByPredicatesURIs);
 
-			
+
 			List<Map<Node, Set<AbstractConceptMapping>>> listMapNodes = new Vector<Map<Node,Set<AbstractConceptMapping>>>();
 			listMapNodes.add(mapNodeTypesByRdfType);
-//			listMapNodes.add(mapNodeTypesBySubject);
+			//			listMapNodes.add(mapNodeTypesBySubject);
 			listMapNodes.add(mapSubjectTypesBySubjectUri);
 			listMapNodes.add(mapSubjectTypesByPredicatesURIs);
 			listMapNodes.add(mapObjectTypesByObjectsURIs);
 			listMapNodes.add(mapObjectTypesByPredicatesURIs);
-			
+
 			Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = 
 					QueryTranslatorUtility.mergeMaps(listMapNodes);
 			this.mapInferredTypes = mapNodeTypes;			
 		}
-		
+
 		return this.mapInferredTypes;
 	}
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> inferByRDFType(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
 			BasicPattern bp = bgp.getPattern();
@@ -172,7 +171,7 @@ public class NodeTypeInferrer {
 						String subjectType = object.getURI();
 						Set<AbstractConceptMapping> cms = 
 								this.mappingDocument.getConceptMappingsByConceptName(subjectType);
-						
+
 						if(cms != null && cms.size() > 0) {
 							this.addToInferredTypes(mapNodeTypes, subject, cms);
 							//this.mapNodeConceptMapping.put(subject, cm);
@@ -182,7 +181,7 @@ public class NodeTypeInferrer {
 						}
 					}					
 				}
- 
+
 			}
 		} else if(op instanceof OpLeftJoin) {
 			OpLeftJoin opLeftJoin = (OpLeftJoin) op;
@@ -205,15 +204,15 @@ public class NodeTypeInferrer {
 			OpFilter opFilter = (OpFilter) op;
 			mapNodeTypes = this.inferByRDFType(opFilter.getSubOp());
 		}
-		
+
 		return mapNodeTypes;
 	}
 
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> inferBySubject(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
 		Map<Node,List<Set<AbstractConceptMapping>>> mapNodeListNodeTypes = new HashMap<Node, List<Set<AbstractConceptMapping>>>();
-		
+
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
 			BasicPattern bp = bgp.getPattern();
@@ -233,8 +232,8 @@ public class NodeTypeInferrer {
 					}
 					listAbstractConceptMappings.add(conceptMappingsByPredicate);
 				}
- 			}
-			
+			}
+
 			for(Node key : mapNodeListNodeTypes.keySet()) {
 				List<Set<AbstractConceptMapping>> listCMS = mapNodeListNodeTypes.get(key);
 				Set<AbstractConceptMapping> cms = QueryTranslatorUtility.setsIntersection(listCMS);	
@@ -264,30 +263,30 @@ public class NodeTypeInferrer {
 			OpFilter opFilter = (OpFilter) op;
 			mapNodeTypes = this.inferByRDFType(opFilter.getSubOp());
 		}
-		
+
 		return mapNodeTypes;
 	}
 
-	
-//	private Set<AbstractConceptMapping> inferSubjectTypesByPredicateURI(
-//			String predicateURI) {
-//		Set<AbstractConceptMapping> result = 
-//				new HashSet<AbstractConceptMapping>();
-//		
-//		if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
-//			Set<AbstractConceptMapping> cms = 
-//					this.mappingDocument.getConceptMappingByPropertyUri(
-//							predicateURI);
-//			if(cms != null && cms.size() > 0) {
-//				result.addAll(cms);
-//				
-//
-//			}
-//		}
-//		
-//		return result;
-//	}
-	
+
+	//	private Set<AbstractConceptMapping> inferSubjectTypesByPredicateURI(
+	//			String predicateURI) {
+	//		Set<AbstractConceptMapping> result = 
+	//				new HashSet<AbstractConceptMapping>();
+	//		
+	//		if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
+	//			Set<AbstractConceptMapping> cms = 
+	//					this.mappingDocument.getConceptMappingByPropertyUri(
+	//							predicateURI);
+	//			if(cms != null && cms.size() > 0) {
+	//				result.addAll(cms);
+	//				
+	//
+	//			}
+	//		}
+	//		
+	//		return result;
+	//	}
+
 	private Map<Node, Set<AbstractConceptMapping>> inferSubjectsTypesByPredicateURIs(Map<Node, Set<Triple>> mapSubjectSTGs) {
 		Map<Node, Set<AbstractConceptMapping>> result = new HashMap<Node, Set<AbstractConceptMapping>>();
 		for(Node subject : mapSubjectSTGs.keySet()) {
@@ -307,13 +306,13 @@ public class NodeTypeInferrer {
 							predicateURIs);
 			result.put(subject, subjectTypes);
 		}
-		
+
 		return result;
 	}
-	
+
 	private Map<Node, Set<Triple>> bgpToSTGs(List<Triple> triples) {
 		Map<Node, Set<Triple>> result = new HashMap<Node, Set<Triple>>();
-		
+
 		for(Triple tp : triples) {
 			Node tpSubject = tp.getSubject();
 			Set<Triple> stg = result.get(tpSubject);
@@ -323,21 +322,21 @@ public class NodeTypeInferrer {
 			}
 			stg.add(tp);
 		}
-		
+
 		return result;
 	}
-	
 
-	
+
+
 	private Map<Node, Set<AbstractConceptMapping>> inferSubjectTypesBySubjectURI(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
 			BasicPattern bp = bgp.getPattern();
 			List<Triple> bpTriples = bp.getList();
 			this.bgpToSTGs(bpTriples);
-			
+
 			for(Triple tp : bpTriples) {
 				Node subject = tp.getSubject();
 				if(subject.isURI()) {
@@ -373,26 +372,26 @@ public class NodeTypeInferrer {
 			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesSubOp = this.inferSubjectTypesBySubjectURI(opFilterSubOp);
 			mapNodeTypes = QueryTranslatorUtility.mergeMaps(mapNodeTypesSubOp, mapNodeTypesExprs);
 		}
-		
+
 		return mapNodeTypes;
 	}
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> inferObjectTypesByExprList(ExprList exprList) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypesExprs = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		List<Map<Node, Set<AbstractConceptMapping>>> listOfMaps = new ArrayList<Map<Node,Set<AbstractConceptMapping>>>();
 		for(Expr expr : exprList.getList()) {
 			Map<Node, Set<AbstractConceptMapping>> map = this.inferObjectTypesByExpr(expr);
 			listOfMaps.add(map);
 		}
 		mapNodeTypesExprs = QueryTranslatorUtility.mergeMaps(listOfMaps);
-		
+
 		return mapNodeTypesExprs;
 	}
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> inferObjectTypesByExpr(Expr expr) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypesExprs = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		if(expr.isConstant()) {
 			NodeValue nodeValue = expr.getConstant();
 			if(nodeValue.isIRI()) {
@@ -416,13 +415,13 @@ public class NodeTypeInferrer {
 
 		return mapNodeTypesExprs;
 	}
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> inferObjectTypesByObjectURI(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
-			
+
 			for(Triple tp : bgp.getPattern().getList()) {
 				Node tpObject = tp.getObject();
 				if(tpObject.isURI()) {
@@ -453,16 +452,16 @@ public class NodeTypeInferrer {
 			OpFilter opFilter = (OpFilter) op;
 			mapNodeTypes = this.inferObjectTypesByObjectURI(opFilter.getSubOp());
 		}
-		
+
 		return mapNodeTypes;
 	}
 
 	private Map<Node, Set<AbstractConceptMapping>> inferObjectTypesByPredicateURI(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
-			
+
 			for(Triple tp : bgp.getPattern().getList()) {
 				Node tpPredicate = tp.getPredicate();
 				Node tpObject = tp.getObject();
@@ -471,17 +470,17 @@ public class NodeTypeInferrer {
 					if(!RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
 						Set<AbstractConceptMapping> nodeTypes = this.mappingDocument.getPossibleRange(predicateURI);
 						//this.addToInferredTypes(mapNodeTypes, tp.getObject(), nodeTypes);
-						
+
 						if(nodeTypes != null && nodeTypes.size() > 0) {
 							mapNodeTypes.put(tpObject, nodeTypes);	
 						}
-						
-//						Set<AbstractConceptMapping> inferredTypes = mapNodeTypes.get(tpObject);
-//						if(inferredTypes != null && inferredTypes.size() > 0) { 
-//							inferredTypes = new HashSet<AbstractConceptMapping>(); 
-//						}
-//						inferredTypes.addAll(nodeTypes);
-						
+
+						//						Set<AbstractConceptMapping> inferredTypes = mapNodeTypes.get(tpObject);
+						//						if(inferredTypes != null && inferredTypes.size() > 0) { 
+						//							inferredTypes = new HashSet<AbstractConceptMapping>(); 
+						//						}
+						//						inferredTypes.addAll(nodeTypes);
+
 					}
 				}
 			}
@@ -504,19 +503,19 @@ public class NodeTypeInferrer {
 			OpFilter opFilter = (OpFilter) op;
 			mapNodeTypes = this.inferObjectTypesByPredicateURI(opFilter.getSubOp());
 		}
-		
+
 		return mapNodeTypes;
 	}
-	
+
 	private Map<Node, Set<AbstractConceptMapping>> inferSubjectTypesByPredicatesURIs(Op op) {
 		Map<Node, Set<AbstractConceptMapping>> mapNodeTypes = new HashMap<Node, Set<AbstractConceptMapping>>();
-		
+
 		if(op instanceof OpBGP) {
 			OpBGP bgp = (OpBGP) op;
 			BasicPattern bp = bgp.getPattern();
 			List<Triple> bpTriples = bp.getList();
 			Map<Node, Set<Triple>> mapSubjectSTGs = this.bgpToSTGs(bpTriples);
-			
+
 			//get subject types by all the predicate URIs of the STGs
 			Map<Node, Set<AbstractConceptMapping>> subjectsTypesByPredicateURIs = 
 					this.inferSubjectsTypesByPredicateURIs(mapSubjectSTGs);
@@ -546,23 +545,23 @@ public class NodeTypeInferrer {
 			OpFilter opFilter = (OpFilter) op;
 			mapNodeTypes = this.inferSubjectTypesByPredicatesURIs(opFilter.getSubOp());
 		}
-		
+
 		return mapNodeTypes;
 	}
-	
 
 
-	
 
-	
+
+
+
 	public Set<AbstractConceptMapping> getTypes(Node node) {
 		return this.mapInferredTypes.get(node);
 	}
-	
+
 	public Set<AbstractConceptMapping> inferByURI(
 			String uri) {
 		Set<AbstractConceptMapping> result = new HashSet<AbstractConceptMapping>();
-		
+
 		Collection<AbstractConceptMapping> cms = 
 				this.mappingDocument.getConceptMappings();
 		for(AbstractConceptMapping cm : cms) {
@@ -575,7 +574,7 @@ public class NodeTypeInferrer {
 				logger.warn(e.getMessage());
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -589,6 +588,6 @@ public class NodeTypeInferrer {
 		}
 		return result.toString();
 	}
-	
+
 
 }
