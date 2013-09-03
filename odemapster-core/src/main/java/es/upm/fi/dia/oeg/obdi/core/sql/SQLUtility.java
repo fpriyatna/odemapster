@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -184,5 +185,29 @@ public class SQLUtility {
 		}
 		return newOrderByCollection;
 		//this.setOrderBy(newOrderByCollection);
-	}	
+	}
+	
+	public static Collection<ZExpression> containsPrefix(ZExp exp, String prefix) {
+		Collection<ZExpression> result = new HashSet<ZExpression>();
+		
+		if(exp instanceof ZExpression) {
+			ZExpression expExpression = (ZExpression) exp;
+			Vector<ZExp> operands = expExpression.getOperands();
+			for(ZExp operand : operands) {
+				if(operand instanceof ZConstant) {
+					String operandString = operand.toString();
+					operandString = operandString.replaceAll("\"", "");
+					operandString = operandString.replaceAll("\'", "");
+					if(operandString.contains(prefix + ".")) {
+						result.add(expExpression);	
+					}
+				} else {
+					Collection<ZExpression> resultAux = SQLUtility.containsPrefix(operand, prefix);
+					result.addAll(resultAux);
+				}
+			}
+		}
+		
+		return result;
+	}
 }

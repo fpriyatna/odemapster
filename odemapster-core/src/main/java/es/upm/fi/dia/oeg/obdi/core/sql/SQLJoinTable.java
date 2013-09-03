@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import org.apache.log4j.Logger;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import Zql.ZExpression;
 import Zql.ZFromItem;
 
@@ -27,6 +28,10 @@ public class SQLJoinTable extends ZFromItem {
 		this.onExpression = onExp;
 	}
 
+	public void addOnExpression(ZExpression onExp2) {
+		this.onExpression = SQLUtility.combineExpressions(this.onExpression, onExp2, Constants.SQL_LOGICAL_OPERATOR_AND);
+	}
+	
 	public void setJoinType(String joinType) {
 		this.joinType = joinType;
 	}

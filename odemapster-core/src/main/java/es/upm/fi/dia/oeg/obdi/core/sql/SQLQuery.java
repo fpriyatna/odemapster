@@ -3,6 +3,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1095,9 +1096,12 @@ public class SQLQuery extends ZQuery implements IQuery {
 			if(rightTable instanceof SQLQuery) {
 				SQLQuery rightTableSQLQuery = (SQLQuery) rightTable;
 				Collection<ZSelectItem> rightTableSelectItems = rightTableSQLQuery.getSelectItems();
+				ZExpression rightTableWhere = (ZExpression) rightTableSQLQuery.getWhere();
+
 				Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTableSQLQuery.buildMapAliasSelectItem();
 				mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
 				ZExpression newJoinExpression = (ZExpression) result.pushFilterDown(oldJoinExpression, mapAliasSelectItems);
+				ZExpression newWhereExpression = (ZExpression) result.pushFilterDown(rightTableWhere, mapAliasSelectItems);
 
 				String logicalTableAlias = rightTable.getAlias();
 				SQLJoinTable joinTable = null;
@@ -1105,11 +1109,26 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 				for(ZFromItem rightTableFromItem : rightTableFromItems) {
 					if(rightTableFromItem instanceof SQLFromItem) {
+						String rightTableAlias = rightTableFromItem.getAlias();
 						LogicalTableType tableType = ((SQLFromItem) rightTableFromItem).getForm();
 						if(tableType == LogicalTableType.TABLE_NAME) {
 							String rightTableName = rightTableFromItem.getTable();
 							SQLLogicalTable rightTableLogicalTable = new SQLFromItem(rightTableName, LogicalTableType.TABLE_NAME);
-							joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, Constants.SQL_EXPRESSION_TRUE);
+
+							Collection<ZExpression> containedExpressions1 = SQLUtility.containsPrefix(newJoinExpression, rightTableAlias);
+							Collection<ZExpression> containedExpressions2 = SQLUtility.containsPrefix(newWhereExpression, rightTableAlias);
+							if(containedExpressions1.isEmpty() && containedExpressions2.isEmpty()) {
+								joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, Constants.SQL_EXPRESSION_TRUE);
+							} else {
+								Collection<ZExpression> combinedExpressionCollection = new HashSet<ZExpression>();
+								combinedExpressionCollection.addAll(containedExpressions1);
+								combinedExpressionCollection.addAll(containedExpressions2);
+
+								ZExpression combinedExpressions = SQLUtility.combineExpresions(combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND);
+								joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, combinedExpressions);	
+							}
+
+
 							String fromItemAlias = rightTableFromItem.getAlias();
 							if(fromItemAlias == null || fromItemAlias.equals("")) {
 								if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
@@ -1121,13 +1140,20 @@ public class SQLQuery extends ZQuery implements IQuery {
 						}
 					} else if(rightTableFromItem instanceof SQLJoinTable) {
 						joinTable = (SQLJoinTable) rightTableFromItem;
+						String rightTableAlias = joinTable.getJoinSource().getAlias();
+						Collection<ZExpression> containedExpressions1 = SQLUtility.containsPrefix(newJoinExpression, rightTableAlias);
+						Collection<ZExpression> containedExpressions2 = SQLUtility.containsPrefix(newWhereExpression, rightTableAlias);
+						Collection<ZExpression> combinedExpressionCollection = new HashSet<ZExpression>();
+						combinedExpressionCollection.addAll(containedExpressions1);
+						combinedExpressionCollection.addAll(containedExpressions2);
+						ZExpression combinedExpressions = SQLUtility.combineExpresions(combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND);
+						joinTable.addOnExpression(combinedExpressions);	
 					}
 
 					result.addFromItem(joinTable);						
 				}
 
-				result.addWhere(newJoinExpression);
-				result.addWhere(rightTableSQLQuery.getWhere());
+				//result.addWhere(rightTableSQLQuery.getWhere());
 				result.addSelects(rightTableSelectItems);
 				Collection<ZSelectItem> newProjections = result.pushProjectionsDown(selectItems, mapAliasSelectItems);
 				result.setSelectItems(newProjections);

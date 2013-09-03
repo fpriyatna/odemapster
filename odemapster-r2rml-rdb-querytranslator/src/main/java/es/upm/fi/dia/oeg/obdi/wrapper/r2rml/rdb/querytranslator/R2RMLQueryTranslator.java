@@ -256,17 +256,25 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			SQLQuery resultAux = null;
 			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
 				try {
-					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-					logicalTables.add(alphaSubject);
+//					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+//					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+//					logicalTables.add(alphaSubject);
+//					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+//						SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+//						logicalTables.add(logicalTable);
+//						ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+//						joinExpressions.add(joinExpression);
+//					}
+//					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+//					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);
+					
+					resultAux = new SQLQuery();
+					resultAux.setSelectItems(selectItems);
+					resultAux.addLogicalTable(alphaSubject);
 					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-						SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-						logicalTables.add(logicalTable);
-						ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-						joinExpressions.add(joinExpression);
+						resultAux.addFromItem(alphaPredicateObject);
 					}
-					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
+					resultAux.setWhere(condSQL);
 				} catch(Exception e) {
 					String errorMessage = "error in eliminating subquery!";
 					logger.error(errorMessage);
