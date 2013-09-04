@@ -382,5 +382,9 @@ public class ConfigurationProperties extends Properties {
 		this.databaseName = databaseName;
 	}
 
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
+	}
+
 
 }
