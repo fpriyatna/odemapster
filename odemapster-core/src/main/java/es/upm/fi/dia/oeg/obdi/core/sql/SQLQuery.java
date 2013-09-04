@@ -1106,7 +1106,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 				String logicalTableAlias = rightTable.getAlias();
 				SQLJoinTable joinTable = null;
 				Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
-
+				Collection<String> addedTabled = new Vector<String>();
+				
 				for(ZFromItem rightTableFromItem : rightTableFromItems) {
 					if(rightTableFromItem instanceof SQLFromItem) {
 						String rightTableAlias = rightTableFromItem.getAlias();

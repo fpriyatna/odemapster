@@ -254,8 +254,9 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			}
 
 			SQLQuery resultAux = null;
-			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
-				try {
+			//don't do subquery elimination here!
+//			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
+//				try {
 //					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
 //					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
 //					logicalTables.add(alphaSubject);
@@ -267,19 +268,11 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 //					}
 //					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
 //					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);
-					
-					resultAux = new SQLQuery();
-					resultAux.setSelectItems(selectItems);
-					resultAux.addLogicalTable(alphaSubject);
-					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-						resultAux.addFromItem(alphaPredicateObject);
-					}
-					resultAux.setWhere(condSQL);
-				} catch(Exception e) {
-					String errorMessage = "error in eliminating subquery!";
-					logger.error(errorMessage);
-				}
-			} 
+//				} catch(Exception e) {
+//					String errorMessage = "error in eliminating subquery!";
+//					logger.error(errorMessage);
+//				}
+//			} 
 			
 			if(resultAux == null) { //without subquery elimination or error occured during the process
 				resultAux = new SQLQuery(alphaSubject);

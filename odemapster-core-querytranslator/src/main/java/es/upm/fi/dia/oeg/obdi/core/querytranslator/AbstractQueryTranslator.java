@@ -1414,28 +1414,30 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 			//TRANS(STG)
 			SQLQuery resultAux = null;
-			if(this.optimizer != null) {
-				boolean isTransSTGSubQueryElimination = this.optimizer.isTransSTGSubQueryElimination();
-				if(isTransSTGSubQueryElimination) {
-					try {
-						Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-						Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-						logicalTables.add(alphaSubject);
-						for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-							SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-							logicalTables.add(logicalTable);
-							ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-							joinExpressions.add(joinExpression);
-						}
-						ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-						resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
-					} catch(Exception e) {
-						String errorMessage = "error in eliminating subquery!";
-						logger.error(errorMessage);
-						resultAux = null;
-					}					
-				}
-			} 
+			//don't do subquery elimination here!
+//			if(this.optimizer != null) {
+//				boolean isTransSTGSubQueryElimination = this.optimizer.isTransSTGSubQueryElimination();
+//				if(isTransSTGSubQueryElimination) {
+//					try {
+//						Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+//						Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+//						logicalTables.add(alphaSubject);
+//						for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+//							SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+//							logicalTables.add(logicalTable);
+//							ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+//							joinExpressions.add(joinExpression);
+//						}
+//						ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+//						resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
+//					} catch(Exception e) {
+//						String errorMessage = "error in eliminating subquery!";
+//						logger.error(errorMessage);
+//						resultAux = null;
+//					}					
+//				}
+//			}
+			
 
 			if(resultAux == null) { //without subquery elimination or error occured during the process
 				resultAux = new SQLQuery(alphaSubject);
