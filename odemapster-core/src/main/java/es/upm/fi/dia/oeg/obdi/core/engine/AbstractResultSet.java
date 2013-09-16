@@ -12,6 +12,8 @@ public abstract class AbstractResultSet {
 //	public Object getObject(String columnLabel) throws ResultSetException;
 	public abstract String getString(int columnIndex) throws ResultSetException;
 	public abstract String getString(String columnLabel) throws ResultSetException;
+	public abstract Integer getInt(int columnIndex) throws ResultSetException;
+	public abstract Integer getInt(String columnLabel) throws ResultSetException;
 
 	public ArrayList<String> getColumnNames() {
 		return columnNames;

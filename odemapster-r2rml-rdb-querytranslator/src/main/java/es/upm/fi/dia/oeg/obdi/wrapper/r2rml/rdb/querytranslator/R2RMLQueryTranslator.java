@@ -48,6 +48,8 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
+import es.upm.fi.dia.oeg.obdi.core.utility.CollectionUtility;
+import es.upm.fi.dia.oeg.obdi.core.utility.RegexUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
@@ -56,7 +58,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
-import es.upm.fi.oeg.obdi.core.utility.RegexUtility;
 
 public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Logger logger = Logger.getLogger(R2RMLQueryTranslator.class);
@@ -151,72 +152,108 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			if(rs != null) {
 				List<String> rsColumnNames = rs.getColumnNames();
 				Map<String, Object> mapNodeMapping = this.getMapVarMapping2();
-				Object mapValue = mapNodeMapping.get(varName);
-				R2RMLTermMap termMap = null;
+				Map<Integer, Object> mapHashCodeMappings = this.getMapHashCodeMapping();
+				Object mapValue = null;
 
-				if(mapValue instanceof R2RMLTermMap) {
-					termMap = (R2RMLTermMap) mapValue;
-				} else if(mapValue instanceof R2RMLRefObjectMap) {
-					R2RMLRefObjectMap refObjectMap = (R2RMLRefObjectMap) mapValue;
-					termMap = refObjectMap.getParentTriplesMap().getSubjectMap();
-				} else {
-					logger.warn("undefined type of mapping!");
-				}
-
-				if(termMap != null) {
-					TermMapType termMapType = termMap.getTermMapType();
+				try {
+					Integer mappingHashCode = rs.getInt(Constants.PREFIX_MAPPING + varName);
+					mapValue = mapHashCodeMappings.get(mappingHashCode);
+				} catch(Exception e) {
 					
-					if(termMapType == TermMapType.TEMPLATE) {
-						String templateString = termMap.getTemplateString();
-						List<String> templateColumns = termMap.getTemplateColumns();
-						Matcher matcher = this.mapTemplateMatcher.get(templateString);
-						if(matcher == null) {
-							Pattern pattern = Pattern.compile(R2RMLConstants.R2RML_TEMPLATE_PATTERN);
-							matcher = pattern.matcher(templateString);
-							this.mapTemplateMatcher.put(templateString, matcher);
-						}
-						Collection<String> templateAttributes = this.mapTemplateAttributes.get(templateString);
-						if(templateAttributes == null) {
-							//attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
-							RegexUtility regexUtility = new RegexUtility();
-							templateAttributes = regexUtility.getTemplateColumns(templateString, true);
-							this.mapTemplateAttributes.put(templateString, templateAttributes);
-						}
+				}
+				
+//				if(mapValue == null) {
+//					mapValue = mapNodeMapping.get(varName);	
+//				}
+				
+				if(mapValue == null) {
+					result = rs.getString(varName);
+				} else {
+					R2RMLTermMap termMap = null;
 
-						Map<String, String> replacements = new HashMap<String, String>();
-						
-						int i=0;
-						for(String templateAttribute : templateAttributes) {
-							String columnName = rsColumnNames.get(i);
-							String dbValue = rs.getString(columnName);
-							replacements.put(templateAttribute, dbValue);
-							i++;
-						}
-						
-						result = R2RMLUtility.replaceTokens(templateString, replacements);
-					} else if(termMapType == TermMapType.COLUMN) {
-						//String columnName = termMap.getColumnName();
-						result = rs.getString(varName);
-					} else if (termMapType == TermMapType.CONSTANT) {
-						result = termMap.getConstantValue();
+					
+					if(mapValue instanceof R2RMLTermMap) {
+						termMap = (R2RMLTermMap) mapValue;
+					} else if(mapValue instanceof R2RMLRefObjectMap) {
+						R2RMLRefObjectMap refObjectMap = (R2RMLRefObjectMap) mapValue;
+						termMap = refObjectMap.getParentTriplesMap().getSubjectMap();
 					} else {
-						logger.warn("Unsupported term map type!");
+						logger.debug("undefined type of mapping!");
+					}
+
+					if(termMap != null) {
+						TermMapType termMapType = termMap.getTermMapType();
+						
+						if(termMapType == TermMapType.TEMPLATE) {
+							String templateString = termMap.getTemplateString();
+							List<String> templateColumns = termMap.getTemplateColumns();
+							Matcher matcher = this.mapTemplateMatcher.get(templateString);
+							if(matcher == null) {
+								Pattern pattern = Pattern.compile(R2RMLConstants.R2RML_TEMPLATE_PATTERN);
+								matcher = pattern.matcher(templateString);
+								this.mapTemplateMatcher.put(templateString, matcher);
+							}
+							Collection<String> templateAttributes = this.mapTemplateAttributes.get(templateString);
+							if(templateAttributes == null) {
+								//attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
+								RegexUtility regexUtility = new RegexUtility();
+								templateAttributes = regexUtility.getTemplateColumns(templateString, true);
+								this.mapTemplateAttributes.put(templateString, templateAttributes);
+							}
+
+							Map<String, String> replacements = new HashMap<String, String>();
+							
+							CollectionUtility collectionUtility = new CollectionUtility();
+							
+							int i=0;
+							for(String templateAttribute : templateAttributes) {
+								//String columnName = rsColumnNames.get(i);
+								//String dbValue = rs.getString(columnName);
+								Collection<String> columnNames = collectionUtility.getElementsStartWith(rsColumnNames, varName + "_");
+								if(columnNames == null || columnNames.isEmpty()) {
+									columnNames = new Vector<String>();
+									columnNames.add(varName);
+								}
+								
+								for(String columnName : columnNames) {
+									String dbValue = rs.getString(columnName);
+									
+									if(dbValue != null) {
+										replacements.put(templateAttribute, dbValue);	
+									}									
+								}
+
+								i++;
+							}
+							
+							if(replacements.size() > 0) {
+								result = R2RMLUtility.replaceTokens(templateString, replacements);	
+							}
+							
+						} else if(termMapType == TermMapType.COLUMN) {
+							//String columnName = termMap.getColumnName();
+							result = rs.getString(varName);
+						} else if (termMapType == TermMapType.CONSTANT) {
+							result = termMap.getConstantValue();
+						} else {
+							logger.debug("Unsupported term map type!");
+						}
+					}
+
+					if(result != null) {
+						String termMapType = termMap.getTermType();
+						if(termMapType != null) {
+							if(termMapType.equals(R2RMLConstants.R2RML_IRI_URI)) {
+								result = ODEMapsterUtility.encodeURI(result);
+							} else if(termMapType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+								result = ODEMapsterUtility.encodeLiteral(result);
+							}
+						}							
 					}
 				}
-
-				String termMapType = termMap.getTermType();
-				if(termMapType != null) {
-					if(termMapType.equals(R2RMLConstants.R2RML_IRI_URI)) {
-						result = ODEMapsterUtility.encodeURI(result);
-					} else if(termMapType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
-						result = ODEMapsterUtility.encodeLiteral(result);
-					}
-				}
-
-
 			}			
 		} catch(Exception e) {
-			logger.error("Error occured while translating result set : " + e.getMessage());
+			logger.debug("Error occured while translating result set : " + e.getMessage());
 		}
 
 		return result;

@@ -19,6 +19,7 @@ public interface IQuery extends SQLLogicalTable {
 	public void setOrderBy(Vector<ZOrderBy> orderByConditions);
 	public Vector<ZOrderBy> getOrderBy();
 	public void setSelectItems(Collection<ZSelectItem> newSelectItems);
+	public void addSelectItems(Collection<ZSelectItem> newSelectItems);
 	public void addWhere(ZExp newWhere);
 	public String getDatabaseType();
 	public void setDatabaseType(String dbType);

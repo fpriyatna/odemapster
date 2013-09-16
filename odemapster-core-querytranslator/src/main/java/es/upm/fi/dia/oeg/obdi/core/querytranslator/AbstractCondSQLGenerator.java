@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
+import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -105,10 +106,10 @@ public abstract class AbstractCondSQLGenerator {
 		}
 		
 
-		List<SQLSelectItem> betaSubjectSelectItems = 
+		List<ZSelectItem> betaSubjectSelectItems = 
 				betaGenerator.calculateBetaSubject(cm, alphaResult);
 		List<ZExp> betaSubjectExpressions = new ArrayList<ZExp>();
-		for(SQLSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
+		for(ZSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
 			ZExp betaSubjectExpression = betaSubjectSelectItem.getExpression();
 			betaSubjectExpressions.add(betaSubjectExpression);
 		}
@@ -116,10 +117,10 @@ public abstract class AbstractCondSQLGenerator {
 		ZExp betaPredicateExpression = 
 				betaGenerator.calculateBetaPredicate(predicateURI).getExpression();
 		
-		List<SQLSelectItem> betaObjectSelectItems = 
+		List<ZSelectItem> betaObjectSelectItems = 
 				betaGenerator.calculateBetaObject(tp, cm, predicateURI, alphaResult);
 		List<ZExp> betaObjectExpressions = new ArrayList<ZExp>();
-		for(SQLSelectItem betaObjectSelectItem : betaObjectSelectItems) {
+		for(ZSelectItem betaObjectSelectItem : betaObjectSelectItems) {
 			ZExp betaObjectExp;
 			if(betaObjectSelectItem.isExpression()) {
 				betaObjectExp = betaObjectSelectItem.getExpression();
@@ -205,7 +206,7 @@ public abstract class AbstractCondSQLGenerator {
 				}
 			}
 		}
-
+		
 		if(subject == predicate) { //line 10
 			if(betaSubjectExpressions.size() == 1) {
 				for(int i=0; i<betaSubjectExpressions.size(); i++) {
@@ -255,10 +256,10 @@ public abstract class AbstractCondSQLGenerator {
 		ZExpression result1 = null;
 		Node subject = tp.getSubject();
 		//ZSelectItem betaCMSelectItem = betaGenerator.calculateBeta(tp, POS.sub);
-		List<SQLSelectItem> betaSubjectSelectItems = betaGenerator.calculateBetaSubject(
+		List<ZSelectItem> betaSubjectSelectItems = betaGenerator.calculateBetaSubject(
 				cm, alphaResult);
 		List<ZExp> betaSubjectExpressions = new ArrayList<ZExp>();
-		for(SQLSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
+		for(ZSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
 			ZExp betaSubjectExpression = betaSubjectSelectItem.getExpression();
 			betaSubjectExpressions.add(betaSubjectExpression);
 		}
@@ -381,10 +382,10 @@ public abstract class AbstractCondSQLGenerator {
 		Collection<ZExpression> exps = new HashSet<ZExpression>();
 
 		Node tp1Subject = tp1.getSubject();
-		List<SQLSelectItem> betaSubjectSelectItems = betaGenerator.calculateBetaSubject(
+		List<ZSelectItem> betaSubjectSelectItems = betaGenerator.calculateBetaSubject(
 				cm, alphaResult);
 		List<ZExp> betaSub1Exps = new ArrayList<ZExp>();
-		for(SQLSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
+		for(ZSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
 			betaSub1Exps.add(betaSubjectSelectItem.getExpression());
 		}
 		
@@ -393,10 +394,10 @@ public abstract class AbstractCondSQLGenerator {
 				tp1Predicate.getURI()).getExpression();
 
 		Node tp1Object = tp1.getObject();
-		List<SQLSelectItem> betaObj1SelectItems = betaGenerator.calculateBetaObject(
+		List<ZSelectItem> betaObj1SelectItems = betaGenerator.calculateBetaObject(
 				tp1, cm, tp1Predicate.getURI(), alphaResult);
 		List<ZExp> betaObj1Exps = new ArrayList<ZExp>();
-		for(SQLSelectItem betaObj1SelectItem : betaObj1SelectItems) {
+		for(ZSelectItem betaObj1SelectItem : betaObj1SelectItems) {
 			ZExp betaObj1Exp;
 			if(betaObj1SelectItem.isExpression()) {
 				betaObj1Exp = betaObj1SelectItem.getExpression();
@@ -411,10 +412,10 @@ public abstract class AbstractCondSQLGenerator {
 
 		
 		Node tp2Object = tp2.getObject();
-		List<SQLSelectItem> betaObj2SelectItems = betaGenerator.calculateBetaObject(
+		List<ZSelectItem> betaObj2SelectItems = betaGenerator.calculateBetaObject(
 				tp2, cm, tp2Predicate.getURI(), alphaResult);
 		List<ZExp> betaObj2Exps = new ArrayList<ZExp>();
-		for(SQLSelectItem betaObj2SelectItem : betaObj2SelectItems) {
+		for(ZSelectItem betaObj2SelectItem : betaObj2SelectItems) {
 			ZExp betaObj2Exp;
 			if(betaObj2SelectItem.isExpression()) {
 				betaObj2Exp = betaObj2SelectItem.getExpression();

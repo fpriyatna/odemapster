@@ -26,6 +26,7 @@ public class Constants {
 	public static final String DATABASE_POSTGRESQL_ENCLOSED_CHARACTER = "\"";
 	
 	public static final String COLUMN_TYPE_TEXT = "text";
+	public static final String COLUMN_TYPE_INTEGER = "integer";
 	
 	//jena specific properties
 	public static final String JENA_MODE_TYPE = "jena.mode.type";
@@ -95,6 +96,7 @@ public class Constants {
 	public static final String PREFIX_VAR = "var_";
 	public static final String PREFIX_LIT = "lit_";
 	public static final String KEY_SUFFIX = "_key";
-
+	public static final String PREFIX_SUBJECT_MAPPING = "sm_";
+	public static final String PREFIX_MAPPING = "map_";
 
 }

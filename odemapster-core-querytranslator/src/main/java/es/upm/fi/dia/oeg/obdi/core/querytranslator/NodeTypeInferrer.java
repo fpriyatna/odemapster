@@ -103,7 +103,7 @@ public class NodeTypeInferrer {
 		if(this.mapInferredTypes == null) {
 			Map<Node, Set<AbstractConceptMapping>> mapSubjectTypesByRdfType = 
 					this.inferByRDFType(opQueryPattern);
-			logger.info("mapNodeTypesByRdfType = " + mapSubjectTypesByRdfType);
+			logger.debug("mapNodeTypesByRdfType = " + mapSubjectTypesByRdfType);
 
 			//			Map<Node, Set<AbstractConceptMapping>> mapNodeTypesBySubject = 
 			//					this.inferBySubject(opQueryPattern);
@@ -111,11 +111,11 @@ public class NodeTypeInferrer {
 
 			Map<Node, Set<AbstractConceptMapping>> mapSubjectTypesByPredicatesURIs = 
 					this.inferSubjectTypesByPredicatesURIs(opQueryPattern);
-			logger.info("mapSubjectTypesByPredicatesURIs = " + mapSubjectTypesByPredicatesURIs);
+			logger.debug("mapSubjectTypesByPredicatesURIs = " + mapSubjectTypesByPredicatesURIs);
 
 			Map<Node, Set<AbstractConceptMapping>> mapSubjectTypesBySubjectUri = 
 					this.inferSubjectTypesBySubjectURI(opQueryPattern);
-			logger.info("mapSubjectTypesBySubjectUri = " + mapSubjectTypesBySubjectUri);
+			logger.debug("mapSubjectTypesBySubjectUri = " + mapSubjectTypesBySubjectUri);
 
 			List<Map<Node, Set<AbstractConceptMapping>>> listSubjectMapNodes = new Vector<Map<Node,Set<AbstractConceptMapping>>>();
 			listSubjectMapNodes.add(mapSubjectTypesByRdfType);
@@ -125,7 +125,7 @@ public class NodeTypeInferrer {
 			
 			Map<Node, Set<AbstractConceptMapping>> mapObjectTypesByObjectsURIs = 
 					this.inferObjectTypesByObjectURI(opQueryPattern);
-			logger.info("mapObjectTypesByObjectsURIs = " + mapObjectTypesByObjectsURIs);
+			logger.debug("mapObjectTypesByObjectsURIs = " + mapObjectTypesByObjectsURIs);
 			for(Node mapNodeTypesByUriKey : mapObjectTypesByObjectsURIs.keySet()) {
 				Set<AbstractConceptMapping> mapNodeTypesByUriValue = mapObjectTypesByObjectsURIs.get(mapNodeTypesByUriKey);
 				Set<AbstractConceptMapping> setConceptMappingsWithoutClassURI = new HashSet<AbstractConceptMapping>();
@@ -137,11 +137,11 @@ public class NodeTypeInferrer {
 				}
 				mapNodeTypesByUriValue.removeAll(setConceptMappingsWithoutClassURI);
 			}
-			logger.info("mapObjectTypesByObjectsURIs updated = " + mapObjectTypesByObjectsURIs);
+			logger.debug("mapObjectTypesByObjectsURIs updated = " + mapObjectTypesByObjectsURIs);
 
 			
 			Map<Node, Set<AbstractConceptMapping>> mapObjectTypesByPredicatesURIs = this.inferObjectTypesByPredicateURI(opQueryPattern, mapSubjectTypes); 
-			logger.info("mapObjectTypesByPredicateURI = " + mapObjectTypesByPredicatesURIs);
+			logger.debug("mapObjectTypesByPredicateURI = " + mapObjectTypesByPredicatesURIs);
 
 
 			List<Map<Node, Set<AbstractConceptMapping>>> listMapNodes = new Vector<Map<Node,Set<AbstractConceptMapping>>>();

@@ -33,7 +33,7 @@ import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.oeg.obdi.core.utility.SQLUtility2;
+import es.upm.fi.dia.oeg.obdi.core.utility.SQLUtility2;
 
 
 public class QueryTranslatorUtility {

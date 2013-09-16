@@ -7,10 +7,12 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
+import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
@@ -35,10 +37,10 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public List<SQLSelectItem> calculateBetaObject(Triple tp
+	public List<ZSelectItem> calculateBetaObject(Triple tp
 			, AbstractConceptMapping cm, String predicateURI
 			, AlphaResult alphaResult) throws QueryTranslationException {
-		List<SQLSelectItem> result = new ArrayList<SQLSelectItem>();
+		List<ZSelectItem> result = new ArrayList<ZSelectItem>();
 		
 		Node object = tp.getObject();
 		
@@ -49,7 +51,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 		if(pms == null || pms.isEmpty()) {
 			String errorMessage = "Undefined mappings for : " + predicateURI 
 					+ " for class " + cm.getConceptName();
-			logger.warn(errorMessage);
+			logger.debug(errorMessage);
 		} else if (pms.size() > 1) {
 			String errorMessage = "Multiple property mappings defined, result may be wrong!";
 			throw new QueryTranslationException(errorMessage);			
@@ -112,12 +114,15 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 
 	@Override
-	public List<SQLSelectItem> calculateBetaSubject(
+	public List<ZSelectItem> calculateBetaSubject(
 			AbstractConceptMapping cm, AlphaResult alphaResult) {
-		List<SQLSelectItem> result = new ArrayList<SQLSelectItem>();
-		
+		List<ZSelectItem> result = new ArrayList<ZSelectItem>();
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
+		
+		
+
+		
 		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
 		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
 		
@@ -136,6 +141,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 			}
 		}
 
+		
 		return result;
 	}
 

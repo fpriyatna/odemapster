@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
+import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -25,15 +26,15 @@ public abstract class AbstractBetaGenerator {
 		this.owner = owner;
 	}
 
-	public List<SQLSelectItem> calculateBeta(Triple tp, POS pos
+	public List<ZSelectItem> calculateBeta(Triple tp, POS pos
 			, AbstractConceptMapping cm, String predicateURI
 			, AlphaResult alphaResult) throws QueryTranslationException {
-		List<SQLSelectItem> result;
+		List<ZSelectItem> result;
 		
 		if(pos == POS.sub) {
 			result = this.calculateBetaSubject(cm, alphaResult);
 		} else if(pos == POS.pre) {
-			result = new ArrayList<SQLSelectItem>();
+			result = new ArrayList<ZSelectItem>();
 			result.add(this.calculateBetaPredicate(predicateURI));
 		} else if(pos == POS.obj) {
 			boolean predicateIsRDFSType = RDF.type.getURI().equals(predicateURI);
@@ -42,7 +43,7 @@ public abstract class AbstractBetaGenerator {
 						cm.getConceptName(), ZConstant.STRING);
 				SQLSelectItem selectItem = new SQLSelectItem();
 				selectItem.setExpression(className);
-				result = new ArrayList<SQLSelectItem>();
+				result = new ArrayList<ZSelectItem>();
 				result.add(selectItem);
 			} else {
 				result = this.calculateBetaObject(
@@ -56,11 +57,11 @@ public abstract class AbstractBetaGenerator {
 		return result;
 	}
 
-	public abstract List<SQLSelectItem> calculateBetaObject(Triple triple
+	public abstract List<ZSelectItem> calculateBetaObject(Triple triple
 			, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult)
 	throws QueryTranslationException;
 
-	public SQLSelectItem calculateBetaPredicate(String predicateURI) {
+	public ZSelectItem calculateBetaPredicate(String predicateURI) {
 		ZConstant predicateURIConstant = 
 				new ZConstant(predicateURI, ZConstant.STRING);
 		SQLSelectItem selectItem = new SQLSelectItem();
@@ -68,7 +69,7 @@ public abstract class AbstractBetaGenerator {
 		return selectItem;
 	}
 	
-	public abstract List<SQLSelectItem> calculateBetaSubject(AbstractConceptMapping cm, AlphaResult alphaResult);
+	public abstract List<ZSelectItem> calculateBetaSubject(AbstractConceptMapping cm, AlphaResult alphaResult);
 
 	protected AbstractQueryTranslator getOwner() {
 		return owner;

@@ -52,6 +52,21 @@ public class RDBResultSet extends AbstractResultSet {
 		}
 	}
 
+	public Integer getInt(int columnIndex) throws ResultSetException {
+		try {
+			return rs.getInt(columnIndex);
+		} catch (SQLException e) {
+			throw new ResultSetException(e);
+		}
+	}
+
+	public Integer getInt(String columnLabel) throws ResultSetException {
+		try {
+			return rs.getInt(columnLabel);
+		} catch (SQLException e) {
+			throw new ResultSetException(e);
+		}
+	}
 
 
 }

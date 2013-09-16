@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import com.hp.hpl.jena.graph.Node;
+
 import es.upm.fi.dia.oeg.obdi.core.Constants;
-import es.upm.fi.oeg.obdi.core.utility.SQLUtility2;
+import es.upm.fi.dia.oeg.obdi.core.utility.SQLUtility2;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
@@ -210,4 +212,31 @@ public class SQLUtility {
 		
 		return result;
 	}
+	
+	public static Collection <ZSelectItem> getSelectItemsMapPrefix(Collection <ZSelectItem> selectItems) {
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
+		for(ZSelectItem selectItem : selectItems) {
+			String alias = selectItem.getAlias();
+			if(alias.startsWith(Constants.PREFIX_MAPPING)) {
+				result.add(selectItem);
+			}
+		}
+		
+		return result;
+	}
+	
+	public static Collection <ZSelectItem> getSelectItemsMapPrefix(Collection <ZSelectItem> selectItems, Node node) {
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
+		for(ZSelectItem selectItem : selectItems) {
+			String alias = selectItem.getAlias();
+			String varNamePrefixed = Constants.PREFIX_MAPPING + node.getName();
+			if(alias.equals(varNamePrefixed)) {
+				result.add(selectItem);
+			}
+		}
+		
+		return result;
+	}	
 }

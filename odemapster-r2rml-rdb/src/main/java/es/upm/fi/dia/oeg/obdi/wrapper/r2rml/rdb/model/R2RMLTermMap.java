@@ -19,12 +19,12 @@ import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.obdi.core.utility.RegexUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
-import es.upm.fi.oeg.obdi.core.utility.RegexUtility;
 
 public class R2RMLTermMap implements R2RMLElement
 , IConstantTermMap, IColumnTermMap, ITemplateTermMap {
@@ -109,7 +109,7 @@ public class R2RMLTermMap implements R2RMLElement
 									isNullableAux = true;
 								}
 							} else {
-								logger.warn("metadata not found for: " + pkColumnString);
+								logger.debug("metadata not found for: " + pkColumnString);
 								isNullableAux = true;
 							}
 						}

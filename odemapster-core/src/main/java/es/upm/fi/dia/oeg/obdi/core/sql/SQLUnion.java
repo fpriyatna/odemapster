@@ -14,7 +14,7 @@ import Zql.ZExpression;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
-import es.upm.fi.oeg.obdi.core.utility.CollectionUtility;
+import es.upm.fi.dia.oeg.obdi.core.utility.CollectionUtility;
 
 public class SQLUnion implements IQuery {
 	String alias;
@@ -311,6 +311,13 @@ public class SQLUnion implements IQuery {
 
 	public void setOffset(long offset) {
 		this.offset = offset;
+	}
+
+	public void addSelectItems(Collection<ZSelectItem> newSelectItems) {
+		for(SQLQuery query : this.unionQueries) {
+			query.addSelectItems(newSelectItems);
+		}
+		
 	}
 
 }

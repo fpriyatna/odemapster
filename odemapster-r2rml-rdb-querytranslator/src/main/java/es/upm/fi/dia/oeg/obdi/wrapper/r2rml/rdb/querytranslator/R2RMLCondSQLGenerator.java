@@ -240,7 +240,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 				String objectMapTermType = objectMap.getTermType(); 
 				if(objectMapTermType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
 					String errorMessage = "triple.object " + tp + " is an URI, but the mapping " + objectMap + " specifies literal";
-					logger.warn(errorMessage);
+					logger.debug(errorMessage);
 					if(optimizer != null && optimizer.isUnionQueryReduction()) {
 						throw new InsatisfiableSQLExpression(errorMessage);	
 					}
@@ -326,7 +326,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 			Map<String, String> matchedColValues = termMap.getTemplateValues(uri);
 			if(matchedColValues == null || matchedColValues.size() == 0) {
 				String errorMessage = "uri " + uri + " doesn't match the template : " + termMap.getTemplateString();
-				logger.error(errorMessage);
+				logger.debug(errorMessage);
 				throw new InsatisfiableSQLExpression(errorMessage);	
 			} else {
 				Collection<ZExpression> exprs = new Vector<ZExpression>();

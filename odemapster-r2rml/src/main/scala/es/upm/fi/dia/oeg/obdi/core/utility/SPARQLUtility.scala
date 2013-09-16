@@ -1,4 +1,4 @@
-package es.upm.fi.oeg.obdi.core.utility
+package es.upm.fi.dia.oeg.obdi.core.utility
 
 import com.hp.hpl.jena.graph.Node
 import com.hp.hpl.jena.sparql.algebra.Op

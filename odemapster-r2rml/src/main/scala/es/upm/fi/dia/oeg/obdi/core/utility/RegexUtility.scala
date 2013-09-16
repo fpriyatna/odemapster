@@ -1,4 +1,4 @@
-package es.upm.fi.oeg.obdi.core.utility
+package es.upm.fi.dia.oeg.obdi.core.utility
 
 import scala.util.matching.Regex
 import scala.collection.JavaConversions._

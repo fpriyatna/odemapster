@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZConstant;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -15,6 +16,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 
 public abstract class AbstractPRSQLGenerator {
@@ -85,14 +87,21 @@ public abstract class AbstractPRSQLGenerator {
 			, String columnType
 			) throws QueryTranslationException {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
+		
 		try {
 			String dbType = owner.getDatabaseType();
 			
-			List<SQLSelectItem> betaObjSelectItems = betaGenerator.calculateBetaObject(
+			List<ZSelectItem> betaObjSelectItems = betaGenerator.calculateBetaObject(
 					tp, cmSubject, predicateURI, alphaResult);
 			for(int i=0; i<betaObjSelectItems.size(); i++) {
-				SQLSelectItem betaObjSelectItem = betaObjSelectItems.get(i); 
-				SQLSelectItem selectItem = betaObjSelectItem.clone();
+				ZSelectItem betaObjSelectItem = betaObjSelectItems.get(i);
+				SQLSelectItem selectItem;
+				if(betaObjSelectItem instanceof SQLSelectItem) {
+					selectItem = ((SQLSelectItem) betaObjSelectItem).clone();
+				} else {
+					selectItem = (SQLSelectItem) betaObjSelectItem;
+				}
+				
 				String selectItemAlias = nameGenerator.generateName(
 						tp.getObject());
 				if(selectItemAlias != null) {
@@ -121,9 +130,14 @@ public abstract class AbstractPRSQLGenerator {
 			, NameGenerator nameGenerator
 			, String predicateURI) throws QueryTranslationException {
 		try {
-			SQLSelectItem betaPre = 
+			ZSelectItem betaPre = 
 					betaGenerator.calculateBetaPredicate(predicateURI);
-			SQLSelectItem selectItem = betaPre.clone();
+			SQLSelectItem selectItem;
+			if(betaPre instanceof SQLSelectItem) {
+				selectItem = ((SQLSelectItem)betaPre).clone();
+			} else {
+				selectItem = (SQLSelectItem) betaPre;
+			}
 			String dbType = this.owner.getDatabaseType();
 			selectItem.setDbType(dbType);
 			selectItem.setColumnType("text");
@@ -141,12 +155,46 @@ public abstract class AbstractPRSQLGenerator {
 
 	}
 	
-	protected abstract Collection<ZSelectItem> genPRSQLSubject(
+	protected Collection<ZSelectItem> genPRSQLSubject(
 			Triple tp, AlphaResult alphaResult
 			, AbstractBetaGenerator betaGenerator
 			, NameGenerator nameGenerator
 			, AbstractConceptMapping cmSubject) 
-					throws QueryTranslationException;
+					throws QueryTranslationException {
+		Node subject = tp.getSubject();
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
+		List<ZSelectItem> betaSubSelectItems = betaGenerator.calculateBetaSubject(cmSubject, alphaResult);
+		try {
+			byte i = 0;
+			for(ZSelectItem betaSub : betaSubSelectItems) {
+				SQLSelectItem selectItem;
+				if(betaSub instanceof SQLSelectItem) {
+					selectItem = ((SQLSelectItem)betaSub).clone();	
+				} else {
+					selectItem = (SQLSelectItem) betaSub;
+				}
+				
+				this.owner.getDatabaseType();
+//				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
+//					selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
+//					selectItem.setColumnType("text");
+//				}			
+				String selectItemSubjectAlias = nameGenerator.generateName(subject);
+				if(betaSubSelectItems.size() > 1) {
+					selectItemSubjectAlias += "_" + i;
+				}
+				i++;
+				selectItem.setAlias(selectItemSubjectAlias);
+				result.add(selectItem);
+			}
+			logger.debug("genPRSQLSubject = " + result);
+			return result;
+		} catch(Exception e) {
+			throw new QueryTranslationException(e);
+		}
+	}
+	
 
 //	public abstract Collection<ZSelectItem> genPRSQLSTG(List<Triple> stg
 //			, List<BetaResultSet> betaResultSetList, NameGenerator nameGenerator) 

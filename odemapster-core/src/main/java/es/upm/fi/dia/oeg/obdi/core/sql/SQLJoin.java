@@ -155,6 +155,10 @@ public class SQLJoin implements IQuery {
 	public void setOffset(long offset) {
 		// TODO Auto-generated method stub
 		
+	}
+	public void addSelectItems(Collection<ZSelectItem> newSelectItems) {
+		// TODO Auto-generated method stub
+		
 	}	
 
 	

@@ -80,13 +80,14 @@ public class DBUtility {
 			logger.warn("Exception occur : " + e.getMessage());
 		}
 
-		logger.debug("Executing query = \n" + query);
+		logger.info("Evaluating query : \n" + query);
+		//logger.info("Evaluating query ...");
 
 		try {
 			long start = System.currentTimeMillis();
 			ResultSet result = stmt.executeQuery(query);
 			long end = System.currentTimeMillis();
-			logger.debug("SQL execution time was "+(end-start)+" ms.");
+			logger.info("SQL execution time was "+(end-start)+" ms.");
 
 			return result;
 		} catch(SQLException e) {

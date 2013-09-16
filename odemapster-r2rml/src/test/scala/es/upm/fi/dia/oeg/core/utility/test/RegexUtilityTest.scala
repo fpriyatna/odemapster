@@ -1,8 +1,8 @@
-package es.upm.fi.oeg.core.utility.test
+package es.upm.fi.dia.oeg.core.utility.test
 
 import scala.util.matching.Regex
 import scala.collection.mutable.HashMap
-import es.upm.fi.oeg.obdi.core.utility.RegexUtility
+import es.upm.fi.dia.oeg.obdi.core.utility.RegexUtility
 
 object RegexUtilityTest extends App {
 	val regexUtility = new RegexUtility();

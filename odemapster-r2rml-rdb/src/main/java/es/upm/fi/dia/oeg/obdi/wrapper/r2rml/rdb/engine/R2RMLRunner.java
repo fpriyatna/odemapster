@@ -28,10 +28,10 @@ public class R2RMLRunner extends AbstractRunner {
 			
 			//String configurationDirectory = System.getProperty("user.dir");
 			String configurationDirectory = args[0];
-			logger.info("propertiesDirectory = " + configurationDirectory);
+			logger.debug("propertiesDirectory = " + configurationDirectory);
 			
 			String configurationFile = args[1];
-			logger.info("propertiesFile = " + configurationFile);
+			logger.debug("propertiesFile = " + configurationFile);
 			
 			AbstractRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
 			runner.run();

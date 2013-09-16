@@ -13,8 +13,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.graph.query.SimpleQueryEngine.Cons;
-
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
@@ -28,7 +26,7 @@ import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.oeg.obdi.core.utility.SQLUtility2;
+import es.upm.fi.dia.oeg.obdi.core.utility.SQLUtility2;
 
 public class SQLQuery extends ZQuery implements IQuery {
 	/**
@@ -1057,7 +1055,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 			Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
 			if(rightTableFromItems.size() != 1) {
 				String errorMessage = "Subquery elimination for left outer join can deal with 1 right table only!";
-				logger.warn(errorMessage);
+				logger.debug(errorMessage);
 				proceed = false;
 			}
 		}
@@ -1257,5 +1255,10 @@ public class SQLQuery extends ZQuery implements IQuery {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
 		Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(pushedOrderByCollection, mapInnerAliasSelectItem);
 		this.setOrderBy(newOrderByCollection);
+	}
+
+	public void addSelectItems(Collection<ZSelectItem> newSelectItems) {
+		this.getSelect().addAll(newSelectItems);
+		
 	}
 }
