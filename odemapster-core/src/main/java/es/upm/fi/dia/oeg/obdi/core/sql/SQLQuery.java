@@ -1245,10 +1245,14 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 	public void pushFilterDown(ZExpression pushedFilter) {
-		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
-		ZExp newFilter = this.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
+		ZExp newFilter = this.pushExpressionDown(pushedFilter);
 		this.addWhere(newFilter);
+	}
 
+	public ZExp pushExpressionDown(ZExpression oldExpression) {
+		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
+		ZExp newFilter = this.pushFilterDown(oldExpression, mapInnerAliasSelectItem);
+		return newFilter;
 	}
 
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {

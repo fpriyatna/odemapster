@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -143,35 +144,38 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	protected void buildPRSQLGenerator() {
 		super.setPrSQLGenerator(new R2RMLPRSQLGenerator(this));
 	}
-	
+
 	@Override
 	public String translateResultSet(String varName, AbstractResultSet rs) {
 		String result = null;
+		CollectionUtility collectionUtility = new CollectionUtility();
 
 		try {
 			if(rs != null) {
 				List<String> rsColumnNames = rs.getColumnNames();
-				Map<String, Object> mapNodeMapping = this.getMapVarMapping2();
-				Map<Integer, Object> mapHashCodeMappings = this.getMapHashCodeMapping();
+				Collection<String> columnNames = collectionUtility.getElementsStartWith(rsColumnNames, varName + "_");
+
+				//Map<String, Object> mapNodeMapping = this.getMapVarMapping2();
+				Map<Integer, Object> mapMappingHashCode = this.getMapHashCodeMapping();
 				Object mapValue = null;
 
 				try {
-					Integer mappingHashCode = rs.getInt(Constants.PREFIX_MAPPING + varName);
-					mapValue = mapHashCodeMappings.get(mappingHashCode);
+					Integer mappingHashCode = rs.getInt(Constants.PREFIX_MAPPING_ID + varName);
+					mapValue = mapMappingHashCode.get(mappingHashCode);
 				} catch(Exception e) {
-					
+
 				}
-				
-//				if(mapValue == null) {
-//					mapValue = mapNodeMapping.get(varName);	
-//				}
-				
+
+				//				if(mapValue == null) {
+				//					mapValue = mapNodeMapping.get(varName);	
+				//				}
+
 				if(mapValue == null) {
 					result = rs.getString(varName);
 				} else {
 					R2RMLTermMap termMap = null;
 
-					
+
 					if(mapValue instanceof R2RMLTermMap) {
 						termMap = (R2RMLTermMap) mapValue;
 					} else if(mapValue instanceof R2RMLRefObjectMap) {
@@ -183,7 +187,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 					if(termMap != null) {
 						TermMapType termMapType = termMap.getTermMapType();
-						
+
 						if(termMapType == TermMapType.TEMPLATE) {
 							String templateString = termMap.getTemplateString();
 							List<String> templateColumns = termMap.getTemplateColumns();
@@ -202,34 +206,30 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 							}
 
 							Map<String, String> replacements = new HashMap<String, String>();
-							
-							CollectionUtility collectionUtility = new CollectionUtility();
-							
-							int i=0;
-							for(String templateAttribute : templateAttributes) {
+
+
+							Iterator<String> templateAttributesIterator = templateAttributes.iterator();
+							for(int i=0; i<templateAttributes.size(); i++) {
+								String templateAttribute = templateAttributesIterator.next();
 								//String columnName = rsColumnNames.get(i);
 								//String dbValue = rs.getString(columnName);
-								Collection<String> columnNames = collectionUtility.getElementsStartWith(rsColumnNames, varName + "_");
-								if(columnNames == null || columnNames.isEmpty()) {
-									columnNames = new Vector<String>();
-									columnNames.add(varName);
-								}
-								
-								for(String columnName : columnNames) {
-									String dbValue = rs.getString(columnName);
-									
-									if(dbValue != null) {
-										replacements.put(templateAttribute, dbValue);	
-									}									
-								}
 
-								i++;
+								String columnName;
+								if(columnNames == null || columnNames.isEmpty()) {
+									columnName = varName;
+								} else {
+									columnName = varName + "_" + i;
+								}
+								String dbValue = rs.getString(columnName);
+								if(dbValue != null) {
+									replacements.put(templateAttribute, dbValue);	
+								}									
 							}
-							
+
 							if(replacements.size() > 0) {
 								result = R2RMLUtility.replaceTokens(templateString, replacements);	
 							}
-							
+
 						} else if(termMapType == TermMapType.COLUMN) {
 							//String columnName = termMap.getColumnName();
 							result = rs.getString(varName);
@@ -263,7 +263,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
 			String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
 		IQuery transTP = null;
-		
+
 		//alpha
 		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
 		if(alphaResult != null) {
@@ -292,25 +292,25 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 			SQLQuery resultAux = null;
 			//don't do subquery elimination here!
-//			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
-//				try {
-//					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-//					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-//					logicalTables.add(alphaSubject);
-//					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-//						SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-//						logicalTables.add(logicalTable);
-//						ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-//						joinExpressions.add(joinExpression);
-//					}
-//					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-//					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);
-//				} catch(Exception e) {
-//					String errorMessage = "error in eliminating subquery!";
-//					logger.error(errorMessage);
-//				}
-//			} 
-			
+			//			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
+			//				try {
+			//					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+			//					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+			//					logicalTables.add(alphaSubject);
+			//					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+			//						SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+			//						logicalTables.add(logicalTable);
+			//						ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+			//						joinExpressions.add(joinExpression);
+			//					}
+			//					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+			//					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);
+			//				} catch(Exception e) {
+			//					String errorMessage = "error in eliminating subquery!";
+			//					logger.error(errorMessage);
+			//				}
+			//			} 
+
 			if(resultAux == null) { //without subquery elimination or error occured during the process
 				resultAux = new SQLQuery(alphaSubject);
 				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
@@ -328,7 +328,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				resultAux.setSelectItems(selectItems);
 				resultAux.setWhere(condSQL);
 			}
-			
+
 			transTP = resultAux;
 			logger.debug("transTP(tp, cm) = " + transTP);			
 		}

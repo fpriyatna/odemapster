@@ -218,7 +218,7 @@ public class SQLUtility {
 		
 		for(ZSelectItem selectItem : selectItems) {
 			String alias = selectItem.getAlias();
-			if(alias.startsWith(Constants.PREFIX_MAPPING)) {
+			if(alias.startsWith(Constants.PREFIX_MAPPING_ID)) {
 				result.add(selectItem);
 			}
 		}
@@ -231,7 +231,7 @@ public class SQLUtility {
 		
 		for(ZSelectItem selectItem : selectItems) {
 			String alias = selectItem.getAlias();
-			String varNamePrefixed = Constants.PREFIX_MAPPING + node.getName();
+			String varNamePrefixed = Constants.PREFIX_MAPPING_ID + node.getName();
 			if(alias.equals(varNamePrefixed)) {
 				result.add(selectItem);
 			}

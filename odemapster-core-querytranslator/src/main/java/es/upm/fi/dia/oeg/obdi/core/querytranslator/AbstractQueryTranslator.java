@@ -86,12 +86,13 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected AbstractMappingDocument mappingDocument;
 	protected AbstractUnfolder unfolder;
 	private Connection connection;
+	
 	protected Map<Node, Set<AbstractConceptMapping>> mapInferredTypes;
 	protected IQueryTranslationOptimizer optimizer = null;
 	protected boolean ignoreRDFTypeStatement = false;
 	protected Map<Op, Collection<Node>> mapTermsC = new HashMap<Op, Collection<Node>>();
 	protected Map<Op, String> mapTransGP1Alias = new HashMap<Op, String>();
-	private Map<String, Object> mapVarMapping2 = new HashMap<String, Object>();
+	//private Map<String, Object> mapVarMapping2 = new HashMap<String, Object>();
 	private Map<Integer, Object> mapHashCodeMapping = new HashMap<Integer, Object>();
 	public enum POS {sub, pre, obj}
 	private ConfigurationProperties configurationProperties;
@@ -514,8 +515,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		List<Var> selectVars = opProject.getVars();
 		Collection<ZSelectItem> mapPrefixSelectItems = new Vector<ZSelectItem>();
 		for(Var selectVar : selectVars) {
-			Collection<ZSelectItem> selectItemsByVars = this.generateSelectItem(
-					selectVar, subOpSQLAlias, oldSelectItems, true);
+			Collection<ZSelectItem> selectItemsByVars = this.generateSelectItem(selectVar, subOpSQLAlias, oldSelectItems, true);
 			newSelectItems.addAll(selectItemsByVars);
 
 			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(oldSelectItems, selectVar);
@@ -632,7 +632,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Collection<ZSelectItem> gp1SelectItems = transGP1.getSelectItems();
 			Collection<ZSelectItem> gp2SelectItems = transGP2.getSelectItems();
 
-			
+
 
 
 
@@ -747,7 +747,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			query2.setDatabaseType(this.databaseType);
 			Collection<ZSelectItem> mappingsSelectItems2 = new Vector<ZSelectItem>();
 
-			
+
 			IQuery transR3 = this.trans(gp2);
 			Collection<ZSelectItem> r3SelectItems = transR3.getSelectItems();
 
@@ -792,7 +792,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					}
 				}
 			}
-			
+
 			Collection<ZSelectItem> selectItemsB2 = this.generateSelectItems(
 					termsB, transR3Alias, gp2SelectItems, false);
 			selectItems2.addAll(selectItemsB2);
@@ -805,7 +805,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					}
 				}
 			}
-			
+
 			Collection<ZSelectItem> selectItemsC2 = this.generateSelectItems(
 					termsCList, transR3Alias + ".", r3SelectItems, false);
 			for(ZSelectItem selectItemC : selectItemsC2) {
@@ -825,7 +825,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					}
 				}
 			}
-			
+
 			query2.addSelectItems(mappingsSelectItems2);
 
 			SQLUnion transUnionSQL = new SQLUnion();
@@ -1517,7 +1517,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 
 			//PRSQLSTG
-			Collection<ZSelectItem> selectItems = 
+			Collection<ZSelectItem> prSQL = 
 					this.prSQLGenerator.genPRSQLSTG(stg, alphaResult
 							, betaGenerator, nameGenerator, cm);
 
@@ -1528,29 +1528,63 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 			//TRANS(STG)
 			SQLQuery resultAux = null;
-			//don't do subquery elimination here!
-			//			if(this.optimizer != null) {
-			//				boolean isTransSTGSubQueryElimination = this.optimizer.isTransSTGSubQueryElimination();
-			//				if(isTransSTGSubQueryElimination) {
-			//					try {
-			//						Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-			//						Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-			//						logicalTables.add(alphaSubject);
-			//						for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-			//							SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-			//							logicalTables.add(logicalTable);
-			//							ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-			//							joinExpressions.add(joinExpression);
-			//						}
-			//						ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-			//						resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);					
-			//					} catch(Exception e) {
-			//						String errorMessage = "error in eliminating subquery!";
-			//						logger.error(errorMessage);
-			//						resultAux = null;
-			//					}					
-			//				}
-			//			}
+			//don't do subquery elimination here! why?
+			if(this.optimizer != null) {
+				boolean isTransSTGSubQueryElimination = this.optimizer.isTransSTGSubQueryElimination();
+				if(isTransSTGSubQueryElimination) {
+					try {
+						Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+						Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+						if(alphaSubject instanceof SQLQuery) {
+							resultAux = (SQLQuery) alphaSubject;
+							
+							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+								resultAux.addLogicalTable(logicalTable);
+								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+								//ZExpression pushedJoinExpression = (ZExpression) resultAux.pushExpressionDown(joinExpression);
+								joinExpressions.add(joinExpression);
+							}
+							
+							//ZExpression pushedCondSQL = (ZExpression) resultAux.pushExpressionDown(condSQL);
+							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+							ZExpression pushedNewWhere = (ZExpression) resultAux.pushExpressionDown(newWhere);
+							resultAux.addWhere(pushedNewWhere);
+							
+							Collection<ZSelectItem> pushedPRSQL = resultAux.pushProjectionsDown(prSQL);
+							resultAux.setSelectItems(pushedPRSQL);
+							
+						} else if(alphaSubject instanceof ZFromItem) {
+							logicalTables.add(alphaSubject);
+							
+							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+								logicalTables.add(logicalTable);
+								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+								joinExpressions.add(joinExpression);
+							}
+							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
+						} else {
+							logger.warn("undefined alphasubject type!");
+							logicalTables.add(alphaSubject);
+							
+							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+								logicalTables.add(logicalTable);
+								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+								joinExpressions.add(joinExpression);
+							}
+							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
+						}
+					} catch(Exception e) {
+						String errorMessage = "error in eliminating subquery!";
+						logger.error(errorMessage);
+						resultAux = null;
+					}					
+				}
+			}
 
 
 			if(resultAux == null) { //without subquery elimination or error occured during the process
@@ -1559,7 +1593,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
 				}
-				resultAux.setSelectItems(selectItems);
+				resultAux.setSelectItems(prSQL);
 				resultAux.setWhere(condSQL);
 			}
 
@@ -1651,9 +1685,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return nameGenerator;
 	}
 
-	public Map<String, Object> getMapVarMapping2() {
-		return this.mapVarMapping2;
-	}
+//	public Map<String, Object> getMapVarMapping2() {
+//		return this.mapVarMapping2;
+//	}
 
 	public String getDatabaseType() {
 		return databaseType;

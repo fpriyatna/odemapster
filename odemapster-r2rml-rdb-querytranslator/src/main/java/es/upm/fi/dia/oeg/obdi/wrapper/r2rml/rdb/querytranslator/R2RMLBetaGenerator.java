@@ -62,10 +62,10 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 			if(refObjectMap == null) {
 				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
-				if(object.isVariable()) {
-					this.getOwner().getMapVarMapping2().put(
-							object.getName(), objectMap);
-				}
+//				if(object.isVariable()) {
+//					this.getOwner().getMapVarMapping2().put(
+//							object.getName(), objectMap);
+//				}
 
 				if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
 					String constantValue = objectMap.getConstantValue();
@@ -87,9 +87,9 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 					}
 				}
 			} else {
-				if(object.isVariable()) {
-					this.getOwner().getMapVarMapping2().put(object.getName(), refObjectMap);
-				}
+//				if(object.isVariable()) {
+//					this.getOwner().getMapVarMapping2().put(object.getName(), refObjectMap);
+//				}
 				
 				List<String> databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
 				//String refObjectMapAlias = refObjectMap.getAlias(); 

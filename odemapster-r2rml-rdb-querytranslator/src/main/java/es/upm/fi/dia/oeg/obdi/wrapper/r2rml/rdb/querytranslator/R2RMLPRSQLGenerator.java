@@ -61,13 +61,13 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 		if(subject.isVariable()) {
 			R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cmSubject;
 			R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
-			this.getOwner().getMapVarMapping2().put(subject.getName(), subjectMap);
+//			this.getOwner().getMapVarMapping2().put(subject.getName(), subjectMap);
 			Collection<ZSelectItem> childResult = new Vector<ZSelectItem>();
 			ZConstant mappingHashCodeConstant = new ZConstant(
 					subjectMap.hashCode() + "", ZConstant.NUMBER);
 			SQLSelectItem mappingSelectItem = new SQLSelectItem();
 			mappingSelectItem.setExpression(mappingHashCodeConstant);
-			String mappingSelectItemAlias = Constants.PREFIX_MAPPING + subject.getName();
+			String mappingSelectItemAlias = Constants.PREFIX_MAPPING_ID + subject.getName();
 			mappingSelectItem.setAlias(mappingSelectItemAlias);
 			mappingSelectItem.setDbType(this.getOwner().getDatabaseType());
 			mappingSelectItem.setColumnType(Constants.COLUMN_TYPE_INTEGER);
@@ -134,7 +134,7 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 							mappingHashCode + "", ZConstant.NUMBER);
 					SQLSelectItem mappingSelectItem = new SQLSelectItem();
 					mappingSelectItem.setExpression(mappingHashCodeConstant);
-					String mappingSelectItemAlias = Constants.PREFIX_MAPPING + object.getName();
+					String mappingSelectItemAlias = Constants.PREFIX_MAPPING_ID + object.getName();
 					mappingSelectItem.setAlias(mappingSelectItemAlias);
 					mappingSelectItem.setDbType(this.getOwner().getDatabaseType());
 					mappingSelectItem.setColumnType(Constants.COLUMN_TYPE_INTEGER);

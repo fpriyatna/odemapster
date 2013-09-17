@@ -97,6 +97,6 @@ public class Constants {
 	public static final String PREFIX_LIT = "lit_";
 	public static final String KEY_SUFFIX = "_key";
 	public static final String PREFIX_SUBJECT_MAPPING = "sm_";
-	public static final String PREFIX_MAPPING = "map_";
+	public static final String PREFIX_MAPPING_ID = "mappingid_";
 
 }
