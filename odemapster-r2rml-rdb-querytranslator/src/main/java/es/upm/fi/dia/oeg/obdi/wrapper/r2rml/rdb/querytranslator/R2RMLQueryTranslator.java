@@ -261,7 +261,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 	@Override
 	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
-			String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
+			String predicateURI, boolean unboundedPredicate) throws QueryTranslationException, InsatisfiableSQLExpression {
 		IQuery transTP = null;
 
 		//alpha

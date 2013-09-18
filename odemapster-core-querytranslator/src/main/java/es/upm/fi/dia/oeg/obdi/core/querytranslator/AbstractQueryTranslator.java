@@ -129,8 +129,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	protected abstract void buildPRSQLGenerator();
 
-	private List<String> getColumnsByNode(Node node, Collection<ZSelectItem> oldSelectItems) {
-		List<String> result = new LinkedList<String>();
+	private Collection<String> getColumnsByNode(Node node, Collection<ZSelectItem> oldSelectItems) {
+		Collection<String> result = new LinkedHashSet<String>();
 		String nameSelectVar = nameGenerator.generateName(node);
 
 		Iterator<ZSelectItem> oldSelectItemsIterator = oldSelectItems.iterator();
@@ -1180,8 +1180,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				boolean isTermCInSubjectGP2 = sparqlUtility.isNodeInSubjectGraph(termC, gp2);
 
 				if(termC.isVariable()) {
-					List<String> termCColumns1 = this.getColumnsByNode(termC, gp1SelectItems);
-					List<String> termCColumns2 = this.getColumnsByNode(termC, gp2SelectItems);
+					Collection<String> termCColumns1 = this.getColumnsByNode(termC, gp1SelectItems);
+					Collection<String> termCColumns2 = this.getColumnsByNode(termC, gp2SelectItems);
 
 					if(termCColumns1.size() == termCColumns2.size()) {
 						Iterator<String> termCColumns1Iterator = termCColumns1.iterator();
@@ -1370,7 +1370,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		if(tpPredicate.isURI()) {
 			String predicateURI = tpPredicate.getURI();
 			try {
-				result = this.trans(tp, cm, predicateURI);	
+				result = this.trans(tp, cm, predicateURI, false);	
 			} catch(InsatisfiableSQLExpression e) {
 
 			}
@@ -1381,7 +1381,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				for(AbstractPropertyMapping pm : pms) {
 					String predicateURI = pm.getMappedPredicateName();
 					try {
-						IQuery sqlQuery = this.trans(tp, cm, predicateURI);
+						IQuery sqlQuery = this.trans(tp, cm, predicateURI, true);
 						sqlQueries.add(sqlQuery);
 					} catch(InsatisfiableSQLExpression e) {
 						logger.debug("Insatifiable sql while translating : " + predicateURI + " in " + cm.getConceptName());
@@ -1400,7 +1400,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return result;
 	}
 
-	protected abstract IQuery trans(Triple tp, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression;
+	protected abstract IQuery trans(Triple tp, AbstractConceptMapping cm, String predicateURI, boolean insideUnboundedPredicate)
+			throws QueryTranslationException, InsatisfiableSQLExpression;
 
 	protected IQuery trans(Triple tp) throws QueryTranslationException {
 		IQuery result = null;
@@ -1555,16 +1556,25 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 							resultAux.setSelectItems(pushedPRSQL);
 							
 						} else if(alphaSubject instanceof ZFromItem) {
-							logicalTables.add(alphaSubject);
+							ZFromItem alphaSubjectFromItem = (ZFromItem) alphaSubject;
 							
+							resultAux = new SQLQuery();
+							resultAux.addSelectItems(prSQL);
+							resultAux.addFromItem(alphaSubjectFromItem);
 							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-								logicalTables.add(logicalTable);
-								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-								joinExpressions.add(joinExpression);
+								resultAux.addFromItem(alphaPredicateObject);
 							}
-							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
+							resultAux.addWhere(condSQL);
+							
+//							logicalTables.add(alphaSubject);
+//							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+//								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+//								logicalTables.add(logicalTable);
+//								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+//								joinExpressions.add(joinExpression);
+//							}
+//							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+//							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
 						} else {
 							logger.warn("undefined alphasubject type!");
 							logicalTables.add(alphaSubject);

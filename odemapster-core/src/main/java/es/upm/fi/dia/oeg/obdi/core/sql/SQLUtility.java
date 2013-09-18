@@ -189,23 +189,71 @@ public class SQLUtility {
 		//this.setOrderBy(newOrderByCollection);
 	}
 	
-	public static Collection<ZExpression> containsPrefix(ZExp exp, String prefix) {
+	public static boolean areAllConstants(Collection<ZExp> exps) {
+		boolean result;
+		
+		if(exps == null) {
+			result = false;
+		} else {
+			result = true;
+			for(ZExp exp : exps) {
+				if(!(exp instanceof ZConstant)) {
+					result = false;
+				}
+			}			
+		}
+		
+		return result;
+	}
+
+	public static Collection<ZExpression> containedInPrefix(ZExp exp, String prefix) {
+		Collection<String> prefixes = new Vector<String>();
+		prefixes.add(prefix);
+		Collection<ZExpression> result = SQLUtility.containedInPrefixes(exp, prefixes, true);
+		return result;
+	}
+
+		
+	public static Collection<ZExpression> containedInPrefixes(ZExp exp, Collection<String> prefixes, boolean allPrefixes) {
 		Collection<ZExpression> result = new HashSet<ZExpression>();
 		
 		if(exp instanceof ZExpression) {
 			ZExpression expExpression = (ZExpression) exp;
 			Vector<ZExp> operands = expExpression.getOperands();
-			for(ZExp operand : operands) {
-				if(operand instanceof ZConstant) {
-					String operandString = operand.toString();
-					operandString = operandString.replaceAll("\"", "");
-					operandString = operandString.replaceAll("\'", "");
-					if(operandString.contains(prefix + ".")) {
-						result.add(expExpression);	
+			if(SQLUtility.areAllConstants(operands)) {
+				Collection<ZExp> resultAux = new Vector<ZExp>();
+				for(ZExp operand : operands) {
+					if(operand instanceof ZConstant) {
+						ZConstant zConstant = (ZConstant) operand;  
+						if(zConstant.getType() == ZConstant.COLUMNNAME) {
+							String operandString = operand.toString();
+							operandString = operandString.replaceAll("\"", "");
+							operandString = operandString.replaceAll("\'", "");
+							boolean found = false;
+							for(String prefix : prefixes) {
+								if(operandString.contains(prefix + ".") && !found) {
+									resultAux.add(operand);	
+								}						
+							}
+						} else {
+							resultAux.add(operand);
+						}
 					}
+				}
+				
+				if(allPrefixes) {
+					if(resultAux.size() == operands.size()) {
+						result.add(expExpression);
+					}					
 				} else {
-					Collection<ZExpression> resultAux = SQLUtility.containsPrefix(operand, prefix);
-					result.addAll(resultAux);
+					if(resultAux.size() > 0) {
+						result.add(expExpression);
+					}
+				}
+			} else {
+				for(ZExp operand : operands) {
+					Collection<ZExpression> resultChild = SQLUtility.containedInPrefixes(operand, prefixes, allPrefixes);
+					result.addAll(resultChild);
 				}
 			}
 		}

@@ -83,8 +83,7 @@ public abstract class AbstractPRSQLGenerator {
 	protected Collection<ZSelectItem> genPRSQLObject(Triple tp
 			, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
 			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject
-			, String predicateURI
-			, String columnType
+			, String predicateURI, String columnType
 			) throws QueryTranslationException {
 		Collection<ZSelectItem> selectItems = new Vector<ZSelectItem>();
 		
@@ -156,11 +155,9 @@ public abstract class AbstractPRSQLGenerator {
 	}
 	
 	protected Collection<ZSelectItem> genPRSQLSubject(
-			Triple tp, AlphaResult alphaResult
-			, AbstractBetaGenerator betaGenerator
-			, NameGenerator nameGenerator
-			, AbstractConceptMapping cmSubject) 
-					throws QueryTranslationException {
+			Triple tp, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject
+			) throws QueryTranslationException {
 		Node subject = tp.getSubject();
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 		
@@ -234,7 +231,7 @@ public abstract class AbstractPRSQLGenerator {
 									betaGenerator, nameGenerator,
 									predicateURI);
 					if(selectItemPredicate != null) {
-						prList.add(selectItemPredicate);	
+						//prList.add(selectItemPredicate);	
 					}
 					
 				}

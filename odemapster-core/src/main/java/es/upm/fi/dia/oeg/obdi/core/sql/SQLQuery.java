@@ -1063,6 +1063,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		if(proceed) {
 			result = new SQLQuery();
 			result.setDatabaseType(databasetype);
+			Collection<String> addedTableAlias = new Vector<String>();
 
 			Map<String, ZSelectItem> mapAliasSelectItems = 
 					new LinkedHashMap<String, ZSelectItem>();
@@ -1071,17 +1072,25 @@ public class SQLQuery extends ZQuery implements IQuery {
 				SQLQuery leftTableSQLQuery = (SQLQuery) leftTable;
 				Vector<ZFromItem> leftTableFromItems = leftTableSQLQuery.getFrom();
 				for(ZFromItem leftTableFromItem : leftTableFromItems) {
-					String fromItemAlias = leftTableFromItem.getAlias();
+					String fromItemAlias;
+					if(leftTableFromItem instanceof SQLJoinTable) {
+						fromItemAlias = ((SQLJoinTable) leftTableFromItem).getJoinSource().getAlias();
+					} else {
+						fromItemAlias = leftTableFromItem.getAlias();	
+					}
+					
 					if(fromItemAlias == null || fromItemAlias.equals("")) {
 						String logicalTableAlias = leftTable.getAlias();
 						if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
 							leftTableFromItem.setAlias(logicalTableAlias);	
 						}
 					}
-					result.addFromItem(leftTableFromItem);	
+					result.addFromItem(leftTableFromItem);
+					addedTableAlias.add(fromItemAlias);
 				}
 
-				result.addWhere(leftTableSQLQuery.getWhere());
+				ZExp leftTableWhere = leftTableSQLQuery.getWhere();
+				result.addWhere(leftTableWhere);
 				Collection<ZSelectItem> leftTableSelectItems = leftTableSQLQuery.getSelectItems();
 				result.addSelects(leftTableSelectItems);
 				Map<String, ZSelectItem> mapAliasSelectItemsLeft = leftTableSQLQuery.buildMapAliasSelectItem();
@@ -1089,6 +1098,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 			} else if(leftTable instanceof SQLFromItem) {
 				SQLFromItem leftTableFromItem = (SQLFromItem) leftTable; 
 				result.addFromItem(leftTableFromItem);
+				addedTableAlias.add(leftTableFromItem.getAlias());
 			}
 
 			if(rightTable instanceof SQLQuery) {
@@ -1104,25 +1114,39 @@ public class SQLQuery extends ZQuery implements IQuery {
 				String logicalTableAlias = rightTable.getAlias();
 				SQLJoinTable joinTable = null;
 				Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
-				Collection<String> addedTabled = new Vector<String>();
 				
+				Collection<ZExp> addedExpressions = new Vector<ZExp>();
 				for(ZFromItem rightTableFromItem : rightTableFromItems) {
 					if(rightTableFromItem instanceof SQLFromItem) {
 						String rightTableAlias = rightTableFromItem.getAlias();
+						
+
 						LogicalTableType tableType = ((SQLFromItem) rightTableFromItem).getForm();
 						if(tableType == LogicalTableType.TABLE_NAME) {
 							String rightTableName = rightTableFromItem.getTable();
 							SQLLogicalTable rightTableLogicalTable = new SQLFromItem(rightTableName, LogicalTableType.TABLE_NAME);
-
-							Collection<ZExpression> containedExpressions1 = SQLUtility.containsPrefix(newJoinExpression, rightTableAlias);
-							Collection<ZExpression> containedExpressions2 = SQLUtility.containsPrefix(newWhereExpression, rightTableAlias);
-							if(containedExpressions1.isEmpty() && containedExpressions2.isEmpty()) {
+							
+							//be careful so that we don't return those join expressions that is not in rightTableAlias
+							Collection<ZExpression> relevantJoinExpression1 = SQLUtility.containedInPrefixes(newJoinExpression, addedTableAlias, true);
+							addedTableAlias.add(rightTableAlias);
+							Collection<ZExpression> relevantJoinExpression2 = SQLUtility.containedInPrefixes(newJoinExpression, addedTableAlias, true);
+							Collection<ZExpression> relevantJoinExpression = new Vector<ZExpression>(relevantJoinExpression2);
+							relevantJoinExpression.removeAll(relevantJoinExpression1);
+							
+							Collection<ZExpression> relevantWhereExpression = SQLUtility.containedInPrefix(newWhereExpression, rightTableAlias);
+							if(relevantJoinExpression.isEmpty() && relevantWhereExpression.isEmpty()) {
 								joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, Constants.SQL_EXPRESSION_TRUE);
 							} else {
 								Collection<ZExpression> combinedExpressionCollection = new HashSet<ZExpression>();
-								combinedExpressionCollection.addAll(containedExpressions1);
-								combinedExpressionCollection.addAll(containedExpressions2);
-
+								for(ZExpression joinExpression : relevantJoinExpression) {
+									if(!addedExpressions.contains(joinExpression)) {
+										combinedExpressionCollection.add(joinExpression);
+										addedExpressions.add(joinExpression);
+									}
+								}
+								
+								combinedExpressionCollection.addAll(relevantWhereExpression);
+								
 								ZExpression combinedExpressions = SQLUtility.combineExpresions(combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND);
 								joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, combinedExpressions);	
 							}
@@ -1140,11 +1164,19 @@ public class SQLQuery extends ZQuery implements IQuery {
 					} else if(rightTableFromItem instanceof SQLJoinTable) {
 						joinTable = (SQLJoinTable) rightTableFromItem;
 						String rightTableAlias = joinTable.getJoinSource().getAlias();
-						Collection<ZExpression> containedExpressions1 = SQLUtility.containsPrefix(newJoinExpression, rightTableAlias);
-						Collection<ZExpression> containedExpressions2 = SQLUtility.containsPrefix(newWhereExpression, rightTableAlias);
+						
+
+						Collection<ZExpression> relevantJoinExpression1 = SQLUtility.containedInPrefixes(newJoinExpression, addedTableAlias, true);
+						addedTableAlias.add(rightTableAlias);
+						Collection<ZExpression> relevantJoinExpression2 = SQLUtility.containedInPrefixes(newJoinExpression, addedTableAlias, true);
+						//so that we don't return those join expressions that is not in rightTableAlias 
+						Collection<ZExpression> relevantJoinExpression = new Vector<ZExpression>(relevantJoinExpression2);
+						relevantJoinExpression.removeAll(relevantJoinExpression1);
+
+						Collection<ZExpression> relevantWhereExpression = SQLUtility.containedInPrefix(newWhereExpression, rightTableAlias);
 						Collection<ZExpression> combinedExpressionCollection = new HashSet<ZExpression>();
-						combinedExpressionCollection.addAll(containedExpressions1);
-						combinedExpressionCollection.addAll(containedExpressions2);
+						combinedExpressionCollection.addAll(relevantJoinExpression);
+						combinedExpressionCollection.addAll(relevantWhereExpression);
 						ZExpression combinedExpressions = SQLUtility.combineExpresions(combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND);
 						joinTable.addOnExpression(combinedExpressions);	
 					}

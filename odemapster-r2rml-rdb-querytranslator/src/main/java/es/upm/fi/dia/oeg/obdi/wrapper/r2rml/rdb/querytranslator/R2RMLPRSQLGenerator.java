@@ -47,13 +47,12 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 	
 	@Override
 	protected Collection<ZSelectItem> genPRSQLSubject(Triple tp
-			, AlphaResult alphaResult
-			, AbstractBetaGenerator betaGenerator
-			, NameGenerator nameGenerator
-			, AbstractConceptMapping cmSubject)
-					throws QueryTranslationException {
+			, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
+			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject
+			) throws QueryTranslationException {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-		Collection<ZSelectItem> parentResult = super.genPRSQLSubject(tp, alphaResult, betaGenerator, nameGenerator, cmSubject);
+		Collection<ZSelectItem> parentResult = super.genPRSQLSubject(tp, alphaResult
+				, betaGenerator, nameGenerator, cmSubject);
 		result.addAll(parentResult);
 		
 		Node subject = tp.getSubject();
@@ -97,11 +96,12 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 	protected Collection<ZSelectItem> genPRSQLObject(Triple tp,
 			AlphaResult alphaResult, AbstractBetaGenerator betaGenerator,
 			NameGenerator nameGenerator, AbstractConceptMapping cmSubject,
-			String predicateURI, String columnType)
+			String predicateURI, String columnType
+			)
 			throws QueryTranslationException {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-		Collection<ZSelectItem> parentResult = super.genPRSQLObject(tp, alphaResult, betaGenerator, nameGenerator,
-				cmSubject, predicateURI, columnType);
+		Collection<ZSelectItem> parentResult = super.genPRSQLObject(tp, alphaResult, betaGenerator
+				, nameGenerator, cmSubject, predicateURI, columnType);
 		result.addAll(parentResult);
 		
 		Node object = tp.getObject();
