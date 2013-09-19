@@ -286,5 +286,17 @@ public class SQLUtility {
 		}
 		
 		return result;
-	}	
+	}
+	
+	public static void setDefaultAlias(Collection<ZSelectItem> selectItems) {
+		for(ZSelectItem selectItem : selectItems) {
+			String alias = selectItem.getAlias();
+			if(alias == null || alias.equals("")) {
+				alias = selectItem.getColumn();
+				if(alias != null && !alias.equals("")) {
+					selectItem.setAlias(alias);
+				}
+			}
+		}
+	}
 }

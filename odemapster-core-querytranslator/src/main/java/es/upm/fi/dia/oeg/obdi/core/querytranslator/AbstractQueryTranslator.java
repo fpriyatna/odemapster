@@ -86,7 +86,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected AbstractMappingDocument mappingDocument;
 	protected AbstractUnfolder unfolder;
 	private Connection connection;
-	
+
 	protected Map<Node, Set<AbstractConceptMapping>> mapInferredTypes;
 	protected IQueryTranslationOptimizer optimizer = null;
 	protected boolean ignoreRDFTypeStatement = false;
@@ -281,6 +281,30 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			result.addAll(selectItems);
 		}
 
+		return result;
+	}
+	
+	private Collection<ZSelectItem> generateMappingIdSelectItems(Collection<Node> nodes, Collection<ZSelectItem> selectItems, String prefix) {
+		if(prefix == null) {
+			prefix = "";
+		} else {
+			if(!prefix.endsWith(".")) {
+				prefix += ".";
+			}	
+		}
+		
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
+		for(Node term : nodes) {
+			if(term.isVariable()) {
+				Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(selectItems, term);
+				for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
+					ZSelectItem newSelectItem = new ZSelectItem(prefix + mappingsSelectItemAux.getAlias());
+					result.add(newSelectItem);	
+				}
+			}
+		}
+		
 		return result;
 	}
 
@@ -609,227 +633,99 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected IQuery trans(OpUnion opUnion) throws Exception {
 		IQuery result;
 
-
 		Op gp1 = opUnion.getLeft();
 		Op gp2 = opUnion.getRight();
 
-		IQuery transGP1 = this.trans(gp1);
-		IQuery transGP2 = this.trans(gp2);
+		IQuery r1 = this.trans(gp1);
+		IQuery r2 = this.trans(gp2);
 
-		if(transGP1 == null && transGP2 == null) {
+		if(r1 == null && r2 == null) {
 			result = null;
-		} else if(transGP1 == null && transGP2 != null) {
-			result = transGP2;
-		} else if(transGP1 != null && transGP2 == null) {
-			result = transGP1;
+		} else if(r1 == null && r2 != null) {
+			result = r2;
+		} else if(r1 != null && r2 == null) {
+			result = r1;
 		} else {
+			IQuery r3 = this.trans(gp2);
+			IQuery r4 = this.trans(gp1);
+
+			String r1Alias = r1.generateAlias() + "R1";
+			r1.setAlias(r1Alias);
+			String r2Alias = r2.generateAlias() + "R2";
+			r2.setAlias(r2Alias);
+			String r3Alias = r3.generateAlias() + "R3";
+			r3.setAlias(r3Alias);
+			String r4Alias = r4.generateAlias() + "R4";
+			r4.setAlias(r4Alias);
+
+			Collection<ZSelectItem> r1SelectItems = r1.getSelectItems();
+			Collection<ZSelectItem> r2SelectItems = r2.getSelectItems();
+			Collection<ZSelectItem> r3SelectItems = r3.getSelectItems();
+
 			Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
 			Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
 			Set<Node> termsA = new LinkedHashSet<Node>(termsGP1);termsA.removeAll(termsGP2);
 			Set<Node> termsB = new LinkedHashSet<Node>(termsGP2);termsB.removeAll(termsGP1);
 			Set<Node> termsC = new LinkedHashSet<Node>(termsGP1);termsC.retainAll(termsGP2);
 
-			Collection<ZSelectItem> gp1SelectItems = transGP1.getSelectItems();
-			Collection<ZSelectItem> gp2SelectItems = transGP2.getSelectItems();
-
-
-
-
-
-			String transGP1Alias = transGP1.generateAlias() + "R1";
-			transGP1.setAlias(transGP1Alias);
-
-			//SQLFromItem transGP1FromItem = new SQLFromItem(transGP1.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem transGP1FromItem;
-			String subQueryGP1ViewName = "sql" + Math.abs(gp1.hashCode());
-			if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
-				Connection conn = this.getConnection();
-				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryGP1ViewName;
-				logger.info(dropViewSQL);
-				DBUtility.execute(conn, dropViewSQL);
-				String createViewSQL = "CREATE VIEW " + subQueryGP1ViewName + " AS " + transGP1;
-				logger.info(createViewSQL);
-				DBUtility.execute(conn, createViewSQL);
-				transGP1FromItem = new SQLFromItem(subQueryGP1ViewName, LogicalTableType.TABLE_NAME);
-			} else {
-				//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
-				transGP1FromItem = new SQLFromItem(transGP1.toString(), LogicalTableType.QUERY_STRING);
-			}
+			
+			Collection<ZSelectItem> selectItemsA1 = this.generateSelectItems(termsA, r1Alias, r1SelectItems, false);
+			SQLUtility.setDefaultAlias(selectItemsA1);
+			Collection<ZSelectItem> selectItemsB1 = this.generateSelectItems(termsB, r2Alias, r2SelectItems, false);
+			SQLUtility.setDefaultAlias(selectItemsB1);
+			Collection<ZSelectItem> selectItemsC1 = this.generateSelectItems(termsC, r1Alias, r1SelectItems, false);
+			SQLUtility.setDefaultAlias(selectItemsC1);
+			
+			Collection<ZSelectItem> selectItemsMappingId1 = new Vector<ZSelectItem>();
+			Collection<ZSelectItem> a1MappingIdSelectItems = this.generateMappingIdSelectItems(termsA, r1SelectItems, r1Alias);
+			selectItemsMappingId1.addAll(a1MappingIdSelectItems);
+			Collection<ZSelectItem> b1MappingIdSelectItems = this.generateMappingIdSelectItems(termsB, r2SelectItems, r2Alias);
+			selectItemsMappingId1.addAll(b1MappingIdSelectItems);
+			Collection<ZSelectItem> c1MappingIdSelectItems = this.generateMappingIdSelectItems(termsC, r1SelectItems, r1Alias);
+			selectItemsMappingId1.addAll(c1MappingIdSelectItems);
 
 			SQLQuery query1 = new SQLQuery();
-			Collection<ZSelectItem> mappingsSelectItems1 = new Vector<ZSelectItem>();
 			query1.setDatabaseType(this.databaseType);
+			SQLJoinTable r1JoinTable = new SQLJoinTable(r1, null, null);
+			SQLJoinTable r2JoinTable = new SQLJoinTable(r2, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE);
+			query1.addFromItem(r1JoinTable);
+			query1.addFromItem(r2JoinTable);
+			query1.addSelectItems(selectItemsA1);
+			query1.addSelectItems(selectItemsB1);
+			query1.addSelectItems(selectItemsC1);
+			query1.addSelectItems(selectItemsMappingId1);
+			
 
-			transGP1FromItem.setAlias(transGP1Alias);
-			//query1.addFrom(transGP1FromItem);
-			query1.addFromItem(new SQLJoinTable(transGP1, null, null));
-
-			String transGP2Alias = transGP2.generateAlias() + "R2";
-			transGP2.setAlias(transGP2Alias);
-
-			//SQLFromItem transGP2FromItem = new SQLFromItem(transGP2.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem transGP2FromItem;
-			String subQueryGP2ViewName = "sqr" + Math.abs(gp2.hashCode());
-			if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
-				Connection conn = this.getConnection();
-				String dropViewSQL = "DROP VIEW IF EXISTS " + subQueryGP2ViewName;
-				logger.info(dropViewSQL);
-				DBUtility.execute(conn, dropViewSQL);
-				String createViewSQL = "CREATE VIEW " + subQueryGP2ViewName + " AS " + transGP2;
-				logger.info(createViewSQL);
-				DBUtility.execute(conn, createViewSQL);
-				transGP2FromItem = new SQLFromItem(subQueryGP2ViewName, LogicalTableType.TABLE_NAME);
-			} else {
-				//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
-				transGP2FromItem = new SQLFromItem(transGP2.toString(), LogicalTableType.QUERY_STRING);
-			}
-			transGP2FromItem.setAlias(transGP2Alias);
-
-			query1.addFromItem(new SQLJoinTable(transGP2, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
-
-
-
-			Collection<ZSelectItem> selectItemsA = this.generateSelectItems(
-					termsA, transGP1Alias, gp1SelectItems, false);
-			for(Node termA : termsA) {
-				if(termA.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp1SelectItems, termA);
-					for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-						ZSelectItem newSelectItem = new ZSelectItem(mappingsSelectItemAux.getAlias());
-						mappingsSelectItems1.add(newSelectItem);	
-					}
-				}
-			}
-
-			Collection<ZSelectItem> selectItemsB = this.generateSelectItems(
-					termsB, transGP2Alias, gp2SelectItems, false);
-			for(Node termB : termsB) {
-				if(termB.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp2SelectItems, termB);
-					for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-						ZSelectItem newSelectItem = new ZSelectItem(mappingsSelectItemAux.getAlias());
-						mappingsSelectItems1.add(newSelectItem);	
-					}
-				}
-			}
-
+			
+			Collection<ZSelectItem> selectItemsA2 = this.generateSelectItems(termsA, r4Alias, r1SelectItems, false);
+			SQLUtility.setDefaultAlias(selectItemsA2);
+			Collection<ZSelectItem> selectItemsB2 = this.generateSelectItems(termsB, r3Alias, r2SelectItems, false);
+			SQLUtility.setDefaultAlias(selectItemsB2);
 			Vector<Node> termsCList = new Vector<Node>(termsC);
+			Collection<ZSelectItem> selectItemsC2 = this.generateSelectItems(termsCList, r3Alias + ".", r3SelectItems, false);
+			SQLUtility.setDefaultAlias(selectItemsC2);
 
-			Vector<ZSelectItem> selectItems1 = new Vector<ZSelectItem>();
-			query1.addSelect(selectItems1);
-			selectItems1.addAll(selectItemsA);
-			selectItems1.addAll(selectItemsB);
-			Collection<ZSelectItem> selectItemsC = this.generateSelectItems(
-					termsCList, transGP1Alias + ".", gp1SelectItems, false);
-			for(Node termC : termsC) {
-				if(termC.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp1SelectItems, termC);
-					for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-						ZSelectItem newSelectItem = new ZSelectItem(mappingsSelectItemAux.getAlias());
-						mappingsSelectItems1.add(newSelectItem);	
-					}				
-				}
-			}
-
-
-			for(ZSelectItem selectItemC : selectItemsC) {
-				String alias = selectItemC.getAlias();
-				if(alias == null || alias.equals("")) {
-					alias = selectItemC.getColumn();
-					selectItemC.setAlias(alias);
-				}
-			}
-			selectItems1.addAll(selectItemsC);
-			query1.addSelect(selectItems1);
-			query1.addSelectItems(mappingsSelectItems1);
+			Collection<ZSelectItem> selectItemsMappingId2 = new Vector<ZSelectItem>();
+			Collection<ZSelectItem> a2MappingIdSelectItems = this.generateMappingIdSelectItems(termsA, r1SelectItems, r4Alias);
+			selectItemsMappingId2.addAll(a2MappingIdSelectItems);
+			Collection<ZSelectItem> b2MappingIdSelectItems = this.generateMappingIdSelectItems(termsB, r2SelectItems, r3Alias);
+			selectItemsMappingId2.addAll(b2MappingIdSelectItems);
+			Collection<ZSelectItem> c2MappingIdSelectItems = this.generateMappingIdSelectItems(termsC, r1SelectItems, r3Alias);
+			selectItemsMappingId2.addAll(c2MappingIdSelectItems);
 
 			SQLQuery query2 = new SQLQuery();
 			query2.setDatabaseType(this.databaseType);
-			Collection<ZSelectItem> mappingsSelectItems2 = new Vector<ZSelectItem>();
+			SQLJoinTable r3JoinTable = new SQLJoinTable(r3, null, null);
+			SQLJoinTable r4JoinTable = new SQLJoinTable(r4, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE);
+			query2.addFromItem(r3JoinTable);
+			query2.addFromItem(r4JoinTable);
+			query2.addSelectItems(selectItemsA2);
+			query2.addSelectItems(selectItemsB2);
+			query2.addSelectItems(selectItemsC2);
+			query2.addSelectItems(selectItemsMappingId2);
 
-
-			IQuery transR3 = this.trans(gp2);
-			Collection<ZSelectItem> r3SelectItems = transR3.getSelectItems();
-
-			String transR3Alias = transR3.generateAlias() + "R3";
-			transR3.setAlias(transR3Alias);
-			//SQLFromItem transR3FromItem = new SQLFromItem(transR3.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem transR3FromItem;
-			if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
-				transR3FromItem = new SQLFromItem(subQueryGP2ViewName, LogicalTableType.TABLE_NAME);
-			} else {
-				transR3FromItem = new SQLFromItem(transR3.toString(), LogicalTableType.QUERY_STRING);
-			}
-			transR3FromItem.setAlias(transR3Alias);
-			//query2.addFrom(transR3FromItem);
-			query2.addFromItem(new SQLJoinTable(transR3, null, null));
-
-			IQuery transR4 = this.trans(gp1);
-			String transR4Alias = transR4.generateAlias() + "R4";
-			transR4.setAlias(transR4Alias);
-			//SQLFromItem transR4FromItem = new SQLFromItem(transR4.toString(), SQLFromItem.FORM_QUERY);
-			SQLFromItem transR4FromItem;
-			if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
-				transR4FromItem = new SQLFromItem(subQueryGP1ViewName, LogicalTableType.TABLE_NAME);
-			} else {
-				transR4FromItem = new SQLFromItem(transR4.toString(), LogicalTableType.QUERY_STRING);
-			}
-			transR4FromItem.setAlias(transR4Alias);
-
-			query2.addFromItem(new SQLJoinTable(transR4, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE));
-
-			Vector<ZSelectItem> selectItems2 = new Vector<ZSelectItem>();
-			query2.addSelect(selectItems2);
-			Collection<ZSelectItem> selectItemsA2 = this.generateSelectItems(
-					termsA, transR4Alias, gp1SelectItems, false);
-			selectItems2.addAll(selectItemsA2);
-			for(Node termA : termsA) {
-				if(termA.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp1SelectItems, termA);
-					for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-						ZSelectItem newSelectItem = new ZSelectItem(mappingsSelectItemAux.getAlias());
-						mappingsSelectItems2.add(newSelectItem);	
-					}
-				}
-			}
-
-			Collection<ZSelectItem> selectItemsB2 = this.generateSelectItems(
-					termsB, transR3Alias, gp2SelectItems, false);
-			selectItems2.addAll(selectItemsB2);
-			for(Node termB : termsB) {
-				if(termB.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp2SelectItems, termB);
-					for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-						ZSelectItem newSelectItem = new ZSelectItem(mappingsSelectItemAux.getAlias());
-						mappingsSelectItems2.add(newSelectItem);	
-					}
-				}
-			}
-
-			Collection<ZSelectItem> selectItemsC2 = this.generateSelectItems(
-					termsCList, transR3Alias + ".", r3SelectItems, false);
-			for(ZSelectItem selectItemC : selectItemsC2) {
-				String alias = selectItemC.getAlias();
-				if(alias == null || alias.equals("")) {
-					alias = selectItemC.getColumn();
-					selectItemC.setAlias(alias);
-				}
-			}
-			selectItems2.addAll(selectItemsC2);
-			for(Node termC : termsC) {
-				if(termC.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp1SelectItems, termC);
-					for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-						mappingsSelectItems2.add(mappingsSelectItemAux);						ZSelectItem newSelectItem = new ZSelectItem(mappingsSelectItemAux.getAlias());
-						mappingsSelectItems2.add(newSelectItem);	
-					}
-				}
-			}
-
-			query2.addSelectItems(mappingsSelectItems2);
 
 			SQLUnion transUnionSQL = new SQLUnion();
-
 			transUnionSQL.setDatabaseType(this.databaseType);
 			transUnionSQL.add(query1);
 			transUnionSQL.add(query2);
@@ -1538,7 +1434,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 						Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
 						if(alphaSubject instanceof SQLQuery) {
 							resultAux = (SQLQuery) alphaSubject;
-							
+
 							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
 								resultAux.addLogicalTable(logicalTable);
@@ -1546,18 +1442,18 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 								//ZExpression pushedJoinExpression = (ZExpression) resultAux.pushExpressionDown(joinExpression);
 								joinExpressions.add(joinExpression);
 							}
-							
+
 							//ZExpression pushedCondSQL = (ZExpression) resultAux.pushExpressionDown(condSQL);
 							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
 							ZExpression pushedNewWhere = (ZExpression) resultAux.pushExpressionDown(newWhere);
 							resultAux.addWhere(pushedNewWhere);
-							
+
 							Collection<ZSelectItem> pushedPRSQL = resultAux.pushProjectionsDown(prSQL);
 							resultAux.setSelectItems(pushedPRSQL);
-							
+
 						} else if(alphaSubject instanceof ZFromItem) {
 							ZFromItem alphaSubjectFromItem = (ZFromItem) alphaSubject;
-							
+
 							resultAux = new SQLQuery();
 							resultAux.addSelectItems(prSQL);
 							resultAux.addFromItem(alphaSubjectFromItem);
@@ -1565,20 +1461,20 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 								resultAux.addFromItem(alphaPredicateObject);
 							}
 							resultAux.addWhere(condSQL);
-							
-//							logicalTables.add(alphaSubject);
-//							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-//								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-//								logicalTables.add(logicalTable);
-//								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-//								joinExpressions.add(joinExpression);
-//							}
-//							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-//							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
+
+							//							logicalTables.add(alphaSubject);
+							//							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+							//								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+							//								logicalTables.add(logicalTable);
+							//								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+							//								joinExpressions.add(joinExpression);
+							//							}
+							//							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+							//							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
 						} else {
 							logger.warn("undefined alphasubject type!");
 							logicalTables.add(alphaSubject);
-							
+
 							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
 								logicalTables.add(logicalTable);
@@ -1695,9 +1591,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return nameGenerator;
 	}
 
-//	public Map<String, Object> getMapVarMapping2() {
-//		return this.mapVarMapping2;
-//	}
+	//	public Map<String, Object> getMapVarMapping2() {
+	//		return this.mapVarMapping2;
+	//	}
 
 	public String getDatabaseType() {
 		return databaseType;

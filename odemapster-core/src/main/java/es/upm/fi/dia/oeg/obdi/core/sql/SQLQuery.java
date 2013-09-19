@@ -1295,6 +1295,5 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void addSelectItems(Collection<ZSelectItem> newSelectItems) {
 		this.getSelect().addAll(newSelectItems);
-		
 	}
 }
