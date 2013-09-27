@@ -449,6 +449,38 @@ public class QueryTranslatorUtility {
 	public OpBGP groupTriplesBySubject2(OpBGP bgp) {
 		return QueryTranslatorUtility.groupTriplesBySubject(bgp);
 	}
+
+	public static List<Triple> groupTriplesBySubject(List<Triple> triples) {
+		List<Triple> result;
+		if(triples == null || triples.size() == 0) {
+			result = null;
+		} else {
+			if(triples.size() == 1) {
+				result = triples;
+			} else {
+				result = new LinkedList<Triple>();
+				
+				LinkedHashMap<Node, LinkedList<Triple>> resultAux = 
+						new LinkedHashMap<Node, LinkedList<Triple>>();
+				Set<Node> subjectSet = new HashSet<Node>();
+
+				for(Triple tp : triples) {
+					Node tpSubject = tp.getSubject();
+					LinkedList<Triple> triplesBySubject = resultAux.get(tpSubject);
+					if(triplesBySubject == null) {
+						triplesBySubject = new LinkedList<Triple>();
+						resultAux.put(tpSubject, triplesBySubject);
+					}
+					triplesBySubject.add(tp);
+				}
+				
+				for(LinkedList<Triple> triplesBySubject : resultAux.values()) {
+					result.addAll(triplesBySubject);
+				}
+			}
+		}
+		return result;
+	}
 	
 	public static OpBGP groupTriplesBySubject(OpBGP bgp) {
 		try {
@@ -462,7 +494,6 @@ public class QueryTranslatorUtility {
 				List<Triple> triplesByHashCode;
 				if(mapTripleHashCode.containsKey(tripleSubjectHashCode)) {
 					triplesByHashCode = mapTripleHashCode.get(tripleSubjectHashCode);
-
 				} else {
 					triplesByHashCode = new Vector<Triple>();
 					mapTripleHashCode.put(tripleSubjectHashCode, triplesByHashCode);

@@ -39,7 +39,8 @@ public class ConfigurationProperties extends Properties {
 	private String queryTranslatorClassName;
 	private String queryEvaluatorClassName;
 	private String queryResultWriterClassName;
-
+	private boolean reorderSTG;
+	
 	//batch upgrade
 	private boolean literalRemoveStrangeChars;
 	private boolean encodeUnsafeChars;
@@ -186,6 +187,9 @@ public class ConfigurationProperties extends Properties {
 
 		this.selfJoinElimination = this.readBoolean(Constants.OPTIMIZE_TB, true);
 		logger.debug("Self join elimination = " + this.selfJoinElimination);
+
+		this.reorderSTG = this.readBoolean(Constants.REORDER_STG, true);
+		logger.debug("Reorder STG = " + this.reorderSTG);
 
 		this.subQueryElimination = this.readBoolean(Constants.SUBQUERY_ELIMINATION, true);
 		logger.debug("Subquery elimination = " + this.subQueryElimination);
@@ -384,6 +388,10 @@ public class ConfigurationProperties extends Properties {
 
 	public void setDatabaseType(String databaseType) {
 		this.databaseType = databaseType;
+	}
+
+	public boolean isReorderSTG() {
+		return reorderSTG;
 	}
 
 

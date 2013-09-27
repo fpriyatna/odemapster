@@ -246,7 +246,7 @@ public abstract class AbstractRunner {
 		return this.queryTranslator;
 	}
 
-	protected void buildQueryTranslator() throws Exception {
+	public void buildQueryTranslator() throws Exception {
 		if(this.queryTranslatorClassName == null) {
 			this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT;					
 		}

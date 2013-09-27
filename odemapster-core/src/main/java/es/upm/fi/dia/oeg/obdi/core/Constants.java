@@ -65,6 +65,7 @@ public class Constants {
 	public static final String SPLIT_OUTPUT_PER_CONCEPT = "split_output_per_concept";
 	
 	public static final String OPTIMIZE_TB = "querytranslator.selfjoinelimination";
+	public static final String REORDER_STG = "querytranslator.reorderstg";
 	public static final String SUBQUERY_ELIMINATION = "querytranslator.subqueryelimination";
 	public static final String TRANSJOIN_SUBQUERY_ELIMINATION = "querytranslator.transjoin.subqueryelimination";
 	public static final String TRANSSTG_SUBQUERY_ELIMINATION = "querytranslator.transstg.subqueryelimination";
@@ -72,6 +73,7 @@ public class Constants {
 	public static final String QUERY_TRANSLATOR_CLASSNAME = "querytranslator.class.name";
 	public static final String QUERY_TRANSLATOR_CLASSNAME_DEFAULT = 
 			"es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator";
+	
 	public static final String DATASOURCE_READER_CLASSNAME = "datasourcereader.class.name";
 	public static final String QUERY_EVALUATOR_CLASSNAME_DEFAULT = 
 			"es.upm.fi.dia.oeg.obdi.core.engine.RDBReader";
@@ -98,5 +100,6 @@ public class Constants {
 	public static final String KEY_SUFFIX = "_key";
 	public static final String PREFIX_SUBJECT_MAPPING = "sm_";
 	public static final String PREFIX_MAPPING_ID = "mappingid_";
+	
 
 }

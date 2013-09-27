@@ -134,6 +134,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		String nameSelectVar = nameGenerator.generateName(node);
 
 		Iterator<ZSelectItem> oldSelectItemsIterator = oldSelectItems.iterator();
+		int i=0;
 		while(oldSelectItemsIterator.hasNext()) {
 			ZSelectItem oldSelectItem = oldSelectItemsIterator.next(); 
 			String oldAlias = oldSelectItem.getAlias();
@@ -144,11 +145,14 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				selectItemName = oldAlias; 
 			}
 
+			
 			if(selectItemName.equalsIgnoreCase(nameSelectVar)) {
 				result.add(selectItemName);
 			} else if (selectItemName.contains(nameSelectVar + "_")) {
-				result.add(selectItemName);
+				String selectItemNameParts = nameSelectVar + "_" + i;
+				result.add(selectItemNameParts);
 			}
+			i++;
 		}
 		return result;
 	}
@@ -276,9 +280,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		Collection<ZSelectItem> result = new LinkedHashSet<ZSelectItem>();
 
 		for(Node node : nodes) {
-			Collection<ZSelectItem> selectItems = this.generateSelectItem(
-					node, prefix, oldSelectItems, useAlias);
-			result.addAll(selectItems);
+			if(!node.isLiteral()) {
+				Collection<ZSelectItem> selectItems = this.generateSelectItem(
+						node, prefix, oldSelectItems, useAlias);
+				result.addAll(selectItems);				
+			}
+
 		}
 
 		return result;
@@ -1194,6 +1201,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		//logger.info("opSparqlQuery = " + opSparqlQuery);
 		if(this.optimizer != null && this.optimizer.isSelfJoinElimination()) {
 			QueryRewritter queryRewritter = new QueryRewritter();
+			boolean reorderSTG = this.configurationProperties.isReorderSTG();
+			queryRewritter.setReorderSTG(reorderSTG);
 			queryRewritter.setMapInferredTypes(mapInferredTypes);
 			Op opSparqlQuery2 = queryRewritter.rewrite(opSparqlQuery);
 			logger.debug("opSparqlQueryRewritten = \n" + opSparqlQuery2);

@@ -33,25 +33,34 @@ import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 public class QueryRewritter implements Rewrite {
 	private static Logger logger = Logger.getLogger(QueryRewritter.class);
 	private Map<Node, Set<AbstractConceptMapping>> mapInferredTypes;
-
+	private boolean reorderSTG = false;
+	
 	public Op rewrite(Op op) {
 		Op result = null;
 		
 		if(op instanceof OpBGP) { //triple or bgp pattern
 			OpBGP bgp = (OpBGP) op;
-			OpBGP bgpGrouped = QueryTranslatorUtility.groupTriplesBySubject(bgp);
-			List<Triple> triplesGrouped = bgpGrouped.getPattern().getList();
+			//OpBGP bgpGrouped = QueryTranslatorUtility.groupTriplesBySubject(bgp);
+			//List<Triple> triplesGrouped = bgpGrouped.getPattern().getList();
+			List<Triple> bgpTriples = bgp.getPattern().getList();
+			List<Triple> triplesGrouped = QueryTranslatorUtility.groupTriplesBySubject(bgpTriples);
 			
-			List<Triple> triplesReordered;
-			try {
-				triplesReordered = this.reorderSTGs(triplesGrouped);	
-			} catch(Exception e) {
-				logger.warn("Error occured when reordering STGs!");
-				triplesReordered = triplesGrouped;
+			BasicPattern basicPattern;
+			if(this.reorderSTG) {
+				List<Triple> triplesReordered;
+				try {
+					triplesReordered = this.reorderSTGs(triplesGrouped);	
+				} catch(Exception e) {
+					logger.warn("Error occured when reordering STGs!");
+					triplesReordered = triplesGrouped;
+				}
+				basicPattern = BasicPattern.wrap(triplesReordered);
+			} else {
+				basicPattern = BasicPattern.wrap(triplesGrouped);
 			}
 			
-			BasicPattern basicPattern = BasicPattern.wrap(triplesReordered);
 			result = new OpBGP(basicPattern);
+			
 			
 //			List<OpBGP> bgpSplitted = QueryTranslatorUtility.splitBGP(bgp2.getPattern().getList());
 //			if(bgpSplitted.size() > 1) {
@@ -239,6 +248,10 @@ public class QueryRewritter implements Rewrite {
 		}
 		
 		return result;
+	}
+
+	public void setReorderSTG(boolean reorderSTG) {
+		this.reorderSTG = reorderSTG;
 	}
 
 
