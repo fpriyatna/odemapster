@@ -151,8 +151,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			} else if (selectItemName.contains(nameSelectVar + "_")) {
 				String selectItemNameParts = nameSelectVar + "_" + i;
 				result.add(selectItemNameParts);
+				i++;
 			}
-			i++;
+			
 		}
 		return result;
 	}
