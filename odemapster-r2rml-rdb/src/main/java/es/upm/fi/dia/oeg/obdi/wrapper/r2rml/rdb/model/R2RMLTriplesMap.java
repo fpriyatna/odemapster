@@ -52,9 +52,10 @@ implements R2RMLElement, IConceptMapping {
 				this.logicalTable = R2RMLLogicalTable.parse(
 						logicalTableStatementObjectResource, this);
 				try {
+					logger.info("Building metadata for triples map: " + this.triplesMapName);
 					this.logicalTable.buildMetaData(
 							this.owner.getConn());
-					//logger.info("metadata built.");
+					logger.info("metadata built.");
 				} catch(Exception e) {
 					logger.error(e.getMessage());
 				}

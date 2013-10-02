@@ -276,7 +276,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			//PRSQL
 			AbstractPRSQLGenerator prSQLGenerator = super.getPrSQLGenerator();
 			NameGenerator nameGenerator = super.getNameGenerator(); 
-			Collection<ZSelectItem> selectItems = prSQLGenerator.genPRSQL(
+			Collection<ZSelectItem> prSQL = prSQLGenerator.genPRSQL(
 					tp, alphaResult, betaGenerator, nameGenerator
 					, cm, predicateURI);
 
@@ -285,31 +285,22 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 					super.getCondSQLGenerator();
 			CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
 					tp, alphaResult, betaGenerator, cm, predicateURI);
-			ZExp condSQL = null;
+			ZExpression condSQL = null;
 			if(condSQLResult != null) {
 				condSQL = condSQLResult.getExpression();
 			}
 
 			SQLQuery resultAux = null;
-			//don't do subquery elimination here!
-			//			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			//				try {
-			//					Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
-			//					Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
-			//					logicalTables.add(alphaSubject);
-			//					for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-			//						SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
-			//						logicalTables.add(logicalTable);
-			//						ZExpression joinExpression = alphaPredicateObject.getOnExpression();
-			//						joinExpressions.add(joinExpression);
-			//					}
-			//					ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
-			//					resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, this.databaseType);
-			//				} catch(Exception e) {
-			//					String errorMessage = "error in eliminating subquery!";
-			//					logger.error(errorMessage);
-			//				}
-			//			} 
+			//don't do subquery elimination here! why?
+			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
+				try {
+					resultAux = super.createQuery(alphaSubject, alphaPredicateObjects, prSQL, condSQL);
+				} catch(Exception e) {
+					String errorMessage = "error in eliminating subquery!";
+					logger.error(errorMessage);
+					resultAux = null;
+				}
+			} 
 
 			if(resultAux == null) { //without subquery elimination or error occured during the process
 				resultAux = new SQLQuery(alphaSubject);
@@ -325,7 +316,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
 					}
 				}
-				resultAux.setSelectItems(selectItems);
+				resultAux.setSelectItems(prSQL);
 				resultAux.setWhere(condSQL);
 			}
 

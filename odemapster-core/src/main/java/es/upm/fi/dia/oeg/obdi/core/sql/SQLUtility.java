@@ -119,13 +119,21 @@ public class SQLUtility {
 		}
 
 		if(selectItems != null && selectItems.size()!=0) {
-			for(ZSelectItem mainQuerySelectItem : selectItems) {
-				String selectItemAlias = mainQuerySelectItem.getAlias();
-				mainQuerySelectItem.setAlias("");
-				String selectItemString = mainQuerySelectItem.toString();
+			for(ZSelectItem selectItem : selectItems) {
+				String selectItemAlias = selectItem.getAlias();
+				selectItem.setAlias("");
+				String aggregationFunction = selectItem.getAggregate();
+				String selectItemString;
+				if(aggregationFunction == null) {
+					selectItemString = selectItem.toString();
+				} else {
+					selectItemString = aggregationFunction + "(" + selectItem.toString() + ") ";
+				}
+				
+				
 				if(selectItemAlias != null && !selectItemAlias.equals("")) {
 					selectItemString += " AS " + selectItemAlias;
-					mainQuerySelectItem.setAlias(selectItemAlias);
+					selectItem.setAlias(selectItemAlias);
 				}
 				selectSQL = selectSQL + selectItemString + ", "; 
 			}
@@ -136,6 +144,18 @@ public class SQLUtility {
 		}
 
 		return selectSQL;		
+	}
+	
+	public static Collection<ZSelectItem> getSelectItemsByAlias(Collection<ZSelectItem> selectItems, String alias) {
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
+		for(ZSelectItem selectItem : selectItems) {
+			String selectItemAlias = selectItem.getAlias();
+			if(alias.equalsIgnoreCase(selectItemAlias)) {
+				result.add(selectItem);
+			}
+		}
+		return result;
 	}
 	
 	public static String getValueWithoutAlias(ZSelectItem selectItem) {

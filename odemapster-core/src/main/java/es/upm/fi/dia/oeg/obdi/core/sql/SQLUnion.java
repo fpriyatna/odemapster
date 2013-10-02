@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
+import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
+import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.Constants;
@@ -25,6 +27,7 @@ public class SQLUnion implements IQuery {
 	private ZExp onExp;
 	private long slice = -1;
 	private long offset = -1;
+	private ZGroupBy groupBy;
 	
 	public SQLUnion() { 
 		this.unionQueries = new Vector<SQLQuery>();
@@ -291,7 +294,7 @@ public class SQLUnion implements IQuery {
 		this.setOrderBy(newOrderByCollection);
 	}
 
-	public void pushFilterDown(ZExpression pushedFilter) {
+	public void pushFilterDown(ZExp pushedFilter) {
 		Iterator<SQLQuery> it = this.unionQueries.iterator();
 		while(it.hasNext()) {
 			SQLQuery sqlQuery = it.next();
@@ -299,7 +302,7 @@ public class SQLUnion implements IQuery {
 			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
 					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
 			
-			ZExp newExpression = sqlQuery.pushFilterDown(pushedFilter, mapInnerAliasSelectItem);
+			ZExp newExpression = sqlQuery.pushExpDown(pushedFilter, mapInnerAliasSelectItem);
 			sqlQuery.addWhere(newExpression);
 		}
 	}
@@ -318,6 +321,23 @@ public class SQLUnion implements IQuery {
 			query.addSelectItems(newSelectItems);
 		}
 		
+	}
+
+	public void addGroupBy(ZGroupBy groupBy) {
+		this.groupBy = groupBy;
+	}
+
+	public ZGroupBy getGroupBy() {
+		return this.groupBy;
+	}
+
+	public void setGroupBy(ZGroupBy groupBy) {
+		this.groupBy = groupBy;
+		
+	}
+
+	public void pushGroupByDown() {
+		//TODO
 	}
 
 }

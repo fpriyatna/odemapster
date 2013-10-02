@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Vector;
 
+import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
+import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
@@ -90,7 +92,7 @@ public class SQLJoin implements IQuery {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public void pushFilterDown(ZExpression pushedFilter) {
+	public void pushFilterDown(ZExp pushedFilter) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -159,7 +161,23 @@ public class SQLJoin implements IQuery {
 	public void addSelectItems(Collection<ZSelectItem> newSelectItems) {
 		// TODO Auto-generated method stub
 		
-	}	
+	}
+	public void addGroupBy(ZGroupBy groupBy) {
+		// TODO Auto-generated method stub
+		
+	}
+	public ZGroupBy getGroupBy() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public void setGroupBy(ZGroupBy groupBy) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void pushGroupByDown() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	
 }

@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Vector;
 
+import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
+import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
@@ -19,6 +21,9 @@ public interface IQuery extends SQLLogicalTable {
 	public void setOrderBy(Vector<ZOrderBy> orderByConditions);
 	public Vector<ZOrderBy> getOrderBy();
 	public void setSelectItems(Collection<ZSelectItem> newSelectItems);
+	public void addGroupBy(ZGroupBy groupBy);
+	public void setGroupBy(ZGroupBy groupBy);
+	public ZGroupBy getGroupBy();
 	public void addSelectItems(Collection<ZSelectItem> newSelectItems);
 	public void addWhere(ZExp newWhere);
 	public String getDatabaseType();
@@ -35,7 +40,8 @@ public interface IQuery extends SQLLogicalTable {
 
 	//public Map<String, ZSelectItem> buildMapAliasSelectItem();
 	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections);
-	public void pushFilterDown(ZExpression pushedFilter);
+	public void pushFilterDown(ZExp pushedFilter);
 	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection);
+	public void pushGroupByDown();
 	
 }

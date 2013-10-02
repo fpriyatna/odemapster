@@ -43,7 +43,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 	private String databaseType;
 	private boolean distinct = false;
 	private String comments;
-
+	
 	public SQLQuery() {
 		super();
 		this.addSelect(new Vector<ZSelectItem>());
@@ -1008,7 +1008,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		//this.setSelectItems(newSelectItems);
 	}
 
-	ZExp pushFilterDown(ZExpression pushedFilter
+	ZExp pushExpDown(ZExp pushedExp
 			, Map<String, ZSelectItem> mapInnerAliasSelectItem) {
 		//Map<String, ZSelectItem> mapInnerAliasSelectItem = this.getMapAliasSelectItem();
 
@@ -1035,7 +1035,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		}
 
 		SQLUtility2 sqlUtility2 = new SQLUtility2();
-		ZExp newFilter = sqlUtility2.replaceExp(pushedFilter, whereReplacement);
+		ZExp newFilter = sqlUtility2.replaceExp(pushedExp, whereReplacement);
 		return newFilter;
 		//this.addWhere(newFilter);
 
@@ -1109,8 +1109,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 				Map<String, ZSelectItem> mapAliasSelectItemsRight = rightTableSQLQuery.buildMapAliasSelectItem();
 				mapAliasSelectItems.putAll(mapAliasSelectItemsRight);
-				ZExpression newJoinExpression = (ZExpression) result.pushFilterDown(oldJoinExpression, mapAliasSelectItems);
-				ZExpression newWhereExpression = (ZExpression) result.pushFilterDown(rightTableWhere, mapAliasSelectItems);
+				ZExpression newJoinExpression = (ZExpression) result.pushExpDown(oldJoinExpression, mapAliasSelectItems);
+				ZExpression newWhereExpression = (ZExpression) result.pushExpDown(rightTableWhere, mapAliasSelectItems);
 
 				String logicalTableAlias = rightTable.getAlias();
 				Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
@@ -1243,7 +1243,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 		Collection<ZSelectItem> newProjections = result.pushProjectionsDown(selectItems, mapAliasSelectItems);
 		result.setSelectItems(newProjections);
-		ZExp newExpression = result.pushFilterDown(whereExpression, mapAliasSelectItems);
+		ZExp newExpression = result.pushExpDown(whereExpression, mapAliasSelectItems);
 		result.addWhere(newExpression);
 		return result;
 	}
@@ -1285,14 +1285,15 @@ public class SQLQuery extends ZQuery implements IQuery {
 		return newProjections;
 	}
 
-	public void pushFilterDown(ZExpression pushedFilter) {
-		ZExp newFilter = this.pushExpressionDown(pushedFilter);
+	public void pushFilterDown(ZExp pushedFilter) {
+		ZExp newFilter = this.pushExpDown(pushedFilter);
 		this.addWhere(newFilter);
 	}
 
-	public ZExp pushExpressionDown(ZExpression oldExpression) {
+	
+	public ZExp pushExpDown(ZExp oldExp) {
 		Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
-		ZExp newFilter = this.pushFilterDown(oldExpression, mapInnerAliasSelectItem);
+		ZExp newFilter = this.pushExpDown(oldExp, mapInnerAliasSelectItem);
 		return newFilter;
 	}
 
@@ -1417,4 +1418,26 @@ public class SQLQuery extends ZQuery implements IQuery {
 		
 		return joinTables;
 	}
+
+	public void pushGroupByDown() {
+		ZGroupBy oldGroupBy = this.getGroupBy();
+		Collection<ZExp> oldGroupByExps = oldGroupBy.getGroupBy();
+		Vector<ZExp> newGroupByExps = new Vector<ZExp>();
+		for(ZExp oldGroupByExp : oldGroupByExps) {
+			ZExp newGroupByExp = this.pushExpDown(oldGroupByExp);
+			newGroupByExps.add(newGroupByExp);
+		}
+		ZGroupBy newGroupBy = new ZGroupBy(newGroupByExps);
+		this.setGroupBy(newGroupBy);
+	}
+
+	public void setGroupBy(ZGroupBy newGroupBy) {
+		ZGroupBy oldGroupBy = this.getGroupBy();
+		oldGroupBy = null;
+		this.addGroupBy(newGroupBy);
+	}
+
+
+
+
 }

@@ -311,17 +311,24 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 				}
 			}
 		} else if(rom != null && om == null) {
-			R2RMLTriplesMap tm = (R2RMLTriplesMap) rom.getParentTriplesMap();
-			String templateString = tm.getSubjectMap().getTemplateString();
-			for(AbstractConceptMapping cm : this.getConceptMappings()) {
-				if(cm.isPossibleInstance(templateString)) {
-					R2RMLTriplesMap tm2 = (R2RMLTriplesMap) cm;
-					Collection<String> classURIs = tm2.getSubjectMap().getClassURIs();
-					if(classURIs != null && !classURIs.isEmpty()) {
-						result.add(cm);	
+			R2RMLTriplesMap parentTriplesMap = (R2RMLTriplesMap) rom.getParentTriplesMap();
+			R2RMLTermMap parentSubjectMap = parentTriplesMap.getSubjectMap();
+			if(parentSubjectMap.getTermMapType() == TermMapType.TEMPLATE) {
+				String templateString = parentSubjectMap.getTemplateString();
+				for(AbstractConceptMapping cm : this.getConceptMappings()) {
+					if(cm.isPossibleInstance(templateString)) {
+						R2RMLTriplesMap tm2 = (R2RMLTriplesMap) cm;
+						Collection<String> classURIs = tm2.getSubjectMap().getClassURIs();
+						if(classURIs != null && !classURIs.isEmpty()) {
+							result.add(cm);	
+						}
 					}
-				}
+				}				
+			} else {
+				result.add(parentTriplesMap);	
 			}
+			
+
 		}
 
 		return result;
