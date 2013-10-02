@@ -1421,14 +1421,17 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void pushGroupByDown() {
 		ZGroupBy oldGroupBy = this.getGroupBy();
-		Collection<ZExp> oldGroupByExps = oldGroupBy.getGroupBy();
-		Vector<ZExp> newGroupByExps = new Vector<ZExp>();
-		for(ZExp oldGroupByExp : oldGroupByExps) {
-			ZExp newGroupByExp = this.pushExpDown(oldGroupByExp);
-			newGroupByExps.add(newGroupByExp);
+		if(oldGroupBy != null) {
+			Collection<ZExp> oldGroupByExps = oldGroupBy.getGroupBy();
+			Vector<ZExp> newGroupByExps = new Vector<ZExp>();
+			for(ZExp oldGroupByExp : oldGroupByExps) {
+				ZExp newGroupByExp = this.pushExpDown(oldGroupByExp);
+				newGroupByExps.add(newGroupByExp);
+			}
+			ZGroupBy newGroupBy = new ZGroupBy(newGroupByExps);
+			this.setGroupBy(newGroupBy);			
 		}
-		ZGroupBy newGroupBy = new ZGroupBy(newGroupByExps);
-		this.setGroupBy(newGroupBy);
+
 	}
 
 	public void setGroupBy(ZGroupBy newGroupBy) {

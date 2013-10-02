@@ -168,9 +168,11 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 					alphaPredicateObjects.add(alphaPredicateObject);
 				}
 			} else {
-				String errorMessage = "Undefined mapping for : " + tpPredicateURI + " in : " + cm.toString();
-				throw new QueryTranslationException(errorMessage);				
-				
+				if(!isRDFTypeStatement) {
+					String errorMessage = "Undefined mapping for : " + tpPredicateURI + " in : " + cm.toString();
+					throw new QueryTranslationException(errorMessage);				
+					
+				}  
 			}
 		}
 		return alphaPredicateObjects;
@@ -197,9 +199,11 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 					alphaPredicateObjects.add(alphaPredicateObject);
 				}
 			} else {
-				String errorMessage = "Undefined mapping for : " + tpPredicateURI + " in : " + cm.toString();
-				throw new QueryTranslationException(errorMessage);				
-				
+				if(!isRDFTypeStatement) {
+					String errorMessage = "Undefined mapping for : " + tpPredicateURI + " in : " + cm.toString();
+					throw new QueryTranslationException(errorMessage);				
+					
+				}
 			}
 		}
 		return alphaPredicateObjects;

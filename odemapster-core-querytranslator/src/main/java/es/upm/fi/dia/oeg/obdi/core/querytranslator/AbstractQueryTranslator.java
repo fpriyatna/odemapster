@@ -63,6 +63,8 @@ import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.expr.aggregate.AggAvg;
 import com.hp.hpl.jena.sparql.expr.aggregate.AggCount;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggMax;
+import com.hp.hpl.jena.sparql.expr.aggregate.AggMin;
 import com.hp.hpl.jena.sparql.expr.aggregate.AggSum;
 import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -586,11 +588,15 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Aggregator aggregator = exprAggregator.getAggregator();
 			String functionName;
 			if(aggregator instanceof AggAvg) {
-				functionName = "AVG";
+				functionName = Constants.AGGREGATION_FUNCTION_AVG;
 			} else if(aggregator instanceof AggSum) {
-				functionName = "SUM";
+				functionName = Constants.AGGREGATION_FUNCTION_SUM;
 			} else if(aggregator instanceof AggCount) {
-				functionName = "COUNT";
+				functionName = Constants.AGGREGATION_FUNCTION_COUNT;
+			} else if(aggregator instanceof AggMax) {
+				functionName = Constants.AGGREGATION_FUNCTION_MAX;
+			} else if(aggregator instanceof AggMin) {
+				functionName = Constants.AGGREGATION_FUNCTION_MIN;
 			} else {
 				String errorMessage = "Unsupported aggregation function " + aggregator;
 				logger.error(errorMessage);

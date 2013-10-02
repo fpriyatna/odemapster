@@ -257,7 +257,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 						objectMap.setColumnTypeName(columnTypeName);
 					}
 
-					if(! "VARCHAR".equals(columnTypeName)) {
+					if(! "VARCHAR".equalsIgnoreCase(columnTypeName)) {
 						String uri = tpObject.getURI();
 						String errorMessage = "Non VARCHAR column : " + objectMap.getColumnName() + " can't be used for URI : " + uri;
 						logger.warn(errorMessage);

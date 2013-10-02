@@ -82,12 +82,15 @@ public abstract class AbstractCondSQLGenerator {
 			, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
 		Collection<ZExpression> exps = new HashSet<ZExpression>();
 		Map<String, ColumnMetaData> mapColumnMetaData = cm.getLogicalTable().getColumnsMetaData();
+		boolean isRDFTypeStatement = RDF.type.getURI().equals(predicateURI);
 
 		Collection<AbstractPropertyMapping> pms = 
 				cm.getPropertyMappings(predicateURI);
 		if(pms == null || pms.size() == 0) {
-			String errorMessage = "No mappings found for predicate : " + predicateURI;
-			throw new QueryTranslationException(errorMessage);
+			if(!isRDFTypeStatement) {
+				String errorMessage = "No mappings found for predicate : " + predicateURI;
+				throw new QueryTranslationException(errorMessage);				
+			}
 		}
 		if(pms.size() > 1) {
 			String errorMessage = "Multiple mappings are not permitted for predicate " + predicateURI;

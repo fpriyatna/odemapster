@@ -101,5 +101,10 @@ public class Constants {
 	public static final String PREFIX_SUBJECT_MAPPING = "sm_";
 	public static final String PREFIX_MAPPING_ID = "mappingid_";
 	
-
+	//aggregation function
+	public static final String AGGREGATION_FUNCTION_AVG = "AVG";
+	public static final String AGGREGATION_FUNCTION_MAX = "MAX";
+	public static final String AGGREGATION_FUNCTION_MIN = "MIN";
+	public static final String AGGREGATION_FUNCTION_COUNT = "COUNT";
+	public static final String AGGREGATION_FUNCTION_SUM = "SUM";
 }
