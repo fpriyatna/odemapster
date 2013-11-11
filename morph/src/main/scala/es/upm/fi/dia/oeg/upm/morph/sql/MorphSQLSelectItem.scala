@@ -40,14 +40,19 @@ extends ZSelectItem {
 			}	 	  
 		}
 
-		val enclosedCharacter :String = {
-			if(Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType)) {
+		val enclosedCharacter :String = dbType match {
+		  	case Constants.DATABASE_MONETDB => {
 				Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
-			} else if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
-				Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
-			} else {
+			} 
+		  	case Constants.DATABASE_POSTGRESQL => {
+				Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER; 
+			} 
+		  	case Constants.DATABASE_GFT => {
+				  Constants.DATABASE_GFT_ENCLOSED_CHARACTER;
+			} 
+		  	case _=> {
 			  ""
-			}		  
+		  	}		  
 		}
 
 		if(this.isExpression()) {
@@ -159,7 +164,7 @@ object MorphSQLSelectItem {
 	: MorphSQLSelectItem = {
 	  
 		val prefix = {
-		  if(pPrefix == null) {
+		  if(pPrefix == null || pPrefix.equals("")) {
 		    null
 		  } else if(!pPrefix.endsWith(".")) {
 		    pPrefix + ".";
@@ -176,7 +181,7 @@ object MorphSQLSelectItem {
 			}		  
 		}
 		
-		val splitColumns = this.splitAndClean(inputColumnName);
+		val splitColumns = this.splitAndClean(inputColumnName, pDBType);
 		val splitColumnsSize = splitColumns.size;
 		var column:String = null;
 		var table:String = null;
@@ -275,7 +280,7 @@ object MorphSQLSelectItem {
 		result;
 	}
 	
-	def splitAndClean(pStr:String ) : Array[String] = {
+	def splitAndClean(pStr:String, dbType:String) : Array[String] = {
 		val str = {
 			if(pStr != null) {
 				pStr.trim();
@@ -286,7 +291,24 @@ object MorphSQLSelectItem {
 			if(str == null) {
 				Array.empty[String]
 			} else {
-				val str2 = str.replaceAll("`", "").replaceAll("\"", "");
+				val str2 = dbType match {
+				  case Constants.DATABASE_MYSQL => {
+				    str.replaceAll(Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER, "")
+				  }
+				  case Constants.DATABASE_MONETDB => {
+					  str.replaceAll(Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, "");  
+				  }
+				  case Constants.DATABASE_POSTGRESQL => {
+				    str.replaceAll(Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, "");
+				  }
+				  case Constants.DATABASE_GFT => {
+				    str.replaceAll(Constants.DATABASE_GFT_ENCLOSED_CHARACTER, "");
+				  }
+				  case _ => {
+				    str;
+				  }
+				} 
+				  
 				val splitColumns = str2.split("\\.");
 				splitColumns
 			}		  

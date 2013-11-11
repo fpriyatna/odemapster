@@ -44,6 +44,10 @@ public abstract class AbstractRunner {
 	private AbstractDataSourceReader dataSourceReader = null;
 	private Object queryResultWriterOutput = null;
 
+	public AbstractRunner() throws Exception {
+		
+	}
+	
 	public AbstractRunner(ConfigurationProperties configurationProperties) throws Exception {
 		this.configurationProperties = configurationProperties;
 
@@ -181,9 +185,10 @@ public abstract class AbstractRunner {
 					this.translateSPARQLQueriesIntoSQLQueries(queries);
 
 			//translate result
-			if (this.conn != null) {
+			//if (this.conn != null) {
+			//GFT does not need a Connection instance
 				this.resultProcessor.translateResult(this.sqlQueries);	
-			}
+			//}
 		}
 
 		logger.info("**********************DONE****************************");
@@ -257,16 +262,19 @@ public abstract class AbstractRunner {
 
 	public void buildQueryTranslator() throws Exception {
 		if(this.queryTranslatorClassName == null) {
-			this.queryTranslatorClassName = constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
+			this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
 		}
 		
 		this.queryTranslator = (IQueryTranslator) 
-				Class.forName(this.queryTranslatorClassName).newInstance();					
-		this.queryTranslator.setConfigurationProperties(configurationProperties);
-		String databaseType = configurationProperties.getDatabaseType();
-		if(databaseType != null && !databaseType.equals("")) {
-			this.queryTranslator.setDatabaseType(databaseType);
+				Class.forName(this.queryTranslatorClassName).newInstance();		
+		if(configurationProperties != null) {
+			this.queryTranslator.setConfigurationProperties(configurationProperties);
+			String databaseType = configurationProperties.getDatabaseType();
+			if(databaseType != null && !databaseType.equals("")) {
+				this.queryTranslator.setDatabaseType(databaseType);
+			}			
 		}
+
 
 		if(this.mappingDocument == null) {
 			String mappingDocumentFilePath = this.getMappingDocumentPath();

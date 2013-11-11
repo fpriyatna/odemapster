@@ -785,6 +785,9 @@ public class SQLQuery extends ZQuery implements IQuery {
 				whereSQL = whereSQL.substring(1, whereSQL.length() - 1);
 			}
 
+			if(whereSQL.startsWith("(") && whereSQL.endsWith(")")) {
+				whereSQL = whereSQL.substring(1, whereSQL.length() - 1);
+			}
 			whereSQL = whereSQL.replaceAll("\\) AND \\(", " AND ");
 			result += "WHERE " + whereSQL + "\n"; 
 		}

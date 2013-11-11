@@ -112,7 +112,7 @@ object MorphSQLConstant {
 	  val result = {
 		  typ match {
 		    case ZConstant.COLUMNNAME => {
-				val splitColumns = MorphSQLSelectItem.splitAndClean(v);
+				val splitColumns = MorphSQLSelectItem.splitAndClean(v, pDBType);
 				val splitColumnsSize = splitColumns.size;
 				var column:String = null;
 				var table:String = null;

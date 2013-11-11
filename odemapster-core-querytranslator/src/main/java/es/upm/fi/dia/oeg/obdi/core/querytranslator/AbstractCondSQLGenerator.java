@@ -372,7 +372,7 @@ public abstract class AbstractCondSQLGenerator {
 		}
 
 		ZExpression result = SQLUtility.combineExpresions(
-				exps, constants.SQL_LOGICAL_OPERATOR_AND());
+				exps, Constants.SQL_LOGICAL_OPERATOR_AND());
 		logger.debug("genCondSQLTB = " + result);
 		return result;
 

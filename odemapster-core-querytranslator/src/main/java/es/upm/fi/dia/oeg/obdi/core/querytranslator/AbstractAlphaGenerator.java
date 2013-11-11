@@ -22,7 +22,10 @@ public abstract class AbstractAlphaGenerator {
 	protected boolean ignoreRDFTypeStatement = false;
 	protected boolean subqueryAsView = false;
 	
-	
+	public AbstractAlphaGenerator(AbstractQueryTranslator owner) {
+		super();
+		this.owner = owner;
+	}
 
 //	public AlphaResultUnion calculateAlpha(Triple tp, AbstractConceptMapping cm) throws Exception {
 //		AlphaResultUnion result = null;

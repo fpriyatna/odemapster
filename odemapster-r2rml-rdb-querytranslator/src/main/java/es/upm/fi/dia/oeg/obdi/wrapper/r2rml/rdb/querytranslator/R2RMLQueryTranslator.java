@@ -125,8 +125,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 	@Override
 	protected void buildAlphaGenerator() {
-		AbstractAlphaGenerator alphaGenerator = new R2RMLAlphaGenerator();
-		alphaGenerator.setOwner(this);
+		AbstractAlphaGenerator alphaGenerator = new R2RMLAlphaGenerator(this);
 		super.setAlphaGenerator(alphaGenerator);
 		
 	}

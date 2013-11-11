@@ -18,6 +18,7 @@ import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
@@ -37,6 +38,10 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLAlphaGenerator.class);
 	private Constants constants = new Constants();
 
+	public R2RMLAlphaGenerator(AbstractQueryTranslator owner) {
+		super(owner);
+	}
+	
 	@Override
 	protected SQLJoinTable calculateAlphaPredicateObject  (Triple triple
 			, AbstractConceptMapping abstractConceptMapping
