@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="/home/fpriyatna/Dropbox/Public/morph/morph-2.9-18.jar"/>
+    <jar path="/home/fpriyatna/Dropbox/Public/morph/morph-2.9-21.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/morph/morph2jar.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
@@ -16,5 +16,6 @@
         <javaElement handleIdentifier="=odemapster-r2rml-rdb/src\/main\/java"/>
         <javaElement handleIdentifier="=odemapster-core/src\/main\/java"/>
         <javaElement handleIdentifier="=odemapster-core-querytranslator/src\/main\/java"/>
+        <javaElement handleIdentifier="=odemapster-r2rml/src\/main\/scala"/>
     </selectedElements>
 </jardesc>

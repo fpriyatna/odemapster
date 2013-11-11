@@ -56,8 +56,14 @@ extends Rewrite {
 				if(leftChildRewritten.isInstanceOf[OpBGP] && rightChildRewritten.isInstanceOf[OpBGP]) {
 					val leftChildRewrittenBGP = leftChildRewritten.asInstanceOf[OpBGP];
 					val rightChildRewrittenBGP = rightChildRewritten.asInstanceOf[OpBGP];
-					leftChildRewrittenBGP.getPattern().addAll(rightChildRewrittenBGP.getPattern());
-					result = leftChildRewrittenBGP;
+//					leftChildRewrittenBGP.getPattern().addAll(rightChildRewrittenBGP.getPattern());
+//					result = leftChildRewrittenBGP;
+					
+					val leftChildRewrittenBGPTriplesList = leftChildRewrittenBGP.getPattern().getList().toList;
+					val rightChildRewrittenBGPTriplesList = rightChildRewrittenBGP.getPattern().getList().toList;
+					val newTriplesList = leftChildRewrittenBGPTriplesList ::: rightChildRewrittenBGPTriplesList; 
+					val newBasicPattern = BasicPattern.wrap(newTriplesList);
+					result = new OpBGP(newBasicPattern);
 				} else {
 					result = OpJoin.create(leftChildRewritten, rightChildRewritten);
 				}
