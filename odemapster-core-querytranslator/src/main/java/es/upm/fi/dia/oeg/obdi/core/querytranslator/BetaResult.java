@@ -1,15 +1,16 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import Zql.ZSelectItem;
+
 
 public class BetaResult {
-	private SQLSelectItem betaSub;
-	private SQLSelectItem betaPre;
-	private SQLSelectItem betaObj;
+	private ZSelectItem betaSub;
+	private ZSelectItem betaPre;
+	private ZSelectItem betaObj;
 	private String predicateURI;
 	
-	public BetaResult(SQLSelectItem betaSub, SQLSelectItem betaPre,
-			SQLSelectItem betaObj, String predicateURI) {
+	public BetaResult(ZSelectItem betaSub, ZSelectItem betaPre,
+			ZSelectItem betaObj, String predicateURI) {
 		super();
 		this.betaSub = betaSub;
 		this.betaPre = betaPre;
@@ -17,15 +18,15 @@ public class BetaResult {
 		this.predicateURI = predicateURI;
 	}
 	
-	public SQLSelectItem getBetaSub() {
+	public ZSelectItem getBetaSub() {
 		return betaSub;
 	}
 	
-	public SQLSelectItem getBetaPre() {
+	public ZSelectItem getBetaPre() {
 		return betaPre;
 	}
 	
-	public SQLSelectItem getBetaObj() {
+	public ZSelectItem getBetaObj() {
 		return betaObj;
 	}
 

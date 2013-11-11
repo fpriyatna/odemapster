@@ -2,7 +2,9 @@ package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.log4j.Logger;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.algebra.Op;
@@ -21,6 +23,8 @@ import com.hp.hpl.jena.sparql.algebra.optimize.TransformFilterConjunction;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.ExprList;
+
+import es.upm.fi.dia.oeg.morph.base.MorphTriple;
 import es.upm.fi.dia.oeg.newrqr.KyrieLib;
 
 
@@ -78,8 +82,8 @@ public class KyrieRewritter implements Rewrite {
 					Collection<Node> leftChildObjects = QueryTranslatorUtility.getObjects(leftChildTriples);
 
 					if (leftChildSubjects.contains(rightTpSubject) && !leftChildObjects.contains(rightTpObject)) {
-						ExtendedTriple rightEtp = new ExtendedTriple(rightTp.getSubject(), rightTp.getPredicate(), rightTp.getObject());
-						rightEtp.setSingleTripleFromTripleBlock(true);
+						MorphTriple rightEtp = new MorphTriple(
+								rightTp.getSubject(), rightTp.getPredicate(), rightTp.getObject(), true);
 						BasicPattern leftChildRewrittenPattern = leftChildRewrittenBGP.getPattern();
 						leftChildRewrittenPattern.add(rightEtp);
 						KyrieRewritter.logger.debug("leftChildRewrittenPattern = " + leftChildRewrittenPattern);
@@ -187,8 +191,8 @@ public class KyrieRewritter implements Rewrite {
 					Collection<Node> leftChildObjects = QueryTranslatorUtility.getObjects(leftChildTriples);
 
 					if (leftChildSubjects.contains(rightTpSubject) && !leftChildObjects.contains(rightTpObject)) {
-						ExtendedTriple rightEtp = new ExtendedTriple(rightTp.getSubject(), rightTp.getPredicate(), rightTp.getObject());
-						rightEtp.setSingleTripleFromTripleBlock(true);
+						MorphTriple rightEtp = new MorphTriple(
+								rightTp.getSubject(), rightTp.getPredicate(), rightTp.getObject(), true);
 						BasicPattern leftChildRewrittenPattern = leftChildRewrittenBGP.getPattern();
 						leftChildRewrittenPattern.add(rightEtp);
 						KyrieRewritter.logger.debug("leftChildRewrittenPattern = " + leftChildRewrittenPattern);

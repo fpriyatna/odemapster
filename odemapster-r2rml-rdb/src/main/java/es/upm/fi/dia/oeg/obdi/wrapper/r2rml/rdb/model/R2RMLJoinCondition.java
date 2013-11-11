@@ -5,11 +5,12 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLJoinConditionException;
 
 public class R2RMLJoinCondition {
 	private static Logger logger = Logger.getLogger(R2RMLJoinCondition.class);
+	private Constants constants = new Constants();
 	
 	private String childColumnName;
 	private String parentColumnName;
@@ -22,7 +23,7 @@ public class R2RMLJoinCondition {
 	}
 	
 	public R2RMLJoinCondition(Resource resource) throws R2RMLJoinConditionException {
-		Statement childStatement = resource.getProperty(R2RMLConstants.R2RML_CHILD_PROPERTY);
+		Statement childStatement = resource.getProperty(constants.R2RML_CHILD_PROPERTY());
 		if(childStatement != null) {
 			this.childColumnName = childStatement.getObject().toString();
 		} else {
@@ -31,7 +32,7 @@ public class R2RMLJoinCondition {
 			throw new R2RMLJoinConditionException(errorMessage);
 		}
 
-		Statement parentStatement = resource.getProperty(R2RMLConstants.R2RML_PARENT_PROPERTY);
+		Statement parentStatement = resource.getProperty(constants.R2RML_PARENT_PROPERTY());
 		if(parentStatement != null) {
 			this.parentColumnName = parentStatement.getObject().toString();
 		} else {

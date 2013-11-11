@@ -17,20 +17,22 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.morph.base.ColumnMetaData;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.MorphTriple;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
-import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
 
 public abstract class AbstractCondSQLGenerator {
 	private static Logger logger = Logger.getLogger(AbstractCondSQLGenerator.class);
 	//protected AbstractBetaGenerator betaGenerator;
 	protected boolean ignoreRDFTypeStatement = false;
 	protected AbstractQueryTranslator owner;
-
+	private Constants constants = new Constants();
+	
 	public AbstractCondSQLGenerator(AbstractQueryTranslator owner) {
 		super();
 		this.owner = owner;
@@ -179,8 +181,8 @@ public abstract class AbstractCondSQLGenerator {
 		} else { //object.isVariable() // improvement by Freddy
 			boolean isSingleTripleFromTripleBlock = false;
 
-			if(tp instanceof ExtendedTriple) {
-				ExtendedTriple etp = (ExtendedTriple) tp;
+			if(tp instanceof MorphTriple) {
+				MorphTriple etp = (MorphTriple) tp;
 				if(etp.isSingleTripleFromTripleBlock()) {
 					isSingleTripleFromTripleBlock = true;
 				} 
@@ -191,9 +193,14 @@ public abstract class AbstractCondSQLGenerator {
 				
 				for(ZExp betaObjectExpression : betaObjectExpressions) {
 					if(betaObjectExpression instanceof ZConstant) {
-						String betaValue = ((ZConstant) betaObjectExpression).getValue();
-						SQLSelectItem betaColumnSelectItem = new SQLSelectItem(betaValue);
-						String betaColumn = betaColumnSelectItem.getColumn();
+						ZConstant betaObjectZConstant = (ZConstant) betaObjectExpression;
+//						String betaValue = betaObjectZConstant.getValue();
+//						SQLSelectItem betaColumnSelectItem = new SQLSelectItem(betaValue);
+//						String betaColumn = betaColumnSelectItem.getColumn();
+						
+						MorphSQLConstant betaColumnConstant = MorphSQLConstant.apply(betaObjectZConstant);
+						String betaColumn = betaColumnConstant.column();
+
 						ColumnMetaData cmd = null;
 						if(mapColumnMetaData != null) {
 							cmd = mapColumnMetaData.get(betaColumn);	
@@ -249,7 +256,7 @@ public abstract class AbstractCondSQLGenerator {
 		}
 
 		ZExpression resultFinal = SQLUtility.combineExpresions(
-				exps, Constants.SQL_LOGICAL_OPERATOR_AND);
+				exps, constants.SQL_LOGICAL_OPERATOR_AND());
 		return resultFinal;
 	}
 
@@ -365,7 +372,7 @@ public abstract class AbstractCondSQLGenerator {
 		}
 
 		ZExpression result = SQLUtility.combineExpresions(
-				exps, Constants.SQL_LOGICAL_OPERATOR_AND);
+				exps, constants.SQL_LOGICAL_OPERATOR_AND());
 		logger.debug("genCondSQLTB = " + result);
 		return result;
 
@@ -479,7 +486,7 @@ public abstract class AbstractCondSQLGenerator {
 
 
 		ZExpression result = SQLUtility.combineExpresions(
-				exps, Constants.SQL_LOGICAL_OPERATOR_AND);
+				exps, constants.SQL_LOGICAL_OPERATOR_AND());
 		return result;
 	}
 

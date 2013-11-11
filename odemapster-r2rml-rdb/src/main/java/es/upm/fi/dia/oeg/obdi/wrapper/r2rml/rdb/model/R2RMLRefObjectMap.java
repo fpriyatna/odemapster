@@ -11,7 +11,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLJoinConditionException;
 
@@ -21,6 +21,8 @@ public class R2RMLRefObjectMap {
 	private RDFNode parentTriplesMap;
 	private R2RMLPredicateObjectMap parentPredicateObjectMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
+	private Constants constants = new Constants();
+	
 	//private String alias;
 	
 	
@@ -29,14 +31,16 @@ public class R2RMLRefObjectMap {
 		this.owner = owner;
 		this.parentPredicateObjectMap = parentPredicateObjectMap;
 		
-		Statement parentTriplesMapStatement = resource.getProperty(R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
+		Statement parentTriplesMapStatement = resource.getProperty(
+				constants.R2RML_PARENTTRIPLESMAP_PROPERTY());
 		if(parentTriplesMapStatement != null)  {
 			//this.parentTriplesMap = parentTriplesMapStatement.getObject().toString();
 			this.parentTriplesMap = parentTriplesMapStatement.getObject();
 		}
 		
 		this.joinConditions = new HashSet<R2RMLJoinCondition>();
-		StmtIterator joinConditionsStatements = resource.listProperties(R2RMLConstants.R2RML_JOINCONDITION_PROPERTY);
+		StmtIterator joinConditionsStatements = resource.listProperties(
+				constants.R2RML_JOINCONDITION_PROPERTY());
 		if(joinConditionsStatements != null && joinConditionsStatements.hasNext()) {
 			while(joinConditionsStatements.hasNext()) {
 				Statement joinConditionStatement = joinConditionsStatements.nextStatement();
@@ -107,9 +111,11 @@ public class R2RMLRefObjectMap {
 	}
 
 	public static boolean isRefObjectMap(Resource resource) {
+		Constants constants = new Constants();
+		
 		boolean hasParentTriplesMap = false;
 		Statement parentTriplesMapStatement = resource.getProperty(
-				R2RMLConstants.R2RML_PARENTTRIPLESMAP_PROPERTY);
+				constants.R2RML_PARENTTRIPLESMAP_PROPERTY());
 		if(parentTriplesMapStatement != null)  {
 			hasParentTriplesMap = true;
 		}

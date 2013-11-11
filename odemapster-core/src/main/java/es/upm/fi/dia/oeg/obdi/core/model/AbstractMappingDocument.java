@@ -14,12 +14,12 @@ import org.w3c.dom.Element;
 
 import com.hp.hpl.jena.graph.Node;
 
+import es.upm.fi.dia.oeg.morph.base.ColumnMetaData;
+import es.upm.fi.dia.oeg.morph.base.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.IParseable;
 import es.upm.fi.dia.oeg.obdi.core.exception.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
-import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
-import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
 
 
 public abstract class AbstractMappingDocument implements IParseable {
@@ -171,9 +171,9 @@ public abstract class AbstractMappingDocument implements IParseable {
 		return result;
 	}
 	
-	public Collection<IPropertyMapping> getPropertyMappings(
+	public Collection<AbstractPropertyMapping> getPropertyMappings(
 			String domain, String range) {
-		Collection<IPropertyMapping> result = new ArrayList<IPropertyMapping>();
+		Collection<AbstractPropertyMapping> result = new ArrayList<AbstractPropertyMapping>();
 
 		Collection<AbstractConceptMapping> conceptMappings = 
 				this.getConceptMappingsByConceptName(domain);

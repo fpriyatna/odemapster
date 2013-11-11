@@ -4,7 +4,6 @@ package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb;
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,18 +16,10 @@ import Zql.ZQuery;
 import Zql.ZSelectItem;
 import Zql.ZStatement;
 import Zql.ZqlParser;
+import es.upm.fi.dia.oeg.morph.base.RegexUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.utility.RegexUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLJoinCondition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLObjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLUtility {
 	private static Logger logger = Logger.getLogger(R2RMLUtility.class);
@@ -51,17 +42,17 @@ public class R2RMLUtility {
 	}
 	
 	
-	public static Collection<String> getAttributesFromStringTemplate2(String text) {
-		Collection<String> attributes = new HashSet<String>();
-		
-		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
-		Matcher matcher = pattern.matcher(text);
-		while (matcher.find()) {
-			String matcherGroup1 = matcher.group(1);
-			attributes.add(matcherGroup1);
-		}
-		return attributes;		
-	}
+//	public static Collection<String> getAttributesFromStringTemplate2(String text) {
+//		Collection<String> attributes = new HashSet<String>();
+//		
+//		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+//		Matcher matcher = pattern.matcher(text);
+//		while (matcher.find()) {
+//			String matcherGroup1 = matcher.group(1);
+//			attributes.add(matcherGroup1);
+//		}
+//		return attributes;		
+//	}
 	
 	public static String replaceTokens(Matcher matcher
 			, String text, Map<String, String> replacements) {
@@ -110,36 +101,36 @@ public class R2RMLUtility {
 		}
 	}
 
-	public static Collection<ZSelectItem> getDatabaseColumns(R2RMLTriplesMap triplesMap) {
-		Collection<ZSelectItem> result = new HashSet<ZSelectItem>();
-		
-		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
-		if(subjectMap != null) {
-			Collection<ZSelectItem> subjectMapColumns = R2RMLUtility.getDatabaseColumns(subjectMap);
-			if(subjectMapColumns != null) { result.addAll(subjectMapColumns); }
-			
-		}
-		
-		Collection<R2RMLPredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
-		if(predicateObjectMaps != null) {
-			for(R2RMLPredicateObjectMap predicateObjectMap : predicateObjectMaps) {
-				R2RMLPredicateMap predicateMap = predicateObjectMap.getPredicateMap();
-				Collection<ZSelectItem> predicateMapColumns = R2RMLUtility.getDatabaseColumns(predicateMap);
-				if(predicateMapColumns != null) { result.addAll(predicateMapColumns);}
-				
-				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
-				Collection<ZSelectItem> objectMapColumns = R2RMLUtility.getDatabaseColumns(objectMap);
-				if(objectMapColumns != null) { result.addAll(objectMapColumns);}
-
-				R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap();
-				Collection<ZSelectItem> refObjectMapColumns = R2RMLUtility.getDatabaseColumns(refObjectMap);
-				if(refObjectMapColumns != null) { result.addAll(refObjectMapColumns);}
-
-			}
-		}
-		
-		return result;
-	}
+//	public static Collection<ZSelectItem> getDatabaseColumns(R2RMLTriplesMap triplesMap) {
+//		Collection<ZSelectItem> result = new HashSet<ZSelectItem>();
+//		
+//		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
+//		if(subjectMap != null) {
+//			Collection<ZSelectItem> subjectMapColumns = R2RMLUtility.getDatabaseColumns(subjectMap);
+//			if(subjectMapColumns != null) { result.addAll(subjectMapColumns); }
+//			
+//		}
+//		
+//		Collection<R2RMLPredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
+//		if(predicateObjectMaps != null) {
+//			for(R2RMLPredicateObjectMap predicateObjectMap : predicateObjectMaps) {
+//				R2RMLPredicateMap predicateMap = predicateObjectMap.getPredicateMap();
+//				Collection<ZSelectItem> predicateMapColumns = R2RMLUtility.getDatabaseColumns(predicateMap);
+//				if(predicateMapColumns != null) { result.addAll(predicateMapColumns);}
+//				
+//				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
+//				Collection<ZSelectItem> objectMapColumns = R2RMLUtility.getDatabaseColumns(objectMap);
+//				if(objectMapColumns != null) { result.addAll(objectMapColumns);}
+//
+//				R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap();
+//				Collection<ZSelectItem> refObjectMapColumns = R2RMLUtility.getDatabaseColumns(refObjectMap);
+//				if(refObjectMapColumns != null) { result.addAll(refObjectMapColumns);}
+//
+//			}
+//		}
+//		
+//		return result;
+//	}
 	
 	private static Collection<ZSelectItem> getDatabaseColumns(
 			R2RMLRefObjectMap refObjectMap) {
@@ -148,47 +139,34 @@ public class R2RMLUtility {
 	}
 
 
-	public static Collection<ZSelectItem> getDatabaseColumns(R2RMLTermMap termMap) {
-		Collection<ZSelectItem> result = new HashSet<ZSelectItem>();
-
-		if(termMap.getTermMapType() == TermMapType.CONSTANT) {
-			ZSelectItem selectItem = new ZSelectItem();
-			selectItem.setExpression(new ZConstant(termMap.getOriginalValue(), ZConstant.UNKNOWN));
-			result.add(selectItem);
-		} else if(termMap.getTermMapType() == TermMapType.COLUMN) {
-			ZSelectItem selectItem = new ZSelectItem(termMap.getOriginalValue());
-			result.add(selectItem);
-		} else if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
-			String template = termMap.getOriginalValue();
-			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
-			RegexUtility regexUtility = new RegexUtility();
-			Collection<String> attributes = regexUtility.getTemplateColumns(template, true);
-			if(attributes != null) {
-				for(String attribute : attributes) {
-					ZSelectItem selectItem = new ZSelectItem(attribute);
-					result.add(selectItem);
-				}
-			}
-		}
-
-		return result;
-	}
+//	public static Collection<ZSelectItem> getDatabaseColumns(R2RMLTermMap termMap) {
+//		Collection<ZSelectItem> result = new HashSet<ZSelectItem>();
+//
+//		if(termMap.getTermMapType() == TermMapType.CONSTANT) {
+//			ZSelectItem selectItem = new ZSelectItem();
+//			selectItem.setExpression(new ZConstant(termMap.getOriginalValue(), ZConstant.UNKNOWN));
+//			result.add(selectItem);
+//		} else if(termMap.getTermMapType() == TermMapType.COLUMN) {
+//			ZSelectItem selectItem = new ZSelectItem(termMap.getOriginalValue());
+//			result.add(selectItem);
+//		} else if(termMap.getTermMapType() == TermMapType.TEMPLATE) {
+//			String template = termMap.getOriginalValue();
+//			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
+//			RegexUtility regexUtility = new RegexUtility();
+//			Collection<String> attributes = regexUtility.getTemplateColumns(template, true);
+//			if(attributes != null) {
+//				for(String attribute : attributes) {
+//					ZSelectItem selectItem = new ZSelectItem(attribute);
+//					result.add(selectItem);
+//				}
+//			}
+//		}
+//
+//		return result;
+//	}
 	
 
 	
-	public static SQLSelectItem toSelectItem(String columnName, String tableAlias, String dbType) {
-		SQLSelectItem result = null;
-		String columnNameSplit[] = columnName.split("\\.");
-		if(columnNameSplit.length == 1) {
-			//result = new SQLSelectItem(tableAlias + "." + columnName);
-			result = SQLSelectItem.createSQLItem(dbType, columnName, tableAlias);
-		} else if(columnNameSplit.length > 1) {
-			//result = new SQLSelectItem(tableAlias + "." + columnNameSplit[columnNameSplit.length - 1]);
-			result = SQLSelectItem.createSQLItem(dbType, columnNameSplit[columnNameSplit.length - 1], tableAlias);
-		}
-
-		return result;
-	}
 	
 	public static ZExpression generateJoinCondition(Collection<R2RMLJoinCondition> joinConditions
 			, String parentTableAlias, String joinQueryAlias, String dbType) {
@@ -200,20 +178,20 @@ public class R2RMLUtility {
 				//String childColumnName = logicalTableAlias + "." + joinCondition.getChildColumnName();
 				String childColumnName = joinCondition.getChildColumnName();
 				//SQLSelectItem childSelectItem = new SQLSelectItem(childColumnName);  
-				SQLSelectItem childSelectItem = SQLSelectItem.createSQLItem(dbType, childColumnName, null);
+//				SQLSelectItem childSelectItem = SQLSelectItem.createSQLItem(dbType, childColumnName, null);
 				
 //				String[] childColumnNameSplit = childColumnName.split("\\.");
 //				if(childColumnNameSplit.length == 1) {
 //					childColumnName = parentTableAlias + "." + childColumnName; 
 //				}
 				
-				childColumnName = parentTableAlias + "." + childSelectItem.columnToString();
+				childColumnName = parentTableAlias + "." + childColumnName;
 				ZConstant childColumn = new ZConstant(childColumnName, ZConstant.COLUMNNAME);
 
 				 
 				String parentColumnName = joinCondition.getParentColumnName();
-				SQLSelectItem parentSelectItem = SQLSelectItem.createSQLItem(dbType, parentColumnName, null);
-				parentColumnName = joinQueryAlias + "." + parentSelectItem.columnToString();
+//				SQLSelectItem parentSelectItem = SQLSelectItem.createSQLItem(dbType, parentColumnName, null);
+				parentColumnName = joinQueryAlias + "." + parentColumnName;
 				ZConstant parentColumn = new ZConstant(parentColumnName, ZConstant.COLUMNNAME);
 				
 				ZExpression joinConditionExpression = new ZExpression("=", childColumn, parentColumn);

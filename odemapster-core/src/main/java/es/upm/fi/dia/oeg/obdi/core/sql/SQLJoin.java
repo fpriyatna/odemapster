@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Vector;
 
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
@@ -88,10 +89,9 @@ public class SQLJoin implements IQuery {
 		// TODO Auto-generated method stub
 		
 	}
-	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
-		// TODO Auto-generated method stub
-		return null;
+	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
 	}
+	
 	public void pushFilterDown(ZExp pushedFilter) {
 		// TODO Auto-generated method stub
 		
@@ -124,7 +124,8 @@ public class SQLJoin implements IQuery {
 	public String toString() {
 		String result = "";
 		
-		String selectItemsString = SQLUtility.printSelectItems(this.getSelectItems(), this.distinct);
+		MorphSQLUtility sqlUtility = new MorphSQLUtility();
+		String selectItemsString = sqlUtility.printSelectItems(this.getSelectItems(), this.distinct);
 		selectItemsString += selectItemsString; 
 
 		return result;
@@ -146,7 +147,7 @@ public class SQLJoin implements IQuery {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {
+	public void pushOrderByDown(Collection<ZSelectItem> pushedProjections) {
 		// TODO Auto-generated method stub
 		
 	}

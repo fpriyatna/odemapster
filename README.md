@@ -1,0 +1,1 @@
+# Morph is an RDB2RDF engine developed by the Ontology Engineering Group, that follows R2RML specifications (http://www.w3.org/TR/r2rml/). Morph supports data upgrade (RDB to RDF instances) and query translation (SPARQL to SQL). At the moment, Morph works with MySQL, PostgreSQL, and MonetDB

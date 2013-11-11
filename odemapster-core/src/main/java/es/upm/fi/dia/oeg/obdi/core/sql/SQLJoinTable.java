@@ -2,13 +2,15 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import org.apache.log4j.Logger;
 
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import Zql.ZExpression;
 import Zql.ZFromItem;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 
 public class SQLJoinTable extends ZFromItem {
 	private static Logger logger = Logger.getLogger(SQLJoinTable.class);
-
+	private Constants constants = new Constants();
+	
 	private SQLLogicalTable joinSource;
 	private String joinType;
 	private ZExpression onExpression;
@@ -29,7 +31,8 @@ public class SQLJoinTable extends ZFromItem {
 	}
 
 	public void addOnExpression(ZExpression onExp2) {
-		this.onExpression = SQLUtility.combineExpressions(this.onExpression, onExp2, Constants.SQL_LOGICAL_OPERATOR_AND);
+		this.onExpression = MorphSQLUtility.combineExpressions(this.onExpression, onExp2
+				, Constants.SQL_LOGICAL_OPERATOR_AND());
 	}
 	
 	public void setJoinType(String joinType) {

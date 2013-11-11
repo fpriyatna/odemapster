@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,14 +17,16 @@ import org.apache.log4j.Logger;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
-import Zql.ZFromItem;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
+import es.upm.fi.dia.oeg.morph.base.CollectionUtility;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.RegexUtility;
+import es.upm.fi.dia.oeg.morph.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
@@ -33,13 +34,14 @@ import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
+import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.CondSQLResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
@@ -47,11 +49,6 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.utility.CollectionUtility;
-import es.upm.fi.dia.oeg.obdi.core.utility.RegexUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
@@ -62,7 +59,8 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Logger logger = Logger.getLogger(R2RMLQueryTranslator.class);
-
+	private Constants constants = new Constants();
+	
 	static Map<Triple, String> mapTripleAlias= new HashMap<Triple, String>();
 	private Map<String, Matcher> mapTemplateMatcher = new HashMap<String, Matcher>();
 	private Map<String, Collection<String>> mapTemplateAttributes = new HashMap<String, Collection<String>>();
@@ -127,7 +125,10 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 	@Override
 	protected void buildAlphaGenerator() {
-		super.setAlphaGenerator(new R2RMLAlphaGenerator(this));
+		AbstractAlphaGenerator alphaGenerator = new R2RMLAlphaGenerator();
+		alphaGenerator.setOwner(this);
+		super.setAlphaGenerator(alphaGenerator);
+		
 	}
 
 	@Override
@@ -160,7 +161,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				Object mapValue = null;
 
 				try {
-					Integer mappingHashCode = rs.getInt(Constants.PREFIX_MAPPING_ID + varName);
+					Integer mappingHashCode = rs.getInt(constants.PREFIX_MAPPING_ID() + varName);
 					mapValue = mapMappingHashCode.get(mappingHashCode);
 				} catch(Exception e) {
 
@@ -193,7 +194,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 							List<String> templateColumns = termMap.getTemplateColumns();
 							Matcher matcher = this.mapTemplateMatcher.get(templateString);
 							if(matcher == null) {
-								Pattern pattern = Pattern.compile(R2RMLConstants.R2RML_TEMPLATE_PATTERN);
+								Pattern pattern = Pattern.compile(constants.R2RML_TEMPLATE_PATTERN());
 								matcher = pattern.matcher(templateString);
 								this.mapTemplateMatcher.put(templateString, matcher);
 							}
@@ -243,9 +244,9 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 					if(result != null) {
 						String termMapType = termMap.getTermType();
 						if(termMapType != null) {
-							if(termMapType.equals(R2RMLConstants.R2RML_IRI_URI)) {
+							if(termMapType.equals(constants.R2RML_IRI_URI())) {
 								result = ODEMapsterUtility.encodeURI(result);
-							} else if(termMapType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+							} else if(termMapType.equals(constants.R2RML_LITERAL_URI())) {
 								result = ODEMapsterUtility.encodeLiteral(result);
 							}
 						}							
@@ -261,9 +262,20 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 	@Override
 	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
-			String predicateURI, boolean unboundedPredicate) throws QueryTranslationException, InsatisfiableSQLExpression {
+			String predicateURI, boolean unboundedPredicate) 
+					throws QueryTranslationException, InsatisfiableSQLExpression {
 		IQuery transTP = null;
 
+		Collection<AbstractPropertyMapping> pms = 
+				cm.getPropertyMappings(predicateURI);
+		
+		if(pms == null || pms.size() == 0) {
+			String errorMessage = "Undefined mappings of predicate : " + predicateURI;
+			throw new QueryTranslationException(errorMessage);			
+		} else {
+			
+		}
+		
 		//alpha
 		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
 		if(alphaResult != null) {
@@ -278,7 +290,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			NameGenerator nameGenerator = super.getNameGenerator(); 
 			Collection<ZSelectItem> prSQL = prSQLGenerator.genPRSQL(
 					tp, alphaResult, betaGenerator, nameGenerator
-					, cm, predicateURI);
+					, cm, predicateURI, unboundedPredicate);
 
 			//CondSQL
 			AbstractCondSQLGenerator condSQLGenerator = 
@@ -365,6 +377,14 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 		return queryTranslatorFreddy;
 
+	}
+
+	@Override
+	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
+			String predicateURI, AbstractPropertyMapping pm)
+			throws QueryTranslationException, InsatisfiableSQLExpression {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

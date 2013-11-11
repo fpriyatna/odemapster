@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.Set;
 
 import Zql.ZUtils;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 public abstract class AbstractUnfolder {
 	//protected ConfigurationProperties properties;
-	protected String dbType = Constants.DATABASE_MYSQL;
+	protected String dbType = new Constants().DATABASE_MYSQL();
 	
 	protected AbstractUnfolder() {
 		ZUtils.addCustomFunction("concat", 2);

@@ -13,9 +13,9 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.newrqr.RewriterWrapper;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
@@ -23,6 +23,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
+	private Constants constants = new Constants();
 	public ConfigurationProperties configurationProperties;
 	protected Connection conn;
 	//protected AbstractParser parser;
@@ -43,14 +44,8 @@ public abstract class AbstractRunner {
 	private AbstractDataSourceReader dataSourceReader = null;
 	private Object queryResultWriterOutput = null;
 
-	public AbstractRunner() {
-
-	}
-
-	public AbstractRunner(String configurationDirectory, String configurationFile) 
-			throws Exception {
-		this.configurationProperties = new ConfigurationProperties
-				(configurationDirectory, configurationFile);
+	public AbstractRunner(ConfigurationProperties configurationProperties) throws Exception {
+		this.configurationProperties = configurationProperties;
 
 		//mapping document
 		String mappingDocumentFile = 
@@ -95,13 +90,27 @@ public abstract class AbstractRunner {
 			this.resultProcessor = new DefaultResultProcessor(
 					dataSourceReader, queryResultWriter);				
 
-		}
+		}		
+	}
+
+	public AbstractRunner(String configurationDirectory, String configurationFile) 
+			throws Exception {
+		this(new ConfigurationProperties(configurationDirectory, configurationFile));
 	}
 
 	public String run()
 			throws Exception {
 		String status = null;
 
+		//mapping document
+		if(this.mappingDocument == null) {
+			String mappingDocumentFile = 
+					this.configurationProperties.getMappingDocumentFilePath();
+			if(mappingDocumentFile != null) {
+				this.readMappingDocumentFile(mappingDocumentFile);
+			}			
+		}
+		
 		if(this.sparqQuery == null) {
 			//set output file
 			String outputFileName = configurationProperties.getOutputFilePath();
@@ -112,7 +121,7 @@ public abstract class AbstractRunner {
 			//query translator
 			if(this.queryTranslator == null) {
 				if(this.queryTranslatorClassName == null) {
-					this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT;					
+					this.queryTranslatorClassName = constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
 				}
 				this.buildQueryTranslator();
 			}
@@ -120,7 +129,7 @@ public abstract class AbstractRunner {
 			//query result writer
 			if(this.queryResultWriter == null) {
 				if(this.queryResultWriterClassName == null) {
-					this.queryResultWriterClassName = Constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT;					
+					this.queryResultWriterClassName = constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT();					
 				}
 				this.buildQueryResultWriter();
 			}
@@ -128,7 +137,7 @@ public abstract class AbstractRunner {
 			//query evaluator
 			if(this.dataSourceReader == null) {
 				if(this.dataSourceReaderClassName == null) {
-					this.dataSourceReaderClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT;
+					this.dataSourceReaderClassName = constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT();
 				}
 				this.buildDataSourceReader();
 			}
@@ -248,7 +257,7 @@ public abstract class AbstractRunner {
 
 	public void buildQueryTranslator() throws Exception {
 		if(this.queryTranslatorClassName == null) {
-			this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT;					
+			this.queryTranslatorClassName = constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
 		}
 		
 		this.queryTranslator = (IQueryTranslator) 
@@ -270,6 +279,7 @@ public abstract class AbstractRunner {
 
 		//query translation optimizer
 		IQueryTranslationOptimizer queryTranslationOptimizer = this.buildQueryTranslationOptimizer();
+		
 		boolean eliminateSelfJoin = this.isSelfJoinElimination();
 		queryTranslationOptimizer.setSelfJoinElimination(eliminateSelfJoin);
 		
@@ -352,7 +362,7 @@ public abstract class AbstractRunner {
 
 		String rdfLanguage = this.configurationProperties.getRdfLanguage();
 		if(rdfLanguage == null) {
-			rdfLanguage = Constants.OUTPUT_FORMAT_RDFXML;
+			rdfLanguage = constants.OUTPUT_FORMAT_RDFXML();
 		}
 
 		//preparing output file
@@ -415,10 +425,6 @@ public abstract class AbstractRunner {
 		return sqlQueries;
 	}
 
-	public String run(String mappingDirectory, String configurationFile) throws Exception {
-		this.configurationProperties = this.loadConfigurationFile(mappingDirectory, configurationFile);
-		return this.run();
-	}
 
 	private void setDataTranslator(AbstractDataTranslator dataTranslator) {
 		this.dataTranslator = dataTranslator;
@@ -501,7 +507,7 @@ public abstract class AbstractRunner {
 				outputFileName = this.configurationProperties.getOutputFilePath();
 			}
 			if(outputFileName == null) {
-				outputFileName = Constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT; 
+				outputFileName = constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT(); 
 			}
 			this.queryResultWriterOutput = outputFileName;
 		}
@@ -517,7 +523,8 @@ public abstract class AbstractRunner {
 			//database connection
 			if(this.configurationProperties != null) {
 				if(this.configurationProperties.getNoOfDatabase() == 1) {
-					try { conn = this.getConnection(); } catch(Exception e) { }				
+					try { conn = this.getConnection(); } 
+					catch(Exception e) { e.printStackTrace(); }				
 				}
 				((RDBReader) dataSourceReader).setConnection(conn);
 				int timeout = this.configurationProperties.getDatabaseTimeout();

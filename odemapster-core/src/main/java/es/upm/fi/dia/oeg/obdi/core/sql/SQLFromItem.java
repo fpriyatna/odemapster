@@ -4,14 +4,16 @@ import java.util.Random;
 
 import Zql.ZExp;
 import Zql.ZFromItem;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+
 
 public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	private Constants constants = new Constants();
+	
 	public enum LogicalTableType {TABLE_NAME, QUERY_STRING};
 	
 //	public static int FORM_TABLE = ZAliasedName.FORM_TABLE;
@@ -35,7 +37,7 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	public String generateAlias() {
 		//return R2OConstants.VIEW_ALIAS + this.hashCode();
 		if(super.getAlias() == null) {
-			super.setAlias(Constants.VIEW_ALIAS + new Random().nextInt(10000));
+			super.setAlias(constants.VIEW_ALIAS() + new Random().nextInt(10000));
 		}
 		return super.getAlias();
 	}

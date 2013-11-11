@@ -12,21 +12,19 @@ import Zql.ZSelectItem;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLPredicateObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLBetaGenerator.class);
@@ -40,8 +38,8 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 	public List<ZSelectItem> calculateBetaObject(Triple tp
 			, AbstractConceptMapping cm, String predicateURI
 			, AlphaResult alphaResult) throws QueryTranslationException {
-		List<ZSelectItem> result = new ArrayList<ZSelectItem>();
-		
+		List<ZSelectItem> betaObjects = new ArrayList<ZSelectItem>();
+		String dbType = this.owner.getDatabaseType();
 		Node object = tp.getObject();
 		
 		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
@@ -69,21 +67,18 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 				if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
 					String constantValue = objectMap.getConstantValue();
-					SQLSelectItem selectItem = new SQLSelectItem();
 					ZConstant zConstant = new ZConstant(constantValue, ZConstant.STRING);
-					selectItem.setExpression(zConstant);
-					result.add(selectItem);
+//					ZSelectItem selectItem = new SQLSelectItem();
+//					selectItem.setExpression(zConstant);
+					ZSelectItem selectItem = MorphSQLSelectItem.apply(zConstant);
+					betaObjects.add(selectItem);
 				} else {
 					Collection<String> databaseColumnsString = objectMap.getDatabaseColumnsString();
 					for(String databaseColumnString : databaseColumnsString) {
-						String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
-						if(alphaSubjectAlias != null) {
-							databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
-						}
-
-						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(databaseColumnString
-								, logicalTableAlias, this.owner.getDatabaseType());
-						result.add(selectItem);
+						ZSelectItem selectItem = MorphSQLSelectItem.apply(
+								databaseColumnString,logicalTableAlias, dbType, null);
+						
+						betaObjects.add(selectItem);
 					}
 				}
 			} else {
@@ -97,19 +92,16 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 
 				if(databaseColumnsString != null) {
 					for(String databaseColumnString : databaseColumnsString) {
-						String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
-						if(alphaSubjectAlias != null) {
-							databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
-						}
-						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(databaseColumnString
-								, refObjectMapAlias, this.owner.getDatabaseType());
-						result.add(selectItem);
+						ZSelectItem selectItem = MorphSQLSelectItem.apply(
+								databaseColumnString, refObjectMapAlias, dbType, null);
+						
+						betaObjects.add(selectItem);
 					}
 				}
 			}			
 		}
 
-		return result;
+		return betaObjects;
 	}
 
 
@@ -119,7 +111,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 		List<ZSelectItem> result = new ArrayList<ZSelectItem>();
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
-		
+		String dbType = this.owner.getDatabaseType();
 		
 
 		
@@ -130,13 +122,7 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 				subjectMap.getDatabaseColumnsString();
 		if(databaseColumnsString != null) {
 			for(String databaseColumnString : databaseColumnsString) {
-				String alphaSubjectAlias = alphaResult.getAlphaSubject().getAlias();
-				if(alphaSubjectAlias != null) {
-					databaseColumnString = alphaSubjectAlias + "." + databaseColumnString;  
-				}
-				
-				SQLSelectItem selectItem = R2RMLUtility.toSelectItem(databaseColumnString
-						, logicalTableAlias, this.owner.getDatabaseType());
+				ZSelectItem selectItem = MorphSQLSelectItem.apply(databaseColumnString, logicalTableAlias, dbType, null);
 				result.add(selectItem);
 			}
 		}

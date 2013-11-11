@@ -13,12 +13,11 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
-import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
@@ -36,10 +35,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLAlphaGenerator.class);
-
-	public R2RMLAlphaGenerator(AbstractQueryTranslator owner) {
-		super(owner);
-	}
+	private Constants constants = new Constants();
 
 	@Override
 	protected SQLJoinTable calculateAlphaPredicateObject  (Triple triple
@@ -60,7 +56,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 			SQLLogicalTable sqlParentLogicalTableAux = unfolder.visit(parentLogicalTable);
 			SQLJoinTable sqlParentLogicalTable = new SQLJoinTable(
-					sqlParentLogicalTableAux, Constants.JOINS_TYPE_INNER, null); 
+					sqlParentLogicalTableAux, constants.JOINS_TYPE_INNER(), null); 
 			String joinQueryAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
 			if(joinQueryAlias == null) {
 				joinQueryAlias = sqlParentLogicalTableAux.generateAlias();
@@ -249,6 +245,14 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		}
 
 		return alphaResult;
+	}
+
+	@Override
+	public AlphaResult calculateAlpha(Triple tp,
+			AbstractConceptMapping abstractConceptMapping, String predicateURI,
+			AbstractPropertyMapping pm) throws QueryTranslationException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

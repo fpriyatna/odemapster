@@ -11,26 +11,29 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import Zql.ZConstant;
+
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import es.upm.fi.dia.oeg.morph.base.ColumnMetaData;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.RegexUtility;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
-import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.utility.RegexUtility;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
 
 public class R2RMLTermMap implements R2RMLElement
 , IConstantTermMap, IColumnTermMap, ITemplateTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);
 	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH}
-
+	private Constants constants = new Constants();
+	
 	private String termType;//IRI, BlankNode, or Literal
 	private String languageTag;
 	private String datatype;
@@ -75,24 +78,24 @@ public class R2RMLTermMap implements R2RMLElement
 			}
 		}
 
-		Statement constantStatement = resource.getProperty(R2RMLConstants.R2RML_CONSTANT_PROPERTY);
+		Statement constantStatement = resource.getProperty(constants.R2RML_CONSTANT_PROPERTY());
 		if(constantStatement != null) {
 			this.termMapType = TermMapType.CONSTANT;
 			this.constantValue = constantStatement.getObject().toString();
 		} else {
-			Statement columnStatement = resource.getProperty(R2RMLConstants.R2RML_COLUMN_PROPERTY);
+			Statement columnStatement = resource.getProperty(constants.R2RML_COLUMN_PROPERTY());
 			if(columnStatement != null) {
 				this.termMapType = TermMapType.COLUMN;
 				this.columnName = columnStatement.getObject().toString();
 				if(columnsMetaData != null) {
 					ColumnMetaData cmd = columnsMetaData.get(this.columnName);
 					if(cmd != null) {
-						this.columnTypeName = cmd.getDataType();
+						this.columnTypeName = cmd.dataType();
 						this.isNullable = cmd.isNullable();
 					}
 				}
 			} else {
-				Statement templateStatement = resource.getProperty(R2RMLConstants.R2RML_TEMPLATE_PROPERTY);
+				Statement templateStatement = resource.getProperty(constants.R2RML_TEMPLATE_PROPERTY());
 				if(templateStatement != null) {
 					this.termMapType = TermMapType.TEMPLATE;
 					this.templateString = templateStatement.getObject().toString();
@@ -104,7 +107,7 @@ public class R2RMLTermMap implements R2RMLElement
 						if(columnsMetaData != null) {
 							ColumnMetaData cmd = columnsMetaData.get(pkColumnString);
 							if(cmd != null) {
-								this.columnTypeName = cmd.getDataType();
+								this.columnTypeName = cmd.dataType();
 								if(cmd.isNullable()) {
 									isNullableAux = true;
 								}
@@ -135,17 +138,17 @@ public class R2RMLTermMap implements R2RMLElement
 			}
 		}
 
-		Statement datatypeStatement = resource.getProperty(R2RMLConstants.R2RML_DATATYPE_PROPERTY);
+		Statement datatypeStatement = resource.getProperty(constants.R2RML_DATATYPE_PROPERTY());
 		if(datatypeStatement != null) {
 			this.datatype = datatypeStatement.getObject().toString();
 		}
 
-		Statement languageStatement = resource.getProperty(R2RMLConstants.R2RML_LANGUAGE_PROPERTY);
+		Statement languageStatement = resource.getProperty(constants.R2RML_LANGUAGE_PROPERTY());
 		if(languageStatement != null) {
 			this.languageTag = languageStatement.getObject().toString();
 		}
 
-		Statement termTypeStatement = resource.getProperty(R2RMLConstants.R2RML_TERMTYPE_PROPERTY);
+		Statement termTypeStatement = resource.getProperty(constants.R2RML_TERMTYPE_PROPERTY());
 		if(termTypeStatement == null) {
 			this.termType = this.getDefaultTermType();
 		} else {
@@ -167,20 +170,20 @@ public class R2RMLTermMap implements R2RMLElement
 
 	private String getDefaultTermType() {
 		//		if(this.termMapPosition == TermMapPosition.OBJECT && this.termMapType == TermMapType.COLUMN) {
-		//			return R2RMLConstants.R2RML_LITERAL_URI;
+		//			return constants.R2RML_LITERAL_URI;
 		//		} else {
-		//			return R2RMLConstants.R2RML_IRI_URI;
+		//			return constants.R2RML_IRI_URI;
 		//		}
 		String result;
 
 		if(this instanceof R2RMLObjectMap) {
 			if(this.termMapType == TermMapType.COLUMN || this.languageTag != null || this.datatype != null) {
-				result = R2RMLConstants.R2RML_LITERAL_URI;
+				result = constants.R2RML_LITERAL_URI();
 			} else { 
-				result = R2RMLConstants.R2RML_IRI_URI;
+				result = constants.R2RML_IRI_URI();
 			}
 		} else {
-			result = R2RMLConstants.R2RML_IRI_URI; 
+			result = constants.R2RML_IRI_URI(); 
 		}
 
 		return result;
@@ -242,16 +245,18 @@ public class R2RMLTermMap implements R2RMLElement
 		}
 	}
 
-	public String getResultSetValue(ResultSet rs, String columnName)  {
+	public String getResultSetValue(ResultSet rs, String pColumnName)  {
 		String result = null;
 
 		try {
 			String dbType = this.configurationProperties.getDatabaseType();
 			//SQLSelectItem selectItem = new SQLSelectItem(columnName);
-			SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName, null);
-			columnName = selectItem.columnToString();
-			if(selectItem.getTable() != null) {
-				columnName = selectItem.getTable() + "." + columnName;
+			//SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName, null);
+			MorphSQLConstant zConstant = MorphSQLConstant.apply(pColumnName, ZConstant.COLUMNNAME, dbType);
+			String columnName = zConstant.column();
+			String tableName = zConstant.table();
+			if(tableName != null) {
+				columnName = tableName + "." + columnName;
 			}
 
 			if(this.getDatatype() == null) {
@@ -354,7 +359,7 @@ public class R2RMLTermMap implements R2RMLElement
 
 
 				if(databaseValue != null) {
-					if(R2RMLConstants.R2RML_IRI_URI.equals(this.termType)) {
+					if(constants.R2RML_IRI_URI().equals(this.termType)) {
 						if(this.configurationProperties.isEncodeUnsafeChars()) {
 							databaseValue = ODEMapsterUtility.encodeUnsafeChars(databaseValue);
 						}
@@ -409,7 +414,7 @@ public class R2RMLTermMap implements R2RMLElement
 	//	}
 
 	public boolean isBlankNode() {
-		if(R2RMLConstants.R2RML_BLANKNODE_URI.equals(this.getTermType())) {
+		if(constants.R2RML_BLANKNODE_URI().equals(this.getTermType())) {
 			return true;
 		} else {
 			return false;
@@ -442,7 +447,9 @@ public class R2RMLTermMap implements R2RMLElement
 		result += "::" + this.getOriginalValue();
 
 		if(this.termMapType == TermMapType.COLUMN) {
-			result += ":" + this.columnTypeName;
+			if(this.columnTypeName != null) {
+				result += ":" + this.columnTypeName;	
+			}
 		}
 
 		return result;

@@ -7,16 +7,19 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import com.hp.hpl.jena.graph.Node;
-
-import es.upm.fi.dia.oeg.obdi.core.Constants;
-import es.upm.fi.dia.oeg.obdi.core.utility.SQLUtility2;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZFromItem;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
+
+import com.hp.hpl.jena.graph.Node;
+
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class SQLUtility {
 
@@ -42,7 +45,6 @@ public class SQLUtility {
 			) {
 		Iterator<? extends ZExp> it = exps.iterator();
 		ZExpression result = null;
-		exps.size();
 
 		if(exps.size() == 1) {
 			ZExp exp = it.next();
@@ -61,30 +63,30 @@ public class SQLUtility {
 		return result;
 	}
 
-	public static ZExpression combineExpressions(ZExp exp1, ZExp exp2,
-			String logicalOperator) {
-		ZExpression result;
-		
-		if(exp1 == null && exp2 == null) {
-			result = null;
-		} else if(exp1 == null) {
-			if(exp2 instanceof ZExpression) {
-				result = (ZExpression) exp2; 
-			} else {
-				result = new ZExpression(exp2.toString());	
-			}
-		} else if (exp2 == null) {
-			if(exp1 instanceof ZExpression) {
-				result = (ZExpression) exp1;
-			} else {
-				result = new ZExpression(exp1.toString());	
-			}
-		} else {
-			result = new ZExpression(logicalOperator, exp1, exp2);	
-		}
-		
-		return result;
-	}
+//	public static ZExpression combineExpressions(ZExp exp1, ZExp exp2,
+//			String logicalOperator) {
+//		ZExpression result;
+//		
+//		if(exp1 == null && exp2 == null) {
+//			result = null;
+//		} else if(exp1 == null) {
+//			if(exp2 instanceof ZExpression) {
+//				result = (ZExpression) exp2; 
+//			} else {
+//				result = new ZExpression(exp2.toString());	
+//			}
+//		} else if (exp2 == null) {
+//			if(exp1 instanceof ZExpression) {
+//				result = (ZExpression) exp1;
+//			} else {
+//				result = new ZExpression(exp1.toString());	
+//			}
+//		} else {
+//			result = new ZExpression(logicalOperator, exp1, exp2);	
+//		}
+//		
+//		return result;
+//	}
 
 	public boolean isSubqueryEliminationPossible(SQLLogicalTable leftTable, SQLLogicalTable rightTable) {
 		boolean leftTablePossible;
@@ -111,40 +113,7 @@ public class SQLUtility {
 		return null;
 	}
 	
-	public static String printSelectItems(Collection<ZSelectItem> selectItems, boolean distinct ) {
-		String selectSQL = "SELECT ";
-		
-		if(distinct) {
-			selectSQL += " DISTINCT ";
-		}
-
-		if(selectItems != null && selectItems.size()!=0) {
-			for(ZSelectItem selectItem : selectItems) {
-				String selectItemAlias = selectItem.getAlias();
-				selectItem.setAlias("");
-				String aggregationFunction = selectItem.getAggregate();
-				String selectItemString;
-				if(aggregationFunction == null) {
-					selectItemString = selectItem.toString();
-				} else {
-					selectItemString = aggregationFunction + "(" + selectItem.toString() + ") ";
-				}
-				
-				
-				if(selectItemAlias != null && !selectItemAlias.equals("")) {
-					selectItemString += " AS " + selectItemAlias;
-					selectItem.setAlias(selectItemAlias);
-				}
-				selectSQL = selectSQL + selectItemString + ", "; 
-			}
-			//remove the last coma and space
-			selectSQL = selectSQL.substring(0, selectSQL.length() - 2);
-		} else {
-			selectSQL += " * ";
-		}
-
-		return selectSQL;		
-	}
+	
 	
 	public static Collection<ZSelectItem> getSelectItemsByAlias(Collection<ZSelectItem> selectItems, String alias) {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
@@ -176,31 +145,44 @@ public class SQLUtility {
 			Map<String, ZSelectItem> mapInnerAliasSelectItem) {
 		Map<ZConstant, ZConstant> whereReplacement = new LinkedHashMap<ZConstant, ZConstant>();
 		for(String alias : mapInnerAliasSelectItem.keySet()) {
-			ZConstant aliasColumn = new ZConstant(alias, ZConstant.COLUMNNAME);
 			ZSelectItem selectItem = mapInnerAliasSelectItem.get(alias);
-			ZConstant zConstant;
+			
+			ZConstant aliasColumn = new ZConstant(alias, ZConstant.COLUMNNAME);
+			
+			String dbType = null;
+			if(selectItem instanceof MorphSQLSelectItem) {
+				dbType = ((MorphSQLSelectItem) selectItem).dbType();
+			}
+
+			
+			MorphSQLConstant zConstant;
 			if(selectItem.isExpression()) {
 				String selectItemValue = selectItem.getExpression().toString();
-				zConstant = new ZConstant(selectItemValue, ZConstant.UNKNOWN);
+				zConstant = MorphSQLConstant.apply(selectItemValue, ZConstant.UNKNOWN, dbType, null);
 			} else {
-				String selectItemTable = selectItem.getTable();
-				String selectItemColumn = selectItem.getColumn();
-				String selectItemValue;
-				if(selectItemTable != null && !selectItemTable.equals("")) {
-					selectItemValue = selectItemTable + "." + selectItemColumn;  
+				String selectItemAlias = selectItem.getAlias();
+				if(selectItemAlias != null && !selectItemAlias.equals("")) {
+					zConstant = MorphSQLConstant.apply(selectItemAlias, ZConstant.COLUMNNAME, dbType, null);
 				} else {
-					selectItemValue = selectItemColumn; 
+					String selectItemValue;
+					String selectItemTable = selectItem.getTable();
+					String selectItemColumn = selectItem.getColumn();
+					
+					if(selectItemTable != null && !selectItemTable.equals("")) {
+						selectItemValue = selectItemTable + "." + selectItemColumn;  
+					} else {
+						selectItemValue = selectItemColumn; 
+					}
+					zConstant = MorphSQLConstant.apply(selectItemValue, ZConstant.COLUMNNAME, dbType, null);
 				}
-				zConstant = new ZConstant(selectItemValue, ZConstant.COLUMNNAME);
 			}
 			whereReplacement.put(aliasColumn, zConstant);
 		}
 
-		SQLUtility2 sqlUtility2 = new SQLUtility2();
 		Vector<ZOrderBy> newOrderByCollection = new Vector<ZOrderBy>();
 		for(ZOrderBy oldOrderBy : oldOrderByCollection) {
 			ZExp orderByExp = oldOrderBy.getExpression();
-			ZExp newOrderByExp = sqlUtility2.replaceExp(orderByExp, whereReplacement);
+			ZExp newOrderByExp = MorphSQLUtility.replaceExp(orderByExp, whereReplacement);
 			ZOrderBy newOrderBy = new ZOrderBy(newOrderByExp);
 			newOrderBy.setAscOrder(oldOrderBy.getAscOrder());
 			newOrderByCollection.add(newOrderBy);
@@ -283,10 +265,10 @@ public class SQLUtility {
 	
 	public static Collection <ZSelectItem> getSelectItemsMapPrefix(Collection <ZSelectItem> selectItems) {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-		
+
 		for(ZSelectItem selectItem : selectItems) {
 			String alias = selectItem.getAlias();
-			if(alias.startsWith(Constants.PREFIX_MAPPING_ID)) {
+			if(alias.startsWith(Constants.PREFIX_MAPPING_ID())) {
 				result.add(selectItem);
 			}
 		}
@@ -294,14 +276,49 @@ public class SQLUtility {
 		return result;
 	}
 	
-	public static Collection <ZSelectItem> getSelectItemsMapPrefix(Collection <ZSelectItem> selectItems, Node node) {
+	public static Collection <ZSelectItem> getSelectItemsMapPrefix(
+			Collection <ZSelectItem> selectItems, Node node, String pPrefix, String dbType) {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		String varNamePrefixed = Constants.PREFIX_MAPPING_ID() + node.getName();
+		String prefix = pPrefix;
+		if(!prefix.endsWith(".")) {
+			prefix += ".";
+		}
 		
 		for(ZSelectItem selectItem : selectItems) {
 			String alias = selectItem.getAlias();
-			String varNamePrefixed = Constants.PREFIX_MAPPING_ID + node.getName();
-			if(alias.equals(varNamePrefixed)) {
-				result.add(selectItem);
+			
+			if(alias != null && !alias.equals("")) {
+				if(varNamePrefixed.equals(alias)) {
+//					result.add(selectItem);
+					
+					ZSelectItem newSelectItem;
+					if(selectItem.isExpression()) {
+						newSelectItem = selectItem;
+					} else {
+						String selectItemColumnName = selectItem.getColumn();
+						newSelectItem = MorphSQLSelectItem.apply(selectItemColumnName, prefix, dbType);
+					}
+					newSelectItem.setAlias(alias);
+					result.add(newSelectItem);
+				}				
+			} else {
+				String selectItemString = selectItem.toString();
+				selectItemString = selectItemString.replaceAll("\"", "");
+				selectItemString = selectItemString.replaceAll("\'", "");
+				
+				if(varNamePrefixed.equals(selectItemString)) {
+//					result.add(selectItem);
+					
+					ZSelectItem newSelectItem;
+					if(selectItem.isExpression()) {
+						newSelectItem = selectItem;
+					} else {
+						String selectItemColumnName = selectItem.getColumn();
+						newSelectItem = MorphSQLSelectItem.apply(selectItemColumnName, prefix, dbType);
+					}
+					result.add(newSelectItem);
+				}				
 			}
 		}
 		

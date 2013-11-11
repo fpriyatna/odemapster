@@ -1,7 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.sql.Connection;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,12 +22,12 @@ import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.SortCondition;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
@@ -70,8 +69,14 @@ import com.hp.hpl.jena.sparql.expr.aggregate.Aggregator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
 
+import es.upm.fi.dia.oeg.morph.base.ColumnMetaData;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.SPARQLUtility;
+import es.upm.fi.dia.oeg.morph.base.TriplePatternPredicateBounder;
+import es.upm.fi.dia.oeg.morph.querytranslator.MorphQueryRewriter;
+import es.upm.fi.dia.oeg.morph.querytranslator.MorphSQLSelectItemGenerator;
+import es.upm.fi.dia.oeg.morph.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
@@ -84,19 +89,18 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoin;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLUnion;
-import es.upm.fi.dia.oeg.obdi.core.utility.SPARQLUtility;
-import es.upm.fi.dia.oeg.obdi.core.utility.SQLConstant;
+import es.upm.fi.dia.oeg.obdi.core.sql.SQLUtility;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private static Logger logger = Logger.getLogger(AbstractQueryTranslator.class);
-
+	private Constants constants = new Constants();
+	
 	//protected String queryFilePath;
 	protected AbstractMappingDocument mappingDocument;
 	protected AbstractUnfolder unfolder;
@@ -112,7 +116,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private Map<String, ZSelectItem> mapAggreatorAlias = new HashMap<String, ZSelectItem>();//varname - selectitem
 	public enum POS {sub, pre, obj}
 	private ConfigurationProperties configurationProperties;
-	protected String databaseType = Constants.DATABASE_MYSQL;
+	protected String databaseType = Constants.DATABASE_MYSQL();
 	private Map<String, String> functionsMap = new HashMap<String, String>();
 	Collection<String> notNullColumns = new Vector<String>();
 
@@ -202,141 +206,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		return result;
 	}
-	private Collection<ZSelectItem> generateSelectItem(Node node, String prefix
-			, Collection<ZSelectItem> oldSelectItems, boolean useAlias) {
-		Collection<ZSelectItem> result = new LinkedList<ZSelectItem>();
-		if(prefix != null && !prefix.endsWith(".")) {
-			prefix += ".";
-		}
-
-		String nameSelectVar = nameGenerator.generateName(node);
-
-		ZSelectItem newSelectItem = null;
-		if(node.isVariable() || node.isURI()) {
-			if(oldSelectItems == null) {
-				if(prefix == null) {
-					newSelectItem = new ZSelectItem(nameSelectVar);
-				} else {
-					newSelectItem = new ZSelectItem(prefix + nameSelectVar);	
-				}
-
-				if(useAlias) {
-					newSelectItem.setAlias(nameSelectVar);	
-				}
-				result.add(newSelectItem);
-			} else {
-				Iterator<ZSelectItem> oldSelectItemsIterator = oldSelectItems.iterator();
-				while(oldSelectItemsIterator.hasNext()) {
-					ZSelectItem oldSelectItem = oldSelectItemsIterator.next(); 
-					String selectItemName;
-					String oldAlias = oldSelectItem.getAlias();
-					String oldTable = null;
-					if(oldAlias == null || oldAlias.equals("")) {
-						selectItemName = oldSelectItem.getColumn();
-						oldTable = oldSelectItem.getTable();
-					} else {
-						selectItemName = oldAlias; 
-					}
-
-					String newSelectItemAlias = null;
-					if(selectItemName.equalsIgnoreCase(nameSelectVar)) {
-						if(prefix == null || prefix.equals("")) {
-							if(oldTable == null || oldTable.equals("")) {
-								newSelectItem = new ZSelectItem(selectItemName);
-							} 
-							//							else {
-							//								newSelectItem = new ZSelectItem(oldTable + "." + selectItemName);
-							//							}
-						} else {
-							newSelectItem = new ZSelectItem(prefix + selectItemName);
-						}
-
-						if(node.isVariable()) {
-							newSelectItemAlias = node.getName();	
-						} else if(node.isURI()) {
-							newSelectItemAlias = node.getURI();
-						}
-					} else if (selectItemName.contains(nameSelectVar + "_")) {
-						if(prefix == null || prefix.equals("")) {
-							if(oldTable == null || oldTable.equals("")) {
-								newSelectItem = new ZSelectItem(selectItemName);
-							} else {
-								newSelectItem = new ZSelectItem(oldTable + "." + selectItemName);
-							}
-						} else {
-							newSelectItem = new ZSelectItem(prefix + selectItemName);
-						}
-
-						if(node.isVariable()) {
-							newSelectItemAlias = node.getName();	
-						} else if(node.isURI()) {
-							newSelectItemAlias = node.getURI();
-						}						
-						newSelectItemAlias += selectItemName.replaceAll(nameSelectVar, "");
-					} else {
-						newSelectItem = null;
-					}
-
-					if(newSelectItem != null) {
-						if(newSelectItemAlias != null && useAlias) {
-							newSelectItem.setAlias(newSelectItemAlias);
-						}
-						result.add(newSelectItem);
-					}
-				}	
-			}
-		} else if(node.isLiteral()){
-			Object literalValue = node.getLiteralValue();
-			ZExp exp;
-			String constantValue;
-			if(prefix == null) {
-				constantValue = literalValue.toString();
-			} else {
-				constantValue = prefix + literalValue.toString();
-			}
-
-			if(literalValue instanceof String) {
-				exp = new ZConstant(constantValue, ZConstant.STRING);							
-			} else if (literalValue instanceof Double) {
-				exp = new ZConstant(constantValue, ZConstant.NUMBER);
-			} else {
-				exp = new ZConstant(constantValue, ZConstant.STRING);							
-
-			}
-			newSelectItem = new SQLSelectItem();
-			newSelectItem.setExpression(exp);
-			if(useAlias) { newSelectItem.setAlias(nameSelectVar); }
-
-			result.add(newSelectItem);
-		} else {
-			logger.warn("unsupported node " + node.toString());
-		}
-
-		return result;
-	}
 
 
-	private Collection<ZSelectItem> generateSelectItems(Collection<Node> nodes
-			, String prefix, Collection<ZSelectItem> oldSelectItems, boolean useAlias) {
-		if(prefix != null && !prefix.endsWith(".")) {
-			prefix += ".";
-		}		
-
-		Collection<ZSelectItem> result = new LinkedHashSet<ZSelectItem>();
-
-		for(Node node : nodes) {
-			if(!node.isLiteral()) {
-				Collection<ZSelectItem> selectItems = this.generateSelectItem(
-						node, prefix, oldSelectItems, useAlias);
-				result.addAll(selectItems);				
-			}
-
-		}
-
-		return result;
-	}
 	
-	private Collection<ZSelectItem> generateMappingIdSelectItems(Collection<Node> nodes, Collection<ZSelectItem> selectItems, String prefix) {
+	private Collection<ZSelectItem> generateMappingIdSelectItems(Collection<Node> nodes
+			, Collection<ZSelectItem> selectItems, String prefix) {
 		if(prefix == null) {
 			prefix = "";
 		} else {
@@ -349,10 +223,14 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		
 		for(Node term : nodes) {
 			if(term.isVariable()) {
-				Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(selectItems, term);
+				Collection<ZSelectItem> mappingsSelectItemsAux = 
+						SQLUtility.getSelectItemsMapPrefix(selectItems, term, prefix, this.databaseType);
 				for(ZSelectItem mappingsSelectItemAux : mappingsSelectItemsAux) {
-					ZSelectItem newSelectItem = new ZSelectItem(prefix + mappingsSelectItemAux.getAlias());
-					result.add(newSelectItem);	
+//					SQLSelectItem newSelectItem = new SQLSelectItem(prefix + mappingsSelectItemAux.getAlias());
+//					newSelectItem.setDbType(this.databaseType);
+					ZSelectItem newSelectItem = MorphSQLSelectItem.apply(
+							mappingsSelectItemAux.getAlias(), prefix, this.databaseType, null);
+					result.add(newSelectItem);
 				}
 			}
 		}
@@ -438,17 +316,17 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 
 	protected IQuery trans(OpBGP bgp) throws Exception {
-		IQuery result = null;
+		IQuery transBGPSQL = null;
 
 		if(QueryTranslatorUtility.isTriplePattern(bgp)) { //triple pattern
 			Triple tp = bgp.getPattern().getList().get(0);
-			result = this.trans(tp);
+			transBGPSQL = this.trans(tp);
 		} else { //bgp pattern
 			List<Triple> triples = bgp.getPattern().getList();
 			boolean isSTG = QueryTranslatorUtility.isSTG(triples);
 
 			if(this.optimizer != null && this.optimizer.isSelfJoinElimination() && isSTG) {
-				result = this.transSTG(triples);
+				transBGPSQL = this.transSTG(triples);
 			} else {
 				int separationIndex = 1;
 				if(this.optimizer != null && this.optimizer.isSelfJoinElimination()) {
@@ -459,11 +337,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				List<Triple> gp2TripleList = triples.subList(separationIndex, triples.size());
 				OpBGP gp2 = new OpBGP(BasicPattern.wrap(gp2TripleList));
 
-				result = this.transJoin(bgp, gp1, gp2, Constants.JOINS_TYPE_INNER);
+				transBGPSQL = this.transJoin(bgp, gp1, gp2, Constants.JOINS_TYPE_INNER());
 			}
 		}
 
-		return result;
+		return transBGPSQL;
 	}
 
 	protected IQuery trans(OpDistinct opDistinct) throws Exception {
@@ -478,10 +356,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected IQuery trans(OpFilter opFilter) throws Exception {
 		Op opFilterSubOp = opFilter.getSubOp();
 		IQuery subOpSQL = this.trans(opFilterSubOp);
-
-		Collection<ZSelectItem> subOpSelectItems = subOpSQL.getSelectItems(); 
 		String transGPSQLAlias = subOpSQL.generateAlias();
-
+		Collection<ZSelectItem> subOpSelectItems = subOpSQL.getSelectItems(); 
+		
 		ExprList exprList = opFilter.getExprs();
 		SQLFromItem resultFrom;
 		if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
@@ -499,17 +376,30 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		}
 		resultFrom.setAlias(transGPSQLAlias);
 
-		IQuery result = null;
-		ZExpression newWhere = this.transExprList(opFilterSubOp, exprList, subOpSelectItems, subOpSQL.getAlias());
+		IQuery transFilterSQL = null;
+		ZExpression exprListSQL = this.transExprList(
+				opFilterSubOp, exprList, subOpSelectItems, subOpSQL.getAlias());
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-			subOpSQL.pushFilterDown(newWhere);
-			result = subOpSQL;
+			subOpSQL.pushFilterDown(exprListSQL);
+			transFilterSQL = subOpSQL;
 		} else {
 			Collection<ZSelectItem> oldSelectItems = subOpSQL.getSelectItems();
 			Collection<ZSelectItem> newSelectItems = new Vector<ZSelectItem>();
+			
 			for(ZSelectItem oldSelectItem : oldSelectItems) {
 				String oldSelectItemAlias = oldSelectItem.getAlias();
-				ZSelectItem newSelectItem = new ZSelectItem(transGPSQLAlias + "." + oldSelectItemAlias);
+				String newColumnName = transGPSQLAlias + "." + oldSelectItemAlias;
+				//ZSelectItem newSelectItem = new ZSelectItem(newColumnName);
+				
+				String columnType = null;
+//				if(oldSelectItem instanceof MorphSQLSelectItem) {
+//					columnType = ((MorphSQLSelectItem) oldSelectItem).columnType();
+//				}
+				
+				//ZSelectItem newSelectItem = MorphSQLSelectItem.apply(oldSelectItemAlias, transGPSQLAlias, databaseType, columnType);
+				ZSelectItem newSelectItem = MorphSQLSelectItem.apply(
+						oldSelectItemAlias, null, databaseType, columnType);
+				
 				newSelectItem.setAlias(oldSelectItemAlias);
 				newSelectItems.add(newSelectItem);
 			}
@@ -517,11 +407,11 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			//			newSelectItems.add(newSelectItem);
 			SQLQuery resultAux = new SQLQuery(subOpSQL);
 			resultAux.setSelectItems(newSelectItems);
-			resultAux.addWhere(newWhere);
-			result = resultAux;
+			resultAux.addWhere(exprListSQL);
+			transFilterSQL = resultAux;
 		}
 
-		return result;
+		return transFilterSQL;
 	}
 
 	protected IQuery trans(OpExtend opExtend)  throws Exception {
@@ -541,8 +431,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			String alias = this.nameGenerator.generateName(var);
 			selectItem.setAlias(alias);
 			
-			String mapPrefixIdOldAlias = Constants.PREFIX_MAPPING_ID + exprVarName.replaceAll("\\.", "dot_"); 
-			String mapPrefixIdNewAlias = Constants.PREFIX_MAPPING_ID + var.getName();
+			String mapPrefixIdOldAlias = constants.PREFIX_MAPPING_ID() 
+					+ exprVarName.replaceAll("\\.", "dot_"); 
+			String mapPrefixIdNewAlias = constants.PREFIX_MAPPING_ID() + var.getName();
 			Collection<ZSelectItem> mapPrefixIdSelectItems = 
 					SQLUtility.getSelectItemsByAlias(selectItems, mapPrefixIdOldAlias);
 			ZSelectItem mapPrefixIdSelectItem = mapPrefixIdSelectItems.iterator().next();
@@ -555,6 +446,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 
 	protected IQuery trans(OpGroup opGroup)  throws Exception {
+		String dbType = this.databaseType;
+		MorphSQLSelectItemGenerator selectItemGenerator = new MorphSQLSelectItemGenerator(
+				this.nameGenerator, dbType);
 		
 		Op subOp = opGroup.getSubOp();
 		IQuery subOpSQL = this.trans(subOp);
@@ -577,7 +471,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				groupByExps.add(zExp);
 			}
 			
-			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(oldSelectItems, var);
+			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(
+					oldSelectItems, var, subOpSQLAlias, this.databaseType);
 			mapPrefixSelectItems.addAll(mapPrefixSelectItemsAux);
 		}
 		
@@ -588,15 +483,15 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Aggregator aggregator = exprAggregator.getAggregator();
 			String functionName;
 			if(aggregator instanceof AggAvg) {
-				functionName = Constants.AGGREGATION_FUNCTION_AVG;
+				functionName = constants.AGGREGATION_FUNCTION_AVG();
 			} else if(aggregator instanceof AggSum) {
-				functionName = Constants.AGGREGATION_FUNCTION_SUM;
+				functionName = constants.AGGREGATION_FUNCTION_SUM();
 			} else if(aggregator instanceof AggCount) {
-				functionName = Constants.AGGREGATION_FUNCTION_COUNT;
+				functionName = constants.AGGREGATION_FUNCTION_COUNT();
 			} else if(aggregator instanceof AggMax) {
-				functionName = Constants.AGGREGATION_FUNCTION_MAX;
+				functionName = constants.AGGREGATION_FUNCTION_MAX();
 			} else if(aggregator instanceof AggMin) {
-				functionName = Constants.AGGREGATION_FUNCTION_MIN;
+				functionName = constants.AGGREGATION_FUNCTION_MIN();
 			} else {
 				String errorMessage = "Unsupported aggregation function " + aggregator;
 				logger.error(errorMessage);
@@ -614,22 +509,30 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Var exprAggregatorVar = exprAggregator.getVar();
 			String aggregatorVarName = exprAggregatorVar.getName();
 			String aggregatorAlias = aggregatorVarName.replaceAll("\\.", "dot_");
-			Collection<ZSelectItem> aggregatedSelectItems = this.generateSelectItem(var, subOpSQLAlias, oldSelectItems, true);
+			//Collection<ZSelectItem> aggregatedSelectItems = this.generateSelectItem(var, subOpSQLAlias, oldSelectItems, true);
+//			Collection<ZSelectItem> aggregatedSelectItems = this.generateSelectItem(
+//					var, subOpSQLAlias, oldSelectItems, true);
+			Collection<ZSelectItem> aggregatedSelectItems = selectItemGenerator.generateSelectItem(
+					var, subOpSQLAlias, oldSelectItems, true);
+			
 			if(aggregatedSelectItems.size() > 1) {
 				String errorMessage = "Multiple columns in aggregation function is not supported: " + aggregatedSelectItems;
 				logger.error(errorMessage);
 				throw new Exception(errorMessage);				
 			}
-			Collection<ZSelectItem> pushedAggregatedSelectItems = transOpGroup.pushProjectionsDown(aggregatedSelectItems);
+			
+			transOpGroup.pushProjectionsDown(aggregatedSelectItems);
+			Collection<ZSelectItem> pushedAggregatedSelectItems = transOpGroup.getSelectItems(); 
 			ZSelectItem pushedAggregatedSelectItem = pushedAggregatedSelectItems.iterator().next();
 			pushedAggregatedSelectItem.setAggregate(functionName);
-			pushedAggregatedSelectItem.setAlias(Constants.PREFIX_VAR + aggregatorAlias);
+			pushedAggregatedSelectItem.setAlias(Constants.PREFIX_VAR() + aggregatorAlias);
 			newSelectItems.add(pushedAggregatedSelectItem);
 			this.mapAggreatorAlias.put(aggregatorVarName, pushedAggregatedSelectItem);
 			
-			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(oldSelectItems, var);
+			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(
+					oldSelectItems, var, subOpSQLAlias, this.databaseType);
 			ZSelectItem mapPrefixSelectItemAux = mapPrefixSelectItemsAux.iterator().next();
-			String mapPrefixSelectItemAuxAlias = Constants.PREFIX_MAPPING_ID + aggregatorAlias;
+			String mapPrefixSelectItemAuxAlias = Constants.PREFIX_MAPPING_ID() + aggregatorAlias;
 			mapPrefixSelectItemAux.setAlias(mapPrefixSelectItemAuxAlias);;
 			
 			mapPrefixSelectItems.addAll(mapPrefixSelectItemsAux);
@@ -645,20 +548,20 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	
 	protected IQuery trans(OpJoin opJoin)  throws Exception {
-		IQuery result = null;
+		IQuery transJoinSQL = null;
 		Op opLeft = opJoin.getLeft();
 		Op opRight = opJoin.getRight();
-		result = this.transJoin(opJoin, opLeft, opRight, Constants.JOINS_TYPE_INNER);
-		return result;
+		transJoinSQL = this.transJoin(opJoin, opLeft, opRight, Constants.JOINS_TYPE_INNER());
+		return transJoinSQL;
 	}
 
 	protected IQuery trans(OpLeftJoin opLeftJoin) throws Exception {
-		IQuery result = null;
+		IQuery transLeftJoinSQL = null;
 		Op opLeft = opLeftJoin.getLeft();
 		Op opRight = opLeftJoin.getRight();
 
-		result = this.transJoin(opLeftJoin, opLeft, opRight, Constants.JOINS_TYPE_LEFT);
-		return result;
+		transLeftJoinSQL = this.transJoin(opLeftJoin, opLeft, opRight, Constants.JOINS_TYPE_LEFT());
+		return transLeftJoinSQL;
 	}
 
 	protected IQuery trans(OpOrder opOrder) throws Exception {
@@ -672,7 +575,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Var sortConditionVar = sortConditionExpr.asVar();
 
 			String nameSortConditionVar = nameGenerator.generateName(sortConditionVar);
-			ZExp zExp = new ZConstant(nameSortConditionVar, ZConstant.COLUMNNAME);
+			ZExp zExp = MorphSQLConstant.apply(nameSortConditionVar, ZConstant.COLUMNNAME, this.databaseType, null);
 			//ZExp zExp = new ZConstant(sortConditionVar.getVarName(), ZConstant.COLUMNNAME);
 
 			ZOrderBy zOrderBy = new ZOrderBy(zExp);
@@ -705,6 +608,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 
 	protected IQuery trans(OpProject opProject) throws Exception {
+		
+		MorphSQLSelectItemGenerator selectItemGenerator = new MorphSQLSelectItemGenerator(
+				this.nameGenerator, this.databaseType);
 		Op opProjectSubOp = opProject.getSubOp();
 		IQuery opProjectSubOpSQL = this.trans(opProjectSubOp);
 
@@ -713,18 +619,24 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 		String subOpSQLAlias = opProjectSubOpSQL.generateAlias();
 
-		Collection<ZSelectItem> newSelectItems = new LinkedList<ZSelectItem>();
+		Collection<ZSelectItem> newSelectItemsVar = new LinkedList<ZSelectItem>();
 		List<Var> selectVars = opProject.getVars();
-		Collection<ZSelectItem> mapPrefixSelectItems = new Vector<ZSelectItem>();
+		Collection<ZSelectItem> newSelectItemsMappingId = new Vector<ZSelectItem>();
 		for(Var selectVar : selectVars) {
-			Collection<ZSelectItem> selectItemsByVars = this.generateSelectItem(selectVar, subOpSQLAlias, oldSelectItems, true);
-			newSelectItems.addAll(selectItemsByVars);
+//			Collection<ZSelectItem> selectItemsByVars = this.generateSelectItem(
+//					selectVar, subOpSQLAlias, oldSelectItems, true);
+			Collection<ZSelectItem> selectItemsByVars = selectItemGenerator.generateSelectItem(
+					selectVar, subOpSQLAlias, oldSelectItems, true);
+			newSelectItemsVar.addAll(selectItemsByVars);
 
-			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(oldSelectItems, selectVar);
-			mapPrefixSelectItems.addAll(mapPrefixSelectItemsAux);
+			Collection<ZSelectItem> mapPrefixSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(
+					oldSelectItems, selectVar, subOpSQLAlias, this.databaseType);
+			newSelectItemsMappingId.addAll(mapPrefixSelectItemsAux);
 		}
 
-
+		Collection<ZSelectItem> newSelectItems = new Vector<ZSelectItem>(newSelectItemsVar);
+		newSelectItems.addAll(newSelectItemsMappingId);
+		
 		if(this.optimizer != null && this.optimizer.isSubQueryAsView()) {
 			Connection conn = this.getConnection();
 			String subQueryViewName = "sqp" + Math.abs(opProject.hashCode());
@@ -739,60 +651,31 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 		IQuery transProjectSQL;
 		if(this.optimizer != null && this.optimizer.isSubQueryElimination()) {
-
-
-			//pushing down order by
-			Vector<ZOrderBy> orderByConditions = opProjectSubOpSQL.getOrderBy();
-			Collection<ZOrderBy> newOrderByCollectionAux = new HashSet<ZOrderBy>();
-			if(newSelectItems != null && orderByConditions != null) {
-				for(ZOrderBy orderBy : orderByConditions) {
-					ZOrderBy newOrderBy = null;
-
-					for(ZSelectItem selectItem : newSelectItems) {
-						String newSelectItemWithoutAlias = SQLUtility.getValueWithoutAlias(selectItem).trim();
-
-						String orderByExpression = orderBy.getExpression().toString();
-						String orderByExpressionWithPrefix = subOpSQLAlias + "." + orderByExpression;
-						if(newSelectItemWithoutAlias.equals(orderByExpressionWithPrefix)) {
-							newOrderBy = new ZOrderBy(new ZConstant(selectItem.getAlias(), ZConstant.COLUMNNAME));
-							newOrderBy.setAscOrder(orderBy.getAscOrder());
-							newOrderByCollectionAux.add(newOrderBy);
-						}
-					}
-
-					if(newOrderBy == null) {
-						newOrderByCollectionAux.add(orderBy);
-					}
-				}				
-			}
-
-			if(orderByConditions != null) {
-				Vector<ZOrderBy> newOrderByCollection = new Vector<ZOrderBy>(newOrderByCollectionAux);
-				opProjectSubOpSQL.pushOrderByDown(newOrderByCollection);
-			}
-
-
+			
 			//push group by down
 			opProjectSubOpSQL.pushGroupByDown();
 			
 			//pushing down projections
-			Collection<ZSelectItem> newProjections = opProjectSubOpSQL.pushProjectionsDown(newSelectItems);
-			if(opProjectSubOpSQL instanceof SQLQuery) {
-				opProjectSubOpSQL.setSelectItems(newProjections);	
-			}
+			opProjectSubOpSQL.pushProjectionsDown(newSelectItems);
+
+			//pushing down order by
+			opProjectSubOpSQL.pushOrderByDown(newSelectItems);
+
 			transProjectSQL = opProjectSubOpSQL;
+//			transProjectSQL.addSelectItems(newSelectItemsMappingId);
 		} else {
 			SQLQuery resultAux = new SQLQuery(opProjectSubOpSQL);
 			resultAux.setSelectItems(newSelectItems);
 			Vector<ZOrderBy> orderByConditions = opProjectSubOpSQL.getOrderBy();
 			if(orderByConditions != null) {
-				resultAux.pushOrderByDown(orderByConditions);
+				resultAux.pushOrderByDown(newSelectItems);
 				opProjectSubOpSQL.setOrderBy(null);				
 			}
 			transProjectSQL = resultAux;
+//			transProjectSQL.addSelectItems(newSelectItemsMappingId);
 		}
 
-		transProjectSQL.addSelectItems(mapPrefixSelectItems);
+		
 		return transProjectSQL;
 	}
 
@@ -814,36 +697,36 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	}
 
 	protected IQuery trans(OpUnion opUnion) throws Exception {
-		IQuery result;
-
 		Op gp1 = opUnion.getLeft();
 		Op gp2 = opUnion.getRight();
-
 		IQuery r1 = this.trans(gp1);
 		IQuery r2 = this.trans(gp2);
 
+		IQuery transUnion;
 		if(r1 == null && r2 == null) {
-			result = null;
+			transUnion = null;
 		} else if(r1 == null && r2 != null) {
-			result = r2;
+			transUnion = r2;
 		} else if(r1 != null && r2 == null) {
-			result = r1;
+			transUnion = r1;
 		} else {
+			MorphSQLSelectItemGenerator selectItemGenerator = 
+					new MorphSQLSelectItemGenerator(this.nameGenerator, this.databaseType);
+			
 			IQuery r3 = this.trans(gp2);
 			IQuery r4 = this.trans(gp1);
 
-			String r1Alias = r1.generateAlias() + "R1";
+			String r1Alias = r1.generateAlias() + "r1";
 			r1.setAlias(r1Alias);
-			String r2Alias = r2.generateAlias() + "R2";
+			String r2Alias = r2.generateAlias() + "r2";
 			r2.setAlias(r2Alias);
-			String r3Alias = r3.generateAlias() + "R3";
+			String r3Alias = r3.generateAlias() + "r3";
 			r3.setAlias(r3Alias);
-			String r4Alias = r4.generateAlias() + "R4";
+			String r4Alias = r4.generateAlias() + "r4";
 			r4.setAlias(r4Alias);
 
 			Collection<ZSelectItem> r1SelectItems = r1.getSelectItems();
 			Collection<ZSelectItem> r2SelectItems = r2.getSelectItems();
-			Collection<ZSelectItem> r3SelectItems = r3.getSelectItems();
 
 			Collection<Node> termsGP1 = QueryTranslatorUtility.terms(gp1, this.ignoreRDFTypeStatement);
 			Collection<Node> termsGP2 = QueryTranslatorUtility.terms(gp2, this.ignoreRDFTypeStatement);
@@ -852,25 +735,33 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Set<Node> termsC = new LinkedHashSet<Node>(termsGP1);termsC.retainAll(termsGP2);
 
 			
-			Collection<ZSelectItem> selectItemsA1 = this.generateSelectItems(termsA, r1Alias, r1SelectItems, false);
+			//Collection<ZSelectItem> selectItemsA1 = this.generateSelectItems(termsA, r1Alias, r1SelectItems, false);
+			Collection<ZSelectItem> selectItemsA1 = selectItemGenerator.generateSelectItems(
+					termsA, r1Alias, r1SelectItems, false);
 			SQLUtility.setDefaultAlias(selectItemsA1);
-			Collection<ZSelectItem> selectItemsB1 = this.generateSelectItems(termsB, r2Alias, r2SelectItems, false);
+			Collection<ZSelectItem> selectItemsB1 = selectItemGenerator.generateSelectItems(
+					termsB, r2Alias, r2SelectItems, false);
 			SQLUtility.setDefaultAlias(selectItemsB1);
-			Collection<ZSelectItem> selectItemsC1 = this.generateSelectItems(termsC, r1Alias, r1SelectItems, false);
+			Collection<ZSelectItem> selectItemsC1 = selectItemGenerator.generateSelectItems(
+					termsC, r1Alias, r1SelectItems, false);
 			SQLUtility.setDefaultAlias(selectItemsC1);
 			
 			Collection<ZSelectItem> selectItemsMappingId1 = new Vector<ZSelectItem>();
-			Collection<ZSelectItem> a1MappingIdSelectItems = this.generateMappingIdSelectItems(termsA, r1SelectItems, r1Alias);
+			Collection<ZSelectItem> a1MappingIdSelectItems = this.generateMappingIdSelectItems(
+					termsA, r1SelectItems, r1Alias);
 			selectItemsMappingId1.addAll(a1MappingIdSelectItems);
-			Collection<ZSelectItem> b1MappingIdSelectItems = this.generateMappingIdSelectItems(termsB, r2SelectItems, r2Alias);
+			Collection<ZSelectItem> b1MappingIdSelectItems = this.generateMappingIdSelectItems(
+					termsB, r2SelectItems, r2Alias);
 			selectItemsMappingId1.addAll(b1MappingIdSelectItems);
-			Collection<ZSelectItem> c1MappingIdSelectItems = this.generateMappingIdSelectItems(termsC, r1SelectItems, r1Alias);
+			Collection<ZSelectItem> c1MappingIdSelectItems = this.generateMappingIdSelectItems(
+					termsC, r1SelectItems, r1Alias);
 			selectItemsMappingId1.addAll(c1MappingIdSelectItems);
 
 			SQLQuery query1 = new SQLQuery();
 			query1.setDatabaseType(this.databaseType);
 			SQLJoinTable r1JoinTable = new SQLJoinTable(r1, null, null);
-			SQLJoinTable r2JoinTable = new SQLJoinTable(r2, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE);
+			SQLJoinTable r2JoinTable = new SQLJoinTable(
+					r2, Constants.JOINS_TYPE_LEFT(), Constants.SQL_EXPRESSION_FALSE());
 			query1.addFromItem(r1JoinTable);
 			query1.addFromItem(r2JoinTable);
 			query1.addSelectItems(selectItemsA1);
@@ -879,27 +770,34 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			query1.addSelectItems(selectItemsMappingId1);
 			
 
-			
-			Collection<ZSelectItem> selectItemsA2 = this.generateSelectItems(termsA, r4Alias, r1SelectItems, false);
+			Collection<ZSelectItem> r3SelectItems = r3.getSelectItems();
+			Collection<ZSelectItem> selectItemsA2 = selectItemGenerator.generateSelectItems(
+					termsA, r4Alias, r1SelectItems, false);
 			SQLUtility.setDefaultAlias(selectItemsA2);
-			Collection<ZSelectItem> selectItemsB2 = this.generateSelectItems(termsB, r3Alias, r2SelectItems, false);
+			Collection<ZSelectItem> selectItemsB2 = selectItemGenerator.generateSelectItems(
+					termsB, r3Alias, r2SelectItems, false);
 			SQLUtility.setDefaultAlias(selectItemsB2);
 			Vector<Node> termsCList = new Vector<Node>(termsC);
-			Collection<ZSelectItem> selectItemsC2 = this.generateSelectItems(termsCList, r3Alias + ".", r3SelectItems, false);
+			Collection<ZSelectItem> selectItemsC2 = selectItemGenerator.generateSelectItems(
+					termsCList, r3Alias + ".", r3SelectItems, false);
 			SQLUtility.setDefaultAlias(selectItemsC2);
 
 			Collection<ZSelectItem> selectItemsMappingId2 = new Vector<ZSelectItem>();
-			Collection<ZSelectItem> a2MappingIdSelectItems = this.generateMappingIdSelectItems(termsA, r1SelectItems, r4Alias);
+			Collection<ZSelectItem> a2MappingIdSelectItems = this.generateMappingIdSelectItems(
+					termsA, r1SelectItems, r4Alias);
 			selectItemsMappingId2.addAll(a2MappingIdSelectItems);
-			Collection<ZSelectItem> b2MappingIdSelectItems = this.generateMappingIdSelectItems(termsB, r2SelectItems, r3Alias);
+			Collection<ZSelectItem> b2MappingIdSelectItems = this.generateMappingIdSelectItems(
+					termsB, r2SelectItems, r3Alias);
 			selectItemsMappingId2.addAll(b2MappingIdSelectItems);
-			Collection<ZSelectItem> c2MappingIdSelectItems = this.generateMappingIdSelectItems(termsC, r1SelectItems, r3Alias);
+			Collection<ZSelectItem> c2MappingIdSelectItems = this.generateMappingIdSelectItems(
+					termsC, r1SelectItems, r3Alias);
 			selectItemsMappingId2.addAll(c2MappingIdSelectItems);
 
 			SQLQuery query2 = new SQLQuery();
 			query2.setDatabaseType(this.databaseType);
 			SQLJoinTable r3JoinTable = new SQLJoinTable(r3, null, null);
-			SQLJoinTable r4JoinTable = new SQLJoinTable(r4, Constants.JOINS_TYPE_LEFT, Constants.SQL_EXPRESSION_FALSE);
+			SQLJoinTable r4JoinTable = new SQLJoinTable(r4
+					, Constants.JOINS_TYPE_LEFT(), Constants.SQL_EXPRESSION_FALSE());
 			query2.addFromItem(r3JoinTable);
 			query2.addFromItem(r4JoinTable);
 			query2.addSelectItems(selectItemsA2);
@@ -914,11 +812,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			transUnionSQL.add(query2);
 			logger.debug("transUnionSQL = \n" + transUnionSQL);
 
-			result = transUnionSQL;
+			transUnion = transUnionSQL;
 		}
 
-
-		return result;
+		return transUnion;
 	}
 
 	protected List<ZExp> transConstant(NodeValue nodeValue) {
@@ -968,7 +865,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			List<ZExp> exprTranslated = this.transExpr(op, expr, subOpSelectItems, prefix);
 			resultAux.addAll(exprTranslated);
 		}
-		ZExpression result = SQLUtility.combineExpresions(resultAux, Constants.SQL_LOGICAL_OPERATOR_AND);
+		ZExpression result = SQLUtility.combineExpresions(resultAux, Constants.SQL_LOGICAL_OPERATOR_AND());
 		return result;
 	}
 
@@ -1001,7 +898,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				resultAuxs.add(resultAux);
 			}
 
-			result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
+			result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND());
 		} else if(exprFunction instanceof ExprFunction2) {
 			Expr leftArg = args.get(0);
 			Expr rightArg = args.get(1);
@@ -1009,14 +906,14 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			List<ZExp> rightExprTranslated = this.transExpr(op, rightArg, subOpSelectItems, prefix);
 
 			if(exprFunction instanceof E_NotEquals){
-				if(Constants.DATABASE_MONETDB.equalsIgnoreCase(databaseType)) {
+				if(Constants.DATABASE_MONETDB().equalsIgnoreCase(databaseType)) {
 					functionSymbol = "<>";
 				} else {
 					functionSymbol = "!=";
 				}
 
 				String concatSymbol;
-				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
+				if(Constants.DATABASE_POSTGRESQL().equalsIgnoreCase(databaseType)) {
 					concatSymbol = "||";
 				} else {
 					concatSymbol = "CONCAT";
@@ -1032,10 +929,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					ZExpression leftConcatOperand = new ZExpression(concatSymbol);
 					for(int i=0; i<leftExprTranslated.size(); i++ ) {
 						ZExp leftOperand = leftExprTranslated.get(i);
-						if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && leftOperand instanceof ZConstant) {
+						if(Constants.DATABASE_POSTGRESQL().equalsIgnoreCase(databaseType) && leftOperand instanceof ZConstant) {
 							String leftOperandValue = ((ZConstant) leftOperand).getValue();
-							SQLConstant leftOperandNew = new SQLConstant(leftOperandValue, ((ZConstant) leftOperand).getType());
-							leftOperandNew.setColumnType("text");
+							MorphSQLConstant leftOperandNew = MorphSQLConstant.apply(leftOperandValue
+									, ((ZConstant) leftOperand).getType(), databaseType, "text");
 							leftConcatOperand.addOperand(leftOperandNew);
 						} else {
 							leftConcatOperand.addOperand(leftOperand);	
@@ -1052,10 +949,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					ZExpression rightConcatOperand = new ZExpression(concatSymbol);
 					for(int i=0; i<rightExprTranslated.size(); i++ ) {
 						ZExp rightOperand = rightExprTranslated.get(i);
-						if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType) && rightOperand instanceof ZConstant) {
+						if(Constants.DATABASE_POSTGRESQL().equalsIgnoreCase(databaseType) && rightOperand instanceof ZConstant) {
 							String rightOperandValue = ((ZConstant) rightOperand).getValue();
-							SQLConstant rightOperandNew = new SQLConstant(rightOperandValue, ((ZConstant) rightOperand).getType());
-							rightOperandNew.setColumnType("text");
+							MorphSQLConstant rightOperandNew = MorphSQLConstant.apply(rightOperandValue
+									, ((ZConstant) rightOperand).getType(), databaseType, "text");
 							rightConcatOperand.addOperand(rightOperandNew);
 						} else {
 							rightConcatOperand.addOperand(rightOperand);	
@@ -1085,7 +982,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					resultAux.addOperand(rightOperand);
 					resultAuxs.add(resultAux);
 				}
-				result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
+				result = SQLUtility.combineExpresions(resultAuxs, constants.SQL_LOGICAL_OPERATOR_AND());
 			}
 		} else {
 			List<List<ZExp>> transArgs = new Vector<List<ZExp>>();
@@ -1123,7 +1020,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				}
 				resultAuxs.add(resultAux);
 			}
-			result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND);
+			result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND());
 		}
 
 		return result;
@@ -1136,7 +1033,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	protected IQuery transJoin(Op opParent, Op gp1, Op gp2
 			, String joinType) throws Exception  {
 		logger.debug("entering transJoin");
-
+		MorphSQLSelectItemGenerator selectItemGenerator = new MorphSQLSelectItemGenerator(this.nameGenerator, this.databaseType);
 		if (opParent instanceof OpLeftJoin) {
 			OpLeftJoin opLefJoin = (OpLeftJoin) opParent;
 			ExprList opLeftJoinExpr = opLefJoin.getExprs();
@@ -1170,14 +1067,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + transGP1SQL;
 				logger.info(createViewSQL + ";\n");
 				DBUtility.execute(conn, createViewSQL);
-
 				transGP1FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
 			} else {
 				//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
 				transGP1FromItem = new SQLFromItem(transGP1SQL.toString(), LogicalTableType.QUERY_STRING);
 			}
 			transGP1FromItem.setAlias(transGP1Alias);
-
 
 			String transGP2Alias = transGP2SQL.generateAlias();
 			SQLFromItem transGP2FromItem;
@@ -1211,39 +1106,49 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			Collection<ZSelectItem> mappingsSelectItems = new Vector<ZSelectItem>();
 			for(Node termA : termsA) {
 				if(termA.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp1SelectItems, termA);
+					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(
+							gp1SelectItems, termA, transGP1Alias, this.databaseType);
 					mappingsSelectItems.addAll(mappingsSelectItemsAux);
 				}
 			}
 			for(Node termB : termsB) {
 				if(termB.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp2SelectItems, termB);
+					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(
+							gp2SelectItems, termB, transGP2Alias, this.databaseType);
 					mappingsSelectItems.addAll(mappingsSelectItemsAux);
 				}
 			}
 			for(Node termC : termsC) {
 				if(termC.isVariable()) {
-					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(gp1SelectItems, termC);
+					Collection<ZSelectItem> mappingsSelectItemsAux = SQLUtility.getSelectItemsMapPrefix(
+							gp1SelectItems, termC, transGP2Alias, this.databaseType);
 					mappingsSelectItems.addAll(mappingsSelectItemsAux);
 				}
 			}
 
 			this.mapTermsC.put(opParent, termsC);
 			Collection<ZSelectItem> selectItems = new HashSet<ZSelectItem>();
-			Collection<ZSelectItem> selectItemsA = this.generateSelectItems(
+//			Collection<ZSelectItem> selectItemsA = this.generateSelectItems(
+//					termsA, transGP1Alias, gp1SelectItems, false);
+			Collection<ZSelectItem> selectItemsA = selectItemGenerator.generateSelectItems(
 					termsA, transGP1Alias, gp1SelectItems, false);
+			
 			for(ZSelectItem selectItemA : selectItemsA) {
 				selectItemA.setAlias(selectItemA.getColumn());
 			}
 			selectItems.addAll(selectItemsA);
-			Collection<ZSelectItem> selectItemsB = this.generateSelectItems(
-					termsB, transGP2Alias, gp2SelectItems, false);
+//			Collection<ZSelectItem> selectItemsB = this.generateSelectItems(
+//					termsB, transGP2Alias, gp2SelectItems, false);
+			Collection<ZSelectItem> selectItemsB = selectItemGenerator.generateSelectItems(
+					termsB, transGP2Alias, gp2SelectItems, false);			
 			for(ZSelectItem selectItemB : selectItemsB) {
 				selectItemB.setAlias(selectItemB.getColumn());
 			}			
 			selectItems.addAll(selectItemsB);
-			Collection<ZSelectItem> selectItemsC = this.generateSelectItems(
-					termsC, transGP1Alias, gp1SelectItems, false);
+//			Collection<ZSelectItem> selectItemsC = this.generateSelectItems(
+//					termsC, transGP1Alias, gp1SelectItems, false);
+			Collection<ZSelectItem> selectItemsC = selectItemGenerator.generateSelectItems(
+					termsC, transGP1Alias, gp1SelectItems, false);			
 			for(ZSelectItem selectItemC : selectItemsC) {
 				selectItemC.setAlias(selectItemC.getColumn());
 			}
@@ -1272,8 +1177,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 						while(termCColumns1Iterator.hasNext()) {
 							String termCColumn1 = termCColumns1Iterator.next();
 							String termCColumn2 = termCColumns2Iterator.next();
-							ZConstant gp1TermC = new ZConstant(transGP1Alias + "." + termCColumn1, ZConstant.UNKNOWN);
-							ZConstant gp2TermC = new ZConstant(transGP2Alias + "." + termCColumn2, ZConstant.UNKNOWN);
+							ZConstant gp1TermC = MorphSQLConstant.apply(transGP1Alias + "." + termCColumn1
+									, ZConstant.COLUMNNAME, this.databaseType, null);
+							ZConstant gp2TermC = MorphSQLConstant.apply(transGP2Alias + "." + termCColumn2
+									, ZConstant.COLUMNNAME, this.databaseType, null);
 
 							ZExpression exp1Aux = new ZExpression("=", gp1TermC, gp2TermC);
 							exps1Aux.add(exp1Aux);
@@ -1288,9 +1195,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 								exps3Aux.add(exp3Aux);								
 							}
 						}
-						ZExpression exp1 = SQLUtility.combineExpresions(exps1Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-						ZExpression exp2 = SQLUtility.combineExpresions(exps2Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
-						ZExpression exp3 = SQLUtility.combineExpresions(exps3Aux, Constants.SQL_LOGICAL_OPERATOR_AND);
+						ZExpression exp1 = SQLUtility.combineExpresions(exps1Aux
+								, Constants.SQL_LOGICAL_OPERATOR_AND());
+						ZExpression exp2 = SQLUtility.combineExpresions(exps2Aux
+								, Constants.SQL_LOGICAL_OPERATOR_AND());
+						ZExpression exp3 = SQLUtility.combineExpresions(exps3Aux
+								, Constants.SQL_LOGICAL_OPERATOR_AND());
 
 						if(exps2Aux.isEmpty() && exps2Aux.isEmpty()) {
 							joinOnExps.add(exp1);
@@ -1310,11 +1220,13 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 						}
 					}						
 				}
-			}				
-			if(joinOnExps == null || joinOnExps.size() == 0) {
-				joinOnExps.add(Constants.SQL_EXPRESSION_TRUE);
 			}
-			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps, Constants.SQL_LOGICAL_OPERATOR_AND);
+
+			if(joinOnExps == null || joinOnExps.size() == 0) {
+				joinOnExps.add(Constants.SQL_EXPRESSION_TRUE());
+			}
+			ZExpression joinOnExpression = SQLUtility.combineExpresions(joinOnExps
+					, Constants.SQL_LOGICAL_OPERATOR_AND());
 
 			IQuery transJoin = null;
 			if(this.optimizer != null) {
@@ -1376,11 +1288,29 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		IQuery result = null;
 		//logger.info("opSparqlQuery = " + opSparqlQuery);
 		if(this.optimizer != null && this.optimizer.isSelfJoinElimination()) {
-			QueryRewritter queryRewritter = new QueryRewritter();
-			boolean reorderSTG = this.configurationProperties.isReorderSTG();
-			queryRewritter.setReorderSTG(reorderSTG);
-			queryRewritter.setMapInferredTypes(mapInferredTypes);
-			Op opSparqlQuery2 = queryRewritter.rewrite(opSparqlQuery);
+			Map<Node, Long> mapNodeLogicalTableSize = new HashMap<Node, Long>();
+			for(Node node : mapInferredTypes.keySet()) {
+				Set<AbstractConceptMapping> cms = mapInferredTypes.get(node);
+				AbstractConceptMapping cm = cms.iterator().next();
+				Long logicalTableSize = cm.getLogicalTableSize();
+				mapNodeLogicalTableSize.put(node, logicalTableSize);
+			}
+			
+			boolean reorderSTG = true;
+			if(this.configurationProperties != null) {
+				reorderSTG = this.configurationProperties.isReorderSTG();
+			}
+			MorphQueryRewriter queryRewritter = new MorphQueryRewriter(mapNodeLogicalTableSize, reorderSTG);
+			
+//			queryRewritter.setMapInferredTypes(mapInferredTypes);
+			Op opSparqlQuery2;
+			try {
+				opSparqlQuery2 = queryRewritter.rewrite(opSparqlQuery);	
+			} catch (Exception e) {
+				e.printStackTrace();
+				opSparqlQuery2 = opSparqlQuery;
+			}
+			
 			logger.debug("opSparqlQueryRewritten = \n" + opSparqlQuery2);
 			result = this.trans(opSparqlQuery2);
 		} else {
@@ -1489,17 +1419,62 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 			}
 		} else if(tpPredicate.isVariable()) {
+			String mappingDocumentURL = this.getMappingDocumentURL();
+			Resource triplesMapResource = cm.getResource();
+			Map<String, ColumnMetaData> columnsMetaData = cm.getLogicalTable().getColumnsMetaData();
+			
+			TriplePatternPredicateBounder tpBounder = new TriplePatternPredicateBounder(mappingDocumentURL, columnsMetaData);
+//			tpBounder.setMapColumnsMetaData(columnsMetaData);
+			
+			Map<Resource, List<String>> boundedTriplePatterns = 
+					tpBounder.expandUnboundedPredicateTriplePattern(tp, triplesMapResource);
+			logger.debug("boundedTriplePatterns = " + boundedTriplePatterns);
+			
+			//List<String> validationResult = validator.expandUnboundedTriplePattern(tp, tm);
 			Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings();
+			if(boundedTriplePatterns.size() != pms.size()) {
+				logger.debug("boundedTriplePatterns.size() != pms.size()!");	
+			}
+			
+			
 			if(pms != null && pms.size() > 0) {
 				List<IQuery> sqlQueries = new Vector<IQuery>();
 				for(AbstractPropertyMapping pm : pms) {
+					Resource propertyMappingResource = pm.getResource();
+					List<String> boundedTriplePatternErrorMessages = 
+							boundedTriplePatterns.get(propertyMappingResource);
 					String predicateURI = pm.getMappedPredicateName();
-					try {
-						IQuery sqlQuery = this.trans(tp, cm, predicateURI, true);
-						sqlQueries.add(sqlQuery);
-					} catch(InsatisfiableSQLExpression e) {
-						logger.debug("Insatifiable sql while translating : " + predicateURI + " in " + cm.getConceptName());
+					if(boundedTriplePatternErrorMessages == null || boundedTriplePatternErrorMessages.isEmpty()) {
+						try {
+							IQuery sqlQuery = this.trans(tp, cm, predicateURI, true);
+							sqlQueries.add(sqlQuery);							
+						} catch(InsatisfiableSQLExpression e) {
+							logger.warn("-- Insatifiable sql while translating : " + predicateURI + " in " + cm.getConceptName());
+							logger.warn(e.getMessage());
+							logger.warn(boundedTriplePatternErrorMessages);
+						}
+					} else {
+						logger.warn("-- Insatifiable sql while translating : " + predicateURI + " in " + cm.getConceptName());
+						logger.warn(boundedTriplePatternErrorMessages);
 					}
+					
+//					try {
+//						if(boundedTriplePatternErrorMessages != null && !boundedTriplePatternErrorMessages.isEmpty()) {
+//							logger.warn("Check TriplePatternPredicateBounder class!");
+//						}
+//						IQuery sqlQuery = this.trans(tp, cm, predicateURI, true);
+//						sqlQueries.add(sqlQuery);
+//					} catch(InsatisfiableSQLExpression e) {
+//						if(boundedTriplePatternErrorMessages == null || boundedTriplePatternErrorMessages.isEmpty()) {
+//							logger.warn("Check TriplePatternPredicateBounder class!");
+//						} else if(boundedTriplePatternErrorMessages.size() > 1) {
+//							logger.warn("Check TriplePatternPredicateBounder class!");
+//						}
+//						
+//						logger.warn(e.getMessage());
+//						logger.warn(boundedTriplePatternErrorMessages.get(0));
+//					}
+					
 				}
 				if(sqlQueries.size() == 1) {
 					result = sqlQueries.iterator().next();
@@ -1514,16 +1489,21 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return result;
 	}
 
-	protected abstract IQuery trans(Triple tp, AbstractConceptMapping cm, String predicateURI, boolean insideUnboundedPredicate)
-			throws QueryTranslationException, InsatisfiableSQLExpression;
+	protected abstract IQuery trans(Triple tp, AbstractConceptMapping cm
+			, String predicateURI, boolean insideUnboundedPredicate) 
+					throws QueryTranslationException, InsatisfiableSQLExpression;
+
+	protected abstract IQuery trans(Triple tp, AbstractConceptMapping cm
+			, String predicateURI, AbstractPropertyMapping pm) 
+					throws QueryTranslationException, InsatisfiableSQLExpression;
 
 	protected IQuery trans(Triple tp) throws QueryTranslationException {
 		IQuery result = null;
 
 		Node tpSubject = tp.getSubject();
 		Node tpPredicate = tp.getPredicate();
-		if(tpPredicate.isURI() && RDF.type.getURI().equals(tpPredicate.getURI()) 
-				&& (this.isIgnoreRDFTypeStatement())) {
+		Node tpObject = tp.getObject();
+		if(tpPredicate.isURI() && RDF.type.getURI().equals(tpPredicate.getURI()) && tpObject.isURI()) {
 			result = null;
 		} else {
 			Collection<AbstractConceptMapping> cms = this.mapInferredTypes.get(tpSubject);
@@ -1632,14 +1612,13 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 
 			//PRSQLSTG
-			Collection<ZSelectItem> prSQL = 
+			Collection<ZSelectItem> prSQLSTG = 
 					this.prSQLGenerator.genPRSQLSTG(stg, alphaResult
 							, betaGenerator, nameGenerator, cm);
 
 
 			//CondSQLSTG
-			ZExpression condSQL = this.condSQLGenerator.genCondSQLSTG(stg
-					, alphaResult, betaGenerator, cm);
+			ZExpression condSQLSQL = this.condSQLGenerator.genCondSQLSTG(stg, alphaResult, betaGenerator, cm);
 
 			//TRANS(STG)
 			SQLQuery resultAux = null;
@@ -1648,7 +1627,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				boolean isTransSTGSubQueryElimination = this.optimizer.isTransSTGSubQueryElimination();
 				if(isTransSTGSubQueryElimination) {
 					try {
-						resultAux = this.createQuery(alphaSubject, alphaPredicateObjects, prSQL, condSQL);
+						resultAux = this.createQuery(alphaSubject, alphaPredicateObjects, prSQLSTG, condSQLSQL);
 					} catch(Exception e) {
 						String errorMessage = "error in eliminating subquery!";
 						logger.error(errorMessage);
@@ -1664,8 +1643,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
 					resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
 				}
-				resultAux.setSelectItems(prSQL);
-				resultAux.setWhere(condSQL);
+				resultAux.setSelectItems(prSQLSTG);
+				resultAux.setWhere(condSQLSQL);
 			}
 
 			transSTG = resultAux;
@@ -1675,8 +1654,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return transSTG;
 	}
 
-	protected SQLQuery createQuery(SQLLogicalTable alphaSubject, Collection<SQLJoinTable> alphaPredicateObjects, 
-			Collection<ZSelectItem> prSQL, ZExpression condSQL) {
+	protected SQLQuery createQuery(SQLLogicalTable alphaSubject
+			, Collection<SQLJoinTable> alphaPredicateObjects, Collection<ZSelectItem> prSQL
+			, ZExpression condSQL) {
 		SQLQuery resultAux = null;
 		
 		Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
@@ -1693,13 +1673,12 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			}
 
 			//ZExpression pushedCondSQL = (ZExpression) resultAux.pushExpressionDown(condSQL);
-			ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+			ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions
+					, Constants.SQL_LOGICAL_OPERATOR_AND());
 			ZExpression pushedNewWhere = (ZExpression) resultAux.pushExpDown(newWhere);
 			resultAux.addWhere(pushedNewWhere);
 
-			Collection<ZSelectItem> pushedPRSQL = resultAux.pushProjectionsDown(prSQL);
-			resultAux.setSelectItems(pushedPRSQL);
-
+			resultAux.pushProjectionsDown(prSQL);
 		} else if(alphaSubject instanceof ZFromItem) {
 			ZFromItem alphaSubjectFromItem = (ZFromItem) alphaSubject;
 
@@ -1718,7 +1697,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			//								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
 			//								joinExpressions.add(joinExpression);
 			//							}
-			//							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+			//							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, constants.SQL_LOGICAL_OPERATOR_AND);
 			//							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
 		} else {
 			logger.warn("undefined alphasubject type!");
@@ -1730,7 +1709,8 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				ZExpression joinExpression = alphaPredicateObject.getOnExpression();
 				joinExpressions.add(joinExpression);
 			}
-			ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, Constants.SQL_LOGICAL_OPERATOR_AND);
+			ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions
+					, Constants.SQL_LOGICAL_OPERATOR_AND());
 			resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
 		}
 		
@@ -1743,16 +1723,18 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		Collection<String> columns = this.getColumnsByNode(var, subOpSelectItems);
 		List<ZExp> result = new LinkedList<ZExp>();
 		for(String column : columns) {
-			ZConstant constant;
+			String columnName;
 			if(prefix == null) {
-				constant = new ZConstant(column, ZConstant.COLUMNNAME);	
+				columnName = column;
 			} else {
 				if(!prefix.endsWith(".")) {
 					prefix += ".";
 				}
-				constant = new ZConstant(prefix + column, ZConstant.COLUMNNAME);
+				columnName = prefix + column;
 			}
 
+			ZConstant constant = MorphSQLConstant.apply(columnName, ZConstant.COLUMNNAME
+					, this.databaseType, null);
 			result.add(constant);
 		}
 		return result;
@@ -1848,5 +1830,142 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 		return mapHashCodeMapping;
 	}
 
+	public String getMappingDocumentURL() {
+		return this.mappingDocument.getMappingDocumentPath();
+	}
+
+//	private Collection<ZSelectItem> generateSelectItem(Node node, String prefix
+//			, Collection<ZSelectItem> oldSelectItems, boolean useAlias) {
+//		Collection<ZSelectItem> result = new LinkedList<ZSelectItem>();
+//		if(prefix != null && !prefix.endsWith(".")) {
+//			prefix += ".";
+//		}
+//
+//		String nameSelectVar = nameGenerator.generateName(node);
+//
+//		ZSelectItem newSelectItem = null;
+//		if(node.isVariable() || node.isURI()) {
+//			if(oldSelectItems == null) {
+//				if(prefix == null) {
+//					newSelectItem = new ZSelectItem(nameSelectVar);
+//				} else {
+//					newSelectItem = new ZSelectItem(prefix + nameSelectVar);	
+//				}
+//
+//				if(useAlias) {
+//					newSelectItem.setAlias(nameSelectVar);	
+//				}
+//				result.add(newSelectItem);
+//			} else {
+//				Iterator<ZSelectItem> oldSelectItemsIterator = oldSelectItems.iterator();
+//				while(oldSelectItemsIterator.hasNext()) {
+//					ZSelectItem oldSelectItem = oldSelectItemsIterator.next(); 
+//					String selectItemName;
+//					String oldAlias = oldSelectItem.getAlias();
+//					String oldTable = null;
+//					if(oldAlias == null || oldAlias.equals("")) {
+//						selectItemName = oldSelectItem.getColumn();
+//						oldTable = oldSelectItem.getTable();
+//					} else {
+//						selectItemName = oldAlias; 
+//					}
+//
+//					String newSelectItemAlias = null;
+//					if(selectItemName.equalsIgnoreCase(nameSelectVar)) {
+//						if(prefix == null || prefix.equals("")) {
+//							if(oldTable == null || oldTable.equals("")) {
+//								newSelectItem = new ZSelectItem(selectItemName);
+//							} 
+//														else {
+//															newSelectItem = new ZSelectItem(oldTable + "." + selectItemName);
+//														}
+//						} else {
+//							newSelectItem = new ZSelectItem(prefix + selectItemName);
+//						}
+//
+//						if(node.isVariable()) {
+//							newSelectItemAlias = node.getName();	
+//						} else if(node.isURI()) {
+//							newSelectItemAlias = node.getURI();
+//						}
+//					} else if (selectItemName.contains(nameSelectVar + "_")) {
+//						if(prefix == null || prefix.equals("")) {
+//							if(oldTable == null || oldTable.equals("")) {
+//								newSelectItem = new ZSelectItem(selectItemName);
+//							} else {
+//								newSelectItem = new ZSelectItem(oldTable + "." + selectItemName);
+//							}
+//						} else {
+//							newSelectItem = new ZSelectItem(prefix + selectItemName);
+//						}
+//
+//						if(node.isVariable()) {
+//							newSelectItemAlias = node.getName();	
+//						} else if(node.isURI()) {
+//							newSelectItemAlias = node.getURI();
+//						}						
+//						newSelectItemAlias += selectItemName.replaceAll(nameSelectVar, "");
+//					} else {
+//						newSelectItem = null;
+//					}
+//
+//					if(newSelectItem != null) {
+//						if(newSelectItemAlias != null && useAlias) {
+//							newSelectItem.setAlias(newSelectItemAlias);
+//						}
+//						result.add(newSelectItem);
+//					}
+//				}	
+//			}
+//		} else if(node.isLiteral()){
+//			Object literalValue = node.getLiteralValue();
+//			ZExp exp;
+//			String constantValue;
+//			if(prefix == null) {
+//				constantValue = literalValue.toString();
+//			} else {
+//				constantValue = prefix + literalValue.toString();
+//			}
+//
+//			if(literalValue instanceof String) {
+//				exp = new ZConstant(constantValue, ZConstant.STRING);							
+//			} else if (literalValue instanceof Double) {
+//				exp = new ZConstant(constantValue, ZConstant.NUMBER);
+//			} else {
+//				exp = new ZConstant(constantValue, ZConstant.STRING);							
+//
+//			}
+//			newSelectItem = new SQLSelectItem();
+//			newSelectItem.setExpression(exp);
+//			if(useAlias) { newSelectItem.setAlias(nameSelectVar); }
+//
+//			result.add(newSelectItem);
+//		} else {
+//			logger.warn("unsupported node " + node.toString());
+//		}
+//
+//		return result;
+//	}
+//
+//
+//	private Collection<ZSelectItem> generateSelectItems(Collection<Node> nodes
+//			, String prefix, Collection<ZSelectItem> oldSelectItems, boolean useAlias) {
+//		if(prefix != null && !prefix.endsWith(".")) {
+//			prefix += ".";
+//		}		
+//
+//		Collection<ZSelectItem> result = new LinkedHashSet<ZSelectItem>();
+//
+//		for(Node node : nodes) {
+//			if(!node.isLiteral()) {
+//				Collection<ZSelectItem> selectItems = this.generateSelectItem(
+//						node, prefix, oldSelectItems, useAlias);
+//				result.addAll(selectItems);				
+//			}
+//
+//		}
+//
+//		return result;
+//	}	
 
 }

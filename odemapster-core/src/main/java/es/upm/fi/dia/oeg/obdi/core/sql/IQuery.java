@@ -39,9 +39,9 @@ public interface IQuery extends SQLLogicalTable {
 //			, String databaseType) throws Exception;
 
 	//public Map<String, ZSelectItem> buildMapAliasSelectItem();
-	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections);
+	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections);
 	public void pushFilterDown(ZExp pushedFilter);
-	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection);
+	public void pushOrderByDown(Collection<ZSelectItem> pushedProjections);
 	public void pushGroupByDown();
 	
 }

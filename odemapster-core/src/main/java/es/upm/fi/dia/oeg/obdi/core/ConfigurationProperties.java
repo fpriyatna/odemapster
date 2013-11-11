@@ -9,9 +9,11 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.core.exception.InvalidConfigurationPropertiesException;
 
 public class ConfigurationProperties extends Properties {
+	
 	//change this to typesafe config
 
 	/**
@@ -31,16 +33,19 @@ public class ConfigurationProperties extends Properties {
 	private String databaseType;
 
 	//query translator
-	private boolean selfJoinElimination;
-	private boolean subQueryElimination;
-	private boolean transJoinSubQueryElimination;
-	private boolean transSTGSubQueryElimination;
-	private boolean subQueryAsView;
 	private String queryTranslatorClassName;
 	private String queryEvaluatorClassName;
 	private String queryResultWriterClassName;
-	private boolean reorderSTG;
+
+	//query optimizer
+	private boolean reorderSTG = true;
+	private boolean selfJoinElimination = true;
+	private boolean subQueryElimination = true;
+	private boolean transJoinSubQueryElimination = true;
+	private boolean transSTGSubQueryElimination = true;
+	private boolean subQueryAsView = false;
 	
+
 	//batch upgrade
 	private boolean literalRemoveStrangeChars;
 	private boolean encodeUnsafeChars;
@@ -101,33 +106,33 @@ public class ConfigurationProperties extends Properties {
 
 	private void readConfigurationFile(String configurationDir) 
 			throws Exception {
-
-		this.noOfDatabase = this.readInteger(Constants.NO_OF_DATABASE_NAME_PROP_NAME, 0); 
+		
+		this.noOfDatabase = this.readInteger(Constants.NO_OF_DATABASE_NAME_PROP_NAME(), 0); 
 		if(this.noOfDatabase != 0 && this.noOfDatabase != 1) {
 			throw new InvalidConfigurationPropertiesException("Only zero or one database is supported.");
 		}
 
 		this.conn = null;
 		for(int i=0; i<noOfDatabase;i++) {
-			String propertyDatabaseDriver = Constants.DATABASE_DRIVER_PROP_NAME + "[" + i + "]";
+			String propertyDatabaseDriver = Constants.DATABASE_DRIVER_PROP_NAME() + "[" + i + "]";
 			this.databaseDriver = this.getProperty(propertyDatabaseDriver);
 
-			String propertyDatabaseURL = Constants.DATABASE_URL_PROP_NAME + "[" + i + "]";
+			String propertyDatabaseURL = Constants.DATABASE_URL_PROP_NAME() + "[" + i + "]";
 			this.databaseURL = this.getProperty(propertyDatabaseURL);
 
-			String propertyDatabaseName= Constants.DATABASE_NAME_PROP_NAME + "[" + i + "]";
+			String propertyDatabaseName= Constants.DATABASE_NAME_PROP_NAME() + "[" + i + "]";
 			this.databaseName = this.getProperty(propertyDatabaseName);
 
-			String propertyDatabaseUser = Constants.DATABASE_USER_PROP_NAME + "[" + i + "]";
+			String propertyDatabaseUser = Constants.DATABASE_USER_PROP_NAME() + "[" + i + "]";
 			this.databaseUser = this.getProperty(propertyDatabaseUser);
 
-			String propertyDatabasePassword = Constants.DATABASE_PWD_PROP_NAME  + "[" + i + "]";
+			String propertyDatabasePassword = Constants.DATABASE_PWD_PROP_NAME()  + "[" + i + "]";
 			this.databasePassword = this.getProperty(propertyDatabasePassword);
 
-			String propertyDatabaseType = Constants.DATABASE_TYPE_PROP_NAME  + "[" + i + "]";
+			String propertyDatabaseType = Constants.DATABASE_TYPE_PROP_NAME()  + "[" + i + "]";
 			this.databaseType = this.getProperty(propertyDatabaseType);
 
-			String propertyDatabaseTimeout = Constants.DATABASE_TIMEOUT_PROP_NAME  + "[" + i + "]";
+			String propertyDatabaseTimeout = Constants.DATABASE_TIMEOUT_PROP_NAME()  + "[" + i + "]";
 			String timeoutPropertyString = this.getProperty(propertyDatabaseTimeout);
 			if(timeoutPropertyString != null && !timeoutPropertyString.equals("")) {
 				this.databaseTimeout = Integer.parseInt(timeoutPropertyString.trim());
@@ -150,7 +155,7 @@ public class ConfigurationProperties extends Properties {
 			}
 		}
 
-		this.mappingDocumentFilePath = this.readString(Constants.MAPPINGDOCUMENT_FILE_PATH, null);
+		this.mappingDocumentFilePath = this.readString(Constants.MAPPINGDOCUMENT_FILE_PATH(), null);
 		if(this.mappingDocumentFilePath != null) {
 			boolean isNetResourceMapping = ODEMapsterUtility.isNetResource(this.mappingDocumentFilePath);
 			if(!isNetResourceMapping && configurationDir != null) {
@@ -158,7 +163,7 @@ public class ConfigurationProperties extends Properties {
 			}
 		}
 
-		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME);
+		this.queryFilePath = this.getProperty(Constants.QUERYFILE_PROP_NAME());
 		boolean isNetResourceQuery = ODEMapsterUtility.isNetResource(this.queryFilePath);
 		if(!isNetResourceQuery && configurationDir != null) {
 			if(this.queryFilePath != null && !this.queryFilePath.equals("")) {
@@ -166,8 +171,8 @@ public class ConfigurationProperties extends Properties {
 			}
 		}
 
-		this.ontologyFilePath = this.getProperty(Constants.ONTOFILE_PROP_NAME);
-		this.outputFilePath = this.getProperty(Constants.OUTPUTFILE_PROP_NAME);
+		this.ontologyFilePath = this.getProperty(Constants.ONTOFILE_PROP_NAME());
+		this.outputFilePath = this.getProperty(Constants.OUTPUTFILE_PROP_NAME());
 
 		if(configurationDir != null) {
 
@@ -179,46 +184,50 @@ public class ConfigurationProperties extends Properties {
 
 		}
 
-		this.rdfLanguage = this.readString(Constants.OUTPUTFILE_RDF_LANGUAGE, Constants.OUTPUT_FORMAT_NTRIPLE);
+		this.rdfLanguage = this.readString(Constants.OUTPUTFILE_RDF_LANGUAGE()
+				, Constants.OUTPUT_FORMAT_NTRIPLE());
 		logger.debug("rdf language = " + this.rdfLanguage);
 
-		this.jenaMode = this.readString(Constants.JENA_MODE_TYPE, Constants.JENA_MODE_TYPE_MEMORY);
+		this.jenaMode = this.readString(Constants.JENA_MODE_TYPE(), Constants.JENA_MODE_TYPE_MEMORY());
 		logger.debug("Jena mode = " + jenaMode);
 
-		this.selfJoinElimination = this.readBoolean(Constants.OPTIMIZE_TB, true);
+		this.selfJoinElimination = this.readBoolean(Constants.OPTIMIZE_TB(), true);
 		logger.debug("Self join elimination = " + this.selfJoinElimination);
 
-		this.reorderSTG = this.readBoolean(Constants.REORDER_STG, true);
+		this.reorderSTG = this.readBoolean(Constants.REORDER_STG(), true);
 		logger.debug("Reorder STG = " + this.reorderSTG);
 
-		this.subQueryElimination = this.readBoolean(Constants.SUBQUERY_ELIMINATION, true);
+		this.subQueryElimination = this.readBoolean(Constants.SUBQUERY_ELIMINATION(), true);
 		logger.debug("Subquery elimination = " + this.subQueryElimination);
 
-		this.transJoinSubQueryElimination = this.readBoolean(Constants.TRANSJOIN_SUBQUERY_ELIMINATION, true);
+		this.transJoinSubQueryElimination = this.readBoolean(
+				Constants.TRANSJOIN_SUBQUERY_ELIMINATION(), true);
 		logger.debug("Trans join subquery elimination = " + this.transJoinSubQueryElimination);
 
-		this.transSTGSubQueryElimination = this.readBoolean(Constants.TRANSSTG_SUBQUERY_ELIMINATION, true);
+		this.transSTGSubQueryElimination = this.readBoolean(
+				Constants.TRANSSTG_SUBQUERY_ELIMINATION(), true);
 		logger.debug("Trans stg subquery elimination = " + this.transSTGSubQueryElimination);
 
-		this.subQueryAsView = this.readBoolean(Constants.SUBQUERY_AS_VIEW, false);
+		this.subQueryAsView = this.readBoolean(Constants.SUBQUERY_AS_VIEW(), false);
 		logger.debug("Subquery as view = " + this.subQueryAsView);
 
 		this.queryTranslatorClassName = this.readString(
-				Constants.QUERY_TRANSLATOR_CLASSNAME, null);
+				Constants.QUERY_TRANSLATOR_CLASSNAME(), null);
 
 		this.queryEvaluatorClassName = this.readString(
-				Constants.DATASOURCE_READER_CLASSNAME, null);
+				Constants.DATASOURCE_READER_CLASSNAME(), null);
 
 		this.queryResultWriterClassName = this.readString(
-				Constants.QUERY_RESULT_WRITER_CLASSNAME, null);
+				Constants.QUERY_RESULT_WRITER_CLASSNAME(), null);
 
-		this.literalRemoveStrangeChars = this.readBoolean(Constants.REMOVE_STRANGE_CHARS_FROM_LITERAL, true);
+		this.literalRemoveStrangeChars = this.readBoolean(
+				Constants.REMOVE_STRANGE_CHARS_FROM_LITERAL(), true);
 		logger.debug("Remove Strange Chars From Literal Column = " + this.literalRemoveStrangeChars);
 
-		this.encodeUnsafeChars = this.readBoolean(Constants.ENCODE_UNSAFE_CHARS_IN_URI_COLUMN, true);
+		this.encodeUnsafeChars = this.readBoolean(Constants.ENCODE_UNSAFE_CHARS_IN_URI_COLUMN(), true);
 		logger.debug("Encode Unsafe Chars From URI Column = " + this.encodeUnsafeChars);
 
-		this.encodeReservedChars = this.readBoolean(Constants.ENCODE_RESERVED_CHARS_IN_URI_COLUMN, true);
+		this.encodeReservedChars = this.readBoolean(Constants.ENCODE_RESERVED_CHARS_IN_URI_COLUMN(), true);
 		logger.debug("Encode Reserved Chars From URI Column = " + this.encodeReservedChars);
 
 	}
@@ -233,14 +242,14 @@ public class ConfigurationProperties extends Properties {
 
 	public String getRdfLanguage() {
 		if(this.rdfLanguage == null) {
-			this.rdfLanguage = Constants.OUTPUT_FORMAT_NTRIPLE;
+			this.rdfLanguage = Constants.OUTPUT_FORMAT_NTRIPLE();
 		}
 		return rdfLanguage;
 	}
 
 	public String getDatabaseType() {
 		if(this == null || this.databaseType == null) {
-			this.databaseType = Constants.DATABASE_MYSQL;
+			this.databaseType = Constants.DATABASE_MYSQL();
 		}
 		return databaseType;
 	}
@@ -392,6 +401,42 @@ public class ConfigurationProperties extends Properties {
 
 	public boolean isReorderSTG() {
 		return reorderSTG;
+	}
+
+	public void setMappingDocumentFilePath(String mappingDocumentFilePath) {
+		this.mappingDocumentFilePath = mappingDocumentFilePath;
+	}
+
+	public void setOutputFilePath(String outputFilePath) {
+		this.outputFilePath = outputFilePath;
+	}
+
+	public void setDatabaseURL(String databaseURL) {
+		this.databaseURL = databaseURL;
+	}
+
+	public void setDatabaseUser(String databaseUser) {
+		this.databaseUser = databaseUser;
+	}
+
+	public void setDatabasePassword(String databasePassword) {
+		this.databasePassword = databasePassword;
+	}
+
+	public void setNoOfDatabase(int noOfDatabase) {
+		this.noOfDatabase = noOfDatabase;
+	}
+
+	public void setDatabaseDriver(String databaseDriver) {
+		this.databaseDriver = databaseDriver;
+	}
+
+	public void setQueryFilePath(String queryFilePath) {
+		this.queryFilePath = queryFilePath;
+	}
+
+	public void setDatabaseTimeout(int databaseTimeout) {
+		this.databaseTimeout = databaseTimeout;
 	}
 
 

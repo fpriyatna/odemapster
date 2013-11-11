@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import Zql.ZExpression;
 import Zql.ZQuery;
 import Zql.ZSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.core.ILogicalQuery;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -21,7 +21,6 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLJoinCondition;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLLogicalTable;
@@ -35,11 +34,13 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLSubjectMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
 	private Map<R2RMLRefObjectMap, String> mapRefObjectMapAlias = new HashMap<R2RMLRefObjectMap, String>();
 	//private ConfigurationProperties configurationProperties;
+	private Constants constants = new Constants();
 	
 	public Map<R2RMLRefObjectMap, String> getMapRefObjectMapAlias() {
 		return mapRefObjectMapAlias;
@@ -65,7 +66,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 	private SQLQuery unfoldSubjectMap(R2RMLLogicalTable logicalTable
 			, R2RMLSubjectMap subjectMap
-			, SQLQuery result, Collection<SQLSelectItem> resultSelectItems) {
+			, SQLQuery result, Collection<ZSelectItem> resultSelectItems) {
 		SQLFromItem logicalTableUnfolded = null;
 		String logicalTableAlias = null;
 
@@ -90,8 +91,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 			new R2RMLUtility();
 			
 			for(String subjectMapColumnString : subjectMapColumnsString) {
-				SQLSelectItem selectItem = R2RMLUtility.toSelectItem(subjectMapColumnString
-						, logicalTableAlias, dbType);
+				ZSelectItem selectItem = MorphSQLSelectItem.apply(subjectMapColumnString, logicalTableAlias, dbType);
+				
 				if(selectItem != null) {
 					if(selectItem.getAlias() == null) {
 						String alias = "\"" + selectItem.toString() + "\"";
@@ -109,7 +110,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 
 		R2RMLSubjectMap subjectMap = triplesMap.getSubjectMap();
 		SQLQuery result = new SQLQuery();
-		Collection<SQLSelectItem> resultSelectItems = new HashSet<SQLSelectItem>();
+		Collection<ZSelectItem> resultSelectItems = new HashSet<ZSelectItem>();
 
 		//unfold logical table
 		R2RMLLogicalTable logicalTable = triplesMap.getLogicalTable();
@@ -131,8 +132,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				if(predicateMapColumnsString != null) {
 					
 					for(String predicateMapColumnString : predicateMapColumnsString) {
-						SQLSelectItem selectItem = R2RMLUtility.toSelectItem(predicateMapColumnString
-								, logicalTableAlias, dbType);
+						ZSelectItem selectItem = MorphSQLSelectItem.apply(predicateMapColumnString
+								, logicalTableAlias, dbType);						
 						if(selectItem != null) {
 							resultSelectItems.add(selectItem);
 						}
@@ -147,7 +148,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 					//if(objectMapColumnsString != null && logicalTable instanceof R2RMLTable) {
 					if(objectMapColumnsString != null) {
 						for(String objectMapColumnString : objectMapColumnsString) {
-							SQLSelectItem selectItem = R2RMLUtility.toSelectItem(
+							ZSelectItem selectItem = MorphSQLSelectItem.apply(
 									objectMapColumnString, logicalTableAlias, this.dbType);
 							if(selectItem != null) {
 								if(selectItem.getAlias() == null) {
@@ -183,15 +184,8 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 							refObjectMap.getParentDatabaseColumnsString();
 					if(refObjectMapColumnsString != null ) {
 						for(String refObjectMapColumnString : refObjectMapColumnsString) {
-							SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, refObjectMapColumnString, null);
-
-							String selectItemColumn = selectItem.getColumn();
-							SQLSelectItem selectItem2 = SQLSelectItem.createSQLItem(dbType, selectItemColumn, joinQueryAlias);
-							if(selectItem2.getAlias() == null) {
-								String alias = "\"" + selectItem2.toString() + "\"";
-								//selectItem2.setAlias(alias);
-							}
-
+							ZSelectItem selectItem2 = MorphSQLSelectItem.apply(
+									refObjectMapColumnString, joinQueryAlias, dbType, null);
 							resultSelectItems.add(selectItem2);
 						}
 					}
@@ -204,7 +198,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 						onExpression = R2RMLUtility.generateJoinCondition(joinConditions
 								, logicalTableAlias, joinQueryAlias, dbType);
 					} else {
-						onExpression = Constants.SQL_EXPRESSION_TRUE;
+						onExpression = constants.SQL_EXPRESSION_TRUE();
 					}
 					joinQuery.setOnExpression(onExpression);
 					//result.addJoinQuery(joinQuery);		

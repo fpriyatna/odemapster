@@ -16,9 +16,6 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import Zql.ZConstant;
-import Zql.ZExp;
-import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
@@ -32,8 +29,6 @@ import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import com.hp.hpl.jena.vocabulary.RDF;
-
-import es.upm.fi.dia.oeg.obdi.core.utility.SQLUtility2;
 
 
 public class QueryTranslatorUtility {
@@ -450,37 +445,37 @@ public class QueryTranslatorUtility {
 		return QueryTranslatorUtility.groupTriplesBySubject(bgp);
 	}
 
-	public static List<Triple> groupTriplesBySubject(List<Triple> triples) {
-		List<Triple> result;
-		if(triples == null || triples.size() == 0) {
-			result = null;
-		} else {
-			if(triples.size() == 1) {
-				result = triples;
-			} else {
-				result = new LinkedList<Triple>();
-				
-				LinkedHashMap<Node, LinkedList<Triple>> resultAux = 
-						new LinkedHashMap<Node, LinkedList<Triple>>();
-				Set<Node> subjectSet = new HashSet<Node>();
-
-				for(Triple tp : triples) {
-					Node tpSubject = tp.getSubject();
-					LinkedList<Triple> triplesBySubject = resultAux.get(tpSubject);
-					if(triplesBySubject == null) {
-						triplesBySubject = new LinkedList<Triple>();
-						resultAux.put(tpSubject, triplesBySubject);
-					}
-					triplesBySubject.add(tp);
-				}
-				
-				for(LinkedList<Triple> triplesBySubject : resultAux.values()) {
-					result.addAll(triplesBySubject);
-				}
-			}
-		}
-		return result;
-	}
+//	public static List<Triple> groupTriplesBySubject(List<Triple> triples) {
+//		List<Triple> result;
+//		if(triples == null || triples.size() == 0) {
+//			result = null;
+//		} else {
+//			if(triples.size() == 1) {
+//				result = triples;
+//			} else {
+//				result = new LinkedList<Triple>();
+//				
+//				LinkedHashMap<Node, LinkedList<Triple>> resultAux = 
+//						new LinkedHashMap<Node, LinkedList<Triple>>();
+//				Set<Node> subjectSet = new HashSet<Node>();
+//
+//				for(Triple tp : triples) {
+//					Node tpSubject = tp.getSubject();
+//					LinkedList<Triple> triplesBySubject = resultAux.get(tpSubject);
+//					if(triplesBySubject == null) {
+//						triplesBySubject = new LinkedList<Triple>();
+//						resultAux.put(tpSubject, triplesBySubject);
+//					}
+//					triplesBySubject.add(tp);
+//				}
+//				
+//				for(LinkedList<Triple> triplesBySubject : resultAux.values()) {
+//					result.addAll(triplesBySubject);
+//				}
+//			}
+//		}
+//		return result;
+//	}
 	
 	public static OpBGP groupTriplesBySubject(OpBGP bgp) {
 		try {

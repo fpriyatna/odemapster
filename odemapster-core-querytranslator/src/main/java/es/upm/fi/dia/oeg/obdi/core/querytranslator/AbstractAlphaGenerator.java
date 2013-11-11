@@ -22,9 +22,6 @@ public abstract class AbstractAlphaGenerator {
 	protected boolean ignoreRDFTypeStatement = false;
 	protected boolean subqueryAsView = false;
 	
-	public AbstractAlphaGenerator(AbstractQueryTranslator owner) {
-		this.owner = owner;
-	}
 	
 
 //	public AlphaResultUnion calculateAlpha(Triple tp, AbstractConceptMapping cm) throws Exception {
@@ -66,8 +63,13 @@ public abstract class AbstractAlphaGenerator {
 //	}
 	
 	public abstract AlphaResult calculateAlpha(Triple tp
-			, AbstractConceptMapping abstractConceptMapping, String predicateURI) throws QueryTranslationException;
-	
+			, AbstractConceptMapping abstractConceptMapping, String predicateURI) 
+					throws QueryTranslationException;
+
+	public abstract AlphaResult calculateAlpha(Triple tp
+			, AbstractConceptMapping abstractConceptMapping, String predicateURI, AbstractPropertyMapping pm) 
+					throws QueryTranslationException;
+
 	protected abstract Object calculateAlphaPredicateObject(Triple triple
 			, AbstractConceptMapping abstractConceptMapping, AbstractPropertyMapping pm 
 			, String logicalTableAlias) throws Exception;
@@ -197,6 +199,11 @@ public abstract class AbstractAlphaGenerator {
 			AbstractConceptMapping abstractConceptMapping,
 			AbstractPropertyMapping abstractPropertyMapping,
 			String logicalTableAlias) throws QueryTranslationException;
+
+
+	public void setOwner(AbstractQueryTranslator owner) {
+		this.owner = owner;
+	}
 
 
 

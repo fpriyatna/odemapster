@@ -11,18 +11,19 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import es.upm.fi.dia.oeg.morph.base.ColumnMetaData;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractLogicalTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
-import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
-import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 //import scala.reflect.generic.Trees.This;
 
 public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements R2RMLElement {
 	private static Logger logger = Logger.getLogger(R2RMLLogicalTable.class);
-
+	private Constants constants = new Constants();
+	
 	LogicalTableType logicalTableType;
 	private String alias;
 	private R2RMLTriplesMap owner;
@@ -106,15 +107,17 @@ public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements 
 	}
 
 	static R2RMLLogicalTable parse(Resource resource, R2RMLTriplesMap owner) throws Exception {
+		Constants constants = new Constants();
+		
 		R2RMLLogicalTable logicalTable = null; 
 		Statement tableNameStatement = resource.getProperty(
-				R2RMLConstants.R2RML_TABLENAME_PROPERTY);
+				constants.R2RML_TABLENAME_PROPERTY());
 		if(tableNameStatement != null) {
 			String tableName = tableNameStatement.getObject().toString();
 			logicalTable = new R2RMLTable(tableName, owner);
 		} else {
 			Statement sqlQueryStatement = resource.getProperty(
-					R2RMLConstants.R2RML_SQLQUERY_PROPERTY);
+					constants.R2RML_SQLQUERY_PROPERTY());
 			if(sqlQueryStatement == null) {
 				logger.error("Invalid logical table defined : " + resource);
 			}

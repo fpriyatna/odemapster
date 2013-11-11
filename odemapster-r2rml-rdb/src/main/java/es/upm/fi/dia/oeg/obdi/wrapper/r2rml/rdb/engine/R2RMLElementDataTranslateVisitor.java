@@ -12,9 +12,10 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.DatatypeMapper;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
-import es.upm.fi.dia.oeg.obdi.core.DatatypeMapper;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
@@ -24,8 +25,6 @@ import es.upm.fi.dia.oeg.obdi.core.exception.QueryTranslatorException;
 import es.upm.fi.dia.oeg.obdi.core.materializer.AbstractMaterializer;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLGraphMap;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLLogicalTable;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
@@ -41,7 +40,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 public class R2RMLElementDataTranslateVisitor extends AbstractDataTranslator 
 implements R2RMLElementVisitor {
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
-
+	
 	public R2RMLElementDataTranslateVisitor(
 			ConfigurationProperties properties) {
 		super(properties);
@@ -105,7 +104,7 @@ implements R2RMLElementVisitor {
 		if(objectMap != null && objectMapUnfoldedValue != null) {
 			String objectMapTermType = objectMap.getTermType();
 
-			if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(objectMapTermType)) {
+			if(Constants.R2RML_IRI_URI().equalsIgnoreCase(objectMapTermType)) {
 				try {
 					objectMapUnfoldedValue = ODEMapsterUtility.encodeURI(objectMapUnfoldedValue);
 				} catch(Exception e) {
@@ -113,7 +112,7 @@ implements R2RMLElementVisitor {
 				}					
 			}
 
-			if(R2RMLConstants.R2RML_LITERAL_URI.equalsIgnoreCase(objectMapTermType)) {
+			if(Constants.R2RML_LITERAL_URI().equalsIgnoreCase(objectMapTermType)) {
 				String datatype = objectMap.getDatatype();
 				String language = null;
 				language = objectMap.getLanguageTag();
@@ -122,20 +121,25 @@ implements R2RMLElementVisitor {
 					if(datatype == null) {
 						String columnName = objectMap.getColumnName();
 						String dbType = this.properties.getDatabaseType();
-						//SQLSelectItem selectItem = new SQLSelectItem(columnName);
-						SQLSelectItem selectItem = SQLSelectItem.createSQLItem(dbType, columnName, null);
 						
 						datatype = mapColumnType.get(columnName);
-						if(datatype == null) {
-							datatype = mapColumnType.get(selectItem.getColumn());
-						}
 					}
 				}
 				
 				if(datatype != null) {
 					if(XSDDatatype.XSDdateTime.getURI().toString().equals(datatype)) {
 						objectMapUnfoldedValue = objectMapUnfoldedValue.replaceAll(" ", "T");
-					}
+					} else if(XSDDatatype.XSDboolean.getURI().toString().equals(datatype)) {
+						if(objectMapUnfoldedValue.equalsIgnoreCase("T") 
+								|| objectMapUnfoldedValue.equalsIgnoreCase("True") ) {
+							objectMapUnfoldedValue = "true";
+						} else if(objectMapUnfoldedValue.equalsIgnoreCase("F") 
+								|| objectMapUnfoldedValue.equalsIgnoreCase("Frue")) {
+							objectMapUnfoldedValue = "false";
+						} else {
+							objectMapUnfoldedValue = "false";
+						}
+					}					
 				}
 				
 				objectMapUnfoldedValue = ODEMapsterUtility.encodeLiteral(objectMapUnfoldedValue);
@@ -165,7 +169,7 @@ implements R2RMLElementVisitor {
 
 					}
 				}
-			} else if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(objectMapTermType)) {
+			} else if(Constants.R2RML_IRI_URI().equalsIgnoreCase(objectMapTermType)) {
 				try {
 					objectMapUnfoldedValue = ODEMapsterUtility.encodeURI(objectMapUnfoldedValue);
 					if(subjectGraphName == null && predicateobjectGraphName == null) {
@@ -186,7 +190,7 @@ implements R2RMLElementVisitor {
 				}
 				
 
-			} else if(R2RMLConstants.R2RML_BLANKNODE_URI.equalsIgnoreCase(objectMapTermType)) {
+			} else if(Constants.R2RML_BLANKNODE_URI().equalsIgnoreCase(objectMapTermType)) {
 				if(subjectGraphName == null && predicateobjectGraphName == null) {
 					this.materializer.materializeObjectPropertyTriple(predicateMapUnfoldedValue, objectMapUnfoldedValue, true, null );
 				} else {
@@ -243,6 +247,7 @@ implements R2RMLElementVisitor {
 		Connection conn = this.properties.openConnection();
 		int timeout = this.properties.getDatabaseTimeout();
 		ResultSet rs = RDBReader.evaluateQuery(sqlQuery, conn, timeout);
+		logger.info("Translating RDB data into RDF instances...");
 		this.translateData(triplesMap, rs);
 		rs.close();
 		//conn.close();		
@@ -252,13 +257,15 @@ implements R2RMLElementVisitor {
 		Map<String, String> mapXMLDatatype = new HashMap<String, String>();
 		Map<String, Integer> mapDBDatatype = new HashMap<String, Integer>();
 		ResultSetMetaData rsmd = null;
+		DatatypeMapper datatypeMapper = new DatatypeMapper();
+		
 		try {
 			rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
 			for (int i=0; i<columnCount; i++) {
 				String columnName = rsmd.getColumnName(i+1);
 				int columnType= rsmd.getColumnType(i+1);
-				String mappedDatatype = DatatypeMapper.getMappedType(columnType);
+				String mappedDatatype = datatypeMapper.getMappedType(columnType);
 				mapXMLDatatype.put(columnName, mappedDatatype);
 				mapDBDatatype.put(columnName, new Integer(columnType));
 			}
@@ -278,7 +285,7 @@ implements R2RMLElementVisitor {
 				if(subjectGraph != null) {
 					//String subjectGraphAlias = subjectGraph.getAlias();
 					subjectGraphName = subjectGraph.getUnfoldedValue(rs, null);
-					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(subjectGraph.getTermType())) {
+					if(Constants.R2RML_IRI_URI().equalsIgnoreCase(subjectGraph.getTermType())) {
 						try {
 							subjectGraphName = ODEMapsterUtility.encodeURI(subjectGraphName);
 						} catch(Exception e) {
@@ -295,7 +302,7 @@ implements R2RMLElementVisitor {
 				if(subjectValue == null) {
 					logger.debug("null value in the subject triple!");
 				} else {
-					if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(subjectMap.getTermType())) {
+					if(Constants.R2RML_IRI_URI().equalsIgnoreCase(subjectMap.getTermType())) {
 						try {
 							subjectValue = ODEMapsterUtility.encodeURI(subjectValue);
 						} catch(Exception e) {
@@ -327,7 +334,7 @@ implements R2RMLElementVisitor {
 						if(predicateobjectGraph != null ) {
 							predicateobjectGraphName = 
 									predicateobjectGraph.getUnfoldedValue(rs, null);
-							if(R2RMLConstants.R2RML_IRI_URI.equalsIgnoreCase(predicateobjectGraph.getTermType())) {
+							if(Constants.R2RML_IRI_URI().equalsIgnoreCase(predicateobjectGraph.getTermType())) {
 								try {
 									predicateobjectGraphName = ODEMapsterUtility.encodeURI(predicateobjectGraphName);
 								} catch(Exception e) {

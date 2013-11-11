@@ -11,12 +11,14 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import Zql.ZSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 
 public class DBUtility {
 	private static Logger logger = Logger.getLogger(DBUtility.class);
-
+	
+	
 	public static boolean execute(Connection conn, String query) throws SQLException {
 		Statement stmt = conn.createStatement();
 
@@ -50,7 +52,8 @@ public class DBUtility {
 
 		//st.setFetchSize(1000);
 		//		Statement st = conn.createStatement();
-
+		Constants constants = new Constants();
+		
 		Statement stmt = null;
 		try {
 			stmt = conn.createStatement(
@@ -59,7 +62,7 @@ public class DBUtility {
 			
 			DatabaseMetaData dbmd = conn.getMetaData();
 			String dbProductName = dbmd.getDatabaseProductName();
-			if(Constants.DATABASE_MYSQL.equalsIgnoreCase(dbProductName)) {
+			if(constants.DATABASE_MYSQL().equalsIgnoreCase(dbProductName)) {
 				stmt.setFetchSize(Integer.MIN_VALUE);	
 			}
 		} catch(Exception e) {
@@ -154,9 +157,9 @@ public class DBUtility {
 			selectItem.setAlias(alias);
 		}
 
-		if(selectItem instanceof SQLSelectItem) {
-			SQLSelectItem sqlSelectItem = (SQLSelectItem) selectItem;
-			String columnType = sqlSelectItem.getColumnType();
+		if(selectItem instanceof MorphSQLSelectItem) {
+			MorphSQLSelectItem sqlSelectItem = (MorphSQLSelectItem) selectItem;
+			String columnType = sqlSelectItem.columnType();
 			result = result.replaceAll("::" + columnType, "");
 		}
 

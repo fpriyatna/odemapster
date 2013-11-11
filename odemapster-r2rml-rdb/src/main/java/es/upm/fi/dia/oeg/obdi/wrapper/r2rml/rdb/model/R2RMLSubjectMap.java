@@ -9,29 +9,30 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 
 public class R2RMLSubjectMap extends R2RMLTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLSubjectMap.class);
+	private Constants constants = new Constants();
 	
 	private Collection<String> classURIs;
 	private R2RMLGraphMap graphMap;
 
 	public R2RMLSubjectMap(String constantValue) {
 		super(TermMapPosition.SUBJECT, constantValue);
-		super.setTermType(R2RMLConstants.R2RML_LITERAL_URI);
+		super.setTermType(constants.R2RML_LITERAL_URI());
 	}
 	
 	public R2RMLSubjectMap(Resource resource, R2RMLTriplesMap owner) throws R2RMLInvalidTermMapException {
 		super(resource, TermMapPosition.SUBJECT, owner);
 		
-		if(this.getTermType() != null && this.getTermType().equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+		if(this.getTermType() != null && this.getTermType().equals(constants.R2RML_LITERAL_URI())) {
 			throw new R2RMLInvalidTermMapException("Literal is not permitted in the subject!");
 		}
 		
 		StmtIterator classStatements = resource.listProperties(
-				R2RMLConstants.R2RML_CLASS_PROPERTY);
+				constants.R2RML_CLASS_PROPERTY());
 		if(classStatements != null) {
 			this.classURIs = new HashSet<String>();
 			
@@ -41,15 +42,15 @@ public class R2RMLSubjectMap extends R2RMLTermMap {
 			}
 		}
 		
-		Statement graphMapStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPHMAP_PROPERTY);
+		Statement graphMapStatement = resource.getProperty(constants.R2RML_GRAPHMAP_PROPERTY());
 		if(graphMapStatement != null) {
 			this.graphMap = new R2RMLGraphMap((Resource) graphMapStatement.getObject(), owner);
 		}
 
-		Statement graphStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPH_PROPERTY);
+		Statement graphStatement = resource.getProperty(constants.R2RML_GRAPH_PROPERTY());
 		if(graphStatement != null) {
 			String graphStatementObjectValue = graphStatement.getObject().toString();
-			if(!R2RMLConstants.R2RML_DEFAULT_GRAPH_URI.equals(graphStatementObjectValue)) {
+			if(!constants.R2RML_DEFAULT_GRAPH_URI().equals(graphStatementObjectValue)) {
 				this.graphMap = new R2RMLGraphMap(graphStatementObjectValue);
 				logger.debug("this.graphMap = " + this.graphMap);				
 			}

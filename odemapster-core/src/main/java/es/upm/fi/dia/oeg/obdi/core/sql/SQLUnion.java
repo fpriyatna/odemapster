@@ -4,19 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
-import Zql.ZConstant;
 import Zql.ZExp;
-import Zql.ZExpression;
 import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
-import es.upm.fi.dia.oeg.obdi.core.Constants;
-import es.upm.fi.dia.oeg.obdi.core.utility.CollectionUtility;
+import es.upm.fi.dia.oeg.morph.base.CollectionUtility;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class SQLUnion implements IQuery {
 	String alias;
@@ -28,6 +27,7 @@ public class SQLUnion implements IQuery {
 	private long slice = -1;
 	private long offset = -1;
 	private ZGroupBy groupBy;
+	private Constants constants = new Constants();
 	
 	public SQLUnion() { 
 		this.unionQueries = new Vector<SQLQuery>();
@@ -65,7 +65,7 @@ public class SQLUnion implements IQuery {
 	@Override
 	public String toString() {
 		String result = null;
-		String unionString = "\n" + Constants.SQL_KEYWORD_UNION + "\n" ;
+		String unionString = "\n" + constants.SQL_KEYWORD_UNION() + "\n" ;
 		
 		CollectionUtility collectionUtility = new CollectionUtility();
 		if(this.unionQueries != null) {
@@ -78,7 +78,7 @@ public class SQLUnion implements IQuery {
 				stringBuffer.append(unionString);
 			}
 			result = collectionUtility.mkString(unionQueriesCollection, 
-					"\n" + Constants.SQL_KEYWORD_UNION + "\n", "", "\n");
+					"\n" + constants.SQL_KEYWORD_UNION() + "\n", "", "\n");
 		}
 		
 		if(this.orderByConditions != null && this.orderByConditions.size() > 0) {
@@ -88,7 +88,7 @@ public class SQLUnion implements IQuery {
 			}
 			
 			String orderByString = collectionUtility.mkString(orderByConditionsCollection, 
-					", ", Constants.SQL_KEYWORD_ORDER_BY + " ", " ");
+					", ", constants.SQL_KEYWORD_ORDER_BY() + " ", " ");
 			result = result + orderByString;
 		}
 			
@@ -106,7 +106,7 @@ public class SQLUnion implements IQuery {
 
 	public String generateAlias() {
 		if(this.alias == null) {
-			this.alias = Constants.VIEW_ALIAS + new Random().nextInt(10000);
+			this.alias = constants.VIEW_ALIAS() + new Random().nextInt(10000);
 		}
 		return this.alias;
 	}
@@ -161,7 +161,37 @@ public class SQLUnion implements IQuery {
 //	}
 
 	public Collection<ZSelectItem> getSelectItems() {
-		return this.unionQueries.iterator().next().getSelectItems();
+		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+		
+		Collection<ZSelectItem> firstQuerySelectItems = this.unionQueries.iterator().next().getSelectItems();
+		for(ZSelectItem selectItem : firstQuerySelectItems) {
+			String selectItemAlias = selectItem.getAlias();
+			String newColumnName;
+			String columnType;
+			
+			if(selectItemAlias == null || selectItemAlias.equals("")) {
+				if(selectItem.isExpression()) {
+					newColumnName = selectItem.getExpression().toString();
+				} else {
+					newColumnName = selectItem.getColumn();	
+				}
+			} else {
+				newColumnName = selectItemAlias;
+			}
+			
+			if(selectItem instanceof MorphSQLSelectItem) {
+				MorphSQLSelectItem morphSQLSelectItem = (MorphSQLSelectItem) selectItem;
+				columnType = morphSQLSelectItem.columnType();
+			} else {
+				columnType = null;
+			}
+			
+			ZSelectItem newSelectItem = MorphSQLSelectItem.apply(
+					newColumnName, null, this.getDatabaseType(), columnType);
+			result.add(newSelectItem);
+		}
+		
+		return result;
 	}
 
 	public void setSelectItems(Collection<ZSelectItem> newSelectItems) {
@@ -250,20 +280,27 @@ public class SQLUnion implements IQuery {
 		return false;
 	}
 
-	public Collection<ZSelectItem> pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
-		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+	public void pushProjectionsDown(Collection<ZSelectItem> pushedProjections) {
+		String unionQueryAlias = this.getAlias();
 		
 		for(SQLQuery sqlQuery : this.unionQueries) {
-			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
-					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
-
-			Collection<ZSelectItem> newProjections = sqlQuery.pushProjectionsDown(pushedProjections
-					, mapInnerAliasSelectItem);
-			sqlQuery.setSelectItems(newProjections);
-			result.addAll(newProjections);
+			String sqlQueryAlias = sqlQuery.getAlias();
+			sqlQuery.setAlias(unionQueryAlias);
+			sqlQuery.pushProjectionsDown(pushedProjections);
+			if(sqlQueryAlias != null) {
+				sqlQuery.setAlias(sqlQueryAlias);	
+			}
+			
+			
+//			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
+//					SQLQuery.buildMapAliasSelectItemAux(this.getAlias(), sqlQuery.getSelectItems());
+//
+//			Collection<ZSelectItem> newProjections = sqlQuery.pushProjectionsDown(pushedProjections
+//					, mapInnerAliasSelectItem);
+//			sqlQuery.setSelectItems(newProjections);
+//			result.addAll(newProjections);
 		}
 		
-		return result;
 	}
 
 //	public Map<String, ZSelectItem> buildMapAliasSelectItem() {
@@ -276,32 +313,41 @@ public class SQLUnion implements IQuery {
 //		return mapAliasSelectItem;
 //	}
 
-	public void pushOrderByDown(Collection<ZOrderBy> pushedOrderByCollection) {
-		Iterator<SQLQuery> it = this.unionQueries.iterator();
-		Map<String, ZSelectItem> mapInnerAliasSelectItem = new HashMap<String, ZSelectItem>();
-		while(it.hasNext()) {
-			SQLQuery sqlQuery = it.next();
+	public void pushOrderByDown(Collection<ZSelectItem> pushedProjections) {
+		if(this.orderByConditions != null) {
+			Map<String, ZSelectItem> mapInnerAliasSelectItem = new HashMap<String, ZSelectItem>();
 			
-			if(!it.hasNext()) {
-				Map<String, ZSelectItem> mapInnerAliasSelectItemAux = 
-						sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
-				mapInnerAliasSelectItem.putAll(mapInnerAliasSelectItemAux);
+			for(ZSelectItem selectItem : pushedProjections) {
+				String selectItemColumn = selectItem.getColumn();
+				mapInnerAliasSelectItem.put(selectItemColumn, selectItem);
 			}
+			
+//			Collection<ZSelectItem> unionSelectItems = this.getSelectItems();
+//			Map<String, ZSelectItem> mapInnerAliasSelectItem = 					
+//					SQLQuery.buildMapAliasSelectItemAux(this.getAlias(), unionSelectItems);
+			
+//			Vector<ZOrderBy> newOrderByCollection = new Vector<ZOrderBy>();
+//			for(ZOrderBy oldOrderBy : this.orderByConditions) {
+//				ZExp orderByExp = oldOrderBy.getExpression();
+//				ZExp newOrderByExp = MorphSQLUtility.replaceExp(orderByExp, whereReplacement);
+//				ZOrderBy newOrderBy = new ZOrderBy(newOrderByExp);
+//				newOrderBy.setAscOrder(oldOrderBy.getAscOrder());
+//				newOrderByCollection.add(newOrderBy);
+//			}
+			
+			Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(this.orderByConditions
+					, mapInnerAliasSelectItem);
+			this.setOrderBy(newOrderByCollection);			
 		}
-		
-		Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(pushedOrderByCollection
-				, mapInnerAliasSelectItem);
-		this.setOrderBy(newOrderByCollection);
+
 	}
 
 	public void pushFilterDown(ZExp pushedFilter) {
 		Iterator<SQLQuery> it = this.unionQueries.iterator();
 		while(it.hasNext()) {
 			SQLQuery sqlQuery = it.next();
-			
 			Map<String, ZSelectItem> mapInnerAliasSelectItem = 
-					sqlQuery.buildMapAliasSelectItemAux(this.getAlias());
-			
+					SQLQuery.buildMapAliasSelectItemAux(this.getAlias(), sqlQuery.getSelectItems());
 			ZExp newExpression = sqlQuery.pushExpDown(pushedFilter, mapInnerAliasSelectItem);
 			sqlQuery.addWhere(newExpression);
 		}

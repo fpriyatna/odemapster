@@ -1,5 +1,6 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,12 +13,12 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectMapException;
@@ -35,15 +36,17 @@ implements R2RMLElement, IConceptMapping {
 	private R2RMLLogicalTable logicalTable;
 	private R2RMLSubjectMap subjectMap;
 	private Collection<R2RMLPredicateObjectMap> predicateObjectMaps;
+	private Constants constants = new Constants();
 	
 	public R2RMLTriplesMap(Resource triplesMap, R2RMLMappingDocument owner) 
 			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		this.owner = owner;
 		this.triplesMapName = triplesMap.getLocalName();
-
+		this.resource = triplesMap;
+		
 		try {
 			Statement logicalTableStatement = triplesMap.getProperty(
-					R2RMLConstants.R2RML_LOGICALTABLE_PROPERTY);
+					constants.R2RML_LOGICALTABLE_PROPERTY());
 			if(logicalTableStatement != null) {
 				RDFNode logicalTableStatementObject = 
 						logicalTableStatement.getObject();
@@ -52,10 +55,12 @@ implements R2RMLElement, IConceptMapping {
 				this.logicalTable = R2RMLLogicalTable.parse(
 						logicalTableStatementObjectResource, this);
 				try {
-					logger.info("Building metadata for triples map: " + this.triplesMapName);
-					this.logicalTable.buildMetaData(
-							this.owner.getConn());
-					logger.info("metadata built.");
+					Connection conn = this.owner.getConn();
+					if(conn != null) {
+						logger.info("Building metadata for triples map: " + this.triplesMapName);
+						this.logicalTable.buildMetaData(conn);
+						logger.info("metadata built.");						
+					}
 				} catch(Exception e) {
 					logger.error(e.getMessage());
 				}
@@ -73,7 +78,7 @@ implements R2RMLElement, IConceptMapping {
 
 		//rr:subjectMap
 		StmtIterator subjectMaps = triplesMap.listProperties(
-				R2RMLConstants.R2RML_SUBJECTMAP_PROPERTY);
+				constants.R2RML_SUBJECTMAP_PROPERTY());
 		if(subjectMaps == null) {
 			String errorMessage = "Missing rr:subjectMap";
 			logger.error(errorMessage);
@@ -86,7 +91,7 @@ implements R2RMLElement, IConceptMapping {
 			throw new R2RMLInvalidTriplesMapException(errorMessage);
 		}
 		Statement subjectMapStatement = triplesMap.getProperty(
-				R2RMLConstants.R2RML_SUBJECTMAP_PROPERTY);
+				constants.R2RML_SUBJECTMAP_PROPERTY());
 		if(subjectMapStatement != null) {
 			Resource subjectMapStatementObjectResource = (Resource) subjectMapStatement.getObject();
 			this.subjectMap = new R2RMLSubjectMap(subjectMapStatementObjectResource, this);
@@ -98,7 +103,7 @@ implements R2RMLElement, IConceptMapping {
 
 		//rr:subject
 		Statement subjectStatement = triplesMap.getProperty(
-				R2RMLConstants.R2RML_SUBJECT_PROPERTY);
+				constants.R2RML_SUBJECT_PROPERTY());
 		if(subjectStatement != null) {
 			String constantValueObject = subjectStatement.getObject().toString();
 			this.subjectMap = new R2RMLSubjectMap(constantValueObject);
@@ -106,7 +111,7 @@ implements R2RMLElement, IConceptMapping {
 
 		//rr:predicateObjectMap
 		StmtIterator predicateObjectMapStatements = triplesMap.listProperties(
-				R2RMLConstants.R2RML_PREDICATEOBJECTMAP_PROPERTY);
+				constants.R2RML_PREDICATEOBJECTMAP_PROPERTY());
 		if(predicateObjectMapStatements != null) {
 			this.predicateObjectMaps = new HashSet<R2RMLPredicateObjectMap>();
 			while(predicateObjectMapStatements.hasNext()) {
@@ -242,7 +247,7 @@ implements R2RMLElement, IConceptMapping {
 	}
 
 	@Override
-	public long getLogicalTableSize() {
+	public Long getLogicalTableSize() {
 		return this.logicalTable.getLogicalTableSize();
 	}
 

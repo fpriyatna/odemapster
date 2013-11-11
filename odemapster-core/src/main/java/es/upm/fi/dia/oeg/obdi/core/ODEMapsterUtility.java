@@ -11,7 +11,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -23,15 +22,14 @@ import org.apache.log4j.Logger;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
-import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.shared.CannotEncodeCharacterException;
 
-import es.upm.fi.dia.oeg.obdi.core.sql.MonetDBColumn;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
 
 public class ODEMapsterUtility {
 	private static Logger logger = Logger.getLogger(ODEMapsterUtility.class);
@@ -459,10 +457,7 @@ public class ODEMapsterUtility {
 
 
 
-	public static Collection<SQLSelectItem> getSelectItemByColumnName(
-			String columnName, Collection<SQLSelectItem> selectItems) {
-		return null;
-	}
+
 
 	//	public static R2OAttributeMapping generatePKColumnAttributeMapping(R2OConceptMapping cm, String oldName, String newName) {
 	//		R2OTransformationExpression uriAs = cm.getURIAs();
@@ -493,135 +488,136 @@ public class ODEMapsterUtility {
 			return false;  
 		}  
 	}
-	public ZSelectItem renameColumn(ZSelectItem selectItem, String tableName, String alias
-			, boolean matches, String databaseType) throws Exception {
+	
+//	public ZSelectItem renameColumn(ZSelectItem selectItem, String tableName, String alias
+//			, boolean matches, String databaseType) throws Exception {
+//
+//		ZSelectItem result;
+//
+//		boolean isExpression = selectItem.isExpression();
+//		if(isExpression) {
+//			ZExp selectItemExp = selectItem.getExpression();
+//			ZExpression newExpression = ODEMapsterUtility.renameColumns((ZExpression) selectItemExp
+//					, tableName, alias, matches, databaseType);
+//			selectItem.setExpression(newExpression);
+//			result = selectItem;
+//		} else {
+//			String selectItemSchema = selectItem.getSchema() ;
+//			String selectItemTable = selectItem.getTable();
+//
+//			if(tableName.equals(selectItemSchema + "." + selectItemTable) == matches) {
+//				ZSelectItem newSelectItem = new ZSelectItem(alias + "." + selectItem.getColumn());
+//				if(selectItem.getAlias() != null) {
+//					newSelectItem.setAlias(selectItem.getAlias());
+//				}
+//				result = newSelectItem;
+//			} else {
+//				result = selectItem;
+//
+//			}
+//		}
+//
+//		return result;
+//	}
 
-		ZSelectItem result;
+//	public Collection<ZSelectItem> renameColumns(Collection<ZSelectItem> selectItems
+//			, String tableName, String alias, boolean matches, String databaseType) throws Exception {
+//		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
+//
+//		for(ZSelectItem selectItem :selectItems) {
+//			ZSelectItem renamedColumn = this.renameColumn(selectItem, tableName, alias, matches, databaseType);
+//			result.add(renamedColumn);
+//		}
+//
+//		return result;
+//	}    
 
-		boolean isExpression = selectItem.isExpression();
-		if(isExpression) {
-			ZExp selectItemExp = selectItem.getExpression();
-			ZExpression newExpression = ODEMapsterUtility.renameColumns((ZExpression) selectItemExp
-					, tableName, alias, matches, databaseType);
-			selectItem.setExpression(newExpression);
-			result = selectItem;
-		} else {
-			String selectItemSchema = selectItem.getSchema() ;
-			String selectItemTable = selectItem.getTable();
-
-			if(tableName.equals(selectItemSchema + "." + selectItemTable) == matches) {
-				ZSelectItem newSelectItem = new ZSelectItem(alias + "." + selectItem.getColumn());
-				if(selectItem.getAlias() != null) {
-					newSelectItem.setAlias(selectItem.getAlias());
-				}
-				result = newSelectItem;
-			} else {
-				result = selectItem;
-
-			}
-		}
-
-		return result;
-
-	}
-
-	public Collection<ZSelectItem> renameColumns(Collection<ZSelectItem> selectItems
-			, String tableName, String alias, boolean matches, String databaseType) throws Exception {
-		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-
-		for(ZSelectItem selectItem :selectItems) {
-			ZSelectItem renamedColumn = this.renameColumn(selectItem, tableName, alias, matches, databaseType);
-			result.add(renamedColumn);
-		}
-
-		return result;
-	}    
-
-	public static ZExpression renameColumns(ZExpression zExpression
-			, String oldName, String newName
-			, boolean matchCondition, String databaseType) throws Exception 
-			{
-		if(zExpression == null) {
-			return null;
-		}
-
-		String operator = zExpression.getOperator();
-		ZExpression result = new ZExpression(operator);
-
-		Collection<ZExp> operands = zExpression.getOperands();
-		for(ZExp operand : operands) {
-			if(operand instanceof ZConstant) {
-				//oldName = benchmark.dbo.product
-				//zExpression = benchmark.dbo.producttype.nr
-
-				ZConstant newOperandConstant;
-
-				ZConstant operandConstant = (ZConstant) operand;
-
-				if(operandConstant.getType() == ZConstant.COLUMNNAME) {
-					String operandConstantValue = operandConstant.getValue();
-					operandConstantValue = operandConstantValue.replaceAll("\'", "");
-					SQLSelectItem oldSelectItem = 
-							new SQLSelectItem(operandConstantValue);
-					if(oldSelectItem.getSchema() == null && oldSelectItem.getTable() == null) {
-						if(operandConstantValue.equalsIgnoreCase(oldName) == matchCondition) {
-							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName, databaseType);
-						} else {
-							newOperandConstant = operandConstant;
-						}
-					} else if(oldSelectItem.getSchema() != null && oldSelectItem.getTable() != null) {
-						String oldTableName = oldSelectItem.getSchema() + "." + oldSelectItem.getTable();
-
-						if(oldTableName.equalsIgnoreCase(oldName) == matchCondition) {
-							//String newOperandConstantValue = operandConstantValue.replaceAll(oldName, newName);
-							//newOperandConstant = Utility.constructDatabaseColumn(newOperandConstantValue);
-							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName + "." + oldSelectItem.getColumn(), databaseType);
-						} else {
-							newOperandConstant = operandConstant;
-						}
-
-					} else {
-						newOperandConstant = operandConstant;
-					}
-
-
-
-					//					ZAliasedName oldColumnName = new ZAliasedName(
-					//							operandConstantValue, ZAliasedName.FORM_COLUMN);
-					//					if(operandConstantValue.startsWith(oldName + ".") == matchCondition) {
-					//						//be careful here when passing sql server column names that have 4 elements 
-					//						//(db.schema.table.column)
-					//						String newColumnName = newName + "." + oldColumnName.getColumn();
-					//						//newOperandConstant = new ZConstant(newColumnName, operandConstant.getType());
-					//						newOperandConstant = Utility.constructDatabaseColumn(newColumnName);
-					//					} else if(operandConstantValue.equalsIgnoreCase(oldName)) {
-					//						newOperandConstant = Utility.constructDatabaseColumn(newName);
-					//					} else {
-					//						newOperandConstant = operandConstant;
-					//					}
-
-				} else {
-					newOperandConstant = operandConstant;					
-				}
-				result.addOperand(newOperandConstant);
-			} else if(operand instanceof ZExpression) {
-				ZExpression operandExpression  = (ZExpression) operand;
-				ZExpression renamedColumns = ODEMapsterUtility.renameColumns(operandExpression, oldName, newName, matchCondition, databaseType); 
-				result.addOperand(renamedColumns);
-			} else {
-				throw new Exception("Unsupported columns renaming operation!");
-			}
-		}
-		return result;
-			}
+//	public static ZExpression renameColumns(ZExpression zExpression
+//			, String oldName, String newName
+//			, boolean matchCondition, String databaseType) throws Exception 
+//			{
+//		if(zExpression == null) {
+//			return null;
+//		}
+//
+//		String operator = zExpression.getOperator();
+//		ZExpression result = new ZExpression(operator);
+//
+//		Collection<ZExp> operands = zExpression.getOperands();
+//		for(ZExp operand : operands) {
+//			if(operand instanceof ZConstant) {
+//				//oldName = benchmark.dbo.product
+//				//zExpression = benchmark.dbo.producttype.nr
+//
+//				ZConstant newOperandConstant;
+//
+//				ZConstant operandConstant = (ZConstant) operand;
+//
+//				if(operandConstant.getType() == ZConstant.COLUMNNAME) {
+//					String operandConstantValue = operandConstant.getValue();
+//					operandConstantValue = operandConstantValue.replaceAll("\'", "");
+//					SQLSelectItem oldSelectItem = 
+//							new SQLSelectItem(operandConstantValue);
+//					if(oldSelectItem.getSchema() == null && oldSelectItem.getTable() == null) {
+//						if(operandConstantValue.equalsIgnoreCase(oldName) == matchCondition) {
+//							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName, databaseType);
+//						} else {
+//							newOperandConstant = operandConstant;
+//						}
+//					} else if(oldSelectItem.getSchema() != null && oldSelectItem.getTable() != null) {
+//						String oldTableName = oldSelectItem.getSchema() + "." + oldSelectItem.getTable();
+//
+//						if(oldTableName.equalsIgnoreCase(oldName) == matchCondition) {
+//							//String newOperandConstantValue = operandConstantValue.replaceAll(oldName, newName);
+//							//newOperandConstant = Utility.constructDatabaseColumn(newOperandConstantValue);
+//							newOperandConstant = ODEMapsterUtility.constructDatabaseColumn(newName + "." + oldSelectItem.getColumn(), databaseType);
+//						} else {
+//							newOperandConstant = operandConstant;
+//						}
+//
+//					} else {
+//						newOperandConstant = operandConstant;
+//					}
+//
+//
+//
+//					//					ZAliasedName oldColumnName = new ZAliasedName(
+//					//							operandConstantValue, ZAliasedName.FORM_COLUMN);
+//					//					if(operandConstantValue.startsWith(oldName + ".") == matchCondition) {
+//					//						//be careful here when passing sql server column names that have 4 elements 
+//					//						//(db.schema.table.column)
+//					//						String newColumnName = newName + "." + oldColumnName.getColumn();
+//					//						//newOperandConstant = new ZConstant(newColumnName, operandConstant.getType());
+//					//						newOperandConstant = Utility.constructDatabaseColumn(newColumnName);
+//					//					} else if(operandConstantValue.equalsIgnoreCase(oldName)) {
+//					//						newOperandConstant = Utility.constructDatabaseColumn(newName);
+//					//					} else {
+//					//						newOperandConstant = operandConstant;
+//					//					}
+//
+//				} else {
+//					newOperandConstant = operandConstant;					
+//				}
+//				result.addOperand(newOperandConstant);
+//			} else if(operand instanceof ZExpression) {
+//				ZExpression operandExpression  = (ZExpression) operand;
+//				ZExpression renamedColumns = ODEMapsterUtility.renameColumns(operandExpression, oldName, newName, matchCondition, databaseType); 
+//				result.addOperand(renamedColumns);
+//			} else {
+//				throw new Exception("Unsupported columns renaming operation!");
+//			}
+//		}
+//		return result;
+//			}
 
 	public static ZConstant constructDatabaseColumn(String columnName, String databaseType) {
-		if(databaseType == null) { databaseType = Constants.DATABASE_MYSQL; }
+		
+		if(databaseType == null) { databaseType = Constants.DATABASE_MYSQL(); }
 
 		ZConstant zColumn;
-		if(databaseType.equalsIgnoreCase(Constants.DATABASE_MONETDB)) {
-			zColumn = new MonetDBColumn(columnName, ZConstant.COLUMNNAME);
-		} else if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL)) {
+		if(databaseType.equalsIgnoreCase(Constants.DATABASE_MONETDB())) {
+			zColumn = MorphSQLConstant.apply(columnName, ZConstant.COLUMNNAME, databaseType, null);
+		} else if(databaseType.equalsIgnoreCase(Constants.DATABASE_MYSQL())) {
 			//			zColumn = new ZConstant("\'" + columnName + "\'", ZConstant.COLUMNNAME);
 			zColumn = new ZConstant(columnName, ZConstant.COLUMNNAME);
 		} else {
@@ -739,17 +735,7 @@ public class ODEMapsterUtility {
 		return result;
 	}
 
-	public static ZSelectItem getSelectItemByAlias(String alias, Collection<ZSelectItem> selectItems, String prefix) {
-		if(selectItems != null) {
-			for(ZSelectItem selectItem : selectItems) {
-				String selectItemAlias = selectItem.getAlias();
-				if(alias.equals(selectItemAlias) || alias.equals(prefix + "." + selectItemAlias)) {
-					return selectItem;
-				}
-			}
-		}
-		return null;
-	}
+
 	
 	public static ZExp replaceColumnNames(ZExp exp, Map<String, String> mapOldNewAlias) {
 		ZExp result = exp;

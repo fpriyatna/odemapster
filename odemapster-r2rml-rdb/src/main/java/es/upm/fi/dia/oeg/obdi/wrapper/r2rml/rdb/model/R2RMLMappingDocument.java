@@ -22,6 +22,9 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import es.upm.fi.dia.oeg.morph.base.ColumnMetaDataFactory;
+import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.TableMetaData;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.exception.ParseException;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -30,9 +33,6 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractRDB2RDFMapping.MappingType;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.core.sql.ColumnMetaData;
-import es.upm.fi.dia.oeg.obdi.core.sql.TableMetaData;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElement;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectMapException;
@@ -43,6 +43,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
+	private Constants constants = new Constants();
 	
 	public R2RMLMappingDocument(String mappingDocumentPath
 			, ConfigurationProperties configurationProperties) 
@@ -62,7 +63,8 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 				if(databaseName != null) {
 					logger.debug("building metadata.");
 					super.tablesMetaData = TableMetaData.buildTablesMetaData(conn, databaseName, databaseType);
-					super.columnsMetaData = ColumnMetaData.buildColumnsMetaData(conn, databaseName, databaseType);
+					//super.columnsMetaData = ColumnMetaData.buildColumnsMetaData(conn, databaseName, databaseType);
+					super.columnsMetaData = ColumnMetaDataFactory.buildColumnsMetaData(conn, databaseName, databaseType);
 				}
 			}
 		}
@@ -82,7 +84,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		super.setMappingDocumentPrefixMap(model.getNsPrefixMap());
 
 		ResIterator triplesMapResources = model.listResourcesWithProperty(
-				RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
+				RDF.type, constants.R2RML_TRIPLESMAP_CLASS());
 		if(triplesMapResources != null) {
 			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
@@ -122,7 +124,8 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		// read the Turtle file
 		model.read(in, null, "TURTLE");
 
-		ResIterator triplesMapResources = model.listResourcesWithProperty(RDF.type, R2RMLConstants.R2RML_TRIPLESMAP_CLASS);
+		ResIterator triplesMapResources = model.listResourcesWithProperty(RDF.type
+				, constants.R2RML_TRIPLESMAP_CLASS());
 		if(triplesMapResources != null) {
 			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
@@ -298,7 +301,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		R2RMLRefObjectMap rom = pom.getRefObjectMap();
 		
 		if(om != null && rom == null) {
-			if(R2RMLConstants.R2RML_IRI_URI.equals(om.getTermType())) {
+			if(constants.R2RML_IRI_URI().equals(om.getTermType())) {
 				for(AbstractConceptMapping cm : this.getConceptMappings()) {
 					R2RMLTriplesMap tm = (R2RMLTriplesMap) cm;
 					tm.getSubjectMap();

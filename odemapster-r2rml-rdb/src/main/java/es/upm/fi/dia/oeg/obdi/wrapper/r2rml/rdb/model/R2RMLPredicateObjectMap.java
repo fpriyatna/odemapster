@@ -5,10 +5,10 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IAttributeMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.IRelationMapping;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLConstants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidRefObjectMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLJoinConditionException;
@@ -21,6 +21,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 	private R2RMLGraphMap graphMap;
 	private R2RMLRefObjectMap refObjectMap;
 	private ObjectMapType objectMapType;
+	private Constants constants = new Constants();
 	
 	private String alias;
 	
@@ -28,21 +29,22 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 			, R2RMLTriplesMap parent) 
 			throws R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
 		this.parent = parent;
+		this.resource = resource;
 		
-		Statement predicateMapStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATEMAP_PROPERTY);
+		Statement predicateMapStatement = resource.getProperty(constants.R2RML_PREDICATEMAP_PROPERTY());
 		if(predicateMapStatement != null) {
 			Resource predicateMapResource = (Resource) predicateMapStatement.getObject();
 			this.predicateMap = new R2RMLPredicateMap(predicateMapResource, parent);
 		}
 
-		Statement predicateStatement = resource.getProperty(R2RMLConstants.R2RML_PREDICATE_PROPERTY);
+		Statement predicateStatement = resource.getProperty(constants.R2RML_PREDICATE_PROPERTY());
 		if(predicateStatement != null) {
 			String constantValueObject = predicateStatement.getObject().toString();
 			this.predicateMap = new R2RMLPredicateMap(constantValueObject);
 		}
 		
 		Statement objectMapStatement = resource.getProperty(
-				R2RMLConstants.R2RML_OBJECTMAP_PROPERTY);
+				constants.R2RML_OBJECTMAP_PROPERTY());
 		if(objectMapStatement != null) {
 			Resource objectMapStatementObject = (Resource) objectMapStatement.getObject();
 			if(R2RMLRefObjectMap.isRefObjectMap(objectMapStatementObject)) {
@@ -55,7 +57,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		}
 
 		Statement objectStatement = resource.getProperty(
-				R2RMLConstants.R2RML_OBJECT_PROPERTY);
+				constants.R2RML_OBJECT_PROPERTY());
 		if(objectStatement != null) {
 			this.objectMapType = ObjectMapType.ObjectMap;
 			String constantValueObject = objectStatement.getObject().toString();
@@ -69,16 +71,16 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 //			this.refObjectMap = new R2RMLRefObjectMap((Resource) refObjectMapStatement.getObject(), mappingDocument);
 //		}
 
-		Statement graphMapStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPHMAP_PROPERTY);
+		Statement graphMapStatement = resource.getProperty(constants.R2RML_GRAPHMAP_PROPERTY());
 		if(graphMapStatement != null) {
 			Resource graphMapResource = (Resource) graphMapStatement.getObject();
 			this.graphMap = new R2RMLGraphMap(graphMapResource, parent);
 		}
 		
-		Statement graphStatement = resource.getProperty(R2RMLConstants.R2RML_GRAPH_PROPERTY);
+		Statement graphStatement = resource.getProperty(constants.R2RML_GRAPH_PROPERTY());
 		if(graphStatement != null) {
 			String graphStatementObjectValue = graphStatement.getObject().toString();
-			if(!R2RMLConstants.R2RML_DEFAULT_GRAPH_URI.equals(graphStatementObjectValue)) {
+			if(!constants.R2RML_DEFAULT_GRAPH_URI().equals(graphStatementObjectValue)) {
 				this.graphMap = new R2RMLGraphMap(graphStatementObjectValue);
 			}
 			
@@ -123,7 +125,7 @@ public class R2RMLPredicateObjectMap extends AbstractPropertyMapping implements 
 		MappingType result;
 		if(this.objectMap != null) {
 			String objectMapTermType = this.objectMap.getTermType();
-			if(objectMapTermType.equals(R2RMLConstants.R2RML_LITERAL_URI)) {
+			if(objectMapTermType.equals(constants.R2RML_LITERAL_URI())) {
 				result = MappingType.ATTRIBUTE;
 			} else {
 				result = MappingType.RELATION;

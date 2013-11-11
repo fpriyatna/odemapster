@@ -5,6 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/odemapster-core"/>
 	<classpathentry kind="lib" path="lib/Zql.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/odemapster-r2rml"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/morph"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/odemapster-core-querytranslator"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

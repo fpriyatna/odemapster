@@ -13,7 +13,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLSelectItem;
+import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 
 public abstract class AbstractBetaGenerator {
@@ -41,8 +41,8 @@ public abstract class AbstractBetaGenerator {
 			if(predicateIsRDFSType) {
 				ZConstant className = new ZConstant(
 						cm.getConceptName(), ZConstant.STRING);
-				SQLSelectItem selectItem = new SQLSelectItem();
-				selectItem.setExpression(className);
+				ZSelectItem selectItem = MorphSQLSelectItem.apply(className);
+				//selectItem.setExpression(className);
 				result = new ArrayList<ZSelectItem>();
 				result.add(selectItem);
 			} else {
@@ -64,8 +64,9 @@ public abstract class AbstractBetaGenerator {
 	public ZSelectItem calculateBetaPredicate(String predicateURI) {
 		ZConstant predicateURIConstant = 
 				new ZConstant(predicateURI, ZConstant.STRING);
-		SQLSelectItem selectItem = new SQLSelectItem();
-		selectItem.setExpression(predicateURIConstant);
+//		ZSelectItem selectItem = new SQLSelectItem();
+//		selectItem.setExpression(predicateURIConstant);
+		ZSelectItem selectItem = MorphSQLSelectItem.apply(predicateURIConstant);
 		return selectItem;
 	}
 	
