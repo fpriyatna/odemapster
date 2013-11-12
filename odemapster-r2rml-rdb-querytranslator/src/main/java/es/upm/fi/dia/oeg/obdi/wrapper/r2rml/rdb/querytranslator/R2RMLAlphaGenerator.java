@@ -36,10 +36,11 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLAlphaGenerator.class);
-	private Constants constants = new Constants();
-
+	protected R2RMLQueryTranslator owner;
+	
 	public R2RMLAlphaGenerator(AbstractQueryTranslator owner) {
 		super(owner);
+		this.owner = (R2RMLQueryTranslator) owner;
 	}
 	
 	@Override
@@ -61,11 +62,11 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 			R2RMLElementUnfoldVisitor unfolder = (R2RMLElementUnfoldVisitor) this.owner.getUnfolder();
 			SQLLogicalTable sqlParentLogicalTableAux = unfolder.visit(parentLogicalTable);
 			SQLJoinTable sqlParentLogicalTable = new SQLJoinTable(
-					sqlParentLogicalTableAux, constants.JOINS_TYPE_INNER(), null); 
-			String joinQueryAlias = R2RMLQueryTranslator.mapTripleAlias.get(triple);
+					sqlParentLogicalTableAux, Constants.JOINS_TYPE_INNER(), null); 
+			String joinQueryAlias = this.owner.getMapTripleAlias().get(triple);
 			if(joinQueryAlias == null) {
 				joinQueryAlias = sqlParentLogicalTableAux.generateAlias();
-				R2RMLQueryTranslator.mapTripleAlias.put(triple, joinQueryAlias);
+				this.owner.getMapTripleAlias().put(triple, joinQueryAlias);
 			}
 			sqlParentLogicalTableAux.setAlias(joinQueryAlias);
 

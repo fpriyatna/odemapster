@@ -4,6 +4,8 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 //import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 
@@ -24,7 +26,7 @@ public class DefaultResultProcessor {
 		for(IQuery iQuery : sqlQueries) {
 			AbstractResultSet abstractResultSet = 
 					this.dataSourceReader.evaluateQuery(iQuery.toString());
-			ArrayList<String> columnNames = iQuery.getSelectItemAliases();
+			LinkedList<String> columnNames = iQuery.getSelectItemAliases();
 			abstractResultSet.setColumnNames(columnNames);
 
 			this.queryResultWriter.setResultSet(abstractResultSet);

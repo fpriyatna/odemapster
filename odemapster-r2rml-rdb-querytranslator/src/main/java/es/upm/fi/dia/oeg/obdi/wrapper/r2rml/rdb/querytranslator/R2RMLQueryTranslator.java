@@ -61,7 +61,7 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Logger logger = Logger.getLogger(R2RMLQueryTranslator.class);
 	private Constants constants = new Constants();
 	
-	static Map<Triple, String> mapTripleAlias= new HashMap<Triple, String>();
+	private static Map<Triple, String> mapTripleAlias= new HashMap<Triple, String>();
 	private Map<String, Matcher> mapTemplateMatcher = new HashMap<String, Matcher>();
 	private Map<String, Collection<String>> mapTemplateAttributes = new HashMap<String, Collection<String>>();
 
@@ -156,12 +156,17 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 				Collection<String> columnNames = collectionUtility.getElementsStartWith(rsColumnNames, varName + "_");
 
 				//Map<String, Object> mapNodeMapping = this.getMapVarMapping2();
-				Map<Integer, Object> mapMappingHashCode = this.getMapHashCodeMapping();
+				Map<Integer, Object> mapMappingHashCode = super.getMapHashCodeMapping();
 				Object mapValue = null;
 
 				try {
-					Integer mappingHashCode = rs.getInt(constants.PREFIX_MAPPING_ID() + varName);
-					mapValue = mapMappingHashCode.get(mappingHashCode);
+					Integer mappingHashCode = rs.getInt(Constants.PREFIX_MAPPING_ID() + varName);
+					if(mappingHashCode == null) {
+						int varNameHashCode = varName.hashCode();
+						mapValue = mapMappingHashCode.get(varNameHashCode);
+					} else {
+						mapValue = mapMappingHashCode.get(mappingHashCode);
+					}
 				} catch(Exception e) {
 
 				}
@@ -384,6 +389,10 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 			throws QueryTranslationException, InsatisfiableSQLExpression {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Map<Triple, String> getMapTripleAlias() {
+		return R2RMLQueryTranslator.mapTripleAlias;
 	}
 
 

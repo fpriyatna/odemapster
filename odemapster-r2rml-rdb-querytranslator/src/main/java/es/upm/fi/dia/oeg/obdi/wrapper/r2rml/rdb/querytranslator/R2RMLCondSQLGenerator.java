@@ -39,9 +39,11 @@ import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
 
 public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLCondSQLGenerator.class);
+	protected R2RMLQueryTranslator owner;
 	
 	public R2RMLCondSQLGenerator(AbstractQueryTranslator owner) {
 		super(owner);
+		this.owner = (R2RMLQueryTranslator) owner;
 	}
 
 	@Override
@@ -115,7 +117,7 @@ public class R2RMLCondSQLGenerator extends AbstractCondSQLGenerator {
 
 			if(refObjectMap != null && objectMap == null) {
 				//String refObjectMapAlias = refObjectMap.getAlias();
-				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
+				String refObjectMapAlias = this.owner.getMapTripleAlias().get(tp);
 
 				//Collection<R2RMLJoinCondition> joinConditions = refObjectMap.getJoinConditions();
 				//ZExp onExpression = R2RMLUtility.generateJoinCondition(joinConditions, logicalTableAlias, refObjectMapAlias);

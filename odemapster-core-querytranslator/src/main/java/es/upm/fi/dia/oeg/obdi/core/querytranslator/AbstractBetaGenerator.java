@@ -1,6 +1,7 @@
 package es.upm.fi.dia.oeg.obdi.core.querytranslator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -12,6 +13,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
+import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator.POS;
 import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
@@ -32,7 +34,7 @@ public abstract class AbstractBetaGenerator {
 		List<ZSelectItem> result;
 		
 		if(pos == POS.sub) {
-			result = this.calculateBetaSubject(cm, alphaResult);
+			result = this.calculateBetaSubject(tp, cm, alphaResult);
 		} else if(pos == POS.pre) {
 			result = new ArrayList<ZSelectItem>();
 			result.add(this.calculateBetaPredicate(predicateURI));
@@ -57,8 +59,34 @@ public abstract class AbstractBetaGenerator {
 		return result;
 	}
 
-	public abstract List<ZSelectItem> calculateBetaObject(Triple triple
+	public List<ZSelectItem> calculateBetaObject(Triple triple
 			, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult)
+	throws QueryTranslationException {
+		List<ZSelectItem> betaObjects = new ArrayList<ZSelectItem>();
+//		String dbType = this.owner.getDatabaseType();
+//		Node object = tp.getObject();
+		
+		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
+//		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
+		
+		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
+		if(pms == null || pms.isEmpty()) {
+			String errorMessage = "Undefined mappings for : " + predicateURI 
+					+ " for class " + cm.getConceptName();
+			logger.debug(errorMessage);
+		} else if (pms.size() > 1) {
+			String errorMessage = "Multiple property mappings defined, result may be wrong!";
+			throw new QueryTranslationException(errorMessage);			
+		} else {//if(pms.size() == 1)
+			AbstractPropertyMapping pm = pms.iterator().next();
+			betaObjects = this.calculateBetaObject(triple, cm, predicateURI, alphaResult, pm);
+		}
+
+		return betaObjects;		
+	}
+
+	public abstract List<ZSelectItem> calculateBetaObject(Triple triple
+			, AbstractConceptMapping cm, String predicateURI, AlphaResult alphaResult, AbstractPropertyMapping pm)
 	throws QueryTranslationException;
 
 	public ZSelectItem calculateBetaPredicate(String predicateURI) {
@@ -70,7 +98,7 @@ public abstract class AbstractBetaGenerator {
 		return selectItem;
 	}
 	
-	public abstract List<ZSelectItem> calculateBetaSubject(AbstractConceptMapping cm, AlphaResult alphaResult);
+	public abstract List<ZSelectItem> calculateBetaSubject(Triple tp, AbstractConceptMapping cm, AlphaResult alphaResult);
 
 	protected AbstractQueryTranslator getOwner() {
 		return owner;

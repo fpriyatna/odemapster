@@ -28,85 +28,16 @@ import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLBetaGenerator.class);
-
+	protected R2RMLQueryTranslator owner;
+	
 	public R2RMLBetaGenerator(AbstractQueryTranslator owner) {
 		super(owner);
+		this.owner = (R2RMLQueryTranslator) owner;
 	}
 
 
 	@Override
-	public List<ZSelectItem> calculateBetaObject(Triple tp
-			, AbstractConceptMapping cm, String predicateURI
-			, AlphaResult alphaResult) throws QueryTranslationException {
-		List<ZSelectItem> betaObjects = new ArrayList<ZSelectItem>();
-		String dbType = this.owner.getDatabaseType();
-		Node object = tp.getObject();
-		
-		//String logicalTableAlias = triplesMap.getLogicalTable().getAlias();
-		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
-		
-		Collection<AbstractPropertyMapping> pms = cm.getPropertyMappings(predicateURI);
-		if(pms == null || pms.isEmpty()) {
-			String errorMessage = "Undefined mappings for : " + predicateURI 
-					+ " for class " + cm.getConceptName();
-			logger.debug(errorMessage);
-		} else if (pms.size() > 1) {
-			String errorMessage = "Multiple property mappings defined, result may be wrong!";
-			throw new QueryTranslationException(errorMessage);			
-		} else {//if(pms.size() == 1)
-			AbstractPropertyMapping pm = pms.iterator().next();
-			R2RMLPredicateObjectMap predicateObjectMap =(R2RMLPredicateObjectMap) pm;
-			R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap(); 
-
-			if(refObjectMap == null) {
-				R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
-//				if(object.isVariable()) {
-//					this.getOwner().getMapVarMapping2().put(
-//							object.getName(), objectMap);
-//				}
-
-				if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
-					String constantValue = objectMap.getConstantValue();
-					ZConstant zConstant = new ZConstant(constantValue, ZConstant.STRING);
-//					ZSelectItem selectItem = new SQLSelectItem();
-//					selectItem.setExpression(zConstant);
-					ZSelectItem selectItem = MorphSQLSelectItem.apply(zConstant);
-					betaObjects.add(selectItem);
-				} else {
-					Collection<String> databaseColumnsString = objectMap.getDatabaseColumnsString();
-					for(String databaseColumnString : databaseColumnsString) {
-						ZSelectItem selectItem = MorphSQLSelectItem.apply(
-								databaseColumnString,logicalTableAlias, dbType, null);
-						
-						betaObjects.add(selectItem);
-					}
-				}
-			} else {
-//				if(object.isVariable()) {
-//					this.getOwner().getMapVarMapping2().put(object.getName(), refObjectMap);
-//				}
-				
-				List<String> databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
-				//String refObjectMapAlias = refObjectMap.getAlias(); 
-				String refObjectMapAlias = R2RMLQueryTranslator.mapTripleAlias.get(tp);
-
-				if(databaseColumnsString != null) {
-					for(String databaseColumnString : databaseColumnsString) {
-						ZSelectItem selectItem = MorphSQLSelectItem.apply(
-								databaseColumnString, refObjectMapAlias, dbType, null);
-						
-						betaObjects.add(selectItem);
-					}
-				}
-			}			
-		}
-
-		return betaObjects;
-	}
-
-
-	@Override
-	public List<ZSelectItem> calculateBetaSubject(
+	public List<ZSelectItem> calculateBetaSubject(Triple tp,
 			AbstractConceptMapping cm, AlphaResult alphaResult) {
 		List<ZSelectItem> result = new ArrayList<ZSelectItem>();
 		R2RMLTriplesMap triplesMap = (R2RMLTriplesMap) cm;
@@ -134,6 +65,62 @@ public class R2RMLBetaGenerator extends AbstractBetaGenerator {
 	protected AbstractQueryTranslator getOwner() {
 		AbstractQueryTranslator result = super.getOwner();
 		return result;
+	}
+
+
+	@Override
+	public List<ZSelectItem> calculateBetaObject(Triple tp,
+			AbstractConceptMapping cm, String predicateURI,
+			AlphaResult alphaResult, AbstractPropertyMapping pm)
+			throws QueryTranslationException {
+		R2RMLPredicateObjectMap predicateObjectMap =(R2RMLPredicateObjectMap) pm;
+		R2RMLRefObjectMap refObjectMap = predicateObjectMap.getRefObjectMap(); 
+		List<ZSelectItem> betaObjects = new ArrayList<ZSelectItem>();
+		String logicalTableAlias = alphaResult.getAlphaSubject().getAlias();
+		String dbType = this.owner.getDatabaseType();
+
+		if(refObjectMap == null) {
+			R2RMLObjectMap objectMap = predicateObjectMap.getObjectMap();
+//			if(object.isVariable()) {
+//				this.getOwner().getMapVarMapping2().put(
+//						object.getName(), objectMap);
+//			}
+
+			if(objectMap.getTermMapType() == TermMapType.CONSTANT) {
+				String constantValue = objectMap.getConstantValue();
+				ZConstant zConstant = new ZConstant(constantValue, ZConstant.STRING);
+//				ZSelectItem selectItem = new SQLSelectItem();
+//				selectItem.setExpression(zConstant);
+				ZSelectItem selectItem = MorphSQLSelectItem.apply(zConstant);
+				betaObjects.add(selectItem);
+			} else {
+				Collection<String> databaseColumnsString = objectMap.getDatabaseColumnsString();
+				for(String databaseColumnString : databaseColumnsString) {
+					ZSelectItem selectItem = MorphSQLSelectItem.apply(
+							databaseColumnString,logicalTableAlias, dbType, null);
+					
+					betaObjects.add(selectItem);
+				}
+			}
+		} else {
+//			if(object.isVariable()) {
+//				this.getOwner().getMapVarMapping2().put(object.getName(), refObjectMap);
+//			}
+			
+			List<String> databaseColumnsString = refObjectMap.getParentDatabaseColumnsString();
+			//String refObjectMapAlias = refObjectMap.getAlias(); 
+			String refObjectMapAlias = this.owner.getMapTripleAlias().get(tp);
+
+			if(databaseColumnsString != null) {
+				for(String databaseColumnString : databaseColumnsString) {
+					ZSelectItem selectItem = MorphSQLSelectItem.apply(
+							databaseColumnString, refObjectMapAlias, dbType, null);
+					
+					betaObjects.add(selectItem);
+				}
+			}
+		}	
+		return betaObjects;
 	}
 
 

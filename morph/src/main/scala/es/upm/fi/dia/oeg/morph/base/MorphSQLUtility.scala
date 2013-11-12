@@ -241,7 +241,7 @@ object MorphSQLUtility {
 					}				   
 				}
 				
-				selectItemStringList = selectItemStringWithAlias :: selectItemStringList;
+				selectItemStringList = selectItemStringList ::: List(selectItemStringWithAlias);
 			}
 			val selectItemStrings = selectItemStringList.mkString(",");
 			selectSQL = selectSQL + selectItemStrings;

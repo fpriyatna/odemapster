@@ -2,6 +2,7 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Vector;
 
@@ -43,7 +44,7 @@ public class SQLJoin implements IQuery {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public ArrayList<String> getSelectItemAliases() {
+	public LinkedList<String> getSelectItemAliases() {
 		// TODO Auto-generated method stub
 		return null;
 	}

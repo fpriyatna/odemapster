@@ -165,7 +165,7 @@ public abstract class AbstractPRSQLGenerator {
 		Collection<ZSelectItem> prSubjects = new Vector<ZSelectItem>();
 		String databaseType = this.owner.getDatabaseType();
 		List<ZSelectItem> betaSubSelectItems = betaGenerator.calculateBetaSubject(
-				cmSubject, alphaResult);
+				tp, cmSubject, alphaResult);
 		try {
 			byte i = 0;
 			for(ZSelectItem betaSub : betaSubSelectItems) {

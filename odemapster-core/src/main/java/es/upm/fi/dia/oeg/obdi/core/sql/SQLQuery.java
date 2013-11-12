@@ -571,8 +571,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 		return super.getSelect();
 	}
 
-	public ArrayList<String> getSelectItemAliases() {
-		ArrayList<String> result = new ArrayList<String>();
+	public LinkedList<String> getSelectItemAliases() {
+		LinkedList<String> result = new LinkedList<String>();
 
 		Collection<ZSelectItem> selectItems = this.getSelect();
 		if(selectItems != null) {
@@ -770,8 +770,8 @@ public class SQLQuery extends ZQuery implements IQuery {
 		}
 
 		//print select
-		MorphSQLUtility sqlUtility = new MorphSQLUtility();
-		String selectSQL = sqlUtility.printSelectItems(this.getSelectItems(), this.getDistinct());
+		Collection<ZSelectItem> thisSelectItems = this.getSelectItems();
+		String selectSQL = MorphSQLUtility.printSelectItems(thisSelectItems, this.getDistinct());
 
 		result += selectSQL + "\n";
 

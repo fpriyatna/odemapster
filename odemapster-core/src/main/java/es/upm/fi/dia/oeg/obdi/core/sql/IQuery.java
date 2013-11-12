@@ -2,6 +2,8 @@ package es.upm.fi.dia.oeg.obdi.core.sql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -15,7 +17,7 @@ import Zql.ZSelectItem;
 public interface IQuery extends SQLLogicalTable {
 	public String generateAlias();
 	public Collection<ZSelectItem> getSelectItems();
-	public ArrayList<String> getSelectItemAliases();
+	public LinkedList<String> getSelectItemAliases();
 	public void cleanupSelectItems();
 	public void cleanupOrderBy();
 	public void setOrderBy(Vector<ZOrderBy> orderByConditions);

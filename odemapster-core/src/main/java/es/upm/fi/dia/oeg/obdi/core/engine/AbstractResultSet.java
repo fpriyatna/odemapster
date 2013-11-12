@@ -1,11 +1,11 @@
 package es.upm.fi.dia.oeg.obdi.core.engine;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import es.upm.fi.dia.oeg.obdi.core.exception.ResultSetException;
 
 public abstract class AbstractResultSet {
-	private ArrayList<String> columnNames = null;
+	private LinkedList<String> columnNames = null;
 
 	public abstract boolean next() throws ResultSetException;
 //	public Object getObject(int columnIndex) throws ResultSetException;
@@ -15,11 +15,11 @@ public abstract class AbstractResultSet {
 	public abstract Integer getInt(int columnIndex) throws ResultSetException;
 	public abstract Integer getInt(String columnLabel) throws ResultSetException;
 
-	public ArrayList<String> getColumnNames() {
+	public LinkedList<String> getColumnNames() {
 		return columnNames;
 	}
 
-	public void setColumnNames(ArrayList<String> columnNames) {
+	public void setColumnNames(LinkedList<String> columnNames) {
 		this.columnNames = columnNames;
 	}
 	

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -111,7 +112,7 @@ public class SQLUnion implements IQuery {
 		return this.alias;
 	}
 
-	public ArrayList<String> getSelectItemAliases() {
+	public LinkedList<String> getSelectItemAliases() {
 		return this.unionQueries.iterator().next().getSelectItemAliases();
 	}
 

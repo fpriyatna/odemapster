@@ -112,7 +112,7 @@ public abstract class AbstractCondSQLGenerator {
 		
 
 		List<ZSelectItem> betaSubjectSelectItems = 
-				betaGenerator.calculateBetaSubject(cm, alphaResult);
+				betaGenerator.calculateBetaSubject(tp, cm, alphaResult);
 		List<ZExp> betaSubjectExpressions = new ArrayList<ZExp>();
 		for(ZSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
 			ZExp betaSubjectExpression = betaSubjectSelectItem.getExpression();
@@ -267,7 +267,7 @@ public abstract class AbstractCondSQLGenerator {
 		Node subject = tp.getSubject();
 		//ZSelectItem betaCMSelectItem = betaGenerator.calculateBeta(tp, POS.sub);
 		List<ZSelectItem> betaSubjectSelectItems = betaGenerator.calculateBetaSubject(
-				cm, alphaResult);
+				tp, cm, alphaResult);
 		List<ZExp> betaSubjectExpressions = new ArrayList<ZExp>();
 		for(ZSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
 			ZExp betaSubjectExpression = betaSubjectSelectItem.getExpression();
@@ -393,7 +393,7 @@ public abstract class AbstractCondSQLGenerator {
 
 		Node tp1Subject = tp1.getSubject();
 		List<ZSelectItem> betaSubjectSelectItems = betaGenerator.calculateBetaSubject(
-				cm, alphaResult);
+				tp1, cm, alphaResult);
 		List<ZExp> betaSub1Exps = new ArrayList<ZExp>();
 		for(ZSelectItem betaSubjectSelectItem : betaSubjectSelectItems) {
 			betaSub1Exps.add(betaSubjectSelectItem.getExpression());

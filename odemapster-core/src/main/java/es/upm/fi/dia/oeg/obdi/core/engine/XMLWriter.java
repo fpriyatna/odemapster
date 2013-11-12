@@ -54,9 +54,7 @@ public class XMLWriter extends AbstractQueryResultWriter {
 				Element bindingElement = xmlDoc.createElement("binding");
 				bindingElement.setAttribute("name", varName);
 				IQueryTranslator queryTranslator = super.getQueryTranslator();
-				String translatedColumnValue = 
-						queryTranslator.translateResultSet(
-								varName, rs);
+				String translatedColumnValue = queryTranslator.translateResultSet(varName, rs);
 				bindingElement.setTextContent(translatedColumnValue);
 				resultElement.appendChild(bindingElement);
 			}
