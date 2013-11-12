@@ -95,11 +95,11 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		return R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn);
 	}
 
-	@Override
-	protected String generateTermCName(Node termC) {
-		String termCName = super.getNameGenerator().generateName(termC);
-		return termCName;
-	}
+//	@Override
+//	protected String generateTermCName(Node termC) {
+//		String termCName = super.getNameGenerator().generateName(termC);
+//		return termCName;
+//	}
 
 	@Override
 	protected List<ZExp> transIRI(Node node) {
@@ -264,84 +264,84 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 		return result;
 	}
 
-	@Override
-	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
-			String predicateURI, boolean unboundedPredicate) 
-					throws QueryTranslationException, InsatisfiableSQLExpression {
-		IQuery transTP = null;
-
-		Collection<AbstractPropertyMapping> pms = 
-				cm.getPropertyMappings(predicateURI);
-		
-		if(pms == null || pms.size() == 0) {
-			String errorMessage = "Undefined mappings of predicate : " + predicateURI;
-			throw new QueryTranslationException(errorMessage);			
-		} else {
-			
-		}
-		
-		//alpha
-		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
-		if(alphaResult != null) {
-			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
-			Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
-
-			//beta
-			AbstractBetaGenerator betaGenerator = super.getBetaGenerator();
-
-			//PRSQL
-			AbstractPRSQLGenerator prSQLGenerator = super.getPrSQLGenerator();
-			NameGenerator nameGenerator = super.getNameGenerator(); 
-			Collection<ZSelectItem> prSQL = prSQLGenerator.genPRSQL(
-					tp, alphaResult, betaGenerator, nameGenerator
-					, cm, predicateURI, unboundedPredicate);
-
-			//CondSQL
-			AbstractCondSQLGenerator condSQLGenerator = 
-					super.getCondSQLGenerator();
-			CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
-					tp, alphaResult, betaGenerator, cm, predicateURI);
-			ZExpression condSQL = null;
-			if(condSQLResult != null) {
-				condSQL = condSQLResult.getExpression();
-			}
-
-			SQLQuery resultAux = null;
-			//don't do subquery elimination here! why?
-			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
-				try {
-					resultAux = super.createQuery(alphaSubject, alphaPredicateObjects, prSQL, condSQL);
-				} catch(Exception e) {
-					String errorMessage = "error in eliminating subquery!";
-					logger.error(errorMessage);
-					resultAux = null;
-				}
-			} 
-
-			if(resultAux == null) { //without subquery elimination or error occured during the process
-				resultAux = new SQLQuery(alphaSubject);
-				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
-					if(alphaSubject instanceof SQLFromItem) {
-						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
-					} else if(alphaSubject instanceof SQLQuery) {
-						ZExpression onExpression = alphaPredicateObject.getOnExpression();
-						alphaPredicateObject.setOnExpression(null);
-						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
-						resultAux.pushFilterDown(onExpression);
-					} else {
-						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
-					}
-				}
-				resultAux.setSelectItems(prSQL);
-				resultAux.setWhere(condSQL);
-			}
-
-			transTP = resultAux;
-			logger.debug("transTP(tp, cm) = " + transTP);			
-		}
-
-		return transTP;
-	}
+//	@Override
+//	protected IQuery trans(Triple tp, AbstractConceptMapping cm,
+//			String predicateURI, boolean unboundedPredicate) 
+//					throws QueryTranslationException, InsatisfiableSQLExpression {
+//		IQuery transTP = null;
+//
+//		Collection<AbstractPropertyMapping> pms = 
+//				cm.getPropertyMappings(predicateURI);
+//		
+//		if(pms == null || pms.size() == 0) {
+//			String errorMessage = "Undefined mappings of predicate : " + predicateURI;
+//			throw new QueryTranslationException(errorMessage);			
+//		} else {
+//			
+//		}
+//		
+//		//alpha
+//		AlphaResult alphaResult = super.getAlphaGenerator().calculateAlpha(tp, cm, predicateURI);
+//		if(alphaResult != null) {
+//			SQLLogicalTable alphaSubject = alphaResult.getAlphaSubject();
+//			Collection<SQLJoinTable> alphaPredicateObjects = alphaResult.getAlphaPredicateObjects();
+//
+//			//beta
+//			AbstractBetaGenerator betaGenerator = super.getBetaGenerator();
+//
+//			//PRSQL
+//			AbstractPRSQLGenerator prSQLGenerator = super.getPrSQLGenerator();
+//			NameGenerator nameGenerator = super.getNameGenerator(); 
+//			Collection<ZSelectItem> prSQL = prSQLGenerator.genPRSQL(
+//					tp, alphaResult, betaGenerator, nameGenerator
+//					, cm, predicateURI, unboundedPredicate);
+//
+//			//CondSQL
+//			AbstractCondSQLGenerator condSQLGenerator = 
+//					super.getCondSQLGenerator();
+//			CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
+//					tp, alphaResult, betaGenerator, cm, predicateURI);
+//			ZExpression condSQL = null;
+//			if(condSQLResult != null) {
+//				condSQL = condSQLResult.getExpression();
+//			}
+//
+//			SQLQuery resultAux = null;
+//			//don't do subquery elimination here! why?
+//			if(super.optimizer != null && this.optimizer.isSubQueryElimination()) {
+//				try {
+//					resultAux = super.createQuery(alphaSubject, alphaPredicateObjects, prSQL, condSQL);
+//				} catch(Exception e) {
+//					String errorMessage = "error in eliminating subquery!";
+//					logger.error(errorMessage);
+//					resultAux = null;
+//				}
+//			} 
+//
+//			if(resultAux == null) { //without subquery elimination or error occured during the process
+//				resultAux = new SQLQuery(alphaSubject);
+//				for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+//					if(alphaSubject instanceof SQLFromItem) {
+//						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+//					} else if(alphaSubject instanceof SQLQuery) {
+//						ZExpression onExpression = alphaPredicateObject.getOnExpression();
+//						alphaPredicateObject.setOnExpression(null);
+//						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object
+//						resultAux.pushFilterDown(onExpression);
+//					} else {
+//						resultAux.addFromItem(alphaPredicateObject);//alpha predicate object	
+//					}
+//				}
+//				resultAux.setSelectItems(prSQL);
+//				resultAux.setWhere(condSQL);
+//			}
+//
+//			transTP = resultAux;
+//			logger.debug("transTP(tp, cm) = " + transTP);			
+//		}
+//
+//		return transTP;
+//	}
 
 	public static AbstractQueryTranslator getQueryTranslatorFreddy(
 			String url, String username, String password

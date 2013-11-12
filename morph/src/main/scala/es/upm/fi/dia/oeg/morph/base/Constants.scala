@@ -32,6 +32,7 @@ object Constants {
 	val DATABASE_GFT = "GFT";
 
 	val DATABASE_POSTGRESQL_ENCLOSED_CHARACTER = "\"";
+	val DATABASE_MONETDB_ENCLOSED_CHARACTER = "\"";
 	val DATABASE_MYSQL_ENCLOSED_CHARACTER = "`";
 	val DATABASE_GFT_ENCLOSED_CHARACTER = "'";
 
@@ -211,5 +212,24 @@ object Constants {
 	val R2RML_DEFAULT_GRAPH_CLASS = ResourceFactory.createResource(R2RML_DEFAULT_GRAPH_URI);
 
 	val R2RML_TEMPLATE_PATTERN = "\\{(.+?)\\}";	
-  
+ 
+	def getEnclosedCharacter(dbType:String) : String = {
+	  dbType match {
+	    case Constants.DATABASE_GFT => {
+	      Constants.DATABASE_GFT_ENCLOSED_CHARACTER;
+	    }
+	    case Constants.DATABASE_MONETDB => {
+	      Constants.DATABASE_MONETDB_ENCLOSED_CHARACTER;
+	    }
+	    case Constants.DATABASE_MYSQL=> {
+	      Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER;
+	    }
+	    case Constants.DATABASE_POSTGRESQL => {
+	      Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
+	    }	    
+	    case _ => {
+	      ""
+	    }	    
+	  }
+	}
 }

@@ -58,6 +58,15 @@ extends ZSelectItem {
 		if(this.isExpression()) {
 			result = this.getExpression().toString();
 		} else {
+//			this.dbType match {
+//				case Constants.DATABASE_GFT => {
+//					result = this.column;
+//				}
+//				case _ => {
+//					result = this.getFullyQualifiedName(enclosedCharacter);
+//				}
+//			}
+			
 			result = this.getFullyQualifiedName(enclosedCharacter);
 		}
 
@@ -315,5 +324,33 @@ object MorphSQLSelectItem {
 		}
 
 		result
-	}	
+	}
+	
+	def print(selectItem:ZSelectItem, useAlias:Boolean , useEnclosedCharacter:Boolean ) : String = {
+	  val selectItemAlias = selectItem.getAlias();
+	  if(!useAlias) {
+		  selectItem.setAlias("");	    
+	  }
+
+	  var selectItemString = selectItem.toString().trim();
+	  if(!useEnclosedCharacter) {
+	    selectItem match {
+	      case morphSQLSelectItem:MorphSQLSelectItem => {
+	        val dbType = morphSQLSelectItem.dbType;
+	        val enclosedCharacter = Constants.getEnclosedCharacter(dbType);
+	        selectItemString = selectItemString.replaceAll(enclosedCharacter, "");
+	      }
+	      case _ => {
+	        selectItemString
+	      }
+	    }
+	  }
+				
+				
+	  if(selectItemAlias != null) {
+		  selectItem.setAlias(selectItemAlias);
+	  }
+
+	  selectItemString
+	}
 }

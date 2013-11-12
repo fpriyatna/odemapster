@@ -1008,13 +1008,15 @@ public class SQLQuery extends ZQuery implements IQuery {
 				selectItemsReplacement.put(outerSelectItem, outerSelectItem);
 			} else {
 				String outerSelectItemAlias = outerSelectItem.getAlias();
-				outerSelectItem.setAlias("");
-				String outerSelectItemString = outerSelectItem.toString().trim();
-				outerSelectItemString = outerSelectItemString.replaceAll("`", "").replaceAll("\"", "");
-				if(outerSelectItemAlias != null) {
-					outerSelectItem.setAlias(outerSelectItemAlias);
-				}
+//				outerSelectItem.setAlias("");
+//				String outerSelectItemString = outerSelectItem.toString().trim();
+//				outerSelectItemString = outerSelectItemString.replaceAll("`", "").replaceAll("\"", "");
+//				if(outerSelectItemAlias != null) {
+//					outerSelectItem.setAlias(outerSelectItemAlias);
+//				}
 
+				String outerSelectItemString = MorphSQLSelectItem.print(outerSelectItem, false, false);
+				
 				ZSelectItem replacementSelectItem;
 				ZSelectItem innerSelectItem = mapInnerAliasSelectItem.get(outerSelectItemString);
 				if(innerSelectItem != null) {
