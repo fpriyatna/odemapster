@@ -11,7 +11,7 @@
 
 	
 <TriplesMapPerson>
-    a rr:TriplesMap;
+	a rr:TriplesMap;
         
 	rr:logicalTable [ 
         rr:tableName  "Student" 
@@ -25,39 +25,64 @@
 		rr:class <http://mappingpedia.linkeddata.es/vocabulary/Person>;
 	];
 
-	rr:predicateObjectMap
-    [ 
+	rr:predicateObjectMap [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/name> ]; 
-      rr:objectMap    [ 
-             rr:column "name";
-             rr:termType rr:Literal;
-      ];
+      rr:objectMap    [ rr:termType rr:Literal; rr:column "name"; ]; 
     ];
 	
-    rr:predicateObjectMap
-    [ 
+    rr:predicateObjectMap [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/webpage> ]; 
-      rr:objectMap    [ 
-             rr:column "webpage";
-             rr:termType rr:Literal;
-      ];
+      rr:objectMap    [ rr:termType rr:Literal; rr:column "webpage"; ];
     ];
 	
-    rr:predicateObjectMap
-    [ 
+    rr:predicateObjectMap [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/phone> ]; 
-      rr:objectMap    [ 
-             rr:column "phone";
-             rr:termType rr:Literal;
-      ];
+      rr:objectMap    [ rr:column "phone"; rr:termType rr:Literal; ];
     ];	
 	
-    rr:predicateObjectMap
-    [ 
+    rr:predicateObjectMap [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/email> ]; 
+      rr:objectMap    [ rr:column "email"; rr:termType rr:Literal; ];
+    ];
+
+   rr:predicateObjectMap [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/hasSport> ]; 
       rr:objectMap    [ 
-             rr:column "email";
-             rr:termType rr:Literal;
+         rr:parentTriplesMap <TriplesMapSport>;
+         rr:joinCondition [ rr:child "sport" ; rr:parent "id" ; ]
       ];
-    ];		
+   ];    		
+.
+
+
+<TriplesMapSport>
+	a rr:TriplesMap;
+        
+	rr:logicalTable [ rr:tableName  "Sport" ];
+	
+    rr:subjectMap [ a rr:Subject;
+		rr:template "http://mappingpedia.linkeddata.es/resources/Sport/{id}";
+		rr:termType rr:IRI;
+		rr:class <http://mappingpedia.linkeddata.es/vocabulary/Sport>;
+	];
+
+	rr:predicateObjectMap [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/id> ]; 
+      rr:objectMap    [ rr:termType rr:Literal; rr:column "id"; ]; 
+    ];
+
+	rr:predicateObjectMap [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/name> ]; 
+      rr:objectMap    [ rr:termType rr:Literal; rr:column "name"; ]; 
+    ];
+
+	rr:predicateObjectMap [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/code> ]; 
+      rr:objectMap    [ rr:termType rr:Literal; rr:column "code"; ]; 
+    ];
+
+	rr:predicateObjectMap [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/type> ]; 
+      rr:objectMap    [ rr:termType rr:Literal; rr:column "type"; ]; 
+    ];
 .
