@@ -42,13 +42,11 @@ public abstract class AbstractCondSQLGenerator {
 			, AlphaResult alphaResult, AbstractBetaGenerator betaGenerator
 			, AbstractConceptMapping cm, String predicateURI) throws QueryTranslationException, InsatisfiableSQLExpression {
 
-		ZExpression condSQLSubject = this.genCondSQLSubject(
-				tp, alphaResult, betaGenerator, cm);
+		ZExpression condSQLSubject = this.genCondSQLSubject(tp, alphaResult, betaGenerator, cm);
 
 		ZExpression condSQLPredicateObject = null;
 		try {
-			condSQLPredicateObject = this.genCondSQLPredicateObject(
-					tp, alphaResult, betaGenerator, cm, predicateURI);			
+			condSQLPredicateObject = this.genCondSQLPredicateObject(tp, alphaResult, betaGenerator, cm, predicateURI);			
 		} catch(InsatisfiableSQLExpression e) {
 			throw e;
 		} catch(Exception e) {
@@ -104,8 +102,7 @@ public abstract class AbstractCondSQLGenerator {
 		Node object = tp.getObject();
 		
 		AbstractPropertyMapping pm = pms.iterator().next();
-		ZExpression result1 = this.genCondSQLPredicateObject(
-				tp, alphaResult, betaGenerator, cm, pm);
+		ZExpression result1 = this.genCondSQLPredicateObject(tp, alphaResult, betaGenerator, cm, pm);
 		if(result1 != null) {
 			exps.add(result1);	
 		}
@@ -256,7 +253,7 @@ public abstract class AbstractCondSQLGenerator {
 		}
 
 		ZExpression resultFinal = SQLUtility.combineExpresions(
-				exps, constants.SQL_LOGICAL_OPERATOR_AND());
+				exps, Constants.SQL_LOGICAL_OPERATOR_AND());
 		return resultFinal;
 	}
 
@@ -486,7 +483,7 @@ public abstract class AbstractCondSQLGenerator {
 
 
 		ZExpression result = SQLUtility.combineExpresions(
-				exps, constants.SQL_LOGICAL_OPERATOR_AND());
+				exps, Constants.SQL_LOGICAL_OPERATOR_AND());
 		return result;
 	}
 

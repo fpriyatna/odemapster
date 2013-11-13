@@ -657,16 +657,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 					ZExpression joinExp = joinQuery.getOnExpression();
 					if(joinExp != null) {
-						try {
-							System.out.println(fromSQL);
-							System.out.println(joinExp);
-							fromSQL += " ON " + joinExp;	
-						} catch (Exception e) {
-							String errorMessage = e.getMessage();
-							System.out.println(errorMessage);
-							e.printStackTrace();
-						}
-						
+						fromSQL += " ON " + joinExp;
 					}
 
 					if(i < fromItems.size() - 1) {

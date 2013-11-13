@@ -120,5 +120,21 @@ public class ExampleWithPropertiesFile {
 			assertTrue(e.getMessage(), false);
 		}
 	}
+
+	@Test
+	public void sparql06() {
+		String configurationDirectory = System.getProperty("user.dir") + "/examples";
+		String configurationFile = "query06.r2rml.properties";
+		try {
+			String[] args = {configurationDirectory, configurationFile};
+			R2RMLRunner.main(args);
+			logger.info("Query process DONE------\n\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("Query process FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}	
 	
 }

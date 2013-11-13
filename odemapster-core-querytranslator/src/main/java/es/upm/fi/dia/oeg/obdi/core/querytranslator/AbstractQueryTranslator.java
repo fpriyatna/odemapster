@@ -22,6 +22,7 @@ import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
@@ -46,6 +47,7 @@ import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.core.VarExprList;
 import com.hp.hpl.jena.sparql.expr.E_Bound;
+import com.hp.hpl.jena.sparql.expr.E_Function;
 import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
 import com.hp.hpl.jena.sparql.expr.E_LogicalNot;
 import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
@@ -875,7 +877,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 
 	private ZExp transFunction(Op op, ExprFunction exprFunction
 			, Collection<ZSelectItem> subOpSelectItems, String prefix) {
-		ZExpression result;
+		ZExp result;
 		String functionSymbol = null;
 		List<Expr> args = exprFunction.getArgs();
 
@@ -965,7 +967,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				}
 
 				result = resultAux;
-			} else {
+			}  else {
 				if(exprFunction instanceof E_LogicalAnd) {
 					//functionSymbol = "AND";
 					functionSymbol = functionsMap.get(E_LogicalAnd.class.toString());
@@ -985,7 +987,36 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 					resultAux.addOperand(rightOperand);
 					resultAuxs.add(resultAux);
 				}
-				result = SQLUtility.combineExpresions(resultAuxs, constants.SQL_LOGICAL_OPERATOR_AND());
+				result = SQLUtility.combineExpresions(resultAuxs, Constants.SQL_LOGICAL_OPERATOR_AND());
+			}
+			
+		} else if(exprFunction instanceof E_Function) {
+			List<ZExp> resultAuxs;
+			E_Function eFunction = (E_Function) exprFunction;
+			String functionIRI = eFunction.getFunctionIRI();
+			List<Expr> exprs = eFunction.getArgs();
+			if(exprs != null && exprs.size() == 1) {
+				Expr expr= exprs.get(0);
+				resultAuxs = this.transExpr(op, expr, subOpSelectItems, prefix);
+				String resultAux = resultAuxs.get(0).toString();
+				
+				if(functionIRI.equals(XSDDatatype.XSDinteger.getURI())) {
+					result = new ZConstant(resultAux, ZConstant.NUMBER);
+				} else if(functionIRI.equals(XSDDatatype.XSDdouble.getURI())) {
+					result = new ZConstant(resultAux, ZConstant.NUMBER);
+				} else if(functionIRI.equals(XSDDatatype.XSDdate.getURI())) {
+					result = new ZConstant(resultAux, ZConstant.UNKNOWN);
+				} else if(functionIRI.equals(XSDDatatype.XSDtime.getURI())) {
+					result = new ZConstant(resultAux, ZConstant.UNKNOWN);
+				} else if(functionIRI.equals(XSDDatatype.XSDdateTime.getURI())) {
+					result = new ZConstant(resultAux, ZConstant.UNKNOWN);
+				} else {
+					result = new ZConstant(resultAux, ZConstant.STRING);
+				}
+			} else {
+				String errorMessage = "unimplemented function";
+				logger.error(errorMessage);
+				result = null;
 			}
 		} else {
 			List<List<ZExp>> transArgs = new Vector<List<ZExp>>();
@@ -1526,8 +1557,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			//CondSQL
 			AbstractCondSQLGenerator condSQLGenerator = 
 					this.getCondSQLGenerator();
-			CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(
-					tp, alphaResult, betaGenerator, cm, predicateURI);
+			CondSQLResult condSQLResult = condSQLGenerator.genCondSQL(tp, alphaResult, betaGenerator, cm, predicateURI);
 			ZExpression condSQL = null;
 			if(condSQLResult != null) {
 				condSQL = condSQLResult.getExpression();
