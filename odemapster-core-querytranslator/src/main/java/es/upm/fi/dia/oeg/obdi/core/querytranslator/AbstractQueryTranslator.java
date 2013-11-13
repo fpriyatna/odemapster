@@ -1205,17 +1205,17 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 						ZExpression exp3 = SQLUtility.combineExpresions(exps3Aux
 								, Constants.SQL_LOGICAL_OPERATOR_AND());
 
-						if(exps2Aux.isEmpty() && exps2Aux.isEmpty()) {
+						if(exps2Aux.isEmpty() && exps3Aux.isEmpty()) {
 							joinOnExps.add(exp1);
 						} else {
-							ZExpression exp123 = new ZExpression("OR");
+							ZExpression exp123 = new ZExpression(Constants.SQL_LOGICAL_OPERATOR_OR());
 							exp123.addOperand(exp1);
 
-							if(!isTermCInSubjectGP1) {
+							if(!isTermCInSubjectGP1 && exp2 != null) {
 								exp123.addOperand(exp2);	
 							}
 
-							if(!isTermCInSubjectGP2) {
+							if(!isTermCInSubjectGP2 && exp3 != null) {
 								exp123.addOperand(exp3);	
 							}
 

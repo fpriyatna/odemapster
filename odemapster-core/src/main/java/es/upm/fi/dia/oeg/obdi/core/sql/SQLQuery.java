@@ -1,20 +1,17 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import scala.Option;
 import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
@@ -27,7 +24,6 @@ import Zql.ZUtils;
 import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
-import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem.LogicalTableType;
 import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLConstant;
 import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
@@ -661,7 +657,16 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 					ZExpression joinExp = joinQuery.getOnExpression();
 					if(joinExp != null) {
-						fromSQL += " ON " + joinExp;
+						try {
+							System.out.println(fromSQL);
+							System.out.println(joinExp);
+							fromSQL += " ON " + joinExp;	
+						} catch (Exception e) {
+							String errorMessage = e.getMessage();
+							System.out.println(errorMessage);
+							e.printStackTrace();
+						}
+						
 					}
 
 					if(i < fromItems.size() - 1) {
