@@ -1,6 +1,5 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +14,6 @@ import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.morph.base.CollectionUtility;
 import es.upm.fi.dia.oeg.morph.base.Constants;
-import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class SQLUnion implements IQuery {
@@ -28,7 +26,6 @@ public class SQLUnion implements IQuery {
 	private long slice = -1;
 	private long offset = -1;
 	private ZGroupBy groupBy;
-	private Constants constants = new Constants();
 	
 	public SQLUnion() { 
 		this.unionQueries = new Vector<SQLQuery>();
@@ -66,7 +63,7 @@ public class SQLUnion implements IQuery {
 	@Override
 	public String toString() {
 		String result = null;
-		String unionString = "\n" + constants.SQL_KEYWORD_UNION() + "\n" ;
+		String unionString = "\n" + Constants.SQL_KEYWORD_UNION() + "\n" ;
 		
 		CollectionUtility collectionUtility = new CollectionUtility();
 		if(this.unionQueries != null) {
@@ -79,7 +76,7 @@ public class SQLUnion implements IQuery {
 				stringBuffer.append(unionString);
 			}
 			result = collectionUtility.mkString(unionQueriesCollection, 
-					"\n" + constants.SQL_KEYWORD_UNION() + "\n", "", "\n");
+					"\n" + Constants.SQL_KEYWORD_UNION() + "\n", "", "\n");
 		}
 		
 		if(this.orderByConditions != null && this.orderByConditions.size() > 0) {
@@ -89,7 +86,7 @@ public class SQLUnion implements IQuery {
 			}
 			
 			String orderByString = collectionUtility.mkString(orderByConditionsCollection, 
-					", ", constants.SQL_KEYWORD_ORDER_BY() + " ", " ");
+					", ", Constants.SQL_KEYWORD_ORDER_BY() + " ", " ");
 			result = result + orderByString;
 		}
 			
@@ -107,7 +104,7 @@ public class SQLUnion implements IQuery {
 
 	public String generateAlias() {
 		if(this.alias == null) {
-			this.alias = constants.VIEW_ALIAS() + new Random().nextInt(10000);
+			this.alias = Constants.VIEW_ALIAS() + new Random().nextInt(10000);
 		}
 		return this.alias;
 	}

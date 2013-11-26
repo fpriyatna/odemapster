@@ -1,15 +1,11 @@
 package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine;
 
-import org.apache.log4j.Logger;
-
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizerFactory;
 
 public class RunnerFactory {
-	private static Logger logger = Logger.getLogger(RunnerFactory.class);
-
 	public static R2RMLRunner createR2RMLRunnerC(String configurationDirectory, String configurationFile)
 			throws Exception {
 		ConfigurationProperties configurationProperties = 

@@ -120,8 +120,6 @@ implements R2RMLElementVisitor {
 				if(objectMap.getTermMapType() == TermMapType.COLUMN) {
 					if(datatype == null) {
 						String columnName = objectMap.getColumnName();
-						String dbType = this.properties.getDatabaseType();
-						
 						datatype = mapColumnType.get(columnName);
 					}
 				}

@@ -21,7 +21,6 @@ public class R2RMLRefObjectMap {
 	private RDFNode parentTriplesMap;
 	private R2RMLPredicateObjectMap parentPredicateObjectMap;
 	private Collection<R2RMLJoinCondition> joinConditions;
-	private Constants constants = new Constants();
 	
 	//private String alias;
 	
@@ -32,7 +31,7 @@ public class R2RMLRefObjectMap {
 		this.parentPredicateObjectMap = parentPredicateObjectMap;
 		
 		Statement parentTriplesMapStatement = resource.getProperty(
-				constants.R2RML_PARENTTRIPLESMAP_PROPERTY());
+				Constants.R2RML_PARENTTRIPLESMAP_PROPERTY());
 		if(parentTriplesMapStatement != null)  {
 			//this.parentTriplesMap = parentTriplesMapStatement.getObject().toString();
 			this.parentTriplesMap = parentTriplesMapStatement.getObject();
@@ -40,7 +39,7 @@ public class R2RMLRefObjectMap {
 		
 		this.joinConditions = new HashSet<R2RMLJoinCondition>();
 		StmtIterator joinConditionsStatements = resource.listProperties(
-				constants.R2RML_JOINCONDITION_PROPERTY());
+				Constants.R2RML_JOINCONDITION_PROPERTY());
 		if(joinConditionsStatements != null && joinConditionsStatements.hasNext()) {
 			while(joinConditionsStatements.hasNext()) {
 				Statement joinConditionStatement = joinConditionsStatements.nextStatement();
@@ -111,11 +110,10 @@ public class R2RMLRefObjectMap {
 	}
 
 	public static boolean isRefObjectMap(Resource resource) {
-		Constants constants = new Constants();
 		
 		boolean hasParentTriplesMap = false;
 		Statement parentTriplesMapStatement = resource.getProperty(
-				constants.R2RML_PARENTTRIPLESMAP_PROPERTY());
+				Constants.R2RML_PARENTTRIPLESMAP_PROPERTY());
 		if(parentTriplesMapStatement != null)  {
 			hasParentTriplesMap = true;
 		}

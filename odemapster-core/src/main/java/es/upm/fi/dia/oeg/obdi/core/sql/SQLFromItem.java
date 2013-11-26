@@ -12,7 +12,6 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Constants constants = new Constants();
 	
 	public enum LogicalTableType {TABLE_NAME, QUERY_STRING};
 	
@@ -37,7 +36,7 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	public String generateAlias() {
 		//return R2OConstants.VIEW_ALIAS + this.hashCode();
 		if(super.getAlias() == null) {
-			super.setAlias(constants.VIEW_ALIAS() + new Random().nextInt(10000));
+			super.setAlias(Constants.VIEW_ALIAS() + new Random().nextInt(10000));
 		}
 		return super.getAlias();
 	}

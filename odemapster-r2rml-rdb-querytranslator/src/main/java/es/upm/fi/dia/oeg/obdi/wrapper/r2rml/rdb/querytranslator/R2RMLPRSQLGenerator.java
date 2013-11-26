@@ -10,8 +10,10 @@ import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.SPARQLUtility;
 import es.upm.fi.dia.oeg.morph.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
@@ -30,7 +32,6 @@ import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLPRSQLGenerator.class);
 	//private R2RMLQueryTranslator owner;
-	private Constants constants = new Constants();
 	
 	public R2RMLPRSQLGenerator(AbstractQueryTranslator owner) {
 		super(owner);
@@ -50,15 +51,19 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 			, NameGenerator nameGenerator, AbstractConceptMapping cmSubject
 			) throws QueryTranslationException {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-		Collection<ZSelectItem> parentResult = super.genPRSQLSubject(tp, alphaResult
-				, betaGenerator, nameGenerator, cmSubject);
-		result.addAll(parentResult);
-		
-		Node subject = tp.getSubject();
-		Collection<ZSelectItem> selectItemsMappingId = this.genPRSQLSubjectMappingId(subject, cmSubject);
-		if(selectItemsMappingId != null) {
-			result.addAll(selectItemsMappingId);
+		Node tpSubject = tp.getSubject();
+		if(!SPARQLUtility.isBlankNode(tpSubject)) {
+			Collection<ZSelectItem> parentResult = super.genPRSQLSubject(tp, alphaResult
+					, betaGenerator, nameGenerator, cmSubject);
+			result.addAll(parentResult);
+			
+			Node subject = tp.getSubject();
+			Collection<ZSelectItem> selectItemsMappingId = this.genPRSQLSubjectMappingId(subject, cmSubject);
+			if(selectItemsMappingId != null) {
+				result.addAll(selectItemsMappingId);
+			}			
 		}
+
 		
 		return result;
 		//ZSelectItem selectItemSubject = betaGenerator.calculateBetaSubject(cmSubject);
@@ -103,47 +108,49 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 			, AbstractConceptMapping cmSubject, String predicateURI) {
 		Collection<ZSelectItem> childResult = new Vector<ZSelectItem>();
 		
-		if(object.isVariable()) {
+		if(object.isVariable() && !SPARQLUtility.isBlankNode(object)) {
 			
 			Collection<AbstractPropertyMapping> propertyMappings = 
 					cmSubject.getPropertyMappings(predicateURI);
-			if(propertyMappings == null) {
+			if(propertyMappings == null || propertyMappings.isEmpty()) {
 				logger.warn("no property mappings defined for predicate: " + predicateURI);
 			} else if (propertyMappings.size() > 1) {
 				logger.warn("multiple property mappings defined for predicate: " + predicateURI);
-			}
-			AbstractPropertyMapping propertyMapping = propertyMappings.iterator().next();
-			if(propertyMapping instanceof R2RMLPredicateObjectMap) {
-				R2RMLPredicateObjectMap pom = (R2RMLPredicateObjectMap) propertyMapping;
-				R2RMLObjectMap om = pom.getObjectMap();
-				int mappingHashCode = -1;
-				if(om != null) {
-					mappingHashCode = om.hashCode();
-					this.getOwner().getMapHashCodeMapping().put(mappingHashCode, om);
-				} else {
-					R2RMLRefObjectMap rom = pom.getRefObjectMap();
-					if(rom != null) {
-						mappingHashCode = rom.hashCode();
-						this.getOwner().getMapHashCodeMapping().put(mappingHashCode, rom);
+			} else {
+				AbstractPropertyMapping propertyMapping = propertyMappings.iterator().next();
+				if(propertyMapping instanceof R2RMLPredicateObjectMap) {
+					R2RMLPredicateObjectMap pom = (R2RMLPredicateObjectMap) propertyMapping;
+					R2RMLObjectMap om = pom.getObjectMap();
+					int mappingHashCode = -1;
+					if(om != null) {
+						mappingHashCode = om.hashCode();
+						this.getOwner().getMapHashCodeMapping().put(mappingHashCode, om);
+					} else {
+						R2RMLRefObjectMap rom = pom.getRefObjectMap();
+						if(rom != null) {
+							mappingHashCode = rom.hashCode();
+							this.getOwner().getMapHashCodeMapping().put(mappingHashCode, rom);
+						}
 					}
-				}
-				
-				if(mappingHashCode != -1) {
-					ZConstant mappingHashCodeConstant = new ZConstant(
-							mappingHashCode + "", ZConstant.NUMBER);
-					String dbType = this.getOwner().getDatabaseType();
-//					SQLSelectItem mappingSelectItem = new SQLSelectItem();
-//					mappingSelectItem.setExpression(mappingHashCodeConstant);
-//					mappingSelectItem.setDbType(dbType);
-//					mappingSelectItem.setColumnType(Constants.POSTGRESQL_COLUMN_TYPE_INTEGER());
-					ZSelectItem mappingSelectItem = MorphSQLSelectItem.apply(
-							mappingHashCodeConstant, dbType, Constants.POSTGRESQL_COLUMN_TYPE_INTEGER());
-					String mappingSelectItemAlias = Constants.PREFIX_MAPPING_ID() + object.getName();
-					mappingSelectItem.setAlias(mappingSelectItemAlias);
+					
+					if(mappingHashCode != -1) {
+						ZConstant mappingHashCodeConstant = new ZConstant(
+								mappingHashCode + "", ZConstant.NUMBER);
+						String dbType = this.getOwner().getDatabaseType();
+//						SQLSelectItem mappingSelectItem = new SQLSelectItem();
+//						mappingSelectItem.setExpression(mappingHashCodeConstant);
+//						mappingSelectItem.setDbType(dbType);
+//						mappingSelectItem.setColumnType(Constants.POSTGRESQL_COLUMN_TYPE_INTEGER());
+						ZSelectItem mappingSelectItem = MorphSQLSelectItem.apply(
+								mappingHashCodeConstant, dbType, Constants.POSTGRESQL_COLUMN_TYPE_INTEGER());
+						String mappingSelectItemAlias = Constants.PREFIX_MAPPING_ID() + object.getName();
+						mappingSelectItem.setAlias(mappingSelectItemAlias);
 
-					childResult.add(mappingSelectItem);
-				}
+						childResult.add(mappingSelectItem);
+					}
+				}				
 			}
+
 		}
 		
 		return childResult;
@@ -157,15 +164,33 @@ public class R2RMLPRSQLGenerator extends AbstractPRSQLGenerator {
 			)
 			throws QueryTranslationException {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
-		Collection<ZSelectItem> parentResult = super.genPRSQLObject(tp, alphaResult, betaGenerator
-				, nameGenerator, cmSubject, predicateURI, columnType);
-		result.addAll(parentResult);
 		
-		Node object = tp.getObject();
-		Collection<ZSelectItem> childResult = this.genPRSQLObjectMappingId(object, cmSubject, predicateURI);
-		if(childResult != null) {
-			result.addAll(childResult);
+		Node tpObject = tp.getObject();
+		if(!SPARQLUtility.isBlankNode(tpObject)) {
+			if(RDF.type.getURI().equalsIgnoreCase(predicateURI)) {
+				R2RMLTriplesMap tm = (R2RMLTriplesMap) cmSubject;
+				Collection<String> classURIs = tm.getSubjectMap().getClassURIs();
+				for(String classURI : classURIs) {
+					ZConstant zConstant = new ZConstant(classURI, ZConstant.STRING);
+					ZSelectItem selectItem = new ZSelectItem();
+					selectItem.setExpression(zConstant);
+					String selectItemAlias = nameGenerator.generateName(tpObject);
+					selectItem.setAlias(selectItemAlias);
+					result.add(selectItem);
+				}
+			} else {
+				Collection<ZSelectItem> parentResult = super.genPRSQLObject(tp, alphaResult, betaGenerator
+						, nameGenerator, cmSubject, predicateURI, columnType);
+				result.addAll(parentResult);
+				
+				Collection<ZSelectItem> childResult = this.genPRSQLObjectMappingId(tpObject, cmSubject, predicateURI);
+				if(childResult != null) {
+					result.addAll(childResult);
+				}				
+			}
+			
 		}
+
 		return result;
 	}
 }

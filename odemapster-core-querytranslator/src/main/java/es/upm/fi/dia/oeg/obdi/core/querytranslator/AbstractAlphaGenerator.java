@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
-
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -16,7 +14,7 @@ import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
 
 public abstract class AbstractAlphaGenerator {
-	private static Logger logger = Logger.getLogger(AbstractAlphaGenerator.class);
+//	private static Logger logger = Logger.getLogger(AbstractAlphaGenerator.class);
 	
 	protected AbstractQueryTranslator owner; 
 	protected boolean ignoreRDFTypeStatement = false;

@@ -11,7 +11,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 
 public abstract class AbstractUnfolder {
 	//protected ConfigurationProperties properties;
-	protected String dbType = new Constants().DATABASE_MYSQL();
+	protected String dbType = Constants.DATABASE_MYSQL();
 	
 	protected AbstractUnfolder() {
 		ZUtils.addCustomFunction("concat", 2);

@@ -34,7 +34,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(SQLQuery.class);
-	private Constants constants = new Constants();
 	
 	private String alias;
 
@@ -229,14 +228,14 @@ public class SQLQuery extends ZQuery implements IQuery {
 					selectItemName = selectItem.getAlias();
 				}
 
-				if(selectItemName.startsWith(constants.PREFIX_VAR())) {
+				if(selectItemName.startsWith(Constants.PREFIX_VAR())) {
 					String newSelectItemAlias = 
-							selectItemName.substring(constants.PREFIX_VAR().length(), selectItemName.length());
+							selectItemName.substring(Constants.PREFIX_VAR().length(), selectItemName.length());
 					selectItem.setAlias(newSelectItemAlias);
 					selectItems2.add(selectItem);					
-				} else if(selectItemName.startsWith(constants.PREFIX_LIT())) {
+				} else if(selectItemName.startsWith(Constants.PREFIX_LIT())) {
 					//do nothing
-				} else if(selectItemName.startsWith(constants.PREFIX_URI())) {
+				} else if(selectItemName.startsWith(Constants.PREFIX_URI())) {
 					//do nothing
 				} else {
 					selectItems2.add(selectItem);
@@ -540,7 +539,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 	public String generateAlias() {
 		//return R2OConstants.VIEW_ALIAS + this.hashCode();
 		if(this.alias == null) {
-			this.alias = constants.VIEW_ALIAS() + new Random().nextInt(10000);
+			this.alias = Constants.VIEW_ALIAS() + new Random().nextInt(10000);
 		}
 		return this.alias;
 	}
@@ -1077,11 +1076,10 @@ public class SQLQuery extends ZQuery implements IQuery {
 	public static SQLQuery create(Collection<ZSelectItem> selectItems
 			, SQLLogicalTable leftTable, SQLLogicalTable rightTable 
 			, String joinType, ZExpression oldJoinExpression, String databasetype) {
-		Constants constants = new Constants();
 		
 		SQLQuery result = null;
 		boolean proceed = true;
-		if(constants.JOINS_TYPE_LEFT().equals(joinType) && rightTable instanceof SQLQuery) {
+		if(Constants.JOINS_TYPE_LEFT().equals(joinType) && rightTable instanceof SQLQuery) {
 			SQLQuery rightTableSQLQuery = (SQLQuery) rightTable;
 			Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
 			if(rightTableFromItems.size() != 1) {
@@ -1145,7 +1143,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 				String logicalTableAlias = rightTable.getAlias();
 				Vector<ZFromItem> rightTableFromItems = rightTableSQLQuery.getFrom();
 				
-				Collection<ZExp> addedExpressions = new Vector<ZExp>();
 				Collection<SQLJoinTable> joinTables = SQLQuery.generateJoinTables(rightTableFromItems, addedTableAlias, joinType
 						, newJoinExpression, newWhereExpression, logicalTableAlias);
 				
@@ -1351,10 +1348,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 			Collection<String> addedTableAlias, String joinType, ZExpression joinExpression,
 			ZExpression whereExpression, String logicalTableAlias, Collection<ZExp> addedExpressions) {
 		Collection<SQLJoinTable> joinTables = new LinkedList<SQLJoinTable>();
-		//Collection<ZFromItem> leftOverFromItems = new Vector<ZFromItem>();
-		//Collection<SQLJoinTable> leftOverJoinTables = new Vector<SQLJoinTable>();
-		Constants constants = new Constants();
-		
 		for(ZFromItem rightTableFromItem : fromItems) {
 			SQLJoinTable joinTable = null;
 
@@ -1381,7 +1374,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 							whereExpression, rightTableAlias);
 					if(relevantJoinExpressions.isEmpty() && relevantWhereExpression.isEmpty()) {
 						joinTable = new SQLJoinTable(rightTableLogicalTable, joinType
-								, constants.SQL_EXPRESSION_TRUE());
+								, Constants.SQL_EXPRESSION_TRUE());
 						
 						//addedTableAlias.remove(rightTableAlias);
 						//leftOverFromItems.add(rightTableFromItem);
@@ -1398,7 +1391,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 						combinedExpressionCollection.addAll(relevantWhereExpression);
 						
 						ZExpression combinedExpressions = SQLUtility.combineExpresions(
-								combinedExpressionCollection, constants.SQL_LOGICAL_OPERATOR_AND());
+								combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND());
 						joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, combinedExpressions);	
 					}
 
@@ -1429,7 +1422,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 				combinedExpressionCollection.addAll(relevantJoinExpression);
 				combinedExpressionCollection.addAll(relevantWhereExpression);
 				ZExpression combinedExpressions = SQLUtility.combineExpresions(
-						combinedExpressionCollection, constants.SQL_LOGICAL_OPERATOR_AND());
+						combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND());
 				joinTable.addOnExpression(combinedExpressions);	
 			}
 
@@ -1469,8 +1462,6 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 	public void setGroupBy(ZGroupBy newGroupBy) {
-		ZGroupBy oldGroupBy = this.getGroupBy();
-		oldGroupBy = null;
 		this.addGroupBy(newGroupBy);
 	}
 

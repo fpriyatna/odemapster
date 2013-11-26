@@ -1,15 +1,10 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
-import Zql.ZConstant;
 import Zql.ZExp;
-import Zql.ZExpression;
 import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;

@@ -6,11 +6,10 @@ import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.exception.R2RMLInvalidTermMapException;
 
 public class R2RMLGraphMap extends R2RMLTermMap {
-	private Constants constants = new Constants();
 	
 	public R2RMLGraphMap(String constantValue) {
 		super(TermMapPosition.GRAPH, constantValue);
-		super.setTermType(constants.R2RML_LITERAL_URI());
+		super.setTermType(Constants.R2RML_LITERAL_URI());
 	}
 	
 	public R2RMLGraphMap(Resource resource, R2RMLTriplesMap owner) throws R2RMLInvalidTermMapException {

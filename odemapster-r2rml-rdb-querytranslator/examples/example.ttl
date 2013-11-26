@@ -29,6 +29,11 @@
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/name> ]; 
       rr:objectMap    [ rr:termType rr:Literal; rr:column "name"; ]; 
     ];
+
+	rr:predicateObjectMap [ 
+      rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/fullname> ]; 
+      rr:objectMap    [ rr:termType rr:Literal; rr:template "{name} {suffix}"; ]; 
+    ];
 	
     rr:predicateObjectMap [ 
       rr:predicateMap [ rr:constant <http://mappingpedia.linkeddata.es/vocabulary/webpage> ]; 

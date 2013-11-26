@@ -89,16 +89,12 @@ public class SQLUtility {
 //	}
 
 	public boolean isSubqueryEliminationPossible(SQLLogicalTable leftTable, SQLLogicalTable rightTable) {
-		boolean leftTablePossible;
 		if(leftTable instanceof SQLFromItem) {
-			leftTablePossible = true;
 		} else if(leftTable instanceof SQLQuery) {
 			SQLQuery leftTableSQLQuery = (SQLQuery) leftTable;
 			Vector<ZFromItem> fromItems = leftTableSQLQuery.getFrom();
-			leftTablePossible = true;
 			for(ZFromItem fromItem : fromItems) {
 				if(!(fromItem instanceof SQLFromItem)) {
-					leftTablePossible = false;
 				}
 			}
 		} else {

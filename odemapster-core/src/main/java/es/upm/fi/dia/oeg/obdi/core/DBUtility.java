@@ -52,7 +52,6 @@ public class DBUtility {
 
 		//st.setFetchSize(1000);
 		//		Statement st = conn.createStatement();
-		Constants constants = new Constants();
 		
 		Statement stmt = null;
 		try {
@@ -62,7 +61,7 @@ public class DBUtility {
 			
 			DatabaseMetaData dbmd = conn.getMetaData();
 			String dbProductName = dbmd.getDatabaseProductName();
-			if(constants.DATABASE_MYSQL().equalsIgnoreCase(dbProductName)) {
+			if(Constants.DATABASE_MYSQL().equalsIgnoreCase(dbProductName)) {
 				stmt.setFetchSize(Integer.MIN_VALUE);	
 			}
 		} catch(Exception e) {

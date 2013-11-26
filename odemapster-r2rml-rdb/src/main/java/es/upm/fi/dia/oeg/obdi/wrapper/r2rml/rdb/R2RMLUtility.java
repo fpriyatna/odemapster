@@ -13,13 +13,11 @@ import org.apache.log4j.Logger;
 import Zql.ZConstant;
 import Zql.ZExpression;
 import Zql.ZQuery;
-import Zql.ZSelectItem;
 import Zql.ZStatement;
 import Zql.ZqlParser;
 import es.upm.fi.dia.oeg.morph.base.RegexUtility;
 import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLJoinCondition;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLRefObjectMap;
 
 public class R2RMLUtility {
 	private static Logger logger = Logger.getLogger(R2RMLUtility.class);
@@ -35,7 +33,8 @@ public class R2RMLUtility {
 		
 		RegexUtility regexUtility = new RegexUtility();
 		Collection<String> attributes = regexUtility.getTemplateColumns(template, true);
-
+		System.out.println("attributes = " + attributes);
+		
 		String template2 = R2RMLUtility.replaceTokens(template, replacements);
 		System.out.println("template2 = " + template2);
 		
@@ -132,11 +131,11 @@ public class R2RMLUtility {
 //		return result;
 //	}
 	
-	private static Collection<ZSelectItem> getDatabaseColumns(
-			R2RMLRefObjectMap refObjectMap) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	private static Collection<ZSelectItem> getDatabaseColumns(
+//			R2RMLRefObjectMap refObjectMap) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 
 //	public static Collection<ZSelectItem> getDatabaseColumns(R2RMLTermMap termMap) {

@@ -2,10 +2,8 @@ package es.upm.fi.dia.oeg.obdi.core.engine;
 
 //import java.sql.ResultSetMetaData;
 //import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 

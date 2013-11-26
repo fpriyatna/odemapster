@@ -1,15 +1,13 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
-import org.apache.log4j.Logger;
-
 import Zql.ZExpression;
 import Zql.ZFromItem;
 import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 
+@SuppressWarnings("serial")
 public class SQLJoinTable extends ZFromItem {
-	private static Logger logger = Logger.getLogger(SQLJoinTable.class);
-	private Constants constants = new Constants();
+//	private static Logger logger = Logger.getLogger(SQLJoinTable.class);
 	
 	private SQLLogicalTable joinSource;
 	private String joinType;

@@ -3,22 +3,26 @@
     <head>
         <variable name="student"/>
         <variable name="sport"/>
+        <variable name="sportId"/>
         <variable name="sportName"/>
     </head>
     <results>
         <result>
             <binding name="student">http://mappingpedia.linkeddata.es/resources/Person/B1</binding>
             <binding name="sport">http://mappingpedia.linkeddata.es/resources/Sport/100</binding>
+            <binding name="sportId">100</binding>
             <binding name="sportName">Tennis</binding>
         </result>
         <result>
             <binding name="student">http://mappingpedia.linkeddata.es/resources/Person/B2</binding>
             <binding name="sport">http://mappingpedia.linkeddata.es/resources/Sport/200</binding>
+            <binding name="sportId">200</binding>
             <binding name="sportName">Chess</binding>
         </result>
         <result>
             <binding name="student">http://mappingpedia.linkeddata.es/resources/Person/B3</binding>
             <binding name="sport">http://mappingpedia.linkeddata.es/resources/Sport/300</binding>
+            <binding name="sportId">300</binding>
             <binding name="sportName">Soccer</binding>
         </result>
     </results>

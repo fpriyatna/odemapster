@@ -22,7 +22,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementVisitor;
 
 public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements R2RMLElement {
 	private static Logger logger = Logger.getLogger(R2RMLLogicalTable.class);
-	private Constants constants = new Constants();
 	
 	LogicalTableType logicalTableType;
 	private String alias;
@@ -107,17 +106,16 @@ public abstract class R2RMLLogicalTable extends AbstractLogicalTable implements 
 	}
 
 	static R2RMLLogicalTable parse(Resource resource, R2RMLTriplesMap owner) throws Exception {
-		Constants constants = new Constants();
 		
 		R2RMLLogicalTable logicalTable = null; 
 		Statement tableNameStatement = resource.getProperty(
-				constants.R2RML_TABLENAME_PROPERTY());
+				Constants.R2RML_TABLENAME_PROPERTY());
 		if(tableNameStatement != null) {
 			String tableName = tableNameStatement.getObject().toString();
 			logicalTable = new R2RMLTable(tableName, owner);
 		} else {
 			Statement sqlQueryStatement = resource.getProperty(
-					constants.R2RML_SQLQUERY_PROPERTY());
+					Constants.R2RML_SQLQUERY_PROPERTY());
 			if(sqlQueryStatement == null) {
 				logger.error("Invalid logical table defined : " + resource);
 			}

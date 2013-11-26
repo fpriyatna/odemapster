@@ -32,7 +32,6 @@ public class R2RMLTermMap implements R2RMLElement
 , IConstantTermMap, IColumnTermMap, ITemplateTermMap {
 	private static Logger logger = Logger.getLogger(R2RMLTermMap.class);
 	public enum TermMapPosition {SUBJECT, PREDICATE, OBJECT, GRAPH}
-	private Constants constants = new Constants();
 	
 	private String termType;//IRI, BlankNode, or Literal
 	private String languageTag;
@@ -56,7 +55,7 @@ public class R2RMLTermMap implements R2RMLElement
 	//for template type TermMap
 	private String templateString;
 
-	private boolean isNullable = true;
+//	private boolean isNullable = true;
 
 	R2RMLTermMap(Resource resource, TermMapPosition termMapPosition, R2RMLTriplesMap owner) 
 			throws R2RMLInvalidTermMapException {
@@ -78,12 +77,12 @@ public class R2RMLTermMap implements R2RMLElement
 			}
 		}
 
-		Statement constantStatement = resource.getProperty(constants.R2RML_CONSTANT_PROPERTY());
+		Statement constantStatement = resource.getProperty(Constants.R2RML_CONSTANT_PROPERTY());
 		if(constantStatement != null) {
 			this.termMapType = TermMapType.CONSTANT;
 			this.constantValue = constantStatement.getObject().toString();
 		} else {
-			Statement columnStatement = resource.getProperty(constants.R2RML_COLUMN_PROPERTY());
+			Statement columnStatement = resource.getProperty(Constants.R2RML_COLUMN_PROPERTY());
 			if(columnStatement != null) {
 				this.termMapType = TermMapType.COLUMN;
 				this.columnName = columnStatement.getObject().toString();
@@ -91,33 +90,30 @@ public class R2RMLTermMap implements R2RMLElement
 					ColumnMetaData cmd = columnsMetaData.get(this.columnName);
 					if(cmd != null) {
 						this.columnTypeName = cmd.dataType();
-						this.isNullable = cmd.isNullable();
+//						this.isNullable = cmd.isNullable();
 					}
 				}
 			} else {
-				Statement templateStatement = resource.getProperty(constants.R2RML_TEMPLATE_PROPERTY());
+				Statement templateStatement = resource.getProperty(Constants.R2RML_TEMPLATE_PROPERTY());
 				if(templateStatement != null) {
 					this.termMapType = TermMapType.TEMPLATE;
 					this.templateString = templateStatement.getObject().toString();
 
 					Collection<String> pkColumnStrings = this.getTemplateColumns();
 					
-					boolean isNullableAux = false;
 					for(String pkColumnString : pkColumnStrings) {
 						if(columnsMetaData != null) {
 							ColumnMetaData cmd = columnsMetaData.get(pkColumnString);
 							if(cmd != null) {
 								this.columnTypeName = cmd.dataType();
 								if(cmd.isNullable()) {
-									isNullableAux = true;
 								}
 							} else {
 								logger.debug("metadata not found for: " + pkColumnString);
-								isNullableAux = true;
 							}
 						}
 					}
-					this.isNullable = isNullableAux;
+//					this.isNullable = isNullableAux;
 				} else {
 					String termMapType;
 					if(this instanceof R2RMLSubjectMap) {
@@ -138,17 +134,17 @@ public class R2RMLTermMap implements R2RMLElement
 			}
 		}
 
-		Statement datatypeStatement = resource.getProperty(constants.R2RML_DATATYPE_PROPERTY());
+		Statement datatypeStatement = resource.getProperty(Constants.R2RML_DATATYPE_PROPERTY());
 		if(datatypeStatement != null) {
 			this.datatype = datatypeStatement.getObject().toString();
 		}
 
-		Statement languageStatement = resource.getProperty(constants.R2RML_LANGUAGE_PROPERTY());
+		Statement languageStatement = resource.getProperty(Constants.R2RML_LANGUAGE_PROPERTY());
 		if(languageStatement != null) {
 			this.languageTag = languageStatement.getObject().toString();
 		}
 
-		Statement termTypeStatement = resource.getProperty(constants.R2RML_TERMTYPE_PROPERTY());
+		Statement termTypeStatement = resource.getProperty(Constants.R2RML_TERMTYPE_PROPERTY());
 		if(termTypeStatement == null) {
 			this.termType = this.getDefaultTermType();
 		} else {
@@ -177,13 +173,14 @@ public class R2RMLTermMap implements R2RMLElement
 		String result;
 
 		if(this instanceof R2RMLObjectMap) {
-			if(this.termMapType == TermMapType.COLUMN || this.languageTag != null || this.datatype != null) {
-				result = constants.R2RML_LITERAL_URI();
+			if(this.termMapType == TermMapType.COLUMN || this.languageTag != null 
+					|| this.datatype != null) {
+				result = Constants.R2RML_LITERAL_URI();
 			} else { 
-				result = constants.R2RML_IRI_URI();
+				result = Constants.R2RML_IRI_URI();
 			}
 		} else {
-			result = constants.R2RML_IRI_URI(); 
+			result = Constants.R2RML_IRI_URI(); 
 		}
 
 		return result;
@@ -359,7 +356,7 @@ public class R2RMLTermMap implements R2RMLElement
 
 
 				if(databaseValue != null) {
-					if(constants.R2RML_IRI_URI().equals(this.termType)) {
+					if(Constants.R2RML_IRI_URI().equals(this.termType)) {
 						if(this.configurationProperties.isEncodeUnsafeChars()) {
 							databaseValue = ODEMapsterUtility.encodeUnsafeChars(databaseValue);
 						}
@@ -414,7 +411,7 @@ public class R2RMLTermMap implements R2RMLElement
 	//	}
 
 	public boolean isBlankNode() {
-		if(constants.R2RML_BLANKNODE_URI().equals(this.getTermType())) {
+		if(Constants.R2RML_BLANKNODE_URI().equals(this.getTermType())) {
 			return true;
 		} else {
 			return false;

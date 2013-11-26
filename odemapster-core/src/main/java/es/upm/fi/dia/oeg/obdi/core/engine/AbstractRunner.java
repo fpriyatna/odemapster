@@ -23,7 +23,6 @@ import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 
 public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
-	private Constants constants = new Constants();
 	public ConfigurationProperties configurationProperties;
 	protected Connection conn;
 	//protected AbstractParser parser;
@@ -125,7 +124,7 @@ public abstract class AbstractRunner {
 			//query translator
 			if(this.queryTranslator == null) {
 				if(this.queryTranslatorClassName == null) {
-					this.queryTranslatorClassName = constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
+					this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
 				}
 				this.buildQueryTranslator();
 			}
@@ -133,7 +132,7 @@ public abstract class AbstractRunner {
 			//query result writer
 			if(this.queryResultWriter == null) {
 				if(this.queryResultWriterClassName == null) {
-					this.queryResultWriterClassName = constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT();					
+					this.queryResultWriterClassName = Constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT();					
 				}
 				this.buildQueryResultWriter();
 			}
@@ -141,7 +140,7 @@ public abstract class AbstractRunner {
 			//query evaluator
 			if(this.dataSourceReader == null) {
 				if(this.dataSourceReaderClassName == null) {
-					this.dataSourceReaderClassName = constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT();
+					this.dataSourceReaderClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT();
 				}
 				this.buildDataSourceReader();
 			}
@@ -370,7 +369,7 @@ public abstract class AbstractRunner {
 
 		String rdfLanguage = this.configurationProperties.getRdfLanguage();
 		if(rdfLanguage == null) {
-			rdfLanguage = constants.OUTPUT_FORMAT_RDFXML();
+			rdfLanguage = Constants.OUTPUT_FORMAT_RDFXML();
 		}
 
 		//preparing output file
@@ -434,9 +433,9 @@ public abstract class AbstractRunner {
 	}
 
 
-	private void setDataTranslator(AbstractDataTranslator dataTranslator) {
-		this.dataTranslator = dataTranslator;
-	}
+//	private void setDataTranslator(AbstractDataTranslator dataTranslator) {
+//		this.dataTranslator = dataTranslator;
+//	}
 
 	//	public void setParser(AbstractParser parser) {
 	//		this.parser = parser;
@@ -515,7 +514,7 @@ public abstract class AbstractRunner {
 				outputFileName = this.configurationProperties.getOutputFilePath();
 			}
 			if(outputFileName == null) {
-				outputFileName = constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT(); 
+				outputFileName = Constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT(); 
 			}
 			this.queryResultWriterOutput = outputFileName;
 		}

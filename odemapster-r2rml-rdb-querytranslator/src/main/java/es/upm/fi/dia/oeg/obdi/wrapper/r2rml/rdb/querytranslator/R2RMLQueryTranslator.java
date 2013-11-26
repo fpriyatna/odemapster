@@ -16,8 +16,6 @@ import org.apache.log4j.Logger;
 
 import Zql.ZConstant;
 import Zql.ZExp;
-import Zql.ZExpression;
-import Zql.ZSelectItem;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -25,7 +23,6 @@ import com.hp.hpl.jena.graph.Triple;
 import es.upm.fi.dia.oeg.morph.base.CollectionUtility;
 import es.upm.fi.dia.oeg.morph.base.Constants;
 import es.upm.fi.dia.oeg.morph.base.RegexUtility;
-import es.upm.fi.dia.oeg.morph.querytranslator.NameGenerator;
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractResultSet;
@@ -36,19 +33,10 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractPropertyMapping;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractAlphaGenerator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractBetaGenerator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractCondSQLGenerator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractPRSQLGenerator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.AbstractQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.AlphaResult;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.CondSQLResult;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationException;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLFromItem;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLJoinTable;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLLogicalTable;
-import es.upm.fi.dia.oeg.obdi.core.sql.SQLQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.R2RMLUtility;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLElementUnfoldVisitor;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
@@ -59,7 +47,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 
 public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Logger logger = Logger.getLogger(R2RMLQueryTranslator.class);
-	private Constants constants = new Constants();
 	
 	private static Map<Triple, String> mapTripleAlias= new HashMap<Triple, String>();
 	private Map<String, Matcher> mapTemplateMatcher = new HashMap<String, Matcher>();
@@ -104,8 +91,6 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	@Override
 	protected List<ZExp> transIRI(Node node) {
 		List<ZExp> result = new LinkedList<ZExp>();
-		ZExp resultAux = null;
-
 		Collection<AbstractConceptMapping> cms = super.mapInferredTypes.get(node);
 		R2RMLTriplesMap cm = (R2RMLTriplesMap) cms.iterator().next();
 
@@ -195,10 +180,9 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 
 						if(termMapType == TermMapType.TEMPLATE) {
 							String templateString = termMap.getTemplateString();
-							List<String> templateColumns = termMap.getTemplateColumns();
 							Matcher matcher = this.mapTemplateMatcher.get(templateString);
 							if(matcher == null) {
-								Pattern pattern = Pattern.compile(constants.R2RML_TEMPLATE_PATTERN());
+								Pattern pattern = Pattern.compile(Constants.R2RML_TEMPLATE_PATTERN());
 								matcher = pattern.matcher(templateString);
 								this.mapTemplateMatcher.put(templateString, matcher);
 							}
@@ -248,9 +232,9 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 					if(result != null) {
 						String termMapType = termMap.getTermType();
 						if(termMapType != null) {
-							if(termMapType.equals(constants.R2RML_IRI_URI())) {
+							if(termMapType.equals(Constants.R2RML_IRI_URI())) {
 								result = ODEMapsterUtility.encodeURI(result);
-							} else if(termMapType.equals(constants.R2RML_LITERAL_URI())) {
+							} else if(termMapType.equals(Constants.R2RML_LITERAL_URI())) {
 								result = ODEMapsterUtility.encodeLiteral(result);
 							}
 						}							

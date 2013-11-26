@@ -34,104 +34,13 @@ extends Rewrite {
 		
 		op match {
 		  	case bgp:OpBGP => {
-				val bgpTriples = bgp.getPattern().getList().toList;
-				val triplesGrouped = SPARQLUtility.groupTriplesBySubject(bgpTriples);
-				
-				val basicPattern = {
-					if(this.reorderSTG) {
-						val triplesReordered = this.reorderSTGs(triplesGrouped.toList);
-						BasicPattern.wrap(triplesReordered);
-					} else {
-						BasicPattern.wrap(triplesGrouped);
-					}				  
-				}
-
-				result = new OpBGP(basicPattern);
+		  		result = this.rewriteBGP(bgp);
 			} 
 			case opJoin:OpJoin => { // AND pattern
-				val leftChild = opJoin.getLeft();
-				val rightChild = opJoin.getRight();
-				val leftChildRewritten = this.rewrite(leftChild);
-				val rightChildRewritten = this.rewrite(rightChild);
-				if(leftChildRewritten.isInstanceOf[OpBGP] && rightChildRewritten.isInstanceOf[OpBGP]) {
-					val leftChildRewrittenBGP = leftChildRewritten.asInstanceOf[OpBGP];
-					val rightChildRewrittenBGP = rightChildRewritten.asInstanceOf[OpBGP];
-//					leftChildRewrittenBGP.getPattern().addAll(rightChildRewrittenBGP.getPattern());
-//					result = leftChildRewrittenBGP;
-					
-					val leftChildRewrittenBGPTriplesList = leftChildRewrittenBGP.getPattern().getList().toList;
-					val rightChildRewrittenBGPTriplesList = rightChildRewrittenBGP.getPattern().getList().toList;
-					val newTriplesList = leftChildRewrittenBGPTriplesList ::: rightChildRewrittenBGPTriplesList; 
-					val newBasicPattern = BasicPattern.wrap(newTriplesList);
-					result = new OpBGP(newBasicPattern);
-				} else {
-					result = OpJoin.create(leftChildRewritten, rightChildRewritten);
-				}
-	
+			  result = this.rewriteJoin(opJoin);
 			} 
 			case opLeftJoin:OpLeftJoin => { //OPT pattern
-				val exprList = opLeftJoin.getExprs();
-				val leftChild = opLeftJoin.getLeft();
-				val rightChild = opLeftJoin.getRight();
-				val leftChildRewritten = this.rewrite(leftChild);
-				val rightChildRewritten = this.rewrite(rightChild);
-				
-				if(leftChildRewritten.isInstanceOf[OpBGP] && rightChildRewritten.isInstanceOf[OpBGP]) {
-					val leftChildRewrittenBGP = leftChildRewritten.asInstanceOf[OpBGP];
-					val rightChildRewrittenBGP = rightChildRewritten.asInstanceOf[OpBGP];
-					val rightBasicPattern = rightChildRewrittenBGP.getPattern();
-					val rightBasicPatternSize = rightBasicPattern.size();
-					if(rightBasicPatternSize == 1) {
-						logger.debug("Optional pattern with only one triple pattern.");
-						
-						val rightTp = rightChildRewrittenBGP.getPattern().get(0);
-						val rightTpSubject = rightTp.getSubject();
-						val rightTpPredicate = rightTp.getPredicate();
-						val rightTpObject = rightTp.getObject();
-						
-						val leftChildTriples = leftChildRewrittenBGP.getPattern().getList().toList;
-						val leftChildSubjects = SPARQLUtility.getSubjects(leftChildTriples);
-						val leftChildObjects = SPARQLUtility.getObjects(leftChildTriples);
-						
-						if(leftChildSubjects.contains(rightTpSubject) 
-						    && !leftChildObjects.contains(rightTpObject)) {
-							
-							val rightEtp = new MorphTriple(rightTpSubject, rightTpPredicate
-							    , rightTpObject, true);
-							val leftChildRewrittenPattern = leftChildRewrittenBGP.getPattern();
-							//leftChildRewrittenPattern.add(rightEtp);
-							val leftChildRewrittenTPList = leftChildRewrittenPattern.getList().toList;
-							val newLeftChildRewrittenTPList = leftChildRewrittenTPList ::: List(rightEtp);
-							
-							//val bgpGrouped = SPARQLUtility.groupBGPBySubject(leftChildRewrittenBGP);
-							//val triplesGrouped = bgpGrouped.getPattern().getList().toList;
-							val bgpGrouped = SPARQLUtility.groupTriplesBySubject(newLeftChildRewrittenTPList);
-							val triplesGrouped = bgpGrouped.toList;
-							
-							try {
-								val triplesReordered = this.reorderSTGs(triplesGrouped);
-								val basicPattern = BasicPattern.wrap(triplesReordered);
-								result = new OpBGP(basicPattern);
-							} catch {
-							  case e:Exception => {
-								val errorMesssage = "error occured while reodering STG.";
-								logger.warn(errorMesssage);
-								//result = bgpGrouped;
-								val basicPattern = BasicPattern.wrap(triplesGrouped);
-								result = new OpBGP(basicPattern);
-							  }
-							}
-						} else {
-							result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
-						}
-						//List<Triple> leftChildTriplesList = leftChildRewrittenBGP.getPattern().getList();
-						//SortedSet<Triple> leftChildTriplesListSorted = new TreeSet<Triple>(leftChildTriplesList);
-					} else {
-						result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
-					}
-				} else {
-					result = OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);				
-				}
+				result = this.rewriteLeftJoin(opLeftJoin);
 			} 
 			case opUnion:OpUnion => { //UNION pattern
 				val leftChild = opUnion.getLeft();
@@ -255,5 +164,117 @@ extends Rewrite {
 		result;
 	}
 
+	def rewriteLeftJoin(opLeftJoin:OpLeftJoin) : Op = {
+		
+	  
+		val exprList = opLeftJoin.getExprs();
+		val leftChild = opLeftJoin.getLeft();
+		val rightChild = opLeftJoin.getRight();
+		val leftChildRewritten = this.rewrite(leftChild);
+		val rightChildRewritten = this.rewrite(rightChild);
+		
+		val result : Op = {
+			if(leftChildRewritten.isInstanceOf[OpBGP] && rightChildRewritten.isInstanceOf[OpBGP]) {
+				val leftChildRewrittenBGP = leftChildRewritten.asInstanceOf[OpBGP];
+				val rightChildRewrittenBGP = rightChildRewritten.asInstanceOf[OpBGP];
+				val rightBasicPattern = rightChildRewrittenBGP.getPattern();
+				val rightBasicPatternSize = rightBasicPattern.size();
+				if(rightBasicPatternSize == 1) {
+					logger.debug("Optional pattern with only one triple pattern.");
+					
+					val rightTp = rightChildRewrittenBGP.getPattern().get(0);
+					val rightTpSubject = rightTp.getSubject();
+					val rightTpPredicate = rightTp.getPredicate();
+					val rightTpObject = rightTp.getObject();
+					
+					val leftChildTriples = leftChildRewrittenBGP.getPattern().getList().toList;
+					val leftChildSubjects = SPARQLUtility.getSubjects(leftChildTriples);
+					val leftChildObjects = SPARQLUtility.getObjects(leftChildTriples);
+					
+					if(leftChildSubjects.contains(rightTpSubject) 
+					    && !leftChildObjects.contains(rightTpObject)) {
+						
+						val rightEtp = new MorphTriple(rightTpSubject, rightTpPredicate
+						    , rightTpObject, true);
+						val leftChildRewrittenPattern = leftChildRewrittenBGP.getPattern();
+						//leftChildRewrittenPattern.add(rightEtp);
+						val leftChildRewrittenTPList = leftChildRewrittenPattern.getList().toList;
+						val newLeftChildRewrittenTPList = leftChildRewrittenTPList ::: List(rightEtp);
+						
+						//val bgpGrouped = SPARQLUtility.groupBGPBySubject(leftChildRewrittenBGP);
+						//val triplesGrouped = bgpGrouped.getPattern().getList().toList;
+						val bgpGrouped = SPARQLUtility.groupTriplesBySubject(newLeftChildRewrittenTPList);
+						val triplesGrouped = bgpGrouped.toList;
+						
+						try {
+							val triplesReordered = this.reorderSTGs(triplesGrouped);
+							val basicPattern = BasicPattern.wrap(triplesReordered);
+							new OpBGP(basicPattern);
+						} catch {
+						  case e:Exception => {
+							val errorMesssage = "error occured while reodering STG.";
+							logger.warn(errorMesssage);
+							//result = bgpGrouped;
+							val basicPattern = BasicPattern.wrap(triplesGrouped);
+							new OpBGP(basicPattern);
+						  }
+						}
+					} else {
+						OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
+					}
+					//List<Triple> leftChildTriplesList = leftChildRewrittenBGP.getPattern().getList();
+					//SortedSet<Triple> leftChildTriplesListSorted = new TreeSet<Triple>(leftChildTriplesList);
+				} else {
+					OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);
+				}
+			} else {
+				OpLeftJoin.create(leftChildRewritten, rightChildRewritten, exprList);				
+			}
+		  
+		}
+				
+		result
+	}
 	
+	def rewriteBGP(bgp:OpBGP) : Op = {
+		val bgpTriples = bgp.getPattern().getList().toList;
+		val triplesGrouped = SPARQLUtility.groupTriplesBySubject(bgpTriples);
+		
+		val basicPattern = {
+			if(this.reorderSTG) {
+				val triplesReordered = this.reorderSTGs(triplesGrouped.toList);
+				BasicPattern.wrap(triplesReordered);
+			} else {
+				BasicPattern.wrap(triplesGrouped);
+			}				  
+		}
+
+		val result = new OpBGP(basicPattern);
+		result;
+	}
+	
+	def rewriteJoin(opJoin:OpJoin) : Op = {
+		val leftChild = opJoin.getLeft();
+		val rightChild = opJoin.getRight();
+		val leftChildRewritten = this.rewrite(leftChild);
+		val rightChildRewritten = this.rewrite(rightChild);
+		val result = {
+			if(leftChildRewritten.isInstanceOf[OpBGP] && rightChildRewritten.isInstanceOf[OpBGP]) {
+				val leftChildRewrittenBGP = leftChildRewritten.asInstanceOf[OpBGP];
+				val rightChildRewrittenBGP = rightChildRewritten.asInstanceOf[OpBGP];
+//					leftChildRewrittenBGP.getPattern().addAll(rightChildRewrittenBGP.getPattern());
+//					result = leftChildRewrittenBGP;
+				
+				val leftChildRewrittenBGPTriplesList = leftChildRewrittenBGP.getPattern().getList().toList;
+				val rightChildRewrittenBGPTriplesList = rightChildRewrittenBGP.getPattern().getList().toList;
+				val newTriplesList = leftChildRewrittenBGPTriplesList ::: rightChildRewrittenBGPTriplesList; 
+				val newBasicPattern = BasicPattern.wrap(newTriplesList);
+				new OpBGP(newBasicPattern);
+			} else {
+				OpJoin.create(leftChildRewritten, rightChildRewritten);
+			}				  
+		}
+		result;
+	  
+	}
 }

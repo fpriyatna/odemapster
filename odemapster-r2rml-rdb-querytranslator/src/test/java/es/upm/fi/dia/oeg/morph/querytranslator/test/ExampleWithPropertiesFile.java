@@ -2,24 +2,11 @@ package es.upm.fi.dia.oeg.morph.querytranslator.test;
 
 import static org.junit.Assert.assertTrue;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
-import es.upm.fi.dia.oeg.morph.base.Constants;
-import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
-import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
-import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
-import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
-import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizerFactory;
-import es.upm.fi.dia.oeg.obdi.core.sql.IQuery;
 import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
-import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator;
 
 public class ExampleWithPropertiesFile {
 	private static Logger logger = Logger.getLogger(ExampleWithPropertiesFile.class);
@@ -136,5 +123,52 @@ public class ExampleWithPropertiesFile {
 			assertTrue(e.getMessage(), false);
 		}
 	}	
-	
+
+	@Test
+	public void sparql08() {
+		String configurationDirectory = System.getProperty("user.dir") + "/examples";
+		String configurationFile = "query08.r2rml.properties";
+		try {
+			String[] args = {configurationDirectory, configurationFile};
+			R2RMLRunner.main(args);
+			logger.info("Query process DONE------\n\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("Query process FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}
+
+	@Test
+	public void sparql09() {
+		String configurationDirectory = System.getProperty("user.dir") + "/examples";
+		String configurationFile = "query09.r2rml.properties";
+		try {
+			String[] args = {configurationDirectory, configurationFile};
+			R2RMLRunner.main(args);
+			logger.info("Query process DONE------\n\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("Query process FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}
+
+	@Test
+	public void sparql10() {
+		String configurationDirectory = System.getProperty("user.dir") + "/examples";
+		String configurationFile = "query10.r2rml.properties";
+		try {
+			String[] args = {configurationDirectory, configurationFile};
+			R2RMLRunner.main(args);
+			logger.info("Query process DONE------\n\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("Query process FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}	
 }

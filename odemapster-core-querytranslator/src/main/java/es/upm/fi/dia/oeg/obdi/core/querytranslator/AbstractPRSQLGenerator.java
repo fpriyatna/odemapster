@@ -163,31 +163,34 @@ public abstract class AbstractPRSQLGenerator {
 			) throws QueryTranslationException {
 		Node subject = tp.getSubject();
 		Collection<ZSelectItem> prSubjects = new Vector<ZSelectItem>();
-		String databaseType = this.owner.getDatabaseType();
-		List<ZSelectItem> betaSubSelectItems = betaGenerator.calculateBetaSubject(
-				tp, cmSubject, alphaResult);
-		try {
-			byte i = 0;
-			for(ZSelectItem betaSub : betaSubSelectItems) {
-				ZSelectItem selectItem = MorphSQLSelectItem.apply(betaSub, databaseType);
-				
-//				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
-//					selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
-//					selectItem.setColumnType("text");
-//				}			
-				String selectItemSubjectAlias = nameGenerator.generateName(subject);
-				if(betaSubSelectItems.size() > 1) {
-					selectItemSubjectAlias += "_" + i;
+		if(!subject.isBlank()) {
+			String databaseType = this.owner.getDatabaseType();
+			List<ZSelectItem> betaSubSelectItems = betaGenerator.calculateBetaSubject(
+					tp, cmSubject, alphaResult);
+			try {
+				byte i = 0;
+				for(ZSelectItem betaSub : betaSubSelectItems) {
+					ZSelectItem selectItem = MorphSQLSelectItem.apply(betaSub, databaseType);
+					
+//					if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(databaseType)) {
+//						selectItem.setDbType(Constants.DATABASE_POSTGRESQL);
+//						selectItem.setColumnType("text");
+//					}			
+					String selectItemSubjectAlias = nameGenerator.generateName(subject);
+					if(betaSubSelectItems.size() > 1) {
+						selectItemSubjectAlias += "_" + i;
+					}
+					i++;
+					selectItem.setAlias(selectItemSubjectAlias);
+					prSubjects.add(selectItem);
 				}
-				i++;
-				selectItem.setAlias(selectItemSubjectAlias);
-				prSubjects.add(selectItem);
-			}
-			logger.debug("genPRSQLSubject = " + prSubjects);
-			return prSubjects;
-		} catch(Exception e) {
-			throw new QueryTranslationException(e);
+				
+			} catch(Exception e) {
+				throw new QueryTranslationException(e);
+			}			
 		}
+		logger.debug("genPRSQLSubject = " + prSubjects);
+		return prSubjects;
 	}
 	
 

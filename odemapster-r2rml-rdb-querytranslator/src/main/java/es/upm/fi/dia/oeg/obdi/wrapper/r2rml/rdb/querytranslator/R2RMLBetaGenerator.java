@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import Zql.ZConstant;
 import Zql.ZSelectItem;
 
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 
 import es.upm.fi.dia.oeg.obdi.core.model.AbstractConceptMapping;
@@ -27,7 +24,7 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class R2RMLBetaGenerator extends AbstractBetaGenerator {
-	private static Logger logger = Logger.getLogger(R2RMLBetaGenerator.class);
+//	private static Logger logger = Logger.getLogger(R2RMLBetaGenerator.class);
 	protected R2RMLQueryTranslator owner;
 	
 	public R2RMLBetaGenerator(AbstractQueryTranslator owner) {

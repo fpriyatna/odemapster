@@ -1,29 +1,23 @@
 package es.upm.fi.dia.oeg.obdi.core.sql;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Vector;
 
-import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
-import Zql.ZConstant;
 import Zql.ZExp;
 import Zql.ZExpression;
 import Zql.ZGroupBy;
 import Zql.ZOrderBy;
 import Zql.ZSelectItem;
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 
 public class SQLJoin implements IQuery {
-	private Collection<ZSelectItem> selectItems;
 	private SQLLogicalTable leftTable;
 	private SQLLogicalTable rightTable;
 	private String joinType;
 	private ZExpression onExpression;
 	private boolean distinct = false;
-	private long slice = -1;
-	private long offset = -1;
-	
 	public void setAlias(String alias) {
 		// TODO Auto-generated method stub
 		
@@ -125,8 +119,7 @@ public class SQLJoin implements IQuery {
 	public String toString() {
 		String result = "";
 		
-		MorphSQLUtility sqlUtility = new MorphSQLUtility();
-		String selectItemsString = sqlUtility.printSelectItems(this.getSelectItems(), this.distinct);
+		String selectItemsString = MorphSQLUtility.printSelectItems(this.getSelectItems(), this.distinct);
 		selectItemsString += selectItemsString; 
 
 		return result;

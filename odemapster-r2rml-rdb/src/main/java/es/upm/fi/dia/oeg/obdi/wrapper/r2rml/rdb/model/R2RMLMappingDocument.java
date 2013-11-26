@@ -43,7 +43,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTermMap.TermMapType;
 
 public class R2RMLMappingDocument extends AbstractMappingDocument implements R2RMLElement{
 	private static Logger logger = Logger.getLogger(R2RMLMappingDocument.class);
-	private Constants constants = new Constants();
 	
 	public R2RMLMappingDocument(String mappingDocumentPath
 			, ConfigurationProperties configurationProperties) 
@@ -84,7 +83,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		super.setMappingDocumentPrefixMap(model.getNsPrefixMap());
 
 		ResIterator triplesMapResources = model.listResourcesWithProperty(
-				RDF.type, constants.R2RML_TRIPLESMAP_CLASS());
+				RDF.type, Constants.R2RML_TRIPLESMAP_CLASS());
 		if(triplesMapResources != null) {
 			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
@@ -125,7 +124,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		model.read(in, null, "TURTLE");
 
 		ResIterator triplesMapResources = model.listResourcesWithProperty(RDF.type
-				, constants.R2RML_TRIPLESMAP_CLASS());
+				, Constants.R2RML_TRIPLESMAP_CLASS());
 		if(triplesMapResources != null) {
 			this.classMappings = new Vector<AbstractConceptMapping>();
 			while(triplesMapResources.hasNext()) {
@@ -301,7 +300,7 @@ public class R2RMLMappingDocument extends AbstractMappingDocument implements R2R
 		R2RMLRefObjectMap rom = pom.getRefObjectMap();
 		
 		if(om != null && rom == null) {
-			if(constants.R2RML_IRI_URI().equals(om.getTermType())) {
+			if(Constants.R2RML_IRI_URI().equals(om.getTermType())) {
 				for(AbstractConceptMapping cm : this.getConceptMappings()) {
 					R2RMLTriplesMap tm = (R2RMLTriplesMap) cm;
 					tm.getSubjectMap();

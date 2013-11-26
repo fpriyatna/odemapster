@@ -40,7 +40,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 	private static Logger logger = Logger.getLogger(R2RMLElementUnfoldVisitor.class);
 	private Map<R2RMLRefObjectMap, String> mapRefObjectMapAlias = new HashMap<R2RMLRefObjectMap, String>();
 	//private ConfigurationProperties configurationProperties;
-	private Constants constants = new Constants();
 	
 	public Map<R2RMLRefObjectMap, String> getMapRefObjectMapAlias() {
 		return mapRefObjectMapAlias;
@@ -95,8 +94,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 				
 				if(selectItem != null) {
 					if(selectItem.getAlias() == null) {
-						String alias = "\"" + selectItem.toString() + "\"";
-						//selectItem.setAlias(alias);
 					}
 					resultSelectItems.add(selectItem);
 				}
@@ -152,8 +149,6 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 									objectMapColumnString, logicalTableAlias, this.dbType);
 							if(selectItem != null) {
 								if(selectItem.getAlias() == null) {
-									String alias = "\"" + selectItem.toString() + "\"";
-									//selectItem.setAlias(alias);
 								}
 								resultSelectItems.add(selectItem);
 							}
@@ -198,7 +193,7 @@ public class R2RMLElementUnfoldVisitor extends AbstractUnfolder implements R2RML
 						onExpression = R2RMLUtility.generateJoinCondition(joinConditions
 								, logicalTableAlias, joinQueryAlias, dbType);
 					} else {
-						onExpression = constants.SQL_EXPRESSION_TRUE();
+						onExpression = Constants.SQL_EXPRESSION_TRUE();
 					}
 					joinQuery.setOnExpression(onExpression);
 					//result.addJoinQuery(joinQuery);		

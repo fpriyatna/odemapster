@@ -36,7 +36,6 @@ implements R2RMLElement, IConceptMapping {
 	private R2RMLLogicalTable logicalTable;
 	private R2RMLSubjectMap subjectMap;
 	private Collection<R2RMLPredicateObjectMap> predicateObjectMaps;
-	private Constants constants = new Constants();
 	
 	public R2RMLTriplesMap(Resource triplesMap, R2RMLMappingDocument owner) 
 			throws R2RMLInvalidTriplesMapException, R2RMLInvalidRefObjectMapException, R2RMLJoinConditionException, R2RMLInvalidTermMapException {
@@ -46,7 +45,7 @@ implements R2RMLElement, IConceptMapping {
 		
 		try {
 			Statement logicalTableStatement = triplesMap.getProperty(
-					constants.R2RML_LOGICALTABLE_PROPERTY());
+					Constants.R2RML_LOGICALTABLE_PROPERTY());
 			if(logicalTableStatement != null) {
 				RDFNode logicalTableStatementObject = 
 						logicalTableStatement.getObject();
@@ -78,7 +77,7 @@ implements R2RMLElement, IConceptMapping {
 
 		//rr:subjectMap
 		StmtIterator subjectMaps = triplesMap.listProperties(
-				constants.R2RML_SUBJECTMAP_PROPERTY());
+				Constants.R2RML_SUBJECTMAP_PROPERTY());
 		if(subjectMaps == null) {
 			String errorMessage = "Missing rr:subjectMap";
 			logger.error(errorMessage);
@@ -91,7 +90,7 @@ implements R2RMLElement, IConceptMapping {
 			throw new R2RMLInvalidTriplesMapException(errorMessage);
 		}
 		Statement subjectMapStatement = triplesMap.getProperty(
-				constants.R2RML_SUBJECTMAP_PROPERTY());
+				Constants.R2RML_SUBJECTMAP_PROPERTY());
 		if(subjectMapStatement != null) {
 			Resource subjectMapStatementObjectResource = (Resource) subjectMapStatement.getObject();
 			this.subjectMap = new R2RMLSubjectMap(subjectMapStatementObjectResource, this);
@@ -103,7 +102,7 @@ implements R2RMLElement, IConceptMapping {
 
 		//rr:subject
 		Statement subjectStatement = triplesMap.getProperty(
-				constants.R2RML_SUBJECT_PROPERTY());
+				Constants.R2RML_SUBJECT_PROPERTY());
 		if(subjectStatement != null) {
 			String constantValueObject = subjectStatement.getObject().toString();
 			this.subjectMap = new R2RMLSubjectMap(constantValueObject);
@@ -111,7 +110,7 @@ implements R2RMLElement, IConceptMapping {
 
 		//rr:predicateObjectMap
 		StmtIterator predicateObjectMapStatements = triplesMap.listProperties(
-				constants.R2RML_PREDICATEOBJECTMAP_PROPERTY());
+				Constants.R2RML_PREDICATEOBJECTMAP_PROPERTY());
 		if(predicateObjectMapStatements != null) {
 			this.predicateObjectMaps = new HashSet<R2RMLPredicateObjectMap>();
 			while(predicateObjectMapStatements.hasNext()) {

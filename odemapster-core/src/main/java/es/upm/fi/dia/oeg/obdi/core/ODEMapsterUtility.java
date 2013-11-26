@@ -174,49 +174,49 @@ public class ODEMapsterUtility {
 		return someString;
 	}
 
-	private static String preEncoding(String uri) {
-		uri = uri.replaceAll("\\(", "_");
-		uri = uri.replaceAll("\\)", "_");
-		uri = uri.replaceAll("\\[", "_");
-		uri = uri.replaceAll("\\]", "_");
-		//			uri = uri.replaceAll("\\.", "_");
+//	private static String preEncoding(String uri) {
+//		uri = uri.replaceAll("\\(", "_");
+//		uri = uri.replaceAll("\\)", "_");
+//		uri = uri.replaceAll("\\[", "_");
+//		uri = uri.replaceAll("\\]", "_");
+//		//			uri = uri.replaceAll("\\.", "_");
+//
+//		uri = uri.replaceAll("\n", " ");
+//		uri = uri.replaceAll("\\n", " ");
+//		uri = uri.replaceAll("\t", " ");
+//		uri = uri.replaceAll("\\t", " ");
+//		uri = uri.replaceAll("\\r", " ");
+//
+//		//			uri = uri.replaceAll("\"", "_");
+//
+//		uri = uri.replaceAll("\\\\", "%5C");
+//		uri = uri.replaceAll("\\b\\s{2,}\\b", " ");
+//
+//
+//
+//
+//
+//
+//
+//		return uri;
+//
+//	}
 
-		uri = uri.replaceAll("\n", " ");
-		uri = uri.replaceAll("\\n", " ");
-		uri = uri.replaceAll("\t", " ");
-		uri = uri.replaceAll("\\t", " ");
-		uri = uri.replaceAll("\\r", " ");
-
-		//			uri = uri.replaceAll("\"", "_");
-
-		uri = uri.replaceAll("\\\\", "%5C");
-		uri = uri.replaceAll("\\b\\s{2,}\\b", " ");
-
-
-
-
-
-
-
-		return uri;
-
-	}
-
-	private static String postEncoding(String uri) {
-		uri = uri.replaceAll(",", "%2C");
-		uri = uri.replaceAll("&", "%26");
-		//uri = uri.replaceAll("&", "and");
-		uri = uri.replaceAll("'", "%27");
-		//uri = uri.replaceAll(" ", "%20");
-		uri = uri.replaceAll("_{2,}+", "_");
-		uri = uri.replaceAll("%23", "#");
-
-		//uri = uri.replaceAll("%20", "_");
-
-		//uri = uri.toLowerCase();
-
-		return uri;
-	}
+//	private static String postEncoding(String uri) {
+//		uri = uri.replaceAll(",", "%2C");
+//		uri = uri.replaceAll("&", "%26");
+//		//uri = uri.replaceAll("&", "and");
+//		uri = uri.replaceAll("'", "%27");
+//		//uri = uri.replaceAll(" ", "%20");
+//		uri = uri.replaceAll("_{2,}+", "_");
+//		uri = uri.replaceAll("%23", "#");
+//
+//		//uri = uri.replaceAll("%20", "_");
+//
+//		//uri = uri.toLowerCase();
+//
+//		return uri;
+//	}
 
 	public static String encodeURI(String originalURI)  throws Exception {
 		String uri = originalURI;
