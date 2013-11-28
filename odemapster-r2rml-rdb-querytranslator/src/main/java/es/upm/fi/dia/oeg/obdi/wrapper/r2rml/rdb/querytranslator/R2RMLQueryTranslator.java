@@ -51,10 +51,11 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 	private static Map<Triple, String> mapTripleAlias= new HashMap<Triple, String>();
 	private Map<String, Matcher> mapTemplateMatcher = new HashMap<String, Matcher>();
 	private Map<String, Collection<String>> mapTemplateAttributes = new HashMap<String, Collection<String>>();
-
+	
 	public R2RMLQueryTranslator() {
 		super();
 		AbstractUnfolder unfolder = new R2RMLElementUnfoldVisitor();
+		unfolder.setDbType(this.databaseType);
 		this.unfolder = unfolder;
 	}
 
@@ -327,45 +328,45 @@ public class R2RMLQueryTranslator extends AbstractQueryTranslator {
 //		return transTP;
 //	}
 
-	public static AbstractQueryTranslator getQueryTranslatorFreddy(
-			String url, String username, String password
-			, String databaseType, String databaseName
-			, String mappingDocumentFile ) throws Exception {
-
-		Properties props = new Properties();
-		props.setProperty("user",username);
-		props.setProperty("password",password);
-
-		Connection conn = null;
-		try {
-			conn = DriverManager.getConnection(url, props);	
-		} catch(Exception e) {
-			String errorMessage = "Error while trying to retrieve a connection: " + e.getMessage();
-			logger.warn(errorMessage);
-		}
-
-		ConfigurationProperties properties = new ConfigurationProperties();
-		properties.setConn(conn);
-		properties.setDatabaseName(databaseName);
-
-		AbstractMappingDocument mappingDocument = 
-				new R2RMLMappingDocument(mappingDocumentFile, properties);
-
-		IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
-		queryTranslationOptimizer.setSelfJoinElimination(true);
-		queryTranslationOptimizer.setUnionQueryReduction(true);
-		queryTranslationOptimizer.setSubQueryElimination(true);
-		queryTranslationOptimizer.setTransJoinSubQueryElimination(false);
-		queryTranslationOptimizer.setSubQueryAsView(false);
-
-		AbstractQueryTranslator queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn); 
-		queryTranslatorFreddy.setOptimizer(queryTranslationOptimizer);
-		queryTranslatorFreddy.setDatabaseType(databaseType);
-		queryTranslatorFreddy.setConnection(conn);
-
-		return queryTranslatorFreddy;
-
-	}
+//	public static AbstractQueryTranslator getQueryTranslatorFreddy(
+//			String url, String username, String password
+//			, String databaseType, String databaseName
+//			, String mappingDocumentFile ) throws Exception {
+//
+//		Properties props = new Properties();
+//		props.setProperty("user",username);
+//		props.setProperty("password",password);
+//
+//		Connection conn = null;
+//		try {
+//			conn = DriverManager.getConnection(url, props);	
+//		} catch(Exception e) {
+//			String errorMessage = "Error while trying to retrieve a connection: " + e.getMessage();
+//			logger.warn(errorMessage);
+//		}
+//
+//		ConfigurationProperties properties = new ConfigurationProperties();
+//		properties.setConn(conn);
+//		properties.setDatabaseName(databaseName);
+//
+//		AbstractMappingDocument mappingDocument = 
+//				new R2RMLMappingDocument(mappingDocumentFile, properties);
+//
+//		IQueryTranslationOptimizer queryTranslationOptimizer = new QueryTranslationOptimizer();
+//		queryTranslationOptimizer.setSelfJoinElimination(true);
+//		queryTranslationOptimizer.setUnionQueryReduction(true);
+//		queryTranslationOptimizer.setSubQueryElimination(true);
+//		queryTranslationOptimizer.setTransJoinSubQueryElimination(false);
+//		queryTranslationOptimizer.setSubQueryAsView(false);
+//
+//		AbstractQueryTranslator queryTranslatorFreddy = R2RMLQueryTranslator.createQueryTranslator(mappingDocument, conn); 
+//		queryTranslatorFreddy.setOptimizer(queryTranslationOptimizer);
+//		queryTranslatorFreddy.setDatabaseType(databaseType);
+//		queryTranslatorFreddy.setConnection(conn);
+//
+//		return queryTranslatorFreddy;
+//
+//	}
 
 	@Override
 	protected IQuery trans(Triple tp, AbstractConceptMapping cm,

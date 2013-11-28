@@ -12,6 +12,7 @@ import es.upm.fi.dia.oeg.obdi.core.model.AbstractMappingDocument;
 public abstract class AbstractUnfolder {
 	//protected ConfigurationProperties properties;
 	protected String dbType = Constants.DATABASE_MYSQL();
+//	protected AbstractRunner owner;
 	
 	protected AbstractUnfolder() {
 		ZUtils.addCustomFunction("concat", 2);
@@ -22,6 +23,7 @@ public abstract class AbstractUnfolder {
 		ZUtils.addCustomFunction("lower", 1);
 		ZUtils.addCustomFunction("REPLACE", 3);
 		ZUtils.addCustomFunction("TRIM", 1);
+//		this.owner = owner;
 	}
 	
 	protected abstract Collection<String> unfold(Set<ILogicalQuery> logicalQueries, AbstractMappingDocument mapping) throws Exception;

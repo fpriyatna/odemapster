@@ -9,4 +9,6 @@ public interface SQLLogicalTable {
 	
 	public String print(boolean withAlias);
 	
+	public void setDbType(String dbType);
+	
 }

@@ -32,52 +32,17 @@ extends ZSelectItem {
 	override def toString() = {
 		var result:String = null;
 		
-		val databaseType = {
-			if(this.dbType == null) {
-				Constants.DATABASE_MYSQL;
-			} else {
-			  this.dbType;
-			}	 	  
-		}
-
-		val enclosedCharacter :String = dbType match {
-		  	case Constants.DATABASE_MONETDB => {
-				Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
-			} 
-		  	case Constants.DATABASE_POSTGRESQL => {
-				Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER; 
-			} 
-		  	case Constants.DATABASE_GFT => {
-				  Constants.DATABASE_GFT_ENCLOSED_CHARACTER;
-			} 
-		  	case _=> {
-			  ""
-		  	}		  
-		}
+		val enclosedCharacter = Constants.getEnclosedCharacter(dbType);
 
 		if(this.isExpression()) {
 			result = this.getExpression().toString();
 		} else {
-//			this.dbType match {
-//				case Constants.DATABASE_GFT => {
-//					result = this.column;
-//				}
-//				case _ => {
-//					result = this.getFullyQualifiedName(enclosedCharacter);
-//				}
-//			}
-			
 			result = this.getFullyQualifiedName(enclosedCharacter);
 		}
 
 		if(this.columnType != null) {
-			if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
-				result += "::" + this.columnType; 
-			} else if(Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType)) {
-			  result = "CAST(" + result + " AS "  + this.columnType + ")"; 
-			}		  
+			result = this.cast(result, dbType, columnType);
 		}
-
 		
 		val alias = this.getAlias();
 		if(alias != null && !alias.equals("")) {
@@ -87,7 +52,23 @@ extends ZSelectItem {
 		result;
 	}
 
-
+	def cast(value:String, dbType:String, columnType:String) : String = {
+		val result = {
+			if(columnType != null) {
+				if(Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
+					value + "::" + this.columnType; 
+				} else if(Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType)) {
+				  "CAST(" + value + " AS "  + this.columnType + ")"; 
+				} else {
+				  value
+				}
+			} else {
+			  value
+			}		  
+		}
+		result;
+	}
+	
 	override def getColumn() = {
 		val result : String = {
 			if(this.column.startsWith("\"") && this.column.endsWith("\"")) {
@@ -99,17 +80,17 @@ extends ZSelectItem {
 		result
 	}
 
-	def columnToString() = {
-		val result = {
-			if(Constants.DATABASE_MONETDB.equalsIgnoreCase(this.dbType)) {
-				"\"" + this.getColumn() + "\"";
-			} else {
-				this.column;
-			}		  
-		}
-		
-		result;
-	}
+//	def columnToString() = {
+//		val result = {
+//			if(Constants.DATABASE_MONETDB.equalsIgnoreCase(this.dbType)) {
+//				"\"" + this.getColumn() + "\"";
+//			} else {
+//				this.column;
+//			}		  
+//		}
+//		
+//		result;
+//	}
 	
 	def main(args:Array[String]) {
 		val selectItem1 = MorphSQLSelectItem("benchmark.product.nr");
@@ -149,7 +130,6 @@ object MorphSQLSelectItem {
 //	}
 	
 	def apply(zExp : ZExp) : MorphSQLSelectItem = {
-			
 		val result = this(zExp, null, null)
 		result
 	}
@@ -161,7 +141,7 @@ object MorphSQLSelectItem {
 	}
 
 	def apply(pInputColumnName:String) : MorphSQLSelectItem = {
-		MorphSQLSelectItem(pInputColumnName, null, null, null);
+		this(pInputColumnName, null, null, null);
 	}
 
 	def apply(pInputColumnName:String, pPrefix:String, pDBType:String) 
@@ -277,9 +257,9 @@ object MorphSQLSelectItem {
 		var result = {
 			if(zSelectItem.isExpression()) {
 				val selectItemExpression = zSelectItem.getExpression();
-				MorphSQLSelectItem(selectItemExpression, databaseType, columnType)
+				this(selectItemExpression, databaseType, columnType)
 			} else {
-				MorphSQLSelectItem(zSelectItem.toString(), null, databaseType, columnType)  
+				this(zSelectItem.toString(), null, databaseType, columnType)  
 			}
 		}
 
@@ -300,23 +280,25 @@ object MorphSQLSelectItem {
 			if(str == null) {
 				Array.empty[String]
 			} else {
-				val str2 = dbType match {
-				  case Constants.DATABASE_MYSQL => {
-				    str.replaceAll(Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER, "")
-				  }
-				  case Constants.DATABASE_MONETDB => {
-					  str.replaceAll(Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, "");  
-				  }
-				  case Constants.DATABASE_POSTGRESQL => {
-				    str.replaceAll(Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, "");
-				  }
-				  case Constants.DATABASE_GFT => {
-				    str.replaceAll(Constants.DATABASE_GFT_ENCLOSED_CHARACTER, "");
-				  }
-				  case _ => {
-				    str;
-				  }
-				} 
+				val enclosedCharacter = Constants.getEnclosedCharacter(dbType);
+				val str2 = str.replaceAll(enclosedCharacter, "");
+//				val str2 = dbType match {
+//				  case Constants.DATABASE_MYSQL => {
+//				    str.replaceAll(Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER, "")
+//				  }
+//				  case Constants.DATABASE_MONETDB => {
+//					  str.replaceAll(Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, "");  
+//				  }
+//				  case Constants.DATABASE_POSTGRESQL => {
+//				    str.replaceAll(Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, "");
+//				  }
+//				  case Constants.DATABASE_GFT => {
+//				    str.replaceAll(Constants.DATABASE_GFT_ENCLOSED_CHARACTER, "");
+//				  }
+//				  case _ => {
+//				    str;
+//				  }
+//				} 
 				  
 				val splitColumns = str2.split("\\.");
 				splitColumns

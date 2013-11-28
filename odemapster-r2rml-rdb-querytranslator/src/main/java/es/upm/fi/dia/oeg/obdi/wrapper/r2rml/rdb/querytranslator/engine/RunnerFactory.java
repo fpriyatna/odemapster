@@ -1,9 +1,10 @@
-package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine;
+package es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.engine;
 
 import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslationOptimizer;
 import es.upm.fi.dia.oeg.obdi.core.engine.IQueryTranslator;
 import es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizerFactory;
+import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.engine.R2RMLRunner;
 
 public class RunnerFactory {
 	public static R2RMLRunner createR2RMLRunnerC(String configurationDirectory, String configurationFile)

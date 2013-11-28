@@ -116,7 +116,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 	private Map<String, ZSelectItem> mapAggreatorAlias = new HashMap<String, ZSelectItem>();//varname - selectitem
 	public enum POS {sub, pre, obj}
 	private ConfigurationProperties configurationProperties;
-	protected String databaseType = Constants.DATABASE_MYSQL();
+	protected String databaseType;
 	private Map<String, String> functionsMap = new HashMap<String, String>();
 	Collection<String> notNullColumns = new Vector<String>();
 
@@ -370,9 +370,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + subOpSQL;
 			logger.info(createViewSQL + ";\n");
 			DBUtility.execute(conn, createViewSQL);
-			resultFrom = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
+			resultFrom = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME, this.databaseType);
 		} else {
-			resultFrom = new SQLFromItem(subOpSQL.toString(), LogicalTableType.QUERY_STRING);
+			resultFrom = new SQLFromItem(subOpSQL.toString(), LogicalTableType.QUERY_STRING, this.databaseType);
 		}
 		resultFrom.setAlias(transGPSQLAlias);
 
@@ -638,7 +638,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 			String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + opProjectSubOpSQL;
 			logger.info(createViewSQL  + ";\n");
 			DBUtility.execute(conn, createViewSQL);
-			new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
+			new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME, this.databaseType);
 		}
 
 		IQuery transProjectSQL;
@@ -1088,10 +1088,10 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + transGP1SQL;
 				logger.info(createViewSQL + ";\n");
 				DBUtility.execute(conn, createViewSQL);
-				transGP1FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
+				transGP1FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME, this.databaseType);
 			} else {
 				//SQLFromItem fromItem = new SQLFromItem(transGP.toString(), SQLFromItem.FORM_QUERY);
-				transGP1FromItem = new SQLFromItem(transGP1SQL.toString(), LogicalTableType.QUERY_STRING);
+				transGP1FromItem = new SQLFromItem(transGP1SQL.toString(), LogicalTableType.QUERY_STRING, this.databaseType);
 			}
 			transGP1FromItem.setAlias(transGP1Alias);
 
@@ -1106,9 +1106,9 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + transGP2SQL;
 				logger.info(createViewSQL + ";\n");
 				DBUtility.execute(conn, createViewSQL);
-				transGP2FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);
+				transGP2FromItem = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME, this.databaseType);
 			} else {
-				transGP2FromItem = new SQLFromItem(transGP2SQL.toString(), LogicalTableType.QUERY_STRING);
+				transGP2FromItem = new SQLFromItem(transGP2SQL.toString(), LogicalTableType.QUERY_STRING, this.databaseType);
 			}
 			transGP2FromItem.setAlias(transGP2Alias);
 
@@ -1332,7 +1332,7 @@ public abstract class AbstractQueryTranslator implements IQueryTranslator {
 				opSparqlQuery2 = opSparqlQuery;
 			}
 			
-			logger.info("opSparqlQueryRewritten = \n" + opSparqlQuery2);
+			logger.debug("opSparqlQueryRewritten = \n" + opSparqlQuery2);
 			result = this.trans(opSparqlQuery2);
 		} else {
 			result = this.trans(opSparqlQuery);

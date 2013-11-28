@@ -13,7 +13,7 @@ public class ExampleWithPropertiesFile {
 	static { PropertyConfigurator.configure("log4j.properties"); }
 	
 	@Test
-	public void batch() {
+	public void testBatchMySQL() {
 		String configurationDirectory = System.getProperty("user.dir") + "/examples";
 		String configurationFile = "batch.r2rml.properties";
 		try {
@@ -29,9 +29,41 @@ public class ExampleWithPropertiesFile {
 	}
 
 	@Test
+	public void testBatchPostgreSQL() {
+		String configurationDirectory = System.getProperty("user.dir") + "/examples";
+		String configurationFile = "batch-postgresql.r2rml.properties";
+		try {
+			R2RMLRunner runner = new R2RMLRunner(configurationDirectory, configurationFile);
+			runner.run();
+			logger.info("Batch process DONE------\n\n");
+		} catch (Exception e) {
+			//e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("Batch process FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}
+	
+	@Test
 	public void sparql01() {
 		String configurationDirectory = System.getProperty("user.dir") + "/examples";
 		String configurationFile = "query01.r2rml.properties";
+		try {
+			String[] args = {configurationDirectory, configurationFile};
+			R2RMLRunner.main(args);
+			logger.info("Query process DONE------\n\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Error : " + e.getMessage());
+			logger.info("Query process FAILED------\n\n");
+			assertTrue(e.getMessage(), false);
+		}
+	}
+
+	@Test
+	public void testSparql01PostgreSQL() {
+		String configurationDirectory = System.getProperty("user.dir") + "/examples";
+		String configurationFile = "query01postgresql.r2rml.properties";
 		try {
 			String[] args = {configurationDirectory, configurationFile};
 			R2RMLRunner.main(args);

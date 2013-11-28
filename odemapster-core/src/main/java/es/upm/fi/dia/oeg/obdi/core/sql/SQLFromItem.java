@@ -23,15 +23,18 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 	private LogicalTableType form;
 	private String joinType;
 	private ZExp onExp;
+	private String dbType;
 	
+	public SQLFromItem(String fullName, LogicalTableType form, String dbType) {
+		super(fullName);
+		this.form = form;
+		this.dbType = dbType;
+	}
+
 	public LogicalTableType getForm() {
 		return form;
 	}
 
-	public SQLFromItem(String fullName, LogicalTableType form) {
-		super(fullName);
-		this.form = form;
-	}
 	
 	public String generateAlias() {
 		//return R2OConstants.VIEW_ALIAS + this.hashCode();
@@ -49,7 +52,13 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 		if(alias != null) {
 			this.setAlias("");
 			if(this.form == LogicalTableType.TABLE_NAME) {
-				String tableName = super.toString();
+				String enclosedCharacter = Constants.getEnclosedCharacter(dbType);
+				String tableName;
+				if(enclosedCharacter == null || enclosedCharacter.equals("")) {
+					tableName = super.toString().trim();
+				} else {
+					tableName = enclosedCharacter + super.toString().trim() + enclosedCharacter;
+				}
 				//tableName = R2RMLUtility.replaceNameWithSpaceChars(tableName);
 				result = tableName + " " + alias;
 			} else {
@@ -97,5 +106,13 @@ public class SQLFromItem extends ZFromItem implements SQLLogicalTable {
 			}
 		}
 		return result;
+	}
+
+	public void setDbType(String dbType) {
+		this.dbType = dbType;
+	}
+
+	public String getDbType() {
+		return dbType;
 	}
 }

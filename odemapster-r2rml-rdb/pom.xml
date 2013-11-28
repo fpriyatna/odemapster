@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>es.upm.fi.dia.oeg.obdi</groupId>
+  <groupId>es.upm.fi.dia.oeg.morph</groupId>
   <artifactId>odemapster-r2rml</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -40,5 +40,39 @@
   		<artifactId>postgresql</artifactId>
   		<version>9.1-901-1.jdbc4</version>
   	</dependency>
+
+		<dependency>
+			<groupId>zql</groupId>
+			<artifactId>zql</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>es.upm.fi.dia.oeg.morph</groupId>
+			<artifactId>odemapster-core</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>	
   </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>aldebaran</id>
+      <name>Corporate Repository</name>
+      <url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-releases-local</url>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>true</uniqueVersion>
+      <id>aldebaran</id>
+      <name>Propellors Snapshots</name>
+      <url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-snapshots-local</url>
+    </snapshotRepository>
+  </distributionManagement>
+  	 
+  <repositories>
+    <repository>
+      <id>my-repo1</id>
+      <name>your custom repo</name>
+      <url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-external-libs-local</url>
+    </repository>
+  </repositories>	   
 </project>

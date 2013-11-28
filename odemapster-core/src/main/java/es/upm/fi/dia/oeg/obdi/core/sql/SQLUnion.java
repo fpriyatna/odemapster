@@ -384,4 +384,10 @@ public class SQLUnion implements IQuery {
 		//TODO
 	}
 
+	@Override
+	public void setDbType(String dbType) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -323,11 +323,11 @@ public class R2RMLTermMap implements R2RMLElement
 		String originalValue = this.getOriginalValue();
 
 		if(this.termMapType == TermMapType.COLUMN) {
-
 			if(logicalTableAlias != null && !logicalTableAlias.equals("")) {
 				String[] originalValueSplit = originalValue.split("\\.");
 				String columnName = originalValueSplit[originalValueSplit.length - 1];
-				originalValue = logicalTableAlias + "." + columnName;
+//				originalValue = logicalTableAlias + "." + columnName;
+				originalValue = logicalTableAlias + "_" + columnName;
 			}
 			result = this.getResultSetValue(rs, originalValue);
 		} else if(this.termMapType == TermMapType.CONSTANT) {
@@ -344,16 +344,17 @@ public class R2RMLTermMap implements R2RMLElement
 				if(logicalTableAlias != null) {
 					String attributeSplit[] = attribute.split("\\.");
 					if(attributeSplit.length == 1) {
-						databaseColumn = logicalTableAlias + "." + attribute;
+						//databaseColumn = logicalTableAlias + "." + attribute;
+						databaseColumn = logicalTableAlias + "_" + attribute;
 						attribute = attributeSplit[attributeSplit.length - 1];
 					} else if(attributeSplit.length > 1) {
-						databaseColumn = logicalTableAlias + "." + attributeSplit[attributeSplit.length - 1];
+						//databaseColumn = logicalTableAlias + "." + attributeSplit[attributeSplit.length - 1];
+						databaseColumn = logicalTableAlias + "_" + attributeSplit[attributeSplit.length - 1];
 					}
 				} else {
 					databaseColumn = attribute;
 				}
 				databaseValue = this.getResultSetValue(rs, databaseColumn);
-
 
 				if(databaseValue != null) {
 					if(Constants.R2RML_IRI_URI().equals(this.termType)) {

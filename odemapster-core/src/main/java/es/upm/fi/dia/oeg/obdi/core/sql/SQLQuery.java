@@ -1354,11 +1354,13 @@ public class SQLQuery extends ZQuery implements IQuery {
 			if(rightTableFromItem instanceof SQLFromItem) {
 				String rightTableAlias = rightTableFromItem.getAlias();
 				
-
-				LogicalTableType tableType = ((SQLFromItem) rightTableFromItem).getForm();
+				SQLFromItem sqlFromItem = (SQLFromItem) rightTableFromItem;
+				LogicalTableType tableType = sqlFromItem.getForm();
+				String dbType = sqlFromItem.getDbType();
 				if(tableType == LogicalTableType.TABLE_NAME) {
 					String rightTableName = rightTableFromItem.getTable();
-					SQLLogicalTable rightTableLogicalTable = new SQLFromItem(rightTableName, LogicalTableType.TABLE_NAME);
+					SQLLogicalTable rightTableLogicalTable = new SQLFromItem(
+							rightTableName, LogicalTableType.TABLE_NAME,dbType);
 					
 					//be careful so that we don't return those join expressions that is not in rightTableAlias
 					Collection<ZExpression> relevantJoinExpression1 = 
@@ -1463,6 +1465,12 @@ public class SQLQuery extends ZQuery implements IQuery {
 
 	public void setGroupBy(ZGroupBy newGroupBy) {
 		this.addGroupBy(newGroupBy);
+	}
+
+	@Override
+	public void setDbType(String dbType) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

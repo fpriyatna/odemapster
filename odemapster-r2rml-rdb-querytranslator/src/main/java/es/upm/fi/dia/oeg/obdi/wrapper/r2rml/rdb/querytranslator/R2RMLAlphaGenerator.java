@@ -37,7 +37,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLTriplesMap;
 public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 	private static Logger logger = Logger.getLogger(R2RMLAlphaGenerator.class);
 	protected R2RMLQueryTranslator owner;
-	
 	public R2RMLAlphaGenerator(AbstractQueryTranslator owner) {
 		super(owner);
 		this.owner = (R2RMLQueryTranslator) owner;
@@ -129,8 +128,8 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 				String createViewSQL = "CREATE VIEW " + subQueryViewName + " AS " + sqlLogicalTable;
 				logger.info(createViewSQL + ";\n");
 				DBUtility.execute(conn, createViewSQL);
-				
-				sqlLogicalTable = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME);				
+				String dbType = this.owner.getDatabaseType();
+				sqlLogicalTable = new SQLFromItem(subQueryViewName, LogicalTableType.TABLE_NAME, dbType);				
 			} catch(Exception e) {
 				throw new QueryTranslationException(e);
 			}
@@ -143,6 +142,7 @@ public class R2RMLAlphaGenerator extends AbstractAlphaGenerator {
 		}
 		//r2rmlLogicalTable.setAlias(logicalTableAlias);
 		sqlLogicalTable.setAlias(logicalTableAlias);
+		sqlLogicalTable.setDbType(this.owner.getDatabaseType());
 //		cm.setAlias(logicalTableAlias);
 		return sqlLogicalTable;
 	}

@@ -173,6 +173,11 @@ public class SQLJoin implements IQuery {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void setDbType(String dbType) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	
 }

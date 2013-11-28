@@ -16,7 +16,8 @@ public abstract class AbstractDataTranslator {
 	protected AbstractMaterializer materializer;
 	protected ConfigurationProperties properties;
 	protected AbstractUnfolder unfolder;
-	
+	protected AbstractRunner owner;
+		
 	public AbstractDataTranslator(ConfigurationProperties properties) {
 		this.properties = properties;
 	}

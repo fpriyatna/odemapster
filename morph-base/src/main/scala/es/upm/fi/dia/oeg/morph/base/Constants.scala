@@ -214,22 +214,16 @@ object Constants {
 	val R2RML_TEMPLATE_PATTERN = "\\{(.+?)\\}";	
  
 	def getEnclosedCharacter(dbType:String) : String = {
-	  dbType match {
-	    case Constants.DATABASE_GFT => {
+	    if (Constants.DATABASE_GFT.equalsIgnoreCase(dbType)) {
 	      Constants.DATABASE_GFT_ENCLOSED_CHARACTER;
-	    }
-	    case Constants.DATABASE_MONETDB => {
+	    } else if (Constants.DATABASE_MONETDB.equalsIgnoreCase(dbType) ) {
 	      Constants.DATABASE_MONETDB_ENCLOSED_CHARACTER;
-	    }
-	    case Constants.DATABASE_MYSQL=> {
+	    } else if(Constants.DATABASE_MYSQL.equalsIgnoreCase(dbType)) {
 	      Constants.DATABASE_MYSQL_ENCLOSED_CHARACTER;
-	    }
-	    case Constants.DATABASE_POSTGRESQL => {
+	    } else if (Constants.DATABASE_POSTGRESQL.equalsIgnoreCase(dbType)) {
 	      Constants.DATABASE_POSTGRESQL_ENCLOSED_CHARACTER;
-	    }	    
-	    case _ => {
+	    } else {	    
 	      ""
 	    }	    
-	  }
 	}
 }
