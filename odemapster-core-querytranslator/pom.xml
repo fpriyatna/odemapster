@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>es.upm.fi.dia.oeg.morph</groupId>
@@ -32,67 +33,56 @@
 			<version>13.0.1</version>
 		</dependency>
 
-    <dependency>
+		<dependency>
 			<groupId>zql</groupId>
 			<artifactId>zql</artifactId>
 			<version>0.1</version>
 		</dependency>
-		
-	<dependency>
-		<groupId>es.upm.fi.oeg.morph</groupId>
-		<artifactId>kyrie</artifactId>
-		<version>0.15.8</version>
-	</dependency>
-		
 
-  
-		<!--
 		<dependency>
 			<groupId>es.upm.fi.oeg.morph</groupId>
 			<artifactId>kyrie</artifactId>
 			<version>0.15.8</version>
 		</dependency>
-		-->
-		
+
+
+
+		<!-- <dependency> <groupId>es.upm.fi.oeg.morph</groupId> <artifactId>kyrie</artifactId> 
+			<version>0.15.8</version> </dependency> -->
+
 		<dependency>
 			<groupId>es.upm.fi.dia.oeg.morph</groupId>
 			<artifactId>odemapster-core</artifactId>
 			<version>1.0-SNAPSHOT</version>
-		</dependency>		
-	
+		</dependency>
+
 	</dependencies>
-	
-	<!-- 
+
+	<!-- <repositories> <repository> <id>jmora</id> <name>jmora-dropbox</name> 
+		<url>https://dl.dropboxusercontent.com/u/452942/maven</url> <layout>default</layout> 
+		</repository> </repositories> -->
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>aldebaran-releases</id>
+			<name>Aldebaran Releases</name>
+			<url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-releases-local</url>
+		</repository>
+		<snapshotRepository>
+			<uniqueVersion>true</uniqueVersion>
+			<id>aldebaran-snapshots</id>
+			<name>Aldebaran Snapshots</name>
+			<url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-snapshots-local</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
-			<id>jmora</id>
-			<name>jmora-dropbox</name>
-			<url>https://dl.dropboxusercontent.com/u/452942/maven</url>
-			<layout>default</layout>
+			<id>aldebaran-external-libs</id>
+			<name>Aldebaran External Libraries</name>
+			<url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-external-libs-local</url>
 		</repository>
 	</repositories>
-	 -->
 
-  <distributionManagement>
-    <repository>
-      <uniqueVersion>false</uniqueVersion>
-      <id>aldebaran</id>
-      <name>Corporate Repository</name>
-      <url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-releases-local</url>
-    </repository>
-    <snapshotRepository>
-      <uniqueVersion>true</uniqueVersion>
-      <id>aldebaran</id>
-      <name>Propellors Snapshots</name>
-      <url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-snapshots-local</url>
-    </snapshotRepository>
-  </distributionManagement>
-  	 
-  <repositories>
-    <repository>
-      <id>my-repo1</id>
-      <name>your custom repo</name>
-      <url>http://aldebaran.dia.fi.upm.es/artifactory/sstreams-external-libs-local</url>
-    </repository>
-  </repositories>	 	
 </project>
