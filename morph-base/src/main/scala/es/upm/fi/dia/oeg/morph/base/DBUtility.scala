@@ -134,7 +134,7 @@ object DBUtility {
 	    , driverString:String, url:String, requester:String) : Connection = {
 
 		try {
-			var prop = new Properties();
+			val prop = new Properties();
 			prop.put("ResultSetMetaDataOptions", "1");
 			prop.put("user", username);
 			prop.put("database", databaseName);

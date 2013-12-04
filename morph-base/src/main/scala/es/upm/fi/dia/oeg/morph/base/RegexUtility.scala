@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import scala.collection.JavaConversions._
 import java.util.HashMap
 
-class RegexUtility {
+object RegexUtility {
 	val patternString1 = "\\{\\w+\\}";
 	val TemplatePattern1 = patternString1.r;
   

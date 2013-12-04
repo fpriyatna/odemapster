@@ -202,8 +202,7 @@ class R2RMLMappingDocument(mappingFile : String) {
 		val result : Map[String, String] = {
 			if(termMapValueType == TermMapType.TemplateTermMap) {
 				val templateString = this.getRRTemplateResource(termMapResource).asLiteral().getValue().toString();
-				val regexUtility = new RegexUtility();
-				val matchedTemplate = regexUtility.getTemplateMatching(templateString, uri);
+				val matchedTemplate = RegexUtility.getTemplateMatching(templateString, uri);
 				matchedTemplate.toMap;
 			} else {
 			  Map();

@@ -31,8 +31,7 @@ public class R2RMLUtility {
 		replacements.put("Name", "Freddy");
 		replacements.put("Invoice Number", "INV0001");
 		
-		RegexUtility regexUtility = new RegexUtility();
-		Collection<String> attributes = regexUtility.getTemplateColumns(template, true);
+		Collection<String> attributes = RegexUtility.getTemplateColumns(template, true);
 		System.out.println("attributes = " + attributes);
 		
 		String template2 = R2RMLUtility.replaceTokens(template, replacements);

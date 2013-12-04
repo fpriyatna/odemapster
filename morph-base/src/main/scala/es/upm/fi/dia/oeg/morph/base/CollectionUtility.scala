@@ -2,20 +2,21 @@ package es.upm.fi.dia.oeg.morph.base
 import scala.collection.JavaConversions._
 import java.util.Collection
 
-class CollectionUtility {
+object CollectionUtility {
 	def mkString(theCollection : Collection[Any], sep:String, start:String, end:String) : String = {
 	  theCollection.mkString(start, sep, end);
 	}
 
 	def getElementsStartWith(theCollection : Collection[String], prefix:String) : Collection[String] = {
-	  var result : List[String] = Nil;
-	  for(collectionElement <- theCollection) {
+	  val result = theCollection.map(collectionElement => {
 	    if(collectionElement.startsWith(prefix)) {
-	      result = result ::: List(collectionElement);
+	      collectionElement;
+	    } else {
+	      null
 	    }
-	  }
+	  })
 	  
-	  result;
+	  result.toList;
 	} 
 
 }

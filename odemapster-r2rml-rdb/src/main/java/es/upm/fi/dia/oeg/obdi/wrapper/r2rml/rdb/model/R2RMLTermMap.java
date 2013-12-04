@@ -213,8 +213,7 @@ public class R2RMLTermMap implements R2RMLElement
 		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			String template = this.getOriginalValue();
 			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(template);
-			RegexUtility regexUtility = new RegexUtility();
-			result = regexUtility.getTemplateColumns(template, true);
+			result = RegexUtility.getTemplateColumns(template, true);
 		}
 
 		return result;
@@ -284,8 +283,7 @@ public class R2RMLTermMap implements R2RMLElement
 			result.add(this.getColumnName());
 		} else if(termMapValueType == TermMapType.TEMPLATE) {
 			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(stringTemplate);
-			RegexUtility regexUtility = new RegexUtility();
-			Collection<String> attributes = regexUtility.getTemplateColumns(this.templateString, true);
+			Collection<String> attributes = RegexUtility.getTemplateColumns(this.templateString, true);
 
 			result.addAll(attributes);
 		}
@@ -301,8 +299,7 @@ public class R2RMLTermMap implements R2RMLElement
 		if(termMapValueType == TermMapType.TEMPLATE) {
 			String templateString = this.templateString;
 			this.getDatabaseColumnsString();
-			RegexUtility regexUtility = new RegexUtility();
-			result = regexUtility.getTemplateMatching(templateString, uri);
+			result = RegexUtility.getTemplateMatching(templateString, uri);
 		}
 
 		return result;
@@ -334,8 +331,7 @@ public class R2RMLTermMap implements R2RMLElement
 			result = originalValue;
 		} else if(this.termMapType == TermMapType.TEMPLATE) {
 			//Collection<String> attributes = R2RMLUtility.getAttributesFromStringTemplate(originalValue);
-			RegexUtility regexUtility = new RegexUtility();
-			Collection<String> attributes = regexUtility.getTemplateColumns(originalValue, true);
+			Collection<String> attributes = RegexUtility.getTemplateColumns(originalValue, true);
 
 			Map<String,String> replacements = new HashMap<String, String>();
 			for(String attribute : attributes) {

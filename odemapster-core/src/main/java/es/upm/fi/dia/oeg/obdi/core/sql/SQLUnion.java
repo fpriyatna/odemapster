@@ -14,6 +14,7 @@ import Zql.ZOrderBy;
 import Zql.ZSelectItem;
 import es.upm.fi.dia.oeg.morph.base.CollectionUtility;
 import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class SQLUnion implements IQuery {
@@ -65,7 +66,6 @@ public class SQLUnion implements IQuery {
 		String result = null;
 		String unionString = "\n" + Constants.SQL_KEYWORD_UNION() + "\n" ;
 		
-		CollectionUtility collectionUtility = new CollectionUtility();
 		if(this.unionQueries != null) {
 			Collection<Object> unionQueriesCollection = new Vector<Object>();
 			StringBuffer stringBuffer = new StringBuffer();
@@ -75,7 +75,7 @@ public class SQLUnion implements IQuery {
 				stringBuffer.append(sqlQueryString);
 				stringBuffer.append(unionString);
 			}
-			result = collectionUtility.mkString(unionQueriesCollection, 
+			result = CollectionUtility.mkString(unionQueriesCollection, 
 					"\n" + Constants.SQL_KEYWORD_UNION() + "\n", "", "\n");
 		}
 		
@@ -85,7 +85,7 @@ public class SQLUnion implements IQuery {
 				orderByConditionsCollection.add(orderBy);
 			}
 			
-			String orderByString = collectionUtility.mkString(orderByConditionsCollection, 
+			String orderByString = CollectionUtility.mkString(orderByConditionsCollection, 
 					", ", Constants.SQL_KEYWORD_ORDER_BY() + " ", " ");
 			result = result + orderByString;
 		}
@@ -333,7 +333,7 @@ public class SQLUnion implements IQuery {
 //				newOrderByCollection.add(newOrderBy);
 //			}
 			
-			Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(this.orderByConditions
+			Vector<ZOrderBy> newOrderByCollection = MorphSQLUtility.pushOrderByDown(this.orderByConditions
 					, mapInnerAliasSelectItem);
 			this.setOrderBy(newOrderByCollection);			
 		}

@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.hp.hpl.jena.query.Query;
+
 import es.upm.fi.dia.oeg.obdi.core.XMLUtility;
 
 public class XMLWriter extends AbstractQueryResultWriter {
@@ -29,7 +31,8 @@ public class XMLWriter extends AbstractQueryResultWriter {
 		//create head element
 		Element headElement = xmlDoc.createElement("head");
 		rootElement.appendChild(headElement);
-		Collection<String> varNames = this.sparqQuery.getResultVars();
+		Query sparqlQuery = this.getQueryTranslator().getSPARQLQuery();
+		Collection<String> varNames = sparqlQuery.getResultVars();
 		for(String varName : varNames) {
 			Element variableElement = xmlDoc.createElement("variable");
 			variableElement.setAttribute("name", varName);
@@ -42,7 +45,8 @@ public class XMLWriter extends AbstractQueryResultWriter {
 	}
 
 	public void process() throws Exception {
-		Collection<String> varNames = this.sparqQuery.getResultVars();
+		Query sparqlQuery = this.getQueryTranslator().getSPARQLQuery();
+		Collection<String> varNames = sparqlQuery.getResultVars();
 		
 		int i=0;
 		AbstractResultSet rs = super.getResultSet();

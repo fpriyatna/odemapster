@@ -38,11 +38,11 @@ public class AlphaResult {
 		return predicateURI;
 	}
 
-	public List<SQLLogicalTable> getAlphaPredicateObjects2() {
+	private List<SQLLogicalTable> getAlphaPredicateObjects2() {
 		return alphaPredicateObjects2;
 	}
 
-	public void setAlphaPredicateObjects2(
+	private void setAlphaPredicateObjects2(
 			List<SQLLogicalTable> alphaPredicateObjects2) {
 		this.alphaPredicateObjects2 = alphaPredicateObjects2;
 	}

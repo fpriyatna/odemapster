@@ -10,20 +10,6 @@ import es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.model.R2RMLMappingDocument;
 public class R2RMLRunner extends AbstractRunner {
 	private static Logger logger = Logger.getLogger(R2RMLRunner.class);
 
-	public R2RMLRunner() throws Exception {
-		super();
-	}
-
-	
-	public R2RMLRunner(ConfigurationProperties configurationProperties) throws Exception {
-		super(configurationProperties);
-	}
-	
-	public R2RMLRunner(String configurationDirectory, String configurationFile)
-			throws Exception {
-		super(configurationDirectory, configurationFile);
-	}
-
 	public static void main(String args[]) throws Exception {
 		try {
 			if(args == null || args.length == 0 || args.length != 2) {
@@ -44,6 +30,20 @@ public class R2RMLRunner extends AbstractRunner {
 			logger.error("Exception occured: " + e.getMessage());
 			throw e;
 		}
+	}
+
+	
+	public R2RMLRunner() throws Exception {
+		super();
+	}
+	
+	public R2RMLRunner(ConfigurationProperties configurationProperties) throws Exception {
+		super(configurationProperties);
+	}
+
+	public R2RMLRunner(String configurationDirectory, String configurationFile)
+			throws Exception {
+		super(configurationDirectory, configurationFile);
 	}
 	
 	@Override

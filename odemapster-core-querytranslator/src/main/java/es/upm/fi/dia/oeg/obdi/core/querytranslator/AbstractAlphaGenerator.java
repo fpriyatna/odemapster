@@ -71,7 +71,7 @@ public abstract class AbstractAlphaGenerator {
 			, AbstractConceptMapping abstractConceptMapping, String predicateURI, AbstractPropertyMapping pm) 
 					throws QueryTranslationException;
 
-	protected abstract Object calculateAlphaPredicateObject(Triple triple
+	protected abstract SQLJoinTable calculateAlphaPredicateObject(Triple triple
 			, AbstractConceptMapping abstractConceptMapping, AbstractPropertyMapping pm 
 			, String logicalTableAlias) throws Exception;
 	
@@ -125,7 +125,7 @@ public abstract class AbstractAlphaGenerator {
 
 					AlphaResult alphaResult = new AlphaResult(alphaSubject
 							, alphaPredicateObjects, tpPredicateURI);
-					alphaResult.setAlphaPredicateObjects2(alphaPredicateObjectAux2);
+					//alphaResult.setAlphaPredicateObjects2(alphaPredicateObjectAux2);
 					
 					AlphaResultUnion alphaTP = new AlphaResultUnion(alphaResult);
 					alphaResultUnionList.add(alphaTP);					
@@ -149,7 +149,7 @@ public abstract class AbstractAlphaGenerator {
 
 					AlphaResult alphaResult = new AlphaResult(alphaSubject
 							, alphaPredicateObjects, tpPredicateURI);
-					alphaResult.setAlphaPredicateObjects2(alphaPredicateObjectAux2);
+					//alphaResult.setAlphaPredicateObjects2(alphaPredicateObjectAux2);
 					
 					alphaTP.add(alphaResult);
 				}

@@ -10,25 +10,25 @@
     </head>
     <results>
         <result>
-            <binding name="student">http://mappingpedia.linkeddata.es/resources/Person/B1</binding>
+            <binding name="student"/>
             <binding name="studentName">Paul</binding>
-            <binding name="sport">http://mappingpedia.linkeddata.es/resources/Sport/100</binding>
+            <binding name="sport"/>
             <binding name="sportName">Tennis</binding>
             <binding name="sportCode">TNS</binding>
             <binding name="sportType">BOTH</binding>
         </result>
         <result>
-            <binding name="student">http://mappingpedia.linkeddata.es/resources/Person/B2</binding>
+            <binding name="student"/>
             <binding name="studentName">John</binding>
-            <binding name="sport">http://mappingpedia.linkeddata.es/resources/Sport/200</binding>
+            <binding name="sport"/>
             <binding name="sportName">Chess</binding>
             <binding name="sportCode">CHS</binding>
             <binding name="sportType">INDOOR</binding>
         </result>
         <result>
-            <binding name="student">http://mappingpedia.linkeddata.es/resources/Person/B3</binding>
+            <binding name="student"/>
             <binding name="studentName">George</binding>
-            <binding name="sport">http://mappingpedia.linkeddata.es/resources/Sport/300</binding>
+            <binding name="sport"/>
             <binding name="sportName">Soccer</binding>
             <binding name="sportCode">SCR</binding>
             <binding name="sportType">OUTDOOR</binding>

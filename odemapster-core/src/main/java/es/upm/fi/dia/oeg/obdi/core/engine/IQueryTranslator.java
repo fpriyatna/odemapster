@@ -13,6 +13,14 @@ public interface IQueryTranslator {
 	
 	void setOptimizer(IQueryTranslationOptimizer optimizer);
 
+	Query getSPARQLQuery();
+	
+	void setSPARQLQuery(Query query);
+	
+	void setSPARQLQueryByString(String queryString);
+	
+	void setSPARQLQueryByFile(String queryFilePath);
+	
 	IQuery translate(Query query) throws Exception;
 
 	void setMappingDocument(AbstractMappingDocument md);

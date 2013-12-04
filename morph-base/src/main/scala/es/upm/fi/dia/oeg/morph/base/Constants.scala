@@ -35,7 +35,10 @@ object Constants {
 	val DATABASE_MONETDB_ENCLOSED_CHARACTER = "\"";
 	val DATABASE_MYSQL_ENCLOSED_CHARACTER = "`";
 	val DATABASE_GFT_ENCLOSED_CHARACTER = "'";
-
+	val DATABASE_ENCLOSED_CHARACTERS = List(
+	    DATABASE_POSTGRESQL_ENCLOSED_CHARACTER, DATABASE_MONETDB_ENCLOSED_CHARACTER
+	    , DATABASE_MYSQL_ENCLOSED_CHARACTER, DATABASE_GFT_ENCLOSED_CHARACTER)
+	
 	val POSTGRESQL_COLUMN_TYPE_TEXT = "text";
 	val POSTGRESQL_COLUMN_TYPE_INTEGER = "integer";
 	val MONETDB_COLUMN_TYPE_TEXT = "clob";
@@ -90,15 +93,18 @@ object Constants {
 	val  TRANSSTG_SUBQUERY_ELIMINATION = "querytranslator.transstg.subqueryelimination";
 	val  SUBQUERY_AS_VIEW = "querytranslator.subqueryasview";
 	val  QUERY_TRANSLATOR_CLASSNAME = "querytranslator.class.name";
+//	val  QUERY_TRANSLATOR_CLASSNAME_DEFAULT = 
+//			"es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator";
 	val  QUERY_TRANSLATOR_CLASSNAME_DEFAULT = 
-			"es.upm.fi.dia.oeg.obdi.wrapper.r2rml.rdb.querytranslator.R2RMLQueryTranslator";
+			"es.upm.fi.dia.oeg.morph.rdb.querytranslator.MorphQueryTranslator";
 	
-	val  DATASOURCE_READER_CLASSNAME = "datasourcereader.class.name";
-	val  QUERY_EVALUATOR_CLASSNAME_DEFAULT = "es.upm.fi.dia.oeg.obdi.core.engine.RDBReader";
-	val  QUERY_RESULT_WRITER_CLASSNAME = "queryresult.writer.class.name";
-	val  QUERY_RESULT_WRITER_CLASSNAME_DEFAULT = "es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter";
-	val  QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT = "output.rdf.xml";
-	
+	val DATASOURCE_READER_CLASSNAME = "datasourcereader.class.name";
+	val QUERY_EVALUATOR_CLASSNAME_DEFAULT = "es.upm.fi.dia.oeg.obdi.core.engine.RDBReader";
+	val QUERY_RESULT_WRITER_CLASSNAME = "queryresult.writer.class.name";
+	val QUERY_RESULT_WRITER_CLASSNAME_DEFAULT = "es.upm.fi.dia.oeg.obdi.core.engine.XMLWriter";
+	val QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT = "output.rdf.xml";
+	val QUERY_OPTIMIZER_CLASSNAME_DEFAULT = "es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer";
+
 	val  REMOVE_STRANGE_CHARS_FROM_LITERAL = "literal.removestrangechars";
 	val  ENCODE_UNSAFE_CHARS_IN_URI_COLUMN = "uricolumn.encodeunsafecharacters";
 	val  ENCODE_RESERVED_CHARS_IN_URI_COLUMN = "uricolumn.encodereserveccharacters";

@@ -18,7 +18,6 @@ import es.upm.fi.dia.oeg.obdi.core.ConfigurationProperties;
 import es.upm.fi.dia.oeg.obdi.core.DBUtility;
 import es.upm.fi.dia.oeg.obdi.core.ODEMapsterUtility;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractDataTranslator;
-import es.upm.fi.dia.oeg.obdi.core.engine.AbstractRunner;
 import es.upm.fi.dia.oeg.obdi.core.engine.AbstractUnfolder;
 import es.upm.fi.dia.oeg.obdi.core.engine.RDBReader;
 import es.upm.fi.dia.oeg.obdi.core.exception.PostProcessorException;

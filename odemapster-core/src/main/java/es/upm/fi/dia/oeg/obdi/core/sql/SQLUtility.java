@@ -23,7 +23,7 @@ import es.upm.fi.dia.oeg.upm.morph.sql.MorphSQLSelectItem;
 
 public class SQLUtility {
 
-	public static ZExpression combineExpresions(ZExp exp1
+	private static ZExpression combineExpresions(ZExp exp1
 			, Collection<? extends ZExp> exps, String logicalOperator
 			) {
 		Collection<ZExp> expressions = new Vector<ZExp>();
@@ -40,7 +40,7 @@ public class SQLUtility {
 	}
 
 		
-	public static ZExpression combineExpresions(
+	private static ZExpression combineExpresions(
 			Collection<? extends ZExp> exps, String logicalOperator
 			) {
 		Iterator<? extends ZExp> it = exps.iterator();
@@ -88,7 +88,7 @@ public class SQLUtility {
 //		return result;
 //	}
 
-	public boolean isSubqueryEliminationPossible(SQLLogicalTable leftTable, SQLLogicalTable rightTable) {
+	private boolean isSubqueryEliminationPossible(SQLLogicalTable leftTable, SQLLogicalTable rightTable) {
 		if(leftTable instanceof SQLFromItem) {
 		} else if(leftTable instanceof SQLQuery) {
 			SQLQuery leftTableSQLQuery = (SQLQuery) leftTable;
@@ -104,14 +104,14 @@ public class SQLUtility {
 		return false;
 	}
 	
-	public IQuery joinQuery(Collection<ZSelectItem> selectItems, IQuery leftTable, IQuery rightTable, String joinType, ZExpression onExpression) {
+	private IQuery joinQuery(Collection<ZSelectItem> selectItems, IQuery leftTable, IQuery rightTable, String joinType, ZExpression onExpression) {
 		
 		return null;
 	}
 	
 	
 	
-	public static Collection<ZSelectItem> getSelectItemsByAlias(Collection<ZSelectItem> selectItems, String alias) {
+	private static Collection<ZSelectItem> getSelectItemsByAlias(Collection<ZSelectItem> selectItems, String alias) {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 		
 		for(ZSelectItem selectItem : selectItems) {
@@ -123,7 +123,7 @@ public class SQLUtility {
 		return result;
 	}
 	
-	public static String getValueWithoutAlias(ZSelectItem selectItem) {
+	private static String getValueWithoutAlias(ZSelectItem selectItem) {
 		String result;
 		
 		String selectItemAlias = selectItem.getAlias();
@@ -137,7 +137,7 @@ public class SQLUtility {
 		return result;
 	}
 	
-	static Vector<ZOrderBy> pushOrderByDown(Collection<ZOrderBy> oldOrderByCollection,
+	private static Vector<ZOrderBy> pushOrderByDown(Collection<ZOrderBy> oldOrderByCollection,
 			Map<String, ZSelectItem> mapInnerAliasSelectItem) {
 		Map<ZConstant, ZConstant> whereReplacement = new LinkedHashMap<ZConstant, ZConstant>();
 		for(String alias : mapInnerAliasSelectItem.keySet()) {
@@ -187,7 +187,7 @@ public class SQLUtility {
 		//this.setOrderBy(newOrderByCollection);
 	}
 	
-	public static boolean areAllConstants(Collection<ZExp> exps) {
+	private static boolean areAllConstants(Collection<ZExp> exps) {
 		boolean result;
 		
 		if(exps == null) {
@@ -204,7 +204,7 @@ public class SQLUtility {
 		return result;
 	}
 
-	public static Collection<ZExpression> containedInPrefix(ZExp exp, String prefix) {
+	private static Collection<ZExpression> containedInPrefix(ZExp exp, String prefix) {
 		Collection<String> prefixes = new Vector<String>();
 		prefixes.add(prefix);
 		Collection<ZExpression> result = SQLUtility.containedInPrefixes(exp, prefixes, true);
@@ -212,7 +212,8 @@ public class SQLUtility {
 	}
 
 		
-	public static Collection<ZExpression> containedInPrefixes(ZExp exp, Collection<String> prefixes, boolean allPrefixes) {
+	private static Collection<ZExpression> containedInPrefixes(
+			ZExp exp, Collection<String> prefixes, boolean allPrefixes) {
 		Collection<ZExpression> result = new HashSet<ZExpression>();
 		
 		if(exp instanceof ZExpression) {
@@ -224,9 +225,7 @@ public class SQLUtility {
 					if(operand instanceof ZConstant) {
 						ZConstant zConstant = (ZConstant) operand;  
 						if(zConstant.getType() == ZConstant.COLUMNNAME) {
-							String operandString = operand.toString();
-							operandString = operandString.replaceAll("\"", "");
-							operandString = operandString.replaceAll("\'", "");
+							String operandString = MorphSQLUtility.printWithoutEnclosedCharacters(operand.toString());
 							boolean found = false;
 							for(String prefix : prefixes) {
 								if(operandString.contains(prefix + ".") && !found) {
@@ -259,7 +258,7 @@ public class SQLUtility {
 		return result;
 	}
 	
-	public static Collection <ZSelectItem> getSelectItemsMapPrefix(Collection <ZSelectItem> selectItems) {
+	private static Collection <ZSelectItem> getSelectItemsMapPrefix(Collection <ZSelectItem> selectItems) {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 
 		for(ZSelectItem selectItem : selectItems) {
@@ -272,7 +271,7 @@ public class SQLUtility {
 		return result;
 	}
 	
-	public static Collection <ZSelectItem> getSelectItemsMapPrefix(
+	private static Collection <ZSelectItem> getSelectItemsMapPrefix(
 			Collection <ZSelectItem> selectItems, Node node, String pPrefix, String dbType) {
 		Collection<ZSelectItem> result = new Vector<ZSelectItem>();
 		String varNamePrefixed = Constants.PREFIX_MAPPING_ID() + node.getName();
@@ -299,9 +298,8 @@ public class SQLUtility {
 					result.add(newSelectItem);
 				}				
 			} else {
-				String selectItemString = selectItem.toString();
-				selectItemString = selectItemString.replaceAll("\"", "");
-				selectItemString = selectItemString.replaceAll("\'", "");
+				String selectItemString = MorphSQLUtility.printWithoutEnclosedCharacters(
+						selectItem.toString());
 				
 				if(varNamePrefixed.equals(selectItemString)) {
 //					result.add(selectItem);
@@ -321,7 +319,7 @@ public class SQLUtility {
 		return result;
 	}
 	
-	public static void setDefaultAlias(Collection<ZSelectItem> selectItems) {
+	private static void setDefaultAlias(Collection<ZSelectItem> selectItems) {
 		for(ZSelectItem selectItem : selectItems) {
 			String alias = selectItem.getAlias();
 			if(alias == null || alias.equals("")) {

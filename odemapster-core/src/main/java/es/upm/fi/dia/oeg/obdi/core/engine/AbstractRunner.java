@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.graph.query.Expression.Constant;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 
@@ -25,18 +26,15 @@ public abstract class AbstractRunner {
 	private static Logger logger = Logger.getLogger(AbstractRunner.class);
 	public ConfigurationProperties configurationProperties;
 	protected Connection conn;
+	protected AbstractMappingDocument mappingDocument;
 	//protected AbstractParser parser;
+
+	//protected Query sparqQuery = null;
 	protected AbstractDataTranslator dataTranslator;
 	private String queryTranslatorClassName = null;
 	private IQueryTranslator queryTranslator;
 	protected DefaultResultProcessor resultProcessor;
-	protected AbstractMappingDocument mappingDocument;
-	protected Query sparqQuery = null;
-	public Query getSparqQuery() {
-		return sparqQuery;
-	}
-	private Collection<IQuery> sqlQueries;
-
+	//	private Collection<IQuery> sqlQueries;
 	private String queryResultWriterClassName = null;
 	private AbstractQueryResultWriter queryResultWriter = null;
 	private String dataSourceReaderClassName = null;
@@ -44,9 +42,9 @@ public abstract class AbstractRunner {
 	private Object queryResultWriterOutput = null;
 
 	public AbstractRunner() throws Exception {
-		
+
 	}
-	
+
 	public AbstractRunner(ConfigurationProperties configurationProperties) throws Exception {
 		this.configurationProperties = configurationProperties;
 
@@ -57,43 +55,42 @@ public abstract class AbstractRunner {
 			this.readMappingDocumentFile(mappingDocumentFile);
 		}
 
-		//sparql query
-		String queryFilePath = this.configurationProperties.getQueryFilePath();
-		if(queryFilePath != null && !queryFilePath.equals("") ) {
-			logger.info("Parsing query file : " + queryFilePath);
-			this.sparqQuery = QueryFactory.read(queryFilePath);
+//		//sparql query
+//		String queryFilePath = this.configurationProperties.getQueryFilePath();
+//		Query sparqQuery = null;
+//		if(queryFilePath != null && !queryFilePath.equals("") ) {
+//			logger.info("Parsing query file : " + queryFilePath);
+//			sparqQuery = QueryFactory.read(queryFilePath);
+//		}
+
+		//data translator
+		this.createDataTranslator(this.configurationProperties);
+
+		//query translator
+		this.queryTranslatorClassName = 
+				this.configurationProperties.getQueryTranslatorClassName();
+		//if(this.queryTranslatorClassName != null) {
+			this.buildQueryTranslator();	
+		//}
+
+		//query writer
+		this.queryResultWriterClassName = 
+				this.configurationProperties.getQueryResultWriterClassName();
+		if(this.queryResultWriterClassName != null) {
+			this.buildQueryResultWriter();
 		}
 
-		if(this.sparqQuery == null) {
-			//data translator
-			this.createDataTranslator(this.configurationProperties);
-		} else {
-			//query translator
-			this.queryTranslatorClassName = 
-					this.configurationProperties.getQueryTranslatorClassName();
-			if(this.queryTranslatorClassName != null) {
-				this.buildQueryTranslator();	
-			}
+		//query evaluator
+		this.dataSourceReaderClassName = 
+				this.configurationProperties.getQueryEvaluatorClassName();
+		if(this.dataSourceReaderClassName != null) {
+			this.buildDataSourceReader();
+		}
 
-			//query writer
-			this.queryResultWriterClassName = 
-					this.configurationProperties.getQueryResultWriterClassName();
-			if(this.queryResultWriterClassName != null) {
-				this.buildQueryResultWriter();
-			}
+		//result processor
+		this.resultProcessor = new DefaultResultProcessor(
+				dataSourceReader, queryResultWriter);				
 
-			//query evaluator
-			this.dataSourceReaderClassName = 
-					this.configurationProperties.getQueryEvaluatorClassName();
-			if(this.dataSourceReaderClassName != null) {
-				this.buildDataSourceReader();
-			}
-
-			//result processor
-			this.resultProcessor = new DefaultResultProcessor(
-					dataSourceReader, queryResultWriter);				
-
-		}		
 	}
 
 	public AbstractRunner(String configurationDirectory, String configurationFile) 
@@ -101,106 +98,71 @@ public abstract class AbstractRunner {
 		this(new ConfigurationProperties(configurationDirectory, configurationFile));
 	}
 
-	public String run()
-			throws Exception {
-		String status = null;
-
-		//mapping document
-		if(this.mappingDocument == null) {
-			String mappingDocumentFile = 
-					this.configurationProperties.getMappingDocumentFilePath();
-			if(mappingDocumentFile != null) {
-				this.readMappingDocumentFile(mappingDocumentFile);
-			}			
+	private void buildDataSourceReader() throws Exception {
+		final String dataSourceReaderClassName;
+		
+		if(this.dataSourceReaderClassName == null || this.dataSourceReaderClassName.equals("")) {
+			dataSourceReaderClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT();
+		} else {
+			dataSourceReaderClassName = this.dataSourceReaderClassName;
 		}
 		
-		if(this.sparqQuery == null) {
-			//set output file
-			String outputFileName = configurationProperties.getOutputFilePath();
-			this.materializeMappingDocuments(outputFileName, mappingDocument);
-		} else {
-			logger.debug("sparql query = " + this.sparqQuery);
-
-			//query translator
-			if(this.queryTranslator == null) {
-				if(this.queryTranslatorClassName == null) {
-					this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
-				}
-				this.buildQueryTranslator();
-			}
-
-			//query result writer
-			if(this.queryResultWriter == null) {
-				if(this.queryResultWriterClassName == null) {
-					this.queryResultWriterClassName = Constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT();					
-				}
-				this.buildQueryResultWriter();
-			}
-
-			//query evaluator
-			if(this.dataSourceReader == null) {
-				if(this.dataSourceReaderClassName == null) {
-					this.dataSourceReaderClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT();
-				}
-				this.buildDataSourceReader();
-			}
-
-			//result processor
-			this.resultProcessor = new DefaultResultProcessor(
-					dataSourceReader, queryResultWriter);				
-
-			//loading ontology file
-			String ontologyFilePath = null;
+		this.dataSourceReader = (AbstractDataSourceReader)
+				Class.forName(dataSourceReaderClassName).newInstance();
+		if(dataSourceReader instanceof RDBReader) {
+			//database connection
 			if(this.configurationProperties != null) {
-				ontologyFilePath = this.configurationProperties.getOntologyFilePath();
+				if(this.configurationProperties.getNoOfDatabase() == 1) {
+					try { conn = this.getConnection(); } 
+					catch(Exception e) { e.printStackTrace(); }				
+				}
+				((RDBReader) dataSourceReader).setConnection(conn);
+				int timeout = this.configurationProperties.getDatabaseTimeout();
+				((RDBReader) dataSourceReader).setTimeout(timeout);
 			}
-
-
-			//rewrite the SPARQL query if necessary
-			List<Query> queries = new ArrayList<Query>();
-			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
-				queries.add(this.sparqQuery);
-			} else {
-				//rewrite the query based on the mappings and ontology
-				logger.info("Rewriting query...");
-				this.configurationProperties.getMappingDocumentFilePath();
-				//				Collection <String> mappedOntologyElements = MappingsExtractor.getMappedPredcatesFromR2O(mappingDocumentFile);
-				Collection <String> mappedOntologyElements = this.mappingDocument.getMappedConcepts();
-				Collection <String> mappedOntologyElements2 = this.mappingDocument.getMappedProperties();
-				mappedOntologyElements.addAll(mappedOntologyElements2);
-
-
-				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
-				//queries = rewritterWapper.rewrite(originalQuery);
-				queries = RewriterWrapper.rewrite(this.sparqQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
-
-				logger.debug("No of rewriting query result = " + queries.size());
-				logger.debug("queries = " + queries);
-			}			
-
-
-			//translate sparql queries into sql queries
-			this.sqlQueries = 
-					this.translateSPARQLQueriesIntoSQLQueries(queries);
-
-			//translate result
-			//if (this.conn != null) {
-			//GFT does not need a Connection instance
-				this.resultProcessor.translateResult(this.sqlQueries);	
-			//}
 		}
 
-		logger.info("**********************DONE****************************");
-		return status;
-
+		logger.debug("query evaluator = " + this.dataSourceReader);
 	}
 
-	protected abstract void createDataTranslator(
-			ConfigurationProperties configurationProperties);
+	private void buildQueryResultWriter() throws Exception {
+		String queryResultWriterClassName;
+		if(this.queryResultWriterClassName == null || this.queryResultWriterClassName.equals("")) {
+			queryResultWriterClassName = Constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT(); 
+		} else {
+			queryResultWriterClassName = this.queryResultWriterClassName;
+		}
+				
+		this.queryResultWriter = (AbstractQueryResultWriter) 
+				Class.forName(queryResultWriterClassName).newInstance();
+
+		if(this.queryTranslator == null) {
+			throw new Exception("Query Translator is not set yet!");
+		}
+		this.queryResultWriter.setQueryTranslator(this.queryTranslator);
+
+//		if(this.sparqQuery != null) {
+//			this.queryResultWriter.setSparqQuery(sparqQuery);
+//		}
+
+		if(queryResultWriter instanceof XMLWriter && this.queryResultWriterOutput == null) {
+			//set output file
+			String outputFileName = null;
+			if(this.configurationProperties != null) {
+				outputFileName = this.configurationProperties.getOutputFilePath();
+			}
+			if(outputFileName == null) {
+				outputFileName = Constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT(); 
+			}
+			this.queryResultWriterOutput = outputFileName;
+		}
+		queryResultWriter.setOutput(this.queryResultWriterOutput);
+
+		logger.debug("query result writer = " + this.queryResultWriter);
+	}
 
 	protected IQueryTranslationOptimizer buildQueryTranslationOptimizer() {
-		String defaultQueryTranslatorClassName =  
-				"es.upm.fi.dia.oeg.obdi.core.querytranslator.QueryTranslationOptimizer";
+		String defaultQueryTranslatorClassName = Constants.QUERY_OPTIMIZER_CLASSNAME_DEFAULT();
 
 		try {
 			return (IQueryTranslationOptimizer) Class.forName(defaultQueryTranslatorClassName).newInstance();
@@ -211,9 +173,64 @@ public abstract class AbstractRunner {
 		return null;
 	}
 
-	protected abstract AbstractUnfolder createUnfolder();
+	public void buildQueryTranslator() throws Exception {
+		final String queryTranslatorClassName;
+		if(this.queryTranslatorClassName == null || this.queryTranslatorClassName.equals("")) {
+			queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();
+		} else {
+			queryTranslatorClassName = this.queryTranslatorClassName; 
+		}
 
-	public abstract void readMappingDocumentFile(String mappingDocumentFile) throws Exception;
+		this.queryTranslator = (IQueryTranslator) 
+				Class.forName(queryTranslatorClassName).newInstance();		
+		if(configurationProperties != null) {
+			this.queryTranslator.setConfigurationProperties(configurationProperties);
+			String databaseType = configurationProperties.getDatabaseType();
+			if(databaseType != null && !databaseType.equals("")) {
+				this.queryTranslator.setDatabaseType(databaseType);
+			}			
+		}
+
+
+		if(this.mappingDocument == null) {
+			String mappingDocumentFilePath = this.getMappingDocumentPath();
+			if(mappingDocumentFilePath == null) {
+				throw new Exception("Mapping document is not set yet!");
+			}
+			this.readMappingDocumentFile(mappingDocumentFilePath);
+		}
+		this.queryTranslator.setMappingDocument(this.mappingDocument);
+
+		//query translation optimizer
+		IQueryTranslationOptimizer queryTranslationOptimizer = this.buildQueryTranslationOptimizer();
+
+		boolean eliminateSelfJoin = this.isSelfJoinElimination();
+		queryTranslationOptimizer.setSelfJoinElimination(eliminateSelfJoin);
+
+		boolean eliminateSubQuery = this.isSubQueryElimination();
+		queryTranslationOptimizer.setSubQueryElimination(eliminateSubQuery);
+
+		boolean transJoinEliminateSubQuery = this.isTransJoinSubQueryElimination();
+		queryTranslationOptimizer.setTransJoinSubQueryElimination(transJoinEliminateSubQuery);
+
+		boolean transSTGEliminateSubQuery = this.isTransSTGSubQueryElimination();
+		queryTranslationOptimizer.setTransSTGSubQueryElimination(transSTGEliminateSubQuery);
+
+		boolean subQueryAsView = this.isSubQueryAsView();
+		queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
+
+		this.queryTranslator.setOptimizer(queryTranslationOptimizer);
+		logger.debug("query translator = " + this.queryTranslator);
+		
+		//sparql query
+		String queryFilePath = this.configurationProperties.getQueryFilePath();
+		this.queryTranslator.setSPARQLQueryByFile(queryFilePath);
+	}
+
+	protected abstract void createDataTranslator(
+			ConfigurationProperties configurationProperties);
+
+	protected abstract AbstractUnfolder createUnfolder();
 
 	public ConfigurationProperties getConfigurationProperties() {
 		if(this.configurationProperties == null) {
@@ -255,56 +272,40 @@ public abstract class AbstractRunner {
 		return dataTranslator;
 	}
 
+	public AbstractMappingDocument getMappingDocument() {
+		return mappingDocument;
+	}
+
+	public String getMappingDocumentPath() {
+		return this.configurationProperties.getMappingDocumentFilePath();
+	}
+
+	public String getOutputFilePath() {
+		return this.configurationProperties.getOutputFilePath();
+	}
+
+	public AbstractQueryResultWriter getQueryResultWriter() {
+		return this.queryResultWriter;
+	}
+
 	public IQueryTranslator getQueryTranslator() {
 		return this.queryTranslator;
 	}
 
-	public void buildQueryTranslator() throws Exception {
-		if(this.queryTranslatorClassName == null) {
-			this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
-		}
-		
-		this.queryTranslator = (IQueryTranslator) 
-				Class.forName(this.queryTranslatorClassName).newInstance();		
-		if(configurationProperties != null) {
-			this.queryTranslator.setConfigurationProperties(configurationProperties);
-			String databaseType = configurationProperties.getDatabaseType();
-			if(databaseType != null && !databaseType.equals("")) {
-				this.queryTranslator.setDatabaseType(databaseType);
-			}			
-		}
+	public Query getSparqQuery() {
+		Query result = null;
 
+		if(this.queryTranslator != null) {
+			result = this.queryTranslator.getSPARQLQuery();
+		} 
 
-		if(this.mappingDocument == null) {
-			String mappingDocumentFilePath = this.getMappingDocumentPath();
-			if(mappingDocumentFilePath == null) {
-				throw new Exception("Mapping document is not set yet!");
-			}
-			this.readMappingDocumentFile(mappingDocumentFilePath);
-		}
-		this.queryTranslator.setMappingDocument(this.mappingDocument);
-
-		//query translation optimizer
-		IQueryTranslationOptimizer queryTranslationOptimizer = this.buildQueryTranslationOptimizer();
-		
-		boolean eliminateSelfJoin = this.isSelfJoinElimination();
-		queryTranslationOptimizer.setSelfJoinElimination(eliminateSelfJoin);
-		
-		boolean eliminateSubQuery = this.isSubQueryElimination();
-		queryTranslationOptimizer.setSubQueryElimination(eliminateSubQuery);
-		
-		boolean transJoinEliminateSubQuery = this.isTransJoinSubQueryElimination();
-		queryTranslationOptimizer.setTransJoinSubQueryElimination(transJoinEliminateSubQuery);
-		
-		boolean transSTGEliminateSubQuery = this.isTransSTGSubQueryElimination();
-		queryTranslationOptimizer.setTransSTGSubQueryElimination(transSTGEliminateSubQuery);
-		
-		boolean subQueryAsView = this.isSubQueryAsView();
-		queryTranslationOptimizer.setSubQueryAsView(subQueryAsView);
-		
-		this.queryTranslator.setOptimizer(queryTranslationOptimizer);
-		logger.debug("query translator = " + this.queryTranslator);
+		return result;
 	}
+
+	//	public Collection<IQuery> getSqlQueries() {
+	//		return sqlQueries;
+	//	}
+
 
 	private boolean isSelfJoinElimination() {
 		boolean result = true;
@@ -314,6 +315,15 @@ public abstract class AbstractRunner {
 		return result;
 	}
 
+	private boolean isSubQueryAsView() {
+		boolean result = false;
+		if(this.configurationProperties != null) {
+			result = this.configurationProperties.isSubQueryAsView();
+		}
+		return result;
+	}
+
+
 	private boolean isSubQueryElimination() {
 		boolean result = true;
 		if(this.configurationProperties != null) {
@@ -321,6 +331,15 @@ public abstract class AbstractRunner {
 		}
 		return result;
 	}
+
+
+	//	private void setDataTranslator(AbstractDataTranslator dataTranslator) {
+	//		this.dataTranslator = dataTranslator;
+	//	}
+
+	//	public void setParser(AbstractParser parser) {
+	//		this.parser = parser;
+	//	}
 
 	private boolean isTransJoinSubQueryElimination() {
 		boolean result = false;
@@ -337,15 +356,6 @@ public abstract class AbstractRunner {
 		}
 		return result;
 	}
-
-	private boolean isSubQueryAsView() {
-		boolean result = false;
-		if(this.configurationProperties != null) {
-			result = this.configurationProperties.isSubQueryAsView();
-		}
-		return result;
-	}
-
 
 	protected ConfigurationProperties loadConfigurationFile(
 			String mappingDirectory, String configurationFile) 
@@ -418,67 +428,114 @@ public abstract class AbstractRunner {
 	}
 
 
-	private Collection<IQuery> translateSPARQLQueriesIntoSQLQueries(
-			Collection<Query> sparqlQueries) throws Exception {
-		Collection<IQuery> sqlQueries = new Vector<IQuery>();
-		for(Query sparqlQuery : sparqlQueries) {
-			logger.debug("SPARQL Query = \n" + sparqlQuery);
-			IQuery sqlQuery = 
-					this.queryTranslator.translate(sparqlQuery);
-			logger.debug("SQL Query = \n" + sqlQuery);
-			sqlQueries.add(sqlQuery);
-		}
-
-		return sqlQueries;
-	}
-
-
-//	private void setDataTranslator(AbstractDataTranslator dataTranslator) {
-//		this.dataTranslator = dataTranslator;
-//	}
-
-	//	public void setParser(AbstractParser parser) {
-	//		this.parser = parser;
-	//	}
-
-	public void setQueryTranslator(IQueryTranslator queryTranslator) {
-		this.queryTranslator = queryTranslator;
-	}
-
-	public void setSparqQuery(Query sparqQuery) {
-		this.sparqQuery = sparqQuery;
-	}
-
-	public void setSparqQuery(String sparqQuery) {
-		this.sparqQuery = QueryFactory.create(sparqQuery);
-	}
+	public abstract void readMappingDocumentFile(String mappingDocumentFile) throws Exception;
 
 	public void readSPARQLFile(String sparqQueryFileURL) {
-		this.sparqQuery = QueryFactory.read(sparqQueryFileURL);
-	}
-
-
-	public String getMappingDocumentPath() {
-		return this.configurationProperties.getMappingDocumentFilePath();
-	}
-
-	public AbstractMappingDocument getMappingDocument() {
-		return mappingDocument;
+		if(this.queryTranslator != null) {
+			Query sparqQuery = QueryFactory.read(sparqQueryFileURL);
+			this.queryTranslator.setSPARQLQuery(sparqQuery);
+		}
 	}
 
 	//	public abstract String getQueryTranslatorClassName();
 
-	public void setResultTranslator(DefaultResultProcessor resultTranslator) {
-		this.resultProcessor = resultTranslator;
+	public String run()
+			throws Exception {
+		String status = null;
+
+		//mapping document
+		if(this.mappingDocument == null) {
+			String mappingDocumentFile = 
+					this.configurationProperties.getMappingDocumentFilePath();
+			if(mappingDocumentFile != null) {
+				this.readMappingDocumentFile(mappingDocumentFile);
+			}			
+		}
+
+		Query sparqlQuery = this.queryTranslator.getSPARQLQuery();
+		if(sparqlQuery == null) {
+			//set output file
+			String outputFileName = configurationProperties.getOutputFilePath();
+			this.materializeMappingDocuments(outputFileName, mappingDocument);
+		} else {
+			logger.debug("sparql query = " + sparqlQuery);
+
+			//query translator
+			if(this.queryTranslator == null) {
+				if(this.queryTranslatorClassName == null) {
+					this.queryTranslatorClassName = Constants.QUERY_TRANSLATOR_CLASSNAME_DEFAULT();					
+				}
+				this.buildQueryTranslator();
+			}
+
+			//query result writer
+			if(this.queryResultWriter == null) {
+				if(this.queryResultWriterClassName == null) {
+					this.queryResultWriterClassName = Constants.QUERY_RESULT_WRITER_CLASSNAME_DEFAULT();					
+				}
+				this.buildQueryResultWriter();
+			}
+
+			//query evaluator
+			if(this.dataSourceReader == null) {
+				if(this.dataSourceReaderClassName == null) {
+					this.dataSourceReaderClassName = Constants.QUERY_EVALUATOR_CLASSNAME_DEFAULT();
+				}
+				this.buildDataSourceReader();
+			}
+
+			//result processor
+			this.resultProcessor = new DefaultResultProcessor(
+					dataSourceReader, queryResultWriter);				
+
+			//loading ontology file
+			String ontologyFilePath = null;
+			if(this.configurationProperties != null) {
+				ontologyFilePath = this.configurationProperties.getOntologyFilePath();
+			}
+
+
+			//rewrite the SPARQL query if necessary
+			List<Query> queries = new ArrayList<Query>();
+			if(ontologyFilePath == null || ontologyFilePath.equals("")) {
+				queries.add(sparqlQuery);
+			} else {
+				//rewrite the query based on the mappings and ontology
+				logger.info("Rewriting query...");
+				this.configurationProperties.getMappingDocumentFilePath();
+				//				Collection <String> mappedOntologyElements = MappingsExtractor.getMappedPredcatesFromR2O(mappingDocumentFile);
+				Collection <String> mappedOntologyElements = this.mappingDocument.getMappedConcepts();
+				Collection <String> mappedOntologyElements2 = this.mappingDocument.getMappedProperties();
+				mappedOntologyElements.addAll(mappedOntologyElements2);
+
+
+				//RewriterWrapper rewritterWapper = new RewriterWrapper(ontologyFilePath, rewritterWrapperMode, mappedOntologyElements);
+				//queries = rewritterWapper.rewrite(originalQuery);
+				queries = RewriterWrapper.rewrite(sparqlQuery, ontologyFilePath, RewriterWrapper.fullMode, mappedOntologyElements, RewriterWrapper.globalMatchMode);
+
+				logger.debug("No of rewriting query result = " + queries.size());
+				logger.debug("queries = " + queries);
+			}			
+
+
+			//translate sparql queries into sql queries
+			Collection<IQuery> sqlQueries = 
+					this.translateSPARQLQueriesIntoSQLQueries(queries);
+
+			//translate result
+			//if (this.conn != null) {
+			//GFT does not need a Connection instance
+			this.resultProcessor.translateResult(sqlQueries);	
+			//}
+		}
+
+		logger.info("**********************DONE****************************");
+		return status;
+
 	}
 
-	public String getOutputFilePath() {
-		return this.configurationProperties.getOutputFilePath();
-	}
-
-	public void setQueryTranslatorClassName(String queryTranslatorClassName) throws Exception {
-		this.queryTranslatorClassName = queryTranslatorClassName;
-		//this.buildQueryTranslator();
+	public void setDataSourceReaderClassName(String queryEvaluatorClassName) {
+		this.dataSourceReaderClassName = queryEvaluatorClassName;
 	}
 
 	public void setQueryResultWriterClassName(String queryResultWriterClassName) throws Exception {
@@ -490,63 +547,43 @@ public abstract class AbstractRunner {
 		this.queryResultWriterOutput = output;
 	}
 
-	public AbstractQueryResultWriter getQueryResultWriter() {
-		return this.queryResultWriter;
+	public void setQueryTranslator(IQueryTranslator queryTranslator) {
+		this.queryTranslator = queryTranslator;
 	}
 
-	private void buildQueryResultWriter() throws Exception {
-		this.queryResultWriter = (AbstractQueryResultWriter) 
-				Class.forName(this.queryResultWriterClassName).newInstance();
-
-		if(this.queryTranslator == null) {
-			throw new Exception("Query Translator is not set yet!");
-		}
-		this.queryResultWriter.setQueryTranslator(this.queryTranslator);
-
-		if(this.sparqQuery != null) {
-			this.queryResultWriter.setSparqQuery(sparqQuery);
-		}
-
-		if(queryResultWriter instanceof XMLWriter && this.queryResultWriterOutput == null) {
-			//set output file
-			String outputFileName = null;
-			if(this.configurationProperties != null) {
-				outputFileName = this.configurationProperties.getOutputFilePath();
-			}
-			if(outputFileName == null) {
-				outputFileName = Constants.QUERY_RESULT_XMLWRITER_OUTPUT_DEFAULT(); 
-			}
-			this.queryResultWriterOutput = outputFileName;
-		}
-		queryResultWriter.setOutput(this.queryResultWriterOutput);
-
-		logger.debug("query result writer = " + this.queryResultWriter);
+	public void setQueryTranslatorClassName(String queryTranslatorClassName) throws Exception {
+		this.queryTranslatorClassName = queryTranslatorClassName;
+		//this.buildQueryTranslator();
 	}
 
-	private void buildDataSourceReader() throws Exception {
-		this.dataSourceReader = (AbstractDataSourceReader)
-				Class.forName(this.dataSourceReaderClassName).newInstance();
-		if(dataSourceReader instanceof RDBReader) {
-			//database connection
-			if(this.configurationProperties != null) {
-				if(this.configurationProperties.getNoOfDatabase() == 1) {
-					try { conn = this.getConnection(); } 
-					catch(Exception e) { e.printStackTrace(); }				
-				}
-				((RDBReader) dataSourceReader).setConnection(conn);
-				int timeout = this.configurationProperties.getDatabaseTimeout();
-				((RDBReader) dataSourceReader).setTimeout(timeout);
-			}
+	public void setResultTranslator(DefaultResultProcessor resultTranslator) {
+		this.resultProcessor = resultTranslator;
+	}
+
+//	public void setSparqQuery(Query sparqQuery) {
+//		if(this.queryTranslator != null) {
+//			this.queryTranslator.setSparqlQuery(sparqQuery);
+//		}
+//	}
+//
+//	public void setSparqQuery(String sparqQueryString) {
+//		if(this.queryTranslator != null) {
+//			Query sparqQuery = QueryFactory.create(sparqQueryString);
+//			this.queryTranslator.setSparqlQuery(sparqQuery);
+//		}
+//	}
+
+	private Collection<IQuery> translateSPARQLQueriesIntoSQLQueries(
+			Collection<Query> sparqlQueries) throws Exception {
+		Collection<IQuery> sqlQueries = new Vector<IQuery>();
+		for(Query sparqlQuery : sparqlQueries) {
+			logger.debug("SPARQL Query = \n" + sparqlQuery);
+			IQuery sqlQuery = 
+					this.queryTranslator.translate(sparqlQuery);
+			logger.debug("SQL Query = \n" + sqlQuery);
+			sqlQueries.add(sqlQuery);
 		}
 
-		logger.debug("query evaluator = " + this.dataSourceReader);
-	}
-
-	public void setDataSourceReaderClassName(String queryEvaluatorClassName) {
-		this.dataSourceReaderClassName = queryEvaluatorClassName;
-	}
-
-	public Collection<IQuery> getSqlQueries() {
 		return sqlQueries;
 	}
 

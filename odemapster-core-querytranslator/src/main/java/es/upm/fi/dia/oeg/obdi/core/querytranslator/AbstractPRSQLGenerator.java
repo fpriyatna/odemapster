@@ -236,10 +236,8 @@ public abstract class AbstractPRSQLGenerator {
 					
 				}
 				if(object != subject && object != predicate) {
-					Collection<ZSelectItem> selectItemsObject = 
-							this.genPRSQLObject(tp, alphaResult,
-									betaGenerator, nameGenerator,
-									cmSubject, predicateURI, null);
+					Collection<ZSelectItem> selectItemsObject = this.genPRSQLObject(tp, alphaResult,
+									betaGenerator, nameGenerator, cmSubject, predicateURI, null);
 					selectItemsSTGObjects.addAll(selectItemsObject);
 				}				
 			}

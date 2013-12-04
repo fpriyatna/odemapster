@@ -1325,7 +1325,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 		Vector<ZOrderBy> orderBy = this.getOrderBy();
 		if(orderBy != null) {
 			Map<String, ZSelectItem> mapInnerAliasSelectItem = this.buildMapAliasSelectItem();
-			Vector<ZOrderBy> newOrderByCollection = SQLUtility.pushOrderByDown(orderBy, mapInnerAliasSelectItem);
+			Vector<ZOrderBy> newOrderByCollection = MorphSQLUtility.pushOrderByDown(orderBy, mapInnerAliasSelectItem);
 			this.setOrderBy(newOrderByCollection);			
 		}
 	}
@@ -1364,16 +1364,15 @@ public class SQLQuery extends ZQuery implements IQuery {
 					
 					//be careful so that we don't return those join expressions that is not in rightTableAlias
 					Collection<ZExpression> relevantJoinExpression1 = 
-							SQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
+							MorphSQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
 					addedTableAlias.add(rightTableAlias);
 					Collection<ZExpression> relevantJoinExpression2 = 
-							SQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
+							MorphSQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
 					Collection<ZExpression> relevantJoinExpressions = 
 							new Vector<ZExpression>(relevantJoinExpression2);
 					relevantJoinExpressions.removeAll(relevantJoinExpression1);
 					
-					Collection<ZExpression> relevantWhereExpression = SQLUtility.containedInPrefix(
-							whereExpression, rightTableAlias);
+					Collection<ZExpression> relevantWhereExpression = MorphSQLUtility.containedInPrefix(whereExpression, rightTableAlias);
 					if(relevantJoinExpressions.isEmpty() && relevantWhereExpression.isEmpty()) {
 						joinTable = new SQLJoinTable(rightTableLogicalTable, joinType
 								, Constants.SQL_EXPRESSION_TRUE());
@@ -1392,7 +1391,7 @@ public class SQLQuery extends ZQuery implements IQuery {
 						
 						combinedExpressionCollection.addAll(relevantWhereExpression);
 						
-						ZExpression combinedExpressions = SQLUtility.combineExpresions(
+						ZExpression combinedExpressions = MorphSQLUtility.combineExpresions(
 								combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND());
 						joinTable = new SQLJoinTable(rightTableLogicalTable, joinType, combinedExpressions);	
 					}
@@ -1412,18 +1411,18 @@ public class SQLQuery extends ZQuery implements IQuery {
 				String rightTableAlias = joinTable.getJoinSource().getAlias();
 				
 
-				Collection<ZExpression> relevantJoinExpression1 = SQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
+				Collection<ZExpression> relevantJoinExpression1 = MorphSQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
 				addedTableAlias.add(rightTableAlias);
-				Collection<ZExpression> relevantJoinExpression2 = SQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
+				Collection<ZExpression> relevantJoinExpression2 = MorphSQLUtility.containedInPrefixes(joinExpression, addedTableAlias, true);
 				//so that we don't return those join expressions that is not in rightTableAlias 
 				Collection<ZExpression> relevantJoinExpression = new Vector<ZExpression>(relevantJoinExpression2);
 				relevantJoinExpression.removeAll(relevantJoinExpression1);
 
-				Collection<ZExpression> relevantWhereExpression = SQLUtility.containedInPrefix(whereExpression, rightTableAlias);
+				Collection<ZExpression> relevantWhereExpression = MorphSQLUtility.containedInPrefix(whereExpression, rightTableAlias);
 				Collection<ZExpression> combinedExpressionCollection = new HashSet<ZExpression>();
 				combinedExpressionCollection.addAll(relevantJoinExpression);
 				combinedExpressionCollection.addAll(relevantWhereExpression);
-				ZExpression combinedExpressions = SQLUtility.combineExpresions(
+				ZExpression combinedExpressions = MorphSQLUtility.combineExpresions(
 						combinedExpressionCollection, Constants.SQL_LOGICAL_OPERATOR_AND());
 				joinTable.addOnExpression(combinedExpressions);	
 			}
@@ -1474,6 +1473,78 @@ public class SQLQuery extends ZQuery implements IQuery {
 	}
 
 
+	public static SQLQuery createQuery(SQLLogicalTable mainTable
+			, Collection<SQLJoinTable> joinTables, Collection<ZSelectItem> selectItems
+			, ZExpression whereCondition, String databaseType) {
+		SQLQuery resultAux = null;
+		
+		Collection<SQLLogicalTable> logicalTables = new Vector<SQLLogicalTable>();
+		Collection<ZExpression> joinExpressions = new Vector<ZExpression>();
+		if(mainTable instanceof SQLQuery) {
+			resultAux = (SQLQuery) mainTable;
+			if(joinTables != null) {
+				for(SQLJoinTable alphaPredicateObject : joinTables) {
+					SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+					resultAux.addLogicalTable(logicalTable);
+					ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+					//ZExpression pushedJoinExpression = (ZExpression) resultAux.pushExpressionDown(joinExpression);
+					joinExpressions.add(joinExpression);
+				}				
+			}
 
+
+			//ZExpression pushedCondSQL = (ZExpression) resultAux.pushExpressionDown(condSQL);
+			Collection<ZExp> expressionsList = new Vector<ZExp>();
+			expressionsList.add(whereCondition);
+			expressionsList.addAll(joinExpressions);
+			ZExpression newWhere = MorphSQLUtility.combineExpresions(expressionsList
+					, Constants.SQL_LOGICAL_OPERATOR_AND());
+			ZExpression pushedNewWhere = (ZExpression) resultAux.pushExpDown(newWhere);
+			resultAux.addWhere(pushedNewWhere);
+
+			resultAux.pushProjectionsDown(selectItems);
+		} else if(mainTable instanceof ZFromItem) {
+			ZFromItem alphaSubjectFromItem = (ZFromItem) mainTable;
+
+			resultAux = new SQLQuery();
+			resultAux.addSelectItems(selectItems);
+			resultAux.addFromItem(alphaSubjectFromItem);
+			if(joinTables != null) {
+				for(SQLJoinTable alphaPredicateObject : joinTables) {
+					resultAux.addFromItem(alphaPredicateObject);
+				}				
+			}
+
+			resultAux.addWhere(whereCondition);
+
+			//							logicalTables.add(alphaSubject);
+			//							for(SQLJoinTable alphaPredicateObject : alphaPredicateObjects) {
+			//								SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+			//								logicalTables.add(logicalTable);
+			//								ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+			//								joinExpressions.add(joinExpression);
+			//							}
+			//							ZExpression newWhere = SQLUtility.combineExpresions(condSQL, joinExpressions, constants.SQL_LOGICAL_OPERATOR_AND);
+			//							resultAux = SQLQuery.create(prSQL, logicalTables, newWhere, this.databaseType);
+		} else {
+			logger.warn("undefined alphasubject type!");
+			logicalTables.add(mainTable);
+
+			for(SQLJoinTable alphaPredicateObject : joinTables) {
+				SQLLogicalTable logicalTable = alphaPredicateObject.getJoinSource();
+				logicalTables.add(logicalTable);
+				ZExpression joinExpression = alphaPredicateObject.getOnExpression();
+				joinExpressions.add(joinExpression);
+			}
+			Collection<ZExp> expressionsList = new Vector<ZExp>();
+			expressionsList.add(whereCondition);
+			expressionsList.addAll(joinExpressions);
+			ZExpression newWhere = MorphSQLUtility.combineExpresions(expressionsList
+					, Constants.SQL_LOGICAL_OPERATOR_AND());
+			resultAux = SQLQuery.create(selectItems, logicalTables, newWhere, databaseType);
+		}
+		
+		return resultAux;
+	}
 
 }

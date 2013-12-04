@@ -19,6 +19,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import es.upm.fi.dia.oeg.morph.base.ColumnMetaData;
 import es.upm.fi.dia.oeg.morph.base.Constants;
+import es.upm.fi.dia.oeg.morph.base.MorphSQLUtility;
 import es.upm.fi.dia.oeg.morph.base.MorphTriple;
 import es.upm.fi.dia.oeg.morph.base.SPARQLUtility;
 import es.upm.fi.dia.oeg.obdi.core.exception.InsatisfiableSQLExpression;
@@ -254,7 +255,7 @@ public abstract class AbstractCondSQLGenerator {
 				}
 			}
 
-			result = SQLUtility.combineExpresions(
+			result = MorphSQLUtility.combineExpresions(
 					exps, Constants.SQL_LOGICAL_OPERATOR_AND());
 			
 		}
@@ -372,7 +373,7 @@ public abstract class AbstractCondSQLGenerator {
 			}
 		}
 
-		ZExpression result = SQLUtility.combineExpresions(
+		ZExpression result = MorphSQLUtility.combineExpresions(
 				exps, Constants.SQL_LOGICAL_OPERATOR_AND());
 		logger.debug("genCondSQLTB = " + result);
 		return result;
@@ -486,7 +487,7 @@ public abstract class AbstractCondSQLGenerator {
 		}
 
 
-		ZExpression result = SQLUtility.combineExpresions(
+		ZExpression result = MorphSQLUtility.combineExpresions(
 				exps, Constants.SQL_LOGICAL_OPERATOR_AND());
 		return result;
 	}
